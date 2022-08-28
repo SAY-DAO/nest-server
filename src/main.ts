@@ -1,8 +1,9 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { startServer } from './server';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
-}
-bootstrap();
+import { Logger } from '@nestjs/common';
+
+const logger = new Logger('main');
+
+startServer().catch((e) => {
+  logger.error(`Failed to start NestJS server: ${e.message}`);
+});
