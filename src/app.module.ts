@@ -1,21 +1,23 @@
 import { Module } from '@nestjs/common';
 // import { LoggerModule } from 'nestjs-pino';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import config from './config';
-// import { NeedModule } from './modules/need.module';
-// import { NeedEntity } from './entity/need.entity';
-// import { SignatureEntity } from './entity/signature.entity';
-// import { SignatureModule } from './modules/signature.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
+import { NeedModule } from './need/need.module';
+import { NeedEntity } from './entities/need.entity';
+import { SignatureModule } from './signature/signature.module';
+import { SignatureEntity } from './entities/signature.entity';
 
 const imports = [
   // LoggerModule.forRoot(),
   TypeOrmModule.forRoot({
     ...config().db,
-    // entities: [NeedEntity, SignatureEntity],
+    entities: [NeedEntity,SignatureEntity],
   }),
-  // NeedModule,
-  // SignatureModule,
+  NeedModule,
+  SignatureModule,
+  ScheduleModule.forRoot(),
 ];
 
 @Module({
