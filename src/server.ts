@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 // import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import config from './config';
+import * as bodyParser from 'body-parser';
 
 async function startServer() {
   console.log('Started server');
@@ -27,6 +28,9 @@ async function startServer() {
   const app = await ApplicationContext();
   app.enableShutdownHooks();
   app.setGlobalPrefix('api/dao');
+  // For large transactions
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
     origin: 'http://localhost:3000',
   });
