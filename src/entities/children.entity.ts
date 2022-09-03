@@ -14,10 +14,10 @@ export class ChildrenEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  @UpdateDateColumn({ type: 'timestamptz', nullable: true })
   updatedAt: Date;
 
   @Index({ unique: true })
@@ -42,7 +42,7 @@ export class ChildrenEntity {
   @Column("simple-json", { nullable: true })
   bio_translations: { en: string; fa: string };
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   birthDate: Date;
 
   @Column({ nullable: true })
@@ -51,7 +51,7 @@ export class ChildrenEntity {
   @Column({ nullable: true })
   city: number;
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   confirmDate: Date;
 
   @Column({ nullable: true })
@@ -60,7 +60,7 @@ export class ChildrenEntity {
   @Column({ nullable: true })
   country: number;
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   created: Date;
 
   @Column({ nullable: true })
@@ -102,7 +102,7 @@ export class ChildrenEntity {
   @Column({ nullable: true })
   is_gone: boolean;
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   migrateDate: Date;
 
   @Column({ nullable: true })
@@ -129,7 +129,7 @@ export class ChildrenEntity {
   @Column({ nullable: true })
   status: number;
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   updated: Date;
 
   @Column({ nullable: true })

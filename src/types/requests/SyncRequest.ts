@@ -4,7 +4,7 @@ import { Need } from "./NeedRequest";
 export class SyncRequest {
     totalCount: number;
     needData: Need[];
-    childData: Children[];
-    totalChildCount: number;
+    childData?: Children[];
+    totalChildCount?: number;
 
 }

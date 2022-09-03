@@ -1,3 +1,5 @@
+import { UserEntity } from "../../entities/user.entity";
+
 export class NeedRequest {
   totalCount: number;
   needData: Need[];
@@ -5,6 +7,7 @@ export class NeedRequest {
 
 // need from panel - flask server
 export class Need {
+  id: string;
   need_id: number;
   title: string;
   affiliateLinkUrl?: string;
@@ -21,13 +24,12 @@ export class Need {
   created_by_id: number;
   deleted_at?: Date | null;
   description: string;
-  description_translations: { en: string, fa: string }
+  description_translations?: { en: string, fa: string }
   details?: string;
   doing_duration?: number;
   donated?: number;
   doneAt?: Date | null;
   expected_delivery_date: Date | null;
-  id: number;
   imageUrl?: string;
   need_retailer_img?: string;
   informations?: string;
@@ -36,7 +38,7 @@ export class Need {
   isDone: boolean;
   isReported: boolean;
   isUrgent: boolean;
-  is_done: boolean;
+  is_done?: boolean;
   link?: string;
   title_translations?: { en: string, fa: string }
   ngoAddress?: string;
@@ -62,6 +64,7 @@ export class Need {
   unpayable: boolean;
   unpayable_from?: Date | null;
   updated?: Date;
+  participants: UserEntity[]
 }
 
 

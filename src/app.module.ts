@@ -11,14 +11,19 @@ import { SignatureEntity } from './entities/signature.entity';
 import { SyncModule } from './sync/sync.module';
 import { ChildrenModule } from './children/children.module';
 import { ChildrenEntity } from './entities/children.entity';
+import { UserEntity } from './entities/user.entity';
+import { UserService } from './user/user.service';
+import { UserController } from './user/user.controller';
+import { UserModule } from './user/user.module';
 
 const imports = [
   LoggerModule.forRoot(),
   TypeOrmModule.forRoot({
     ...config().db,
-    entities: [NeedEntity, SignatureEntity, ChildrenEntity],
+    entities: [UserEntity, NeedEntity, SignatureEntity, ChildrenEntity],
   }),
   SyncModule,
+  UserModule,
   ChildrenModule,
   NeedModule,
   SignatureModule,
