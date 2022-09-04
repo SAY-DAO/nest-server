@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
 import { Repository } from 'typeorm';
 import { Need, NeedRequest } from '../../types/requests/NeedRequest';
-import { UserService } from '../../user/user.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class NeedService {
@@ -122,7 +122,7 @@ export class NeedService {
         childGeneratedCode: request.needData[i]?.childGeneratedCode,
         childSayName: request.needData[i].childSayName,
         child_delivery_date: request.needData[i].child_delivery_date && new Date(request.needData[i].child_delivery_date),
-        child_id: request.needData[i].child_id,
+        child_id: request.child_id,
         confirmDate: request.needData[i].confirmDate && new Date(request.needData[i]?.confirmDate),
         confirmUser: request.needData[i].confirmUser,
         cost: request.needData[i].cost,

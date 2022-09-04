@@ -34,4 +34,5 @@ export class UserEntity {
 
   @ManyToMany(() => NeedEntity, need => need.participants)
   doneNeeds: NeedEntity[]
+  
 }

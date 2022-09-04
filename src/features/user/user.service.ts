@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { NeedEntity } from 'src/entities/need.entity';
-import { DoneNeedRequest } from '../types/requests/DoneNeedRequest';
+import { DoneNeedRequest } from '../../types/requests/DoneNeedRequest';
 import { Repository, UpdateResult } from 'typeorm';
-import { UserEntity } from '../entities/user.entity';
-import { User, UserRequest } from '../types/requests/UserRequest';
-import { Need } from 'src/types/requests/NeedRequest';
+import { UserEntity } from '../../entities/user.entity';
+import { User, UserRequest } from '../../types/requests/UserRequest';
+import { Need } from '../../types/requests/NeedRequest';
 
 @Injectable()
 export class UserService {

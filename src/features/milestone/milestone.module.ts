@@ -5,14 +5,14 @@ import { HttpModule } from '@nestjs/axios';
 import { MileStoneEntity } from '../../entities/milestone.entity';
 import { MilestoneController } from './milestone.controller';
 import { MilestoneService } from './milestone.service';
-import { EpicEntity } from '../../entities/epic.enitity';
 import { EpicService } from '../epic/epic.service';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { NeedEntity } from '../../entities/need.entity';
-import { UserService } from '../../user/user.service';
+import { UserService } from '../user/user.service';
 import { UserEntity } from '../../entities/user.entity';
+import { EpicEntity } from '../../entities/epic.entity';
 
 @Module({
   imports: [

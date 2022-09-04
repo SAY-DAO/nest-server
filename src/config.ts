@@ -16,8 +16,11 @@ function loadConfig() {
       synchronize: true,
       logging: true,
       dropSchema: false,
+      entities: [`${__dirname}/entity/*.js`]
+
     },
     logPretty: 'LOG_PRETTY_PRINT',
+
   };
 }
 

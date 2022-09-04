@@ -1,21 +1,20 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { MileStoneRequest } from '../../types/requests/MileStoneRequest';
-import { NeedRequest } from '../../types/requests/NeedRequest';
 import { MilestoneService } from './milestone.service';
 
-@Controller('milestone')
-@Controller('needs')
+@ApiTags('Milestone')
+@Controller('Milestone')
 export class MilestoneController {
-    // constructor(private needService: MilestoneService) { }
+    constructor(private mileStoneService: MilestoneService) { }
 
-    // @Post(`milestone`)
-    // async createMileStone(@Body() data: MileStoneRequest) {
-    //     const mileStone = await this.needService.createMileStone(
-    //         data
-    //     );
-    //     const result = { 'mileStone': mileStone }
-    //     return result
-    // }
+    @Post(`create`)
+    async createMileStone(@Body() data: MileStoneRequest) {
+        const mileStone = await this.mileStoneService.createMileStone(
+            data
+        );
+        const result = { 'mileStone': mileStone }
+        return result
+    }
 
 }

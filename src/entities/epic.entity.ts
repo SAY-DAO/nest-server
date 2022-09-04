@@ -1,4 +1,3 @@
-
 import {
     PrimaryGeneratedColumn,
     CreateDateColumn,
@@ -29,12 +28,15 @@ export class EpicEntity {
     dueDate: Date;
 
     @Column()
+    title: string;
+
+    @Column()
     description: string;
 
     @OneToOne(() => ChildrenEntity)
     @JoinColumn()
     need: NeedEntity
 
-    // @ManyToOne(() => MileStoneEntity, (ms) => ms.id)
-    // mileStone: MileStoneEntity
+    @ManyToOne(() => MileStoneEntity, (ms) => ms.id)
+    mileStone: MileStoneEntity
 }

@@ -5,12 +5,13 @@ import { NeedEntity } from '../../entities/need.entity';
 import { NeedController } from './need.controller';
 import { NeedService } from './need.service';
 import { HttpModule } from '@nestjs/axios';
-import { UserService } from '../../user/user.service';
+import { UserService } from '../user/user.service';
 import { UserEntity } from '../../entities/user.entity';
+import { EpicEntity } from '../../entities/epic.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([NeedEntity, UserEntity]),
+    TypeOrmModule.forFeature([NeedEntity, EpicEntity, UserEntity]),
     ScheduleModule.forRoot(),
     HttpModule,
   ],

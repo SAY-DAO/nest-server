@@ -15,10 +15,10 @@ export const ApplicationContext = async () => {
       },
     });
     const options = new DocumentBuilder()
-      .setTitle('Test Title')
-      .setDescription('Test API')
+      .setTitle('SAY DAO')
+      .setDescription('DAO API')
       .setVersion('v0.1.0')
-      .addTag('Needs')
+      // .addTag('Needs')
       .addServer(
         `http://localhost:${config().serverPort}/api/dao`,
         "Codefi's Example Server",

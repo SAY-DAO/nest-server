@@ -13,19 +13,20 @@ export class SyncController { // panel usage
     @Post(`update`)
     async updateServer(@Body() data: SyncRequest) {
         let childResult
-        // if (data.childData) {
-        //     childResult = await this.childrenService.createChild({
-        //         childData: data.childData,
-        //         totalChildCount: data.totalChildCount,
-        //     });
-        // }
-        
+        if (data.childData) {
+            childResult = await this.childrenService.createChild({
+                childData: data.childData,
+                totalChildCount: data.totalChildCount,
+            });
+        }
+
         const needResult = await this.needService.createNeeds({
             totalCount: data.totalCount,
-            needData: data.needData
+            needData: data.needData,
+            child_id: 4
         });
 
-        // const result = { 'nestChildResult': childResult, 'nestNeedResult': needResult }
-        // return result
+        const result = { 'nestChildResult': childResult, 'nestNeedResult': needResult }
+        return result
     }
 }

@@ -7,8 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { UserService } from '../../user/user.service';
 import { UserEntity } from '../../entities/user.entity';
+import { UserService } from '../user/user.service';
 
 @Module({
   imports: [

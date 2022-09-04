@@ -3,6 +3,7 @@ import { UserEntity } from "../../entities/user.entity";
 export class NeedRequest {
   totalCount: number;
   needData: Need[];
+  child_id: number;
 }
 
 // need from panel - flask server

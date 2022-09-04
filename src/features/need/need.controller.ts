@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { MileStoneRequest } from 'src/types/requests/MileStoneRequest';
 import { NeedRequest } from '../../types/requests/NeedRequest';
 import { NeedService } from './need.service';
 
@@ -27,11 +26,14 @@ export class NeedController {
         return await this.needService.getChildNeeds(id);
     }
 
-    @Post(`child/update/id=:id`)
-    async updateChildNeeds(@Param('id') id: number, @Body() data: NeedRequest) {
+    @Post(`child/update`)
+    async updateChildNeeds(@Body() data: NeedRequest) {
+        console.log(data)
+
         const needResult = await this.needService.createNeeds({
             totalCount: data.totalCount,
-            needData: data.needData
+            needData: data.needData,
+            child_id: data.child_id
         });
 
         const result = { 'nestNeedResult': needResult }

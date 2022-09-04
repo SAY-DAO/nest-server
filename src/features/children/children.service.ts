@@ -16,12 +16,12 @@ export class ChildrenService {
   }
 
   async GetChildById(childId: number): Promise<ChildrenEntity> {
-    const need = await this.childrenRepository.findOne({
+    const child = await this.childrenRepository.findOne({
       where: {
         child_id: childId,
       },
     })
-    return need
+    return child
   }
 
 

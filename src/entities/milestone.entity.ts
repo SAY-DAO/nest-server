@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { ChildrenEntity } from './children.entity';
-import { EpicEntity } from './epic.enitity';
+import { EpicEntity } from './epic.entity';
 
 @Entity()
 export class MileStoneEntity {
@@ -31,7 +31,7 @@ export class MileStoneEntity {
     @JoinColumn()
     child: ChildrenEntity
 
-    // @OneToMany(() => EpicEntity, (epic) => epic.id)
-    // epics: EpicEntity[]
+    @OneToMany(() => EpicEntity, (epic) => epic.id)
+    epics: EpicEntity[]
 
 }
