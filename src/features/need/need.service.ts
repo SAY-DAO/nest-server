@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { NeedEntity } from '../entities/need.entity';
+import { NeedEntity } from '../../entities/need.entity';
 import { Repository } from 'typeorm';
-import { Need, NeedRequest } from '../types/requests/NeedRequest';
-import { UserService } from '../user/user.service';
+import { Need, NeedRequest } from '../../types/requests/NeedRequest';
+import { UserService } from '../../user/user.service';
 
 @Injectable()
 export class NeedService {
@@ -15,6 +15,15 @@ export class NeedService {
 
   async getNeeds(): Promise<NeedEntity[]> {
     return await this.needRepository.find();
+  }
+
+  async GetNeedById(needId: number): Promise<NeedEntity> {
+    const need = await this.needRepository.findOne({
+      where: {
+        need_id: needId,
+      },
+    })
+    return need
   }
 
   async getChildNeeds(id: number): Promise<NeedEntity[]> {
@@ -33,7 +42,6 @@ export class NeedService {
   ): Promise<Need> {
 
     if (need.participants) {
-      console.log('fgfgf-g-g-----------------------------------partic exist--------------------')
       need.title = request.title;
       need.category = request.category;
       need.created = request.created;
@@ -72,19 +80,11 @@ export class NeedService {
         }
       }
     } else {
-      console.log('------------------emty patic update-----------')
-      console.log(request.participants)
-      console.log(need.participants)
       need.participants = request.participants
-      console.log(need.participants)
       this.needRepository.save(need)
     }
-
-
-
     return need
   }
-
 
   async createNeeds(request: NeedRequest): Promise<NeedEntity[]> {
     let list = []
@@ -99,8 +99,6 @@ export class NeedService {
       })
       // if already created only update
       if (thisNeed) {
-        console.log('------------------second time updatin now-----------')
-        // console.log(thisNeed)
         const updatedNeed = await this.updateNeed(thisNeed, request.needData[i])
         list.push(updatedNeed)
         continue

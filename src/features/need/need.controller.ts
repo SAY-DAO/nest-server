@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { NeedRequest } from '../types/requests/NeedRequest';
+import { MileStoneRequest } from 'src/types/requests/MileStoneRequest';
+import { NeedRequest } from '../../types/requests/NeedRequest';
 import { NeedService } from './need.service';
 
 @ApiTags('Needs')
@@ -12,6 +13,12 @@ export class NeedController {
     @ApiOperation({ description: 'Get all needs from flask' })
     async getNeeds() {
         return await this.needService.getNeeds();
+    }
+
+    @Get(`:needId`)
+    @ApiOperation({ description: 'Get one need' })
+    async getOneNeed(@Param('needId') needId: number) {
+        return await this.needService.GetNeedById(needId);
     }
 
     @Get(`child/done/:id`)

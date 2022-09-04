@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
-import { SyncRequest } from '../types/requests/SyncRequest';
+import { SyncRequest } from '../../types/requests/SyncRequest';
 
 @ApiTags('Sync')
 @Controller('sync')

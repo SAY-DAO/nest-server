@@ -2,7 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChildrenEntity } from '../entities/children.entity';
+import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildrenController } from './children.controller';
 import { ChildrenService } from './children.service';
 

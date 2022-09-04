@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ChildrenEntity } from '../entities/children.entity';
-import { ChildrenRequest } from '../types/requests/ChildrenRequest';
+import { ChildrenEntity } from '../../entities/children.entity';
+import { ChildrenRequest } from '../../types/requests/ChildrenRequest';
 
 @Injectable()
 export class ChildrenService {
@@ -14,6 +14,16 @@ export class ChildrenService {
   async getChildren(): Promise<ChildrenEntity[]> {
     return await this.childrenRepository.find();
   }
+
+  async GetChildById(childId: number): Promise<ChildrenEntity> {
+    const need = await this.childrenRepository.findOne({
+      where: {
+        child_id: childId,
+      },
+    })
+    return need
+  }
+
 
   async createChild(request: ChildrenRequest): Promise<number> {
     for (let i = 0; i < request.childData.length; i++) {

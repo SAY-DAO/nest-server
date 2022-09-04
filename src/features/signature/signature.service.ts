@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SignatureEntity } from '../entities/signature.entity';
+import { SignatureEntity } from '../../entities/signature.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

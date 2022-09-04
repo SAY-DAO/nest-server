@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SignatureService } from '../signature/signature.service';
+import { SignatureService } from './signature.service';
 
 @ApiTags('Signature')
 @Controller('dao/signature')
