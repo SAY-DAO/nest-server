@@ -7,15 +7,14 @@ import { NeedService } from './need.service';
 import { HttpModule } from '@nestjs/axios';
 import { UserService } from '../user/user.service';
 import { UserEntity } from '../../entities/user.entity';
-import { EpicEntity } from '../../entities/epic.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([NeedEntity, EpicEntity, UserEntity]),
+    TypeOrmModule.forFeature([NeedEntity, UserEntity]),
     ScheduleModule.forRoot(),
     HttpModule,
   ],
   controllers: [NeedController],
   providers: [NeedService, UserService],
 })
-export class NeedModule { }
+export class NeedModule {}

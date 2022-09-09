@@ -4,6 +4,7 @@ import config from './config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
+import { MileStoneEntity } from './entities/milestone.entity';
 import { NeedEntity } from './entities/need.entity';
 import { SignatureModule } from './features/signature/signature.module';
 import { SignatureEntity } from './entities/signature.entity';
@@ -13,24 +14,34 @@ import { SyncModule } from './features/sync/sync.module';
 import { ChildrenModule } from './features/children/children.module';
 import { NeedModule } from './features/need/need.module';
 import { MilestoneModule } from './features/milestone/milestone.module';
-import { MileStoneEntity } from './entities/milestone.entity';
-import { EpicModule } from './features/epic/epic.module';
-import { EpicEntity } from './entities/epic.entity';
+import { StepEntity } from './entities/step.entity';
 import { UserModule } from './features/user/user.module';
+import { StepModule } from './features/step/step.module';
+import { ProviderModule } from './features/provider/provider.module';
+import { ProviderEntity } from './entities/provider.entity';
 
 const imports = [
   LoggerModule.forRoot(),
   TypeOrmModule.forRoot({
     ...config().db,
     dropSchema: false,
-    entities: [UserEntity, NeedEntity, EpicEntity, MileStoneEntity, SignatureEntity, ChildrenEntity],
+    entities: [
+      UserEntity,
+      NeedEntity,
+      ProviderEntity,
+      MileStoneEntity,
+      StepEntity,
+      SignatureEntity,
+      ChildrenEntity,
+    ],
   }),
   SyncModule,
   UserModule,
   ChildrenModule,
-  EpicModule,
   NeedModule,
+  ProviderModule,
   MilestoneModule,
+  StepModule,
   SignatureModule,
   ScheduleModule.forRoot(),
 ];

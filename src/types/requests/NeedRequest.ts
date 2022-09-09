@@ -25,7 +25,7 @@ export class Need {
   created_by_id: number;
   deleted_at?: Date | null;
   description: string;
-  description_translations?: { en: string, fa: string }
+  description_translations?: { en: string; fa: string };
   details?: string;
   doing_duration?: number;
   donated?: number;
@@ -41,14 +41,14 @@ export class Need {
   isUrgent: boolean;
   is_done?: boolean;
   link?: string;
-  title_translations?: { en: string, fa: string }
+  title_translations?: { en: string; fa: string };
   ngoAddress?: string;
   ngoId: number;
   ngoName: string;
   ngo_delivery_date: Date | null;
   oncePurchased?: boolean;
   paid?: number;
-  payments: []
+  payments: [];
   progress: string;
   purchase_cost: any;
   purchase_date: Date | null;
@@ -65,7 +65,5 @@ export class Need {
   unpayable: boolean;
   unpayable_from?: Date | null;
   updated?: Date;
-  participants: UserEntity[]
+  participants: UserEntity[];
 }
-
-

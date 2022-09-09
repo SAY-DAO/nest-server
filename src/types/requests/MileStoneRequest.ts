@@ -1,13 +1,11 @@
-import { ChildrenEntity } from "../../entities/children.entity";
-
 export class MileStoneRequest {
-    epics: EpicRequest[];
-    signature: string;
+  epics: StepRequest[];
+  signature: string;
 }
 
-export class EpicRequest {
-    dueDate: Date;
-    title: string;
-    description: string;
-    need_id: number;
+export class StepRequest {
+  dueDate: Date;
+  title: string;
+  description: string;
+  need_id: number;
 }

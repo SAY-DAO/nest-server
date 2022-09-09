@@ -15,15 +15,17 @@ export class ChildrenService {
     return await this.childrenRepository.find();
   }
 
-  async GetChildById(childId: number): Promise<ChildrenEntity> {
+  async GetChildById(child_id: number): Promise<ChildrenEntity> {
     const child = await this.childrenRepository.findOne({
       where: {
-        child_id: childId,
+        child_id: child_id,
       },
-    })
-    return child
-  }
+    });
+    console.log("child_id");
+    console.log(child_id);
 
+    return child;
+  }
 
   async createChild(request: ChildrenRequest): Promise<number> {
     for (let i = 0; i < request.childData.length; i++) {
@@ -31,9 +33,9 @@ export class ChildrenService {
         where: {
           child_id: request.childData[i].child_id,
         },
-      })
+      });
       if (thisChild) {
-        continue
+        continue;
       }
       const saved = await this.childrenRepository.save({
         child_id: request.childData[i].child_id,
@@ -74,7 +76,6 @@ export class ChildrenService {
         updated: new Date(request.childData[i].updated),
         voiceUrl: request.childData[i].voiceUrl,
       });
-
     }
     return request.totalChildCount;
   }

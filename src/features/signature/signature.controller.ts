@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SignatureRequest } from '../../types/requests/SignatureRequest';
 import { SignatureService } from './signature.service';
 
 @ApiTags('Signature')
-@Controller('dao/signature')
+@Controller('signature')
 export class SignatureController {
-  constructor(private signatureService: SignatureService) {}
+  constructor(private signatureService: SignatureService) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get a single transaction by ID' })
@@ -13,9 +14,8 @@ export class SignatureController {
     return await this.signatureService.getSignatures();
   }
   @Post(`add`)
-  async createTransaction(@Body('data') { signature }) {
-    console.log(signature);
-    const transaction = await this.signatureService.createSignature(signature);
+  async signTransaction(@Body() { request: data }: { request: SignatureRequest }) {
+    const transaction = await this.signatureService.signTransaction(data);
     return transaction;
   }
 }

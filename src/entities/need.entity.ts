@@ -7,9 +7,14 @@ import {
   Index,
   JoinTable,
   ManyToMany,
+  OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from './user.entity';
+import { SignatureEntity } from './signature.entity';
+import { ProviderEntity } from './provider.entity';
+import { ProviderType } from '../types/interface';
 
 @Entity()
 export class NeedEntity {
@@ -72,8 +77,8 @@ export class NeedEntity {
   @Column({ nullable: true })
   description: string;
 
-  @Column("simple-json", { nullable: true })
-  description_translation_en: { en: string, fa: string };
+  @Column('simple-json', { nullable: true })
+  description_translation_en: { en: string; fa: string };
 
   @Column({ nullable: true })
   details: string;
@@ -117,8 +122,8 @@ export class NeedEntity {
   @Column({ nullable: true })
   link: string;
 
-  @Column("simple-json", { nullable: true })
-  title_translations: { en: string, fa: string };
+  @Column('simple-json', { nullable: true })
+  title_translations: { en: string; fa: string };
 
   @Column({ nullable: true })
   ngoAddress: string;
@@ -138,7 +143,7 @@ export class NeedEntity {
   @Column({ nullable: true })
   paid: number;
 
-  @Column("simple-array", { nullable: true })
+  @Column('simple-array', { nullable: true })
   payments: [];
 
   @Column({ nullable: true })
@@ -189,9 +194,15 @@ export class NeedEntity {
   @Column({ type: 'timestamptz', nullable: true })
   updated: Date;
 
-  @ManyToMany(() => UserEntity, user => user.doneNeeds, {
-    eager: true // eg: need.participants is forced to be included
+  @ManyToMany(() => UserEntity, (user) => user.doneNeeds, {
+    eager: true, // eg: need.participants is forced to be included
   })
   @JoinTable()
-  participants: UserEntity[]
+  participants: UserEntity[];
+
+  @OneToMany(() => SignatureEntity, (signature) => signature.need, { eager: true })
+  signatures: SignatureEntity[];
+
+  @ManyToOne(() => ProviderEntity, (p) => p.needs, { eager: true })
+  provider: ProviderEntity;
 }

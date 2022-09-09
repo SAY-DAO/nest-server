@@ -4,16 +4,16 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Column,
+  ManyToOne,
   OneToOne,
   JoinColumn,
-  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { ChildrenEntity } from './children.entity';
-import { StepEntity } from './step.entity';
+import { MileStoneEntity } from './milestone.entity';
+import { NeedEntity } from './need.entity';
 
 @Entity()
-export class MileStoneEntity {
+export class StepEntity {
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -24,13 +24,19 @@ export class MileStoneEntity {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  dueDate: Date;
+
   @Column({ nullable: true })
-  signature: string;
+  title: string;
 
-  @OneToOne(() => ChildrenEntity)
+  @Column({ nullable: true })
+  description: string;
+
+  @OneToOne(() => NeedEntity)
   @JoinColumn()
-  child: ChildrenEntity;
+  need: NeedEntity;
 
-  @OneToMany(() => StepEntity, (step) => step.mileStone, { eager: true })
-  steps: StepEntity[];
+  @ManyToOne(() => MileStoneEntity, (ms) => ms.steps)
+  mileStone: MileStoneEntity;
 }
