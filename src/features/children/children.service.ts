@@ -21,6 +21,13 @@ export class ChildrenService {
         child_id: child_id,
       },
     });
+    const all = await this.getChildren()
+    for (let i = 0; i < all.length; i++) {
+      console.log("all");
+      console.log(all[i].child_id);
+    }
+    console.log("child");
+    console.log(child);
     console.log("child_id");
     console.log(child_id);
 

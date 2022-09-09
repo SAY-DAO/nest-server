@@ -47,7 +47,7 @@ export class SignatureService {
   async signTransaction(request: SignatureRequest) {
     let SocialWorkerVoucher: SocialWorkerVoucher;
     let FamilyVoucher: FamilyVoucher;
-
+    let types: { Voucher: { name: string; type: string; }[]; };
     console.log(request);
     const need = await this.needService.GetNeedById(request.needId);
     const user = await this.userService.getUser(request.userId);
@@ -66,9 +66,20 @@ export class SignatureService {
         needId: need.need_id,
         userId: user && user.id_user || request.userId, // we do not have any users available at begining
         child: child.sayName,
-        provider: need.provider.name,
+        provider: need.provider && need.provider.name || 'digikala',
         wallet: request.signerAddress,
         content: `Your ${request.impacts} impacts will be ready for a firend to mint!`,
+      };
+      // define your data types
+      types = {
+        Voucher: [
+          { name: 'needId', type: 'uint256' },
+          { name: 'userId', type: 'uint256' },
+          { name: 'child', type: 'string' },
+          { name: 'provider', type: 'string' },
+          { name: 'wallet', type: 'address' },
+          { name: 'content', type: 'string' },
+        ],
       };
     } else if (IsParticipant) {
       FamilyVoucher = {
@@ -80,25 +91,13 @@ export class SignatureService {
       };
     }
 
-    console.log(isCreator, IsParticipant);
-
     console.log(SocialWorkerVoucher);
 
     const domain = await this.designDomain(
       request.verifyContractAddress,
       request.chainId,
     );
-    // define your data types
-    const types = {
-      Voucher: [
-        { name: 'needId', type: 'uint256' },
-        { name: 'userId', type: 'uint256' },
-        { name: 'needTitle', type: 'string' },
-        { name: 'needImage', type: 'string' },
-        { name: 'signerAddress', type: 'address' },
-        { name: 'content', type: 'string' },
-      ],
-    };
+
 
 
     return {

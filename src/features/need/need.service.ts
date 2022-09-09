@@ -136,7 +136,7 @@ export class NeedService {
         child_delivery_date:
           request.needData[i].child_delivery_date &&
           new Date(request.needData[i].child_delivery_date),
-        child_id: request.child_id,
+        child_id: request.needData[i].child_id,
         confirmDate:
           request.needData[i].confirmDate &&
           new Date(request.needData[i]?.confirmDate),

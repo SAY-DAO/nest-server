@@ -23,7 +23,6 @@ export class SyncController { // panel usage
         const needResult = await this.needService.createNeeds({
             totalCount: data.totalCount,
             needData: data.needData,
-            child_id: 4
         });
 
         const result = { 'nestChildResult': childResult, 'nestNeedResult': needResult }
