@@ -11,6 +11,6 @@ export class UserController {
     @ApiOperation({ description: 'Get all done needs' })
 
     async getUserChildDoneNeeds(@Query('childId') childId: string, @Query('userId') userId: string) {
-        return await this.userService.getUserChildDoneNeeds({ id_user: Number(userId), child_id: Number(childId) });
+        return await this.userService.getUserChildDoneNeeds({ userId: Number(userId), childId: Number(childId) });
     }
 }

@@ -1,6 +1,9 @@
-import {  Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation,  ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NeedService } from './need.service';
+
+export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
+
 
 @ApiTags('Needs')
 @Controller('needs')
@@ -9,8 +12,15 @@ export class NeedController {
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs from flask' })
-  async getNeeds() {
-    return await this.needService.getNeeds();
+  async getNeeds(@Query('page') page = 1, @Query('limit') limit = 10) {
+    limit = limit > 100 ? 100 : limit;
+
+    return this.needService.getNeeds({
+      limit: Number(limit),
+      page: Number(page),
+      route: NEEDS_URL
+    })
+
   }
 
   @Get(`:needId`)

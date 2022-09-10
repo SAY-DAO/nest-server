@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DoneNeedRequest } from '../../types/requests/DoneNeedRequest';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserEntity } from '../../entities/user.entity';
-import { User, UserRequest } from '../../types/requests/UserRequest';
-import { Need } from '../../types/requests/NeedRequest';
+import { NeedEntity } from '../../entities/need.entity';
+import { UserInterface } from '../../entities/interface/user-entity.interface';
 
 @Injectable()
 export class UserService {
@@ -18,17 +18,19 @@ export class UserService {
   }
 
   async getUserChildDoneNeeds(data: DoneNeedRequest): Promise<any> {
+    console.log('-----------------------inja----------------')
     const user = await this.userRepository.findOne({
       where: {
-        id_user: data.id_user,
+        userId: data.userId,
       },
       relations: {
         doneNeeds: true,
       },
     });
+    console.log(user)
     let filteredNeeds = [];
-    function isMatched(doneNeed: Need) {
-      return doneNeed.child_id === data.child_id;
+    function isMatched(doneNeed: NeedEntity) {
+      return doneNeed.child.childId === data.childId;
     }
     // user is not found when there is no done needs
     if (user) {
@@ -54,53 +56,53 @@ export class UserService {
     return { ...user, doneNeeds: needData };
   }
 
-  async getUser(id_user: number): Promise<UserEntity> {
+  async getUser(userId: number): Promise<UserEntity> {
     const user = await this.userRepository.findOne({
       where: {
-        id_user: id_user,
+        userId: userId,
       },
     });
     return user;
   }
 
-  public async updateUser(request: User): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: {
-        id_user: request.id_user,
-      },
-    });
-    user.avatarUrl = request.avatarUrl;
-    return await this.userRepository.save(user);
-  }
+  // public async updateUser(userId: number, request: UserRequest): Promise<UserEntity> {
+  //   const user = await this.userRepository.findOne({
+  //     where: {
+  //       userId: userId,
+  //     },
+  //   });
+  //   user.avatarUrl = request.avatarUrl;
+  //   return await this.userRepository.save(user);
+  // }
 
-  async createUsers(request: UserRequest): Promise<UserEntity[]> {
-    const list = [];
-    for (let i = 0; i < request.userData.length; i++) {
-      const thisUser = await this.userRepository.findOne({
-        where: {
-          id_user: request.userData[i].id_user,
-        },
-      });
+  // async createUsers(request: UserRequest): Promise<UserEntity[]> {
+  //   const list = [];
+  //   for (let i = 0; i < request.userData.length; i++) {
+  //     const thisUser = await this.userRepository.findOne({
+  //       where: {
+  //         userId: request.userData[i].userId,
+  //       },
+  //     });
 
-      if (thisUser) {
-        const updated = await this.updateUser(request.userData[i]);
-        list.push(updated);
-        continue;
-      }
+  //     if (thisUser) {
+  //       const updated = await this.updateUser(request.userData[i].userId, request.userData);
+  //       list.push(updated);
+  //       continue;
+  //     }
 
-      const saved = await this.userRepository.save({
-        id_user: request.userData[i].id_user,
-        avatarUrl: request.userData[i].avatarUrl,
-        isActive: request.userData[i].isActive,
-      });
-      list.push(saved);
-    }
-    return list;
-  }
+  //     const saved = await this.userRepository.save({
+  //       // userId: request.userData[i].userId,
+  //       // avatarUrl: request.userData[i].avatarUrl,
+  //       // isActive: request.userData[i].isActive,
+  //     });
+  //     list.push(saved);
+  //   }
+  //   return list;
+  // }
 
-  async createUser(request: User): Promise<UserEntity> {
+  async createUser(request: UserInterface): Promise<UserEntity> {
     const saved = await this.userRepository.save({
-      id_user: request.id_user,
+      userId: request.userId,
       avatarUrl: request.avatarUrl,
       isActive: request.isActive,
     });

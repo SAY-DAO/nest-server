@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { NeedEntity } from './need.entity';
+import { PaymentEntity } from './payment.entity';
 
 @Entity()
 export class UserEntity {
@@ -24,7 +25,7 @@ export class UserEntity {
 
   @Index({ unique: true })
   @Column()
-  id_user: number;
+  userId: number;
 
   @Column({ nullable: true })
   avatarUrl: string;
@@ -34,5 +35,7 @@ export class UserEntity {
 
   @ManyToMany(() => NeedEntity, need => need.participants)
   doneNeeds: NeedEntity[]
-  
+
+  @ManyToMany(() => PaymentEntity, payment => payment.user)
+  payments: PaymentEntity[]
 }

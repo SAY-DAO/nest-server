@@ -3,9 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { StepEntity } from '../../entities/step.entity';
 import { Repository } from 'typeorm';
 import { StepRequest } from '../../types/requests/MileStoneRequest';
-import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
-import { Need } from '../../types/requests/NeedRequest';
+import { NeedEntity } from '../../entities/need.entity';
 
 @Injectable()
 export class StepService {
@@ -15,7 +14,7 @@ export class StepService {
     private childrenService: ChildrenService,
   ) { }
 
-  async createStep(need: Need, request: StepRequest): Promise<StepEntity> {
+  async createStep(need: NeedEntity, request: StepRequest): Promise<StepEntity> {
     const step = await this.stepepository.save({
       title: request.title,
       description: request.description,

@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne } from 'typeorm'
+import { Entity, Column, OneToMany } from 'typeorm'
 import { BaseEntity } from './BaseEntity'
 import { NeedEntity } from './need.entity'
 
@@ -19,6 +19,6 @@ export class ProviderEntity extends BaseEntity {
     @Column()
     type: string
 
-    @ManyToOne(() => NeedEntity, (need) => need.provider)
-    needs: NeedEntity[]
+    @OneToMany(() => NeedEntity, (need) => need.provider)
+    needs: NeedEntity[];
 }

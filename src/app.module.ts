@@ -19,6 +19,8 @@ import { UserModule } from './features/user/user.module';
 import { StepModule } from './features/step/step.module';
 import { ProviderModule } from './features/provider/provider.module';
 import { ProviderEntity } from './entities/provider.entity';
+import { PaymentEntity } from './entities/payment.entity';
+import { PaymentModule } from './features/payment/payment.module';
 
 const imports = [
   LoggerModule.forRoot(),
@@ -27,6 +29,7 @@ const imports = [
     dropSchema: false,
     entities: [
       UserEntity,
+      PaymentEntity,
       NeedEntity,
       ProviderEntity,
       MileStoneEntity,
@@ -37,6 +40,7 @@ const imports = [
   }),
   SyncModule,
   UserModule,
+  PaymentModule,
   ChildrenModule,
   NeedModule,
   ProviderModule,

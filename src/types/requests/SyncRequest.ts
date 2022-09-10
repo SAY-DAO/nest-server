@@ -1,10 +1,9 @@
-import { Children } from "./ChildrenRequest";
-import { Need } from "./NeedRequest";
+import { ChildRequest } from "./ChildrenRequest";
+import { NeedRequest } from "./NeedRequest";
 
 export class SyncRequest {
+    childData?: ChildRequest[];
+    needData: NeedRequest[];
     totalCount: number;
-    needData: Need[];
-    childData?: Children[];
     totalChildCount?: number;
-
 }

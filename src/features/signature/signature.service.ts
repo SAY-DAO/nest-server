@@ -48,23 +48,21 @@ export class SignatureService {
     let SocialWorkerVoucher: SocialWorkerVoucher;
     let FamilyVoucher: FamilyVoucher;
     let types: { Voucher: { name: string; type: string; }[]; };
-    console.log(request);
     const need = await this.needService.GetNeedById(request.needId);
     const user = await this.userService.getUser(request.userId);
-    const child = await this.childService.GetChildById(need.child_id);
-    console.log(user || request.userId);
-    console.log(child);
+    const child = await this.childService.GetChildById(need.child.childId);
 
 
-    const isCreator = need.created_by_id === 13; // request.userId
+
+    const isCreator = need.createdById === 13; // request.userId
     const IsParticipant = need.participants.filter(
-      (p) => (p.id_user = request.userId),
+      (p) => (p.userId = request.userId),
     );
 
     if (isCreator) {
       SocialWorkerVoucher = {
-        needId: need.need_id,
-        userId: user && user.id_user || request.userId, // we do not have any users available at begining
+        needId: need.needId,
+        userId: user && user.userId || request.userId, // we do not have any users available at begining
         child: child.sayName,
         provider: need.provider && need.provider.name || 'digikala',
         wallet: request.signerAddress,
@@ -83,9 +81,9 @@ export class SignatureService {
       };
     } else if (IsParticipant) {
       FamilyVoucher = {
-        needId: need.need_id,
-        userId: user && user.id_user || request.userId, // we do not have any users available at begining
-        child: need.child_id,
+        needId: need.needId,
+        userId: user && user.userId || request.userId, // we do not have any users available at begining
+        child: need.child.childId,
         wallet: request.signerAddress,
         content: `Your ${request.impacts} impacts will be ready for a firend to mint!`,
       };

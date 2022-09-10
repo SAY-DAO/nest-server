@@ -1,16 +1,14 @@
-export class ChildrenRequest {
-    childData: ChildRequest[];
-    totalChildCount: number;
-}
+import { NeedEntity } from "../need.entity";
 
-export class ChildRequest {
+
+export interface ChildrenInterface {
     childId: number;
     address: string;
     awakeAvatarUrl: string;
     bio: string;
     bioSummary: string;
-    bioSummaryTranslations: { en: string, fa: string }
-    bioTranslations: { en: string, fa: string }
+    bioSummaryTranslations: { en: string; fa: string };
+    bioTranslations: { en: string; fa: string };
     birthDate: Date;
     birthPlace: string;
     city: number;
@@ -37,11 +35,11 @@ export class ChildRequest {
     phoneNumber: string;
     sayFamilyCount: number;
     sayName: string;
-    sayname_translations: { en: string, fa: string }
+    sayname_translations: { en: string; fa: string };
     sleptAvatarUrl: string;
     status: number;
-    updated: string;
+    updated: Date;
     voiceUrl: string;
-    avatarUrl: string;
-
+    needs: NeedEntity[]
 }
+

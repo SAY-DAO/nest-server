@@ -15,6 +15,4 @@ import { UserEntity } from '../../entities/user.entity';
   controllers: [SignatureController],
   providers: [SignatureService, NeedService, UserService, ChildrenService],
 })
-export class SignatureModule {
-  constructor(private signatureService: SignatureService) { }
-}
+export class SignatureModule { }

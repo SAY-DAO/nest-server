@@ -15,44 +15,47 @@ export class ChildrenService {
     return await this.childrenRepository.find();
   }
 
-  async GetChildById(child_id: number): Promise<ChildrenEntity> {
+  async GetChildById(childId: number): Promise<ChildrenEntity> {
     const child = await this.childrenRepository.findOne({
       where: {
-        child_id: child_id,
+        childId: childId,
       },
     });
     const all = await this.getChildren()
     for (let i = 0; i < all.length; i++) {
-      console.log("all");
-      console.log(all[i].child_id);
     }
-    console.log("child");
-    console.log(child);
-    console.log("child_id");
-    console.log(child_id);
 
     return child;
   }
 
-  async createChild(request: ChildrenRequest): Promise<number> {
-    for (let i = 0; i < request.childData.length; i++) {
-      const thisChild = await this.childrenRepository.findOne({
+  async syncChildren(request: ChildrenRequest): Promise<ChildrenEntity[]> {
+    const list = []
+    let thisChild: ChildrenEntity;
+    console.log('request--------')
+    console.log(request)
+    for (let i = 0; i < request.totalChildCount; i++) {
+      console.log('createChild')
+      console.log(request.childData[i].childId)
+      thisChild = await this.childrenRepository.findOne({
         where: {
-          child_id: request.childData[i].child_id,
+          childId: request.childData[i].childId,
         },
       });
       if (thisChild) {
+        console.log('foundOne')
+        console.log(request.childData[i].childId)
         continue;
       }
-      const saved = await this.childrenRepository.save({
-        child_id: request.childData[i].child_id,
+
+      const child = await this.childrenRepository.save({
+        childId: request.childData[i].childId,
         address: request.childData[i].address,
         avatarUrl: request.childData[i].avatarUrl,
         awakeAvatarUrl: request.childData[i].awakeAvatarUrl,
         bio: request.childData[i].bio,
         bioSummary: request.childData[i].bioSummary,
-        bio_summary_translations: request.childData[i].bio_summary_translations,
-        bio_translations: request.childData[i].bio_translations,
+        bioSummaryTranslations: request.childData[i].bioSummaryTranslations,
+        bioTranslations: request.childData[i].bioTranslations,
         birthDate: new Date(request.childData[i].birthDate),
         birthPlace: request.childData[i].birthPlace,
         city: request.childData[i].city,
@@ -60,18 +63,18 @@ export class ChildrenService {
         confirmUser: request.childData[i].confirmUser,
         country: request.childData[i].country,
         created: new Date(request.childData[i].created),
-        done_needs_count: request.childData[i].done_needs_count,
+        doneNeedsCount: request.childData[i].doneNeedsCount,
         education: request.childData[i].education,
         existence_status: request.childData[i].existence_status,
         familyCount: request.childData[i].familyCount,
         generatedCode: request.childData[i].generatedCode,
         housingStatus: request.childData[i].housingStatus,
-        id_ngo: request.childData[i].id_ngo,
-        id_social_worker: request.childData[i].id_social_worker,
+        ngoId: request.childData[i].ngoId,
+        idSocialWorker: request.childData[i].idSocialWorker,
         isConfirmed: request.childData[i].isConfirmed,
         isDeleted: request.childData[i].isDeleted,
         isMigrated: request.childData[i].isMigrated,
-        is_gone: request.childData[i].is_gone,
+        isGone: request.childData[i].isGone,
         migrateDate: new Date(request.childData[i].migrateDate),
         migratedId: request.childData[i].migratedId,
         nationality: request.childData[i].nationality,
@@ -83,7 +86,9 @@ export class ChildrenService {
         updated: new Date(request.childData[i].updated),
         voiceUrl: request.childData[i].voiceUrl,
       });
+      list.push(child)
     }
-    return request.totalChildCount;
+    console.log(list)
+    return list
   }
 }

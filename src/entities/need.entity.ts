@@ -14,7 +14,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
 import { ProviderEntity } from './provider.entity';
-import { ProviderType } from '../types/interface';
+import { ChildrenEntity } from './children.entity';
+import { PaymentEntity } from './payment.entity';
 
 @Entity()
 export class NeedEntity {
@@ -26,20 +27,26 @@ export class NeedEntity {
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamptz', nullable: true })
-  updatedAt: Date;
+  updatedAt?: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', nullable: true })
+  deletedAt?: Date;
 
   @Index({ unique: true })
   @Column()
-  need_id: number;
+  needId: number;
 
   @Column({ nullable: true })
   title: string;
 
   @Column({ nullable: true })
-  affiliateLinkUrl: string;
+  doingDuration: number;
 
   @Column({ nullable: true })
-  bank_track_id: string;
+  affiliateLinkUrl?: string;
+
+  @Column({ nullable: true })
+  bankTrackId?: string;
 
   @Column({ nullable: true })
   category: number;
@@ -51,34 +58,29 @@ export class NeedEntity {
   childSayName: string;
 
   @Column({ type: 'timestamptz', nullable: true })
-  child_delivery_date: Date;
-
-  @Column()
-  child_id: number;
+  childDeliveryDate?: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  confirmDate: Date;
+  confirmDate?: Date;
 
   @Column({ nullable: true })
-  confirmUser: number;
+  confirmUser?: number;
 
   @Column({ nullable: true })
   cost: number;
+
 
   @Column({ type: 'timestamptz', nullable: true })
   created: Date;
 
   @Column({ nullable: true })
-  created_by_id: number;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  deleted_at: Date;
+  createdById?: number;
 
   @Column({ nullable: true })
   description: string;
 
   @Column('simple-json', { nullable: true })
-  description_translation_en: { en: string; fa: string };
+  descriptionTranslations: { en: string; fa: string };
 
   @Column({ nullable: true })
   details: string;
@@ -93,13 +95,13 @@ export class NeedEntity {
   doneAt: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  expected_delivery_date: Date;
+  expectedDeliveryDate: Date;
 
   @Column({ nullable: true })
   imageUrl: string;
 
   @Column({ nullable: true })
-  need_retailer_img: string;
+  needRetailerImg: string;
 
   @Column({ nullable: true })
   informations: string;
@@ -123,7 +125,7 @@ export class NeedEntity {
   link: string;
 
   @Column('simple-json', { nullable: true })
-  title_translations: { en: string; fa: string };
+  titleTranslations: { en: string; fa: string };
 
   @Column({ nullable: true })
   ngoAddress: string;
@@ -135,7 +137,7 @@ export class NeedEntity {
   ngoName: string;
 
   @Column({ type: 'timestamptz', nullable: true })
-  ngo_delivery_date: Date;
+  ngoDeliveryDate: Date;
 
   @Column({ nullable: true })
   oncePurchased: boolean;
@@ -143,66 +145,70 @@ export class NeedEntity {
   @Column({ nullable: true })
   paid: number;
 
-  @Column('simple-array', { nullable: true })
-  payments: [];
-
   @Column({ nullable: true })
   progress: string;
 
   @Column({ nullable: true })
-  purchase_cost: number;
+  purchaseCost: number;
 
   @Column({ type: 'timestamptz', nullable: true })
-  purchase_date: Date;
+  purchaseDate: Date;
 
   @Column({ nullable: true })
-  receipt_count: number;
+  receiptCount?: number;
 
   @Column({ nullable: true })
-  receipts: string;
+  receipts?: string;
 
   @Column({ nullable: true })
   status: number;
 
   @Column({ nullable: true })
-  status_description: string;
+  statusDescription?: string;
 
   @Column({ type: 'timestamptz', nullable: true })
-  status_updated_at: Date;
+  statusUpdatedAt?: Date;
 
   @Column({ nullable: true })
   type: number;
 
   @Column({ nullable: true })
-  type_name: string;
+  typeName?: string;
 
   @Column({ type: 'timestamptz', nullable: true })
-  unavailable_from: Date;
+  unavailableFrom?: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  unconfirmed_at: Date;
+  unconfirmedAt?: Date;
 
   @Column({ nullable: true })
-  unpaid_cost: number;
+  unpaidCost?: number;
 
   @Column({ nullable: true })
-  unpayable: boolean;
+  unpayable?: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
-  unpayable_from: Date;
+  unpayableFrom?: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  updated: Date;
+  updated?: Date;
 
   @ManyToMany(() => UserEntity, (user) => user.doneNeeds, {
     eager: true, // eg: need.participants is forced to be included
   })
   @JoinTable()
-  participants: UserEntity[];
+  participants?: UserEntity[];
 
   @OneToMany(() => SignatureEntity, (signature) => signature.need, { eager: true })
-  signatures: SignatureEntity[];
+  signatures?: SignatureEntity[];
+
+  @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: true })
+  payments?: PaymentEntity[];
+
+  @ManyToOne(() => ChildrenEntity, (child) => child.needs, { eager: true })
+  child: ChildrenEntity;
 
   @ManyToOne(() => ProviderEntity, (p) => p.needs, { eager: true })
-  provider: ProviderEntity;
+  provider?: ProviderEntity;
 }
+

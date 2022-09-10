@@ -16,7 +16,7 @@ export class MilestoneService {
     private stepService: StepService,
     private childrenService: ChildrenService,
     private needService: NeedService,
-  ) {}
+  ) { }
 
   async getMilestones(): Promise<MileStoneEntity[]> {
     return await this.mileRepository.find({
@@ -28,20 +28,20 @@ export class MilestoneService {
 
   async createMileStone(request: MileStoneRequest): Promise<MileStoneEntity> {
     let theChild: ChildrenEntity;
-    let steps = [];
+    const steps = [];
     for (let i = 0; i < request.epics.length; i++) {
-      let theNeed = await this.needService.GetNeedById(
-        request.epics[i].need_id,
+      const theNeed = await this.needService.GetNeedById(
+        request.epics[i].needId,
       );
       if (!theChild) {
-        theChild = await this.childrenService.GetChildById(theNeed.child_id);
+        theChild = await this.childrenService.GetChildById(theNeed.child.childId);
       }
 
       const step = await this.stepService.createStep(theNeed, request.epics[i]);
       steps.push(step);
 
     }
-    let mileStone = await this.mileRepository.save({
+    const mileStone = await this.mileRepository.save({
       child: theChild,
       steps,
     });

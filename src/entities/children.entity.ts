@@ -5,8 +5,10 @@ import {
   UpdateDateColumn,
   Column,
   Index,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { NeedEntity } from './need.entity';
 
 @Entity()
 export class ChildrenEntity {
@@ -22,7 +24,7 @@ export class ChildrenEntity {
 
   @Index({ unique: true })
   @Column()
-  child_id: number;
+  childId: number;
 
   @Column({ nullable: true })
   address: string;
@@ -37,10 +39,10 @@ export class ChildrenEntity {
   bioSummary: string;
 
   @Column("simple-json", { nullable: true })
-  bio_summary_translations: { en: string; fa: string };
+  bioSummaryTranslations: { en: string; fa: string };
 
   @Column("simple-json", { nullable: true })
-  bio_translations: { en: string; fa: string };
+  bioTranslations: { en: string; fa: string };
 
   @Column({ type: 'timestamptz', nullable: true })
   birthDate: Date;
@@ -64,7 +66,7 @@ export class ChildrenEntity {
   created: Date;
 
   @Column({ nullable: true })
-  done_needs_count: number;
+  doneNeedsCount: number;
 
   @Column({ nullable: true })
   education: string;
@@ -85,10 +87,10 @@ export class ChildrenEntity {
   housingStatus: string;
 
   @Column({ nullable: true })
-  id_ngo: number;
+  ngoId: number;
 
   @Column({ nullable: true })
-  id_social_worker: number;
+  idSocialWorker: number;
 
   @Column({ nullable: true })
   isConfirmed: boolean;
@@ -100,7 +102,7 @@ export class ChildrenEntity {
   isMigrated: boolean;
 
   @Column({ nullable: true })
-  is_gone: boolean;
+  isGone: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
   migrateDate: Date;
@@ -134,4 +136,8 @@ export class ChildrenEntity {
 
   @Column({ nullable: true })
   voiceUrl: string;
+
+  @OneToMany(() => NeedEntity, (need) => need.child)
+  needs?: NeedEntity[]
 }
+
