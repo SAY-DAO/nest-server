@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from '../../entities/user.entity';
 import { NeedEntity } from '../../entities/need.entity';
 import { UserInterface } from '../../entities/interface/user-entity.interface';
+import { ParticipantRequest } from 'src/types/requests/NeedRequest';
 
 @Injectable()
 export class UserService {
@@ -17,8 +18,17 @@ export class UserService {
     return await this.userRepository.find();
   }
 
+
+  async getUser(userId: number): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: {
+        userId: userId,
+      },
+    });
+    return user;
+  }
+
   async getUserChildDoneNeeds(data: DoneNeedRequest): Promise<any> {
-    console.log('-----------------------inja----------------')
     const user = await this.userRepository.findOne({
       where: {
         userId: data.userId,
@@ -27,16 +37,15 @@ export class UserService {
         doneNeeds: true,
       },
     });
-    console.log(user)
+
     let filteredNeeds = [];
     function isMatched(doneNeed: NeedEntity) {
-      return doneNeed.child.childId === data.childId;
+      return doneNeed.child?.childId === data.childId;
     }
     // user is not found when there is no done needs
     if (user) {
       filteredNeeds = user.doneNeeds.filter(isMatched);
     }
-
     // urgent ==> index 0
     // growth 0 ==> index 1
     // joy 1 ==> index 2
@@ -53,59 +62,16 @@ export class UserService {
     }
     needData[5].push(...filteredNeeds);
 
-    return { ...user, doneNeeds: needData };
+    return { ...user, doneNeeds: needData, total: filteredNeeds.length };
   }
-
-  async getUser(userId: number): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({
-      where: {
-        userId: userId,
-      },
-    });
-    return user;
-  }
-
-  // public async updateUser(userId: number, request: UserRequest): Promise<UserEntity> {
-  //   const user = await this.userRepository.findOne({
-  //     where: {
-  //       userId: userId,
-  //     },
-  //   });
-  //   user.avatarUrl = request.avatarUrl;
-  //   return await this.userRepository.save(user);
-  // }
-
-  // async createUsers(request: UserRequest): Promise<UserEntity[]> {
-  //   const list = [];
-  //   for (let i = 0; i < request.userData.length; i++) {
-  //     const thisUser = await this.userRepository.findOne({
-  //       where: {
-  //         userId: request.userData[i].userId,
-  //       },
-  //     });
-
-  //     if (thisUser) {
-  //       const updated = await this.updateUser(request.userData[i].userId, request.userData);
-  //       list.push(updated);
-  //       continue;
-  //     }
-
-  //     const saved = await this.userRepository.save({
-  //       // userId: request.userData[i].userId,
-  //       // avatarUrl: request.userData[i].avatarUrl,
-  //       // isActive: request.userData[i].isActive,
-  //     });
-  //     list.push(saved);
-  //   }
-  //   return list;
-  // }
 
   async createUser(request: UserInterface): Promise<UserEntity> {
     const saved = await this.userRepository.save({
       userId: request.userId,
       avatarUrl: request.avatarUrl,
-      isActive: request.isActive,
+      // isActive: request.isActive,
     });
     return saved;
   }
+
 }

@@ -5,18 +5,23 @@ import { NeedService } from '../need/need.service';
 import { SyncRequest } from '../../types/requests/SyncRequest';
 import { AllExceptionsFilter } from '../../filters/all-exception.filter';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { NeedEntity } from 'src/entities/need.entity';
+import { UserService } from '../user/user.service';
+import { UserEntity } from '../../entities/user.entity';
+import { NeedEntity } from '../../entities/need.entity';
 
 @ApiTags('Sync')
 @Controller('sync')
 export class SyncController { // panel usage
     constructor(private needService: NeedService,
-        private childrenService: ChildrenService) { }
+        private childrenService: ChildrenService,
+    ) { }
 
     @Post(`update`)
     @UseFilters(AllExceptionsFilter)
     async updateServer(@Body() data: SyncRequest) {
         let childResult: ChildrenEntity[]
+        let needResult: NeedEntity[]
+
         // from social worker panel
         if (data.childData) {
             childResult = await this.childrenService.syncChildren({
@@ -25,11 +30,15 @@ export class SyncController { // panel usage
             });
         }
 
-        // from social worker panel and dapp
-        const needResult = await this.needService.syncNeeds({
-            totalCount: data.totalCount,
-            needData: data.needData,
-        });
+        if (data.needData) {
+            needResult = await this.needService.syncNeeds({
+                totalCount: data.totalCount,
+                needData: data.needData,
+                childId: data.childId,
+            });
+        }
+
+
 
         const result = { 'nestChildResult': childResult, 'nestNeedResult': needResult }
         return result

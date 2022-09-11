@@ -9,10 +9,12 @@ import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { NeedEntity } from '../../entities/need.entity';
-import { UserService } from '../user/user.service';
-import { UserEntity } from '../../entities/user.entity';
 import { StepEntity } from '../../entities/step.entity';
 import { StepService } from '../step/step.service';
+import { PaymentEntity } from '../../entities/payment.entity';
+import { PaymentService } from '../payment/payment.service';
+import { UserEntity } from '../../entities/user.entity';
+import { UserService } from '../user/user.service';
 
 @Module({
   imports: [
@@ -20,8 +22,9 @@ import { StepService } from '../step/step.service';
       MileStoneEntity,
       ChildrenEntity,
       NeedEntity,
-      UserEntity,
       StepEntity,
+      UserEntity,
+      PaymentEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -33,6 +36,7 @@ import { StepService } from '../step/step.service';
     NeedService,
     UserService,
     StepService,
+    PaymentService
   ],
 })
-export class MilestoneModule {}
+export class MilestoneModule { }

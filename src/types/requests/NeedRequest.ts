@@ -1,5 +1,3 @@
-import { PaymentEntity } from "src/entities/payment.entity";
-import { UserEntity } from "src/entities/user.entity";
 import { ChildrenEntity } from "../../entities/children.entity";
 
 // need from panel - flask server
@@ -29,7 +27,7 @@ export class NeedRequest {
   expectedDeliveryDate: Date | null;
   imageUrl: string;
   needRetailerImg: string;
-  informations: string;
+  information: string;
   isConfirmed: boolean;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -65,7 +63,7 @@ export class NeedRequest {
   unpayable: boolean;
   unpayableFrom: Date | null;
   updated: Date;
-  payments: PaymentEntity[];
+  payments: BankPaymentRequest[];
   participants: ParticipantRequest[];
   child: ChildrenEntity;
 }

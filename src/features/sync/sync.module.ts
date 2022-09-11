@@ -7,17 +7,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { UserEntity } from '../../entities/user.entity';
+import { PaymentEntity } from '../../entities/payment.entity';
+import { PaymentService } from '../payment/payment.service';
 import { UserService } from '../user/user.service';
+import { UserEntity } from '../../entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, NeedEntity, ChildrenEntity]), // add entitiy and services to be available in the module
+    TypeOrmModule.forFeature([ChildrenEntity, NeedEntity, PaymentEntity, UserEntity]), // add entity and services to be available in the module
     ScheduleModule.forRoot(),
     HttpModule,
   ],
   controllers: [SyncController],
-  providers: [UserService, NeedService, ChildrenService], // add entitiy and services to be available in the module
+  providers: [ChildrenService, NeedService, PaymentService, UserService], // add entity and services to be available in the module
 })
 export class SyncModule { }
 

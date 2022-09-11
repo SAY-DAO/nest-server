@@ -10,9 +10,9 @@ import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildrenService } from '../children/children.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([PaymentEntity, NeedEntity, UserEntity, ChildrenEntity])],
+    imports: [TypeOrmModule.forFeature([PaymentEntity, UserEntity, NeedEntity, ChildrenEntity])],
     controllers: [],
-    providers: [PaymentService, NeedService, UserService, ChildrenService],
+    providers: [PaymentService, UserService, NeedService, ChildrenService],
 })
 
 export class PaymentModule { }

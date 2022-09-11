@@ -9,10 +9,12 @@ import { ChildrenService } from '../children/children.service';
 import { NeedEntity } from '../../entities/need.entity';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { UserEntity } from '../../entities/user.entity';
+import { PaymentService } from '../payment/payment.service';
+import { PaymentEntity } from '../../entities/payment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SignatureEntity, NeedEntity, ChildrenEntity, UserEntity])],
+  imports: [TypeOrmModule.forFeature([PaymentEntity, SignatureEntity, NeedEntity, ChildrenEntity, UserEntity])],
   controllers: [SignatureController],
-  providers: [SignatureService, NeedService, UserService, ChildrenService],
+  providers: [SignatureService, NeedService, PaymentService, UserService, ChildrenService],
 })
 export class SignatureModule { }

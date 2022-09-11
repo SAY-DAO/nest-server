@@ -31,7 +31,7 @@ export interface NeedInterface {
     expectedDeliveryDate?: Date;
     imageUrl?: string;
     needRetailerImg?: string;
-    informations?: string;
+    information?: string;
     isConfirmed?: boolean;
     isDeleted?: boolean;
     isDone?: boolean;

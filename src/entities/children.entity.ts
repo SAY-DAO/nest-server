@@ -78,9 +78,6 @@ export class ChildrenEntity {
   familyCount: number;
 
   @Column({ nullable: true })
-  gender: boolean;
-
-  @Column({ nullable: true })
   generatedCode: string;
 
   @Column({ nullable: true })
@@ -112,9 +109,6 @@ export class ChildrenEntity {
 
   @Column({ nullable: true })
   nationality: string;
-
-  @Column({ nullable: true })
-  phoneNumber: string;
 
   @Column({ nullable: true })
   sayFamilyCount: number;

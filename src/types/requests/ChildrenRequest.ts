@@ -5,7 +5,6 @@ export class ChildrenRequest {
 
 export class ChildRequest {
     childId: number;
-    address: string;
     awakeAvatarUrl: string;
     bio: string;
     bioSummary: string;
@@ -22,7 +21,6 @@ export class ChildRequest {
     education: string;
     existence_status: number;
     familyCount: number;
-    gender: boolean;
     generatedCode: string;
     housingStatus: string;
     ngoId: number;
@@ -40,7 +38,7 @@ export class ChildRequest {
     sayname_translations: { en: string, fa: string }
     sleptAvatarUrl: string;
     status: number;
-    updated: string;
+    updated: Date;
     voiceUrl: string;
     avatarUrl: string;
 

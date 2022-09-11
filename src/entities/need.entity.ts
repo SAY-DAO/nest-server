@@ -193,9 +193,7 @@ export class NeedEntity {
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
-  @ManyToMany(() => UserEntity, (user) => user.doneNeeds, {
-    eager: true, // eg: need.participants is forced to be included
-  })
+  @ManyToMany(() => UserEntity, (user) => user.doneNeeds)
   @JoinTable()
   participants?: UserEntity[];
 

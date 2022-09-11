@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ChildrenInterface } from 'src/entities/interface/children-entity.interface';
 import { Repository } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildrenRequest } from '../../types/requests/ChildrenRequest';
@@ -21,21 +22,54 @@ export class ChildrenService {
         childId: childId,
       },
     });
-    const all = await this.getChildren()
-    for (let i = 0; i < all.length; i++) {
-    }
-
     return child;
+  }
+
+  async createChild(request: ChildrenInterface): Promise<ChildrenEntity> {
+    const saved = await this.childrenRepository.save({
+      childId: request.childId,
+      sleptAvatarUrl: request.sleptAvatarUrl,
+      awakeAvatarUrl: request.awakeAvatarUrl,
+      bio: request.bio,
+      bioSummary: request.bioSummary,
+      bioSummaryTranslations: request.bioSummaryTranslations,
+      bioTranslations: request.bioTranslations,
+      birthDate: request.birthDate && new Date(request.birthDate),
+      birthPlace: request.birthPlace,
+      city: request.city,
+      confirmDate: request.confirmDate && new Date(request.confirmDate),
+      confirmUser: request.confirmUser,
+      country: request.country,
+      created: request.created && new Date(request.created),
+      doneNeedsCount: request.doneNeedsCount,
+      education: request.education,
+      existence_status: request.existence_status,
+      familyCount: request.familyCount,
+      generatedCode: request.generatedCode,
+      housingStatus: request.housingStatus,
+      ngoId: request.ngoId,
+      idSocialWorker: request.idSocialWorker,
+      isConfirmed: request.isConfirmed,
+      isDeleted: request.isDeleted,
+      isMigrated: request.isMigrated,
+      isGone: request.isGone,
+      migrateDate: request.migrateDate && new Date(request.migrateDate),
+      migratedId: request.migratedId,
+      nationality: request.nationality,
+      sayFamilyCount: request.sayFamilyCount,
+      sayName: request.sayName,
+      sayname_translations: request.sayname_translations,
+      status: request.status,
+      updated: request.updated && new Date(request.updated),
+      voiceUrl: request.voiceUrl,
+    });
+    return saved;
   }
 
   async syncChildren(request: ChildrenRequest): Promise<ChildrenEntity[]> {
     const list = []
     let thisChild: ChildrenEntity;
-    console.log('request--------')
-    console.log(request)
     for (let i = 0; i < request.totalChildCount; i++) {
-      console.log('createChild')
-      console.log(request.childData[i].childId)
       thisChild = await this.childrenRepository.findOne({
         where: {
           childId: request.childData[i].childId,
@@ -43,13 +77,11 @@ export class ChildrenService {
       });
       if (thisChild) {
         console.log('foundOne')
-        console.log(request.childData[i].childId)
         continue;
       }
 
       const child = await this.childrenRepository.save({
         childId: request.childData[i].childId,
-        address: request.childData[i].address,
         avatarUrl: request.childData[i].avatarUrl,
         awakeAvatarUrl: request.childData[i].awakeAvatarUrl,
         bio: request.childData[i].bio,
@@ -88,7 +120,6 @@ export class ChildrenService {
       });
       list.push(child)
     }
-    console.log(list)
     return list
   }
 }
