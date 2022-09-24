@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { SyncController } from './sync.controller';
 import { NeedEntity } from '../../entities/need.entity';
 import { HttpModule } from '@nestjs/axios';
@@ -11,6 +11,7 @@ import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { UserService } from '../user/user.service';
 import { UserEntity } from '../../entities/user.entity';
+import { SyncMiddleware } from './middlewares/sync.middleware';
 
 @Module({
   imports: [
@@ -21,6 +22,11 @@ import { UserEntity } from '../../entities/user.entity';
   controllers: [SyncController],
   providers: [ChildrenService, NeedService, PaymentService, UserService], // add entity and services to be available in the module
 })
-export class SyncModule { }
-
-
+export class SyncModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SyncMiddleware).forRoutes({
+      path: 'sync/update',
+      method: RequestMethod.POST
+    })
+  }
+}

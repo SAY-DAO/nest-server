@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
 import { NeedService } from './need.service';
@@ -33,7 +33,7 @@ export class NeedController {
 
   @Get(`:needId`)
   @ApiOperation({ description: 'Get one need' })
-  async getOneNeed(@Query('needId') needId: number) {
+  async getOneNeed(@Query('needId', ParseIntPipe) needId: number) {
     return await this.needService.getNeedById(needId);
   }
 
@@ -124,7 +124,7 @@ export class NeedController {
 
   @Get(`child/done/:id`)
   @ApiOperation({ description: 'Get child all done need' })
-  async getChildNeeds(@Param('id') id: number) {
+  async getChildNeeds(@Param('id', ParseIntPipe) id: number) {
     return await this.needService.getChildNeeds(id);
   }
 }

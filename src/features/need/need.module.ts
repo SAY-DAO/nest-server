@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NeedEntity } from '../../entities/need.entity';
@@ -11,6 +11,7 @@ import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { UserEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
+import { NeedMiddleware } from './middlewares/need.middleware';
 
 @Module({
   imports: [
@@ -21,4 +22,8 @@ import { UserService } from '../user/user.service';
   controllers: [NeedController],
   providers: [NeedService, ChildrenService, PaymentService, UserService],
 })
-export class NeedModule {}
+export class NeedModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(NeedMiddleware).forRoutes('needs')
+  }
+}
