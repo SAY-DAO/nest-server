@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NeedEntity } from '../../entities/need.entity';
@@ -11,7 +11,8 @@ import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { UserEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
-import { NeedMiddleware } from './middlewares/need.middleware';
+import { GetNeedMiddleware } from './middlewares/get-need.middleware';
+import { PostNeedMiddleware } from './middlewares/post-need.middleware';
 
 @Module({
   imports: [
@@ -24,6 +25,14 @@ import { NeedMiddleware } from './middlewares/need.middleware';
 })
 export class NeedModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(NeedMiddleware).forRoutes('needs')
+    consumer
+      .apply(GetNeedMiddleware).forRoutes({
+        path: 'needs/all',
+        method: RequestMethod.GET
+      })
+      .apply(PostNeedMiddleware).forRoutes({
+        path: 'needs/add',
+        method: RequestMethod.POST
+      })
   }
 }

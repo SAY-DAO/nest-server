@@ -2,9 +2,9 @@ import { HttpException, HttpStatus, Injectable, NestMiddleware } from '@nestjs/c
 import { NextFunction, Request, Response } from 'express';
 
 @Injectable()
-export class UserMiddleware implements NestMiddleware {
+export class PostNeedMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log('Dapp Sync MiddleWare...')
+    console.log('Create Need MiddleWare...')
     console.log(req.headers)
     const { origin } = req.headers
     const origins = [

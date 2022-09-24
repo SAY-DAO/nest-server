@@ -32,7 +32,7 @@ async function startServer() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: [process.env.AUTHORIZED_DAPP_LOCAL, process.env.AUTHORIZED_PANEL_LOCAL],
   });
   app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
