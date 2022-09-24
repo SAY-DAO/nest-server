@@ -1,27 +1,14 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   Column,
   Index,
   OneToMany,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
 import { NeedEntity } from './need.entity';
+import { BaseEntity } from './BaseEntity';
 
 @Entity()
-export class ChildrenEntity {
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz', nullable: true })
-  updatedAt: Date;
-
+export class ChildrenEntity extends BaseEntity {
   @Index({ unique: true })
   @Column()
   childId: number;
@@ -72,7 +59,7 @@ export class ChildrenEntity {
   education: string;
 
   @Column({ nullable: true })
-  existence_status: number;
+  existenceStatus: number;
 
   @Column({ nullable: true })
   familyCount: number;

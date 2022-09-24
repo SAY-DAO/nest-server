@@ -1,7 +1,6 @@
-import { NeedEntity } from "../need.entity";
+import { NeedEntity } from "../../entities/need.entity";
 
-
-export interface ChildrenInterface {
+export interface ChildParameters {
     childId: number;
     awakeAvatarUrl?: string;
     bio?: string;
@@ -17,7 +16,7 @@ export interface ChildrenInterface {
     created?: Date;
     doneNeedsCount?: number;
     education?: string;
-    existenceStatus?: number;
+    existence_status?: number;
     familyCount?: number;
     generatedCode?: string;
     housingStatus?: string;

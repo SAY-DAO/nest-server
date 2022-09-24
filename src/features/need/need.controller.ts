@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
+import { ChildrenService } from '../children/children.service';
 import { NeedService } from './need.service';
 
 export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
@@ -9,7 +10,8 @@ export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
 @ApiTags('Needs')
 @Controller('needs')
 export class NeedController {
-  constructor(private needService: NeedService) { }
+  constructor(private needService: NeedService,
+    private childrenService: ChildrenService) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs from flask' })
@@ -118,13 +120,15 @@ export class NeedController {
       needRetailerImg: data.needRetailerImg,
       progress: data?.progress,
     };
-    return await this.needService.createNeed(newNeed);
+    const theChild = await this.childrenService.getChildById(data.childId)
+    return await this.needService.createNeed(theChild, newNeed);
   }
 
 
   @Get(`child/done/:id`)
   @ApiOperation({ description: 'Get child all done need' })
   async getChildNeeds(@Param('id', ParseIntPipe) id: number) {
-    return await this.needService.getChildNeeds(id);
+    const theChild = await this.childrenService.getChildById(id);
+    return theChild.needs;
   }
 }

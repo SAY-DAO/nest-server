@@ -4,8 +4,6 @@ import { IsNotEmpty } from 'class-validator'
 // need from panel - flask server
 export class CreateNeedDto {
   @IsNotEmpty()
-  id: string;
-  @IsNotEmpty()
   needId: number;
   @IsNotEmpty()
   title: string;
@@ -34,9 +32,6 @@ export class CreateNeedDto {
   needRetailerImg: string;
   information: string;
   isConfirmed: boolean;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
   doingDuration: number;
   signatures: [];
   isDeleted: boolean;

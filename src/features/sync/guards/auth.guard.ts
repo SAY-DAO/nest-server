@@ -10,7 +10,7 @@ export class AuthGuard implements CanActivate {
     console.log('Guarding Sync request...')
     const request = context.switchToHttp().getRequest() as Request;
     console.log(request.headers)
-    // check user auth and return false if not authorized
+    // TODO: check user auth and return false if not authorized
     return true;
   }
 }

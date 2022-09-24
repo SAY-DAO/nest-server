@@ -1,35 +1,23 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
   Column,
-  UpdateDateColumn,
   Index,
   JoinTable,
   ManyToMany,
   OneToMany,
   ManyToOne,
+  DeleteDateColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
 import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
 import { PaymentEntity } from './payment.entity';
+import { BaseEntity } from './BaseEntity';
 
 @Entity()
-export class NeedEntity {
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @CreateDateColumn({ type: 'timestamptz', nullable: true })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz', nullable: true })
-  updatedAt?: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz', nullable: true })
+export class NeedEntity extends BaseEntity {
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
   deletedAt?: Date;
 
   @Index({ unique: true })
@@ -69,7 +57,6 @@ export class NeedEntity {
   @Column({ nullable: true })
   cost: number;
 
-
   @Column({ type: 'timestamptz', nullable: true })
   created: Date;
 
@@ -104,7 +91,7 @@ export class NeedEntity {
   needRetailerImg: string;
 
   @Column({ nullable: true })
-  informations: string;
+  information: string;
 
   @Column({ nullable: true })
   isConfirmed: boolean;
