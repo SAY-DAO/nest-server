@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { ChildrenService } from '../children/children.service';
 import { from, map, Observable } from 'rxjs';
 import {
@@ -11,11 +11,8 @@ import {
 } from 'nestjs-typeorm-paginate';
 import { PaymentService } from '../payment/payment.service';
 import { UserService } from '../user/user.service';
-import { UserEntity } from '../../entities/user.entity';
-import { PaymentEntity } from '../../entities/payment.entity';
-import { ServerError } from '../../filters/server-exception.filter';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { NeedParameters } from '../../types/parameters/NeedParameters';
+import { NeedParams } from 'src/types/parameters/NeedParameters';
 
 @Injectable()
 export class NeedService {
@@ -63,7 +60,7 @@ export class NeedService {
     return need;
   }
 
-  createNeed(theChild: ChildrenEntity, needDetails: NeedParameters): Promise<NeedEntity> {
+  createNeed(theChild: ChildrenEntity, needDetails: NeedParams): Promise<NeedEntity> {
     const newNeed = this.needRepository.create({
       child: theChild,
       needId: needDetails.needId,
@@ -91,7 +88,7 @@ export class NeedService {
       descriptionTranslations: needDetails.descriptionTranslations, // { en: '' , fa: ''}
       titleTranslations: needDetails.titleTranslations,
       details: needDetails.details,
-      doing_duration: needDetails.doing_duration,
+      doingDuration: needDetails.doingDuration,
       donated: needDetails.donated,
       doneAt:
         needDetails.doneAt && new Date(needDetails?.doneAt),
@@ -146,70 +143,12 @@ export class NeedService {
   }
 
 
-  async updateSyncedNeed(
-    theNeed: NeedEntity,
-    // request: NeedInterface,
-    participants: UserEntity[],
-    payments: PaymentEntity[],
-  ): Promise<NeedEntity> {
-    // if (paymentList) {
-    //   for (let k = 0; k < paymentList.length; k++) {
-    //     let user = await this.paymentService.getUser(
-    //       participants[k].userId,
-    //     );
-    //     if (!user) {
-    //       user = await this.userService.createUser(participants[k]);
-    //     }
-    //     // check if participants already saved
-    //     const array1 = participants;
-    //     const array2 = theNeed.participants || [];
-    //     const isSame =
-    //       array1.length == array2.length &&
-    //       array1.every(function (element, index) {
-    //         return element === array2[index];
-    //       });
-    //     // add users which are not saved
-    //     if (!isSame && array1[0]) {
-    //       const userId = participants[k].userId; //Element to be searched
-    //       for (let i = 0; i < participants.length; i++) {
-    //         if (userId === participants[i].userId) {
-    //           theNeed.participants = [...participants, user];
-    //           from(this.needRepository.update(theNeed.id, request));
-    //         }
-    //       }
-    //     }
-    //   }
-    //   const need = await this.getNeedById(request.needId);
-    //   need.participants = participants;
-    //   this.needRepository.save(need)
-    //   return need;
-    // }
-    // if (participants) {
-    //   for (let k = 0; k < participants.length; k++) {
-    //     // check if participants already saved
-    //     let user = await this.userService.getUser(
-    //       participants[k].userId,
-    //     );
-    //     if (!user) {
-    //       user = await this.userService.createUser(participants[k]);
-    //     }
-    //     theNeed.participants = [...participants, user];
-    //     from(this.needRepository.update(theNeed.id, request));
-    //   }
-    // }
-    if (payments) {
-      theNeed.payments = payments;
-    }
-    if (participants) {
-      theNeed.participants = participants;
-    }
-    try {
-      this.needRepository.save(theNeed);
-      return theNeed;
-    } catch (e) {
-      // dapp api error when child is not created yet
-      throw new ServerError(e);
-    }
+  updateNeed(
+    id: string,
+    updateNeedDetails: NeedParams,
+  ): Promise<UpdateResult> {
+    return this.needRepository.update({ id }, { ...updateNeedDetails });
+
   }
 
 }

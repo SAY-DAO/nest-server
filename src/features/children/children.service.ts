@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ChildParams } from 'src/types/parameters/ChildParameters';
 import { Repository } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { ChildParameters } from '../../types/parameters/ChildParameters';
 
 @Injectable()
 export class ChildrenService {
@@ -24,7 +24,7 @@ export class ChildrenService {
     return child;
   }
 
-  createChild(childDetails: ChildParameters): Promise<ChildrenEntity> {
+  createChild(childDetails: ChildParams): Promise<ChildrenEntity> {
     const newChild = this.childrenRepository.create({
       childId: childDetails.childId,
       sleptAvatarUrl: childDetails.sleptAvatarUrl,

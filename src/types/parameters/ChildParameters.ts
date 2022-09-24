@@ -1,6 +1,6 @@
 import { NeedEntity } from "../../entities/need.entity";
 
-export interface ChildParameters {
+export type ChildParams = {
     childId: number;
     awakeAvatarUrl?: string;
     bio?: string;

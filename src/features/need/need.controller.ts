@@ -62,14 +62,14 @@ export class NeedController {
       created:
         data.created && new Date(data?.created),
       createdById: data.createdById,
-      deleted_at:
+      deletedAt:
         data.deleted_at &&
         new Date(data?.deleted_at),
       description: data.description, // { en: '' , fa: ''}
       descriptionTranslations: data.descriptionTranslations, // { en: '' , fa: ''}
       titleTranslations: data.titleTranslations,
       details: data.details,
-      doing_duration: data.doing_duration,
+      doingDuration: data.doing_duration,
       donated: data.donated,
       doneAt:
         data.doneAt && new Date(data?.doneAt),

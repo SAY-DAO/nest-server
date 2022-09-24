@@ -12,40 +12,40 @@ import { UserEntity } from './user.entity';
 export class PaymentEntity extends BaseEntity {
     @Index({ unique: true })
     @Column()
-    payment_id: number;
+    paymentId: number;
 
     @Column({ nullable: true })
-    bank_amount: number;
+    bankAmount: number;
 
     @Column({ nullable: true })
-    card_number: string;
+    cardNumber: string;
 
     @Column({ nullable: true })
-    credit_amount: number;
+    creditAmount: number;
 
     @Column({ nullable: true })
     description: string;
 
     @Column({ nullable: true })
-    donation_amount: number;
+    donationAmount: number;
 
     @Column({ nullable: true })
-    gateway_payment_id: string;
+    gatewayPaymentId: string;
 
     @Column({ nullable: true })
-    gateway_track_id: string;
+    gatewayTrackId: string;
 
     @Column({ nullable: true })
-    hashed_card_no: string;
+    hashedCardNo: string;
 
     @Column({ nullable: true })
     link: string;
 
     @Column({ nullable: true })
-    total_amount: number;
+    totalAmount: number;
 
     @Column({ type: 'timestamptz', nullable: true })
-    transaction_date: Date;
+    transactionDate: Date;
 
     @Column({ type: 'timestamptz', nullable: true })
     created: Date;

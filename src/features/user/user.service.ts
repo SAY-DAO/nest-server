@@ -4,7 +4,7 @@ import { DoneNeedRequestDto } from '../../types/dtos/DoneNeedRequest.dto';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../../entities/user.entity';
 import { NeedEntity } from '../../entities/need.entity';
-import { UserInterface } from '../../entities/interface/user-entity.interface';
+import { UserParams } from '../../types/parameters/UserParameters';
 
 @Injectable()
 export class UserService {
@@ -64,13 +64,13 @@ export class UserService {
     return { ...user, doneNeeds: needData, total: filteredNeeds.length };
   }
 
-  async createUser(request: UserInterface): Promise<UserEntity> {
-    const saved = await this.userRepository.save({
+  createUser(request: UserParams): Promise<UserEntity> {
+    const newUser = this.userRepository.create({
       userId: request.userId,
       avatarUrl: request.avatarUrl,
       // isActive: request.isActive,
     });
-    return saved;
+    return this.userRepository.save(newUser);
   }
 
 }

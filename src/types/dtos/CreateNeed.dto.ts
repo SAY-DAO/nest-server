@@ -32,7 +32,6 @@ export class CreateNeedDto {
   needRetailerImg: string;
   information: string;
   isConfirmed: boolean;
-  doingDuration: number;
   signatures: [];
   isDeleted: boolean;
   isDone: boolean;
