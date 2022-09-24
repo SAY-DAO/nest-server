@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SignatureRequest } from '../../types/requests/SignatureRequest';
+import { CreateSignatureDto } from '../../types/dtos/CreateSignature.dto';
 import { SignatureService } from './signature.service';
 
 @ApiTags('Signature')
@@ -14,7 +14,7 @@ export class SignatureController {
     return await this.signatureService.getSignatures();
   }
   @Post(`add`)
-  async signTransaction(@Body() { request: data }: { request: SignatureRequest }) {
+  async signTransaction(@Body() { request: data }: { request: CreateSignatureDto }) {
     const transaction = await this.signatureService.signTransaction(data);
     return transaction;
   }

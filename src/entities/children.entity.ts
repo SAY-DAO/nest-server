@@ -117,7 +117,7 @@ export class ChildrenEntity {
   sayName: string;
 
   @Column("simple-json", { nullable: true })
-  sayname_translations: { en: string; fa: string };
+  sayNameTranslations: { en: string; fa: string };
 
   @Column({ nullable: true })
   sleptAvatarUrl: string;

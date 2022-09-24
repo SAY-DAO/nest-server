@@ -64,7 +64,7 @@ export interface NeedInterface {
     participants?: UserEntity[];
     payments?: PaymentEntity[];
     signatures?: SignatureEntity[];
-    child: ChildrenEntity;
+    childId: number;
     provider?: ProviderEntity;
 
 }

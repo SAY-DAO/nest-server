@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { SignatureEntity } from '../../entities/signature.entity';
 import { Repository } from 'typeorm';
 import { Domain, FamilyVoucher, ProviderType, SocialWorkerVoucher } from '../../types/interface';
-import { SignatureRequest } from '../../types/requests/SignatureRequest';
+import { CreateSignatureDto } from '../../types/dtos/CreateSignature.dto';
 import { NeedService } from '../need/need.service';
 import { UserService } from '../user/user.service';
 import { ChildrenService } from '../children/children.service';
@@ -44,19 +44,17 @@ export class SignatureService {
     };
   }
 
-  async signTransaction(request: SignatureRequest) {
+  async signTransaction(request: CreateSignatureDto) {
     let SocialWorkerVoucher: SocialWorkerVoucher;
     let FamilyVoucher: FamilyVoucher;
     let types: { Voucher: { name: string; type: string; }[]; };
-    const need = await this.needService.GetNeedById(request.needId);
+    const need = await this.needService.getNeedById(request.needId);
     const user = await this.userService.getUser(request.userId);
-    const child = await this.childService.GetChildById(need.child.childId);
-
-
+    const child = await this.childService.getChildById(need.child.childId);
 
     const isCreator = need.createdById === 13; // request.userId
-    const IsParticipant = need.participants.filter(
-      (p) => (p.userId = request.userId),
+    const IsParticipant = need.payments.filter(
+      (p) => (p.user.userId = request.userId),
     );
 
     if (isCreator) {

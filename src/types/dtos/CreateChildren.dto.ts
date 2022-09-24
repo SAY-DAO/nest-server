@@ -1,17 +1,21 @@
-export class ChildrenRequest {
-    childData: ChildRequest[];
-    totalChildCount: number;
+import { IsNotEmpty } from 'class-validator'
+export class CreateChildrenDto {
+    childData: CreateChildDto[];
 }
 
-export class ChildRequest {
+export class CreateChildDto {
+    @IsNotEmpty()
     childId: number;
+    @IsNotEmpty()
     awakeAvatarUrl: string;
+    @IsNotEmpty()
     bio: string;
     bioSummary: string;
     bioSummaryTranslations: { en: string, fa: string }
     bioTranslations: { en: string, fa: string }
     birthDate: Date;
     birthPlace: string;
+    @IsNotEmpty()
     city: number;
     confirmDate: Date;
     confirmUser: number;
@@ -35,7 +39,7 @@ export class ChildRequest {
     phoneNumber: string;
     sayFamilyCount: number;
     sayName: string;
-    sayname_translations: { en: string, fa: string }
+    sayNameTranslations: { en: string, fa: string }
     sleptAvatarUrl: string;
     status: number;
     updated: Date;

@@ -1,9 +1,9 @@
-export class MileStoneRequest {
-  epics: StepRequest[];
+export class CreateMileStoneDto {
+  epics: CreateStepDto[];
   signature: string;
 }
 
-export class StepRequest {
+export class CreateStepDto {
   dueDate: Date;
   title: string;
   description: string;

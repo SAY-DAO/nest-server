@@ -1,11 +1,16 @@
 import { ChildrenEntity } from "../../entities/children.entity";
+import { IsNotEmpty } from 'class-validator'
 
 // need from panel - flask server
-export class NeedRequest {
+export class CreateNeedDto {
+  @IsNotEmpty()
   id: string;
+  @IsNotEmpty()
   needId: number;
+  @IsNotEmpty()
   title: string;
   affiliateLinkUrl: string;
+  @IsNotEmpty()
   bankTrackId: string | null;
   category: number;
   childGeneratedCode: string;
@@ -63,13 +68,13 @@ export class NeedRequest {
   unpayable: boolean;
   unpayableFrom: Date | null;
   updated: Date;
-  payments: BankPaymentRequest[];
-  participants: ParticipantRequest[];
+  payments: CreatePaymentDto[];
+  participants: CreateParticipantDto[];
   child: ChildrenEntity;
 }
 
 // // need from panel - flask server
-export class BankPaymentRequest {
+export class CreatePaymentDto {
   bank_amount: number;
   card_no: string;
   cart_payment_id: string;
@@ -82,7 +87,7 @@ export class BankPaymentRequest {
   hashed_card_no: string;
   id: number;
   id_need: number;
-  userId: number;
+  id_user: number;
   link: string;
   need_amount: number;
   order_id: string;
@@ -92,7 +97,7 @@ export class BankPaymentRequest {
   verified: Date | null;
 }
 
-export class ParticipantRequest {
+export class CreateParticipantDto {
   id_user: number;
   user_avatar: string;
 }

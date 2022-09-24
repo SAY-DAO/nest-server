@@ -10,8 +10,8 @@ import { UserEntity } from './user.entity';
 
 @Entity()
 export class PaymentEntity extends BaseEntity {
-    @Column({ nullable: false })
     @Index({ unique: true })
+    @Column()
     payment_id: number;
 
     @Column({ nullable: true })

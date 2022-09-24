@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BankPaymentRequest } from '../../types/requests/NeedRequest';
+import { CreatePaymentDto } from '../../types/dtos/CreateNeed.dto';
 import { Repository } from 'typeorm';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { UserService } from '../user/user.service';
@@ -29,8 +29,8 @@ export class PaymentService {
         return user;
     }
 
-    async createPayment(need: NeedEntity,request: BankPaymentRequest): Promise<PaymentEntity> {
-        const theUser = await this.userService.getUser(request.userId)
+    async createPayment(request: CreatePaymentDto): Promise<PaymentEntity> {
+        const theUser = await this.userService.getUser(request.id_user)
         const saved = await this.paymentRepository.save({
             card_number: request.card_no,
             cart_payment_id: request.cart_payment_id,
@@ -42,7 +42,6 @@ export class PaymentService {
             gateway_track_id: request.gateway_track_id,
             hashed_card_no: request.hashed_card_no,
             payment_id: request.id,
-            need: need,
             user: theUser,
             link: request.link,
             bank_amount: request.need_amount,

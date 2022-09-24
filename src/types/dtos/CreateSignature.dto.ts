@@ -1,4 +1,4 @@
-export class SignatureRequest {
+export class CreateSignatureDto {
     verifyContractAddress: string
     chainId: string;
     signerAddress: string;

@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DoneNeedRequest } from '../../types/requests/DoneNeedRequest';
+import { DoneNeedRequestDto } from '../../types/dtos/DoneNeedRequest.dto';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../../entities/user.entity';
 import { NeedEntity } from '../../entities/need.entity';
 import { UserInterface } from '../../entities/interface/user-entity.interface';
-import { ParticipantRequest } from 'src/types/requests/NeedRequest';
 
 @Injectable()
 export class UserService {
@@ -28,7 +27,7 @@ export class UserService {
     return user;
   }
 
-  async getUserChildDoneNeeds(data: DoneNeedRequest): Promise<any> {
+  async getUserChildDoneNeeds(data: DoneNeedRequestDto): Promise<any> {
     const user = await this.userRepository.findOne({
       where: {
         userId: data.userId,

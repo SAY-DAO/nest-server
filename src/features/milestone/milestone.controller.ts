@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { MileStoneRequest } from '../../types/requests/MileStoneRequest';
+import { CreateMileStoneDto } from '../../types/dtos/CreateMileStone.dto';
 import { MilestoneService } from './milestone.service';
 
 @ApiTags('Milestone')
@@ -15,7 +15,7 @@ export class MilestoneController {
   }
 
   @Post(`create`)
-  async createMileStone(@Body() data: MileStoneRequest) {
+  async createMileStone(@Body() data: CreateMileStoneDto) {
     const mileStone = await this.mileStoneService.createMileStone(data);
     const result = { mileStone: mileStone };
     return result;
