@@ -1,13 +1,16 @@
-import { Body, Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
 import { SyncRequestDto } from '../../types/dtos/SyncRequest.dto';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { NeedEntity } from '../../entities/need.entity';
+import { ValidateSyncRequestPipe } from './pipes/validate-sync-request.pipe';
+import { AuthGuard } from './guards/auth.guard';
 
 @ApiTags('Sync')
 @Controller('sync')
+@UseGuards(AuthGuard)
 export class SyncController { // panel usage
     constructor(private needService: NeedService,
         private childrenService: ChildrenService,
@@ -15,7 +18,7 @@ export class SyncController { // panel usage
 
     @Post(`update`)
     @UsePipes(new ValidationPipe())
-    async updateServer(@Body() data: SyncRequestDto) {
+    async updateServer(@Body(ValidateSyncRequestPipe) data: SyncRequestDto) {
         let childrenResult: ChildrenEntity[]
         let childResult: ChildrenEntity;
         let needResult: NeedEntity[]

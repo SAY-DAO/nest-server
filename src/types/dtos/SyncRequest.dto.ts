@@ -4,7 +4,7 @@ import { IsNotEmpty } from 'class-validator'
 
 export class SyncRequestDto {
     childData?: CreateChildDto[];
-    @IsNotEmpty()
+    @IsNotEmpty() // through the ValidationPipe
     needData: CreateNeedDto[];
     childId?: number;
 }
