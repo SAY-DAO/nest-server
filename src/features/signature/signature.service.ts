@@ -59,7 +59,7 @@ export class SignatureService {
 
     if (isCreator) {
       SocialWorkerVoucher = {
-        needId: need.needId,
+        flaskNeedId: need.flaskNeedId,
         userId: user && user.userId || request.userId, // we do not have any users available at begining
         child: child.sayName,
         provider: need.provider && need.provider.name || 'digikala',
@@ -69,7 +69,7 @@ export class SignatureService {
       // define your data types
       types = {
         Voucher: [
-          { name: 'needId', type: 'uint256' },
+          { name: 'flaskNeedId', type: 'uint256' },
           { name: 'userId', type: 'uint256' },
           { name: 'child', type: 'string' },
           { name: 'provider', type: 'string' },
@@ -79,7 +79,7 @@ export class SignatureService {
       };
     } else if (IsParticipant) {
       FamilyVoucher = {
-        needId: need.needId,
+        flaskNeedId: need.flaskNeedId,
         userId: user && user.userId || request.userId, // we do not have any users available at begining
         child: need.child.childId,
         wallet: request.signerAddress,

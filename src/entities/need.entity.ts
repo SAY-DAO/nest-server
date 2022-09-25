@@ -14,6 +14,7 @@ import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
 import { PaymentEntity } from './payment.entity';
 import { BaseEntity } from './BaseEntity';
+import { ProviderType } from '../types/interface';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
@@ -22,7 +23,7 @@ export class NeedEntity extends BaseEntity {
 
   @Index({ unique: true })
   @Column()
-  needId: number;
+  flaskNeedId: number;
 
   @Column({ nullable: true })
   title: string;
@@ -156,8 +157,8 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   statusUpdatedAt?: Date;
 
-  @Column({ nullable: true })
-  type: number;
+  @Column({ type: 'enum', enum: ProviderType, nullable: true })
+  type: ProviderType;
 
   @Column({ nullable: true })
   typeName?: string;
@@ -180,17 +181,20 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
-  @ManyToMany(() => UserEntity, (user) => user.doneNeeds)
+  @ManyToMany(() => UserEntity, (user) => user.doneNeeds, { eager: false })
   @JoinTable()
   participants?: UserEntity[];
 
   @OneToMany(() => SignatureEntity, (signature) => signature.need, { eager: true })
   signatures?: SignatureEntity[];
 
-  @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: true })
+  @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: false })
   payments?: PaymentEntity[];
 
-  @ManyToOne(() => ChildrenEntity, (child) => child.needs, { eager: true })
+  @Column()
+  flaskChildId: number;
+
+  @ManyToOne(() => ChildrenEntity, (child) => child.needs, { eager: false })
   child: ChildrenEntity;
 
   @ManyToOne(() => ProviderEntity, (p) => p.needs, { eager: true })

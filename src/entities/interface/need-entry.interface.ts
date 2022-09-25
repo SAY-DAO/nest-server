@@ -8,7 +8,7 @@ export interface NeedInterface {
     id?: string;
     createdAt?: Date;
     updatedAt?: Date;
-    needId?: number;
+    flaskNeedId?: number;
     title?: string;
     affiliateLinkUrl?: string;
     bankTrackId?: string;

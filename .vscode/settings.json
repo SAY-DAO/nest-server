@@ -1,7 +1,3 @@
 {
-  "cSpell.words": [
-    "dtos",
-    "middlewares",
-    "typeorm"
-  ]
+  "cSpell.words": ["dtos", "middlewares", "timestamptz", "typeorm"]
 }

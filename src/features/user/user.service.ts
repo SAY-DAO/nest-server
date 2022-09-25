@@ -27,48 +27,22 @@ export class UserService {
     return user;
   }
 
-  async getUserChildDoneNeeds(data: DoneNeedRequestDto): Promise<any> {
-    const user = await this.userRepository.findOne({
+  async getUserDoneNeeds(userId: number): Promise<UserEntity> {
+    return await this.userRepository.findOne({
       where: {
-        userId: data.userId,
+        userId,
       },
       relations: {
         doneNeeds: true,
       },
     });
-
-    let filteredNeeds = [];
-    function isMatched(doneNeed: NeedEntity) {
-      return doneNeed.child?.childId === data.childId;
-    }
-    // user is not found when there is no done needs
-    if (user) {
-      filteredNeeds = user.doneNeeds.filter(isMatched);
-    }
-    // urgent ==> index 0
-    // growth 0 ==> index 1
-    // joy 1 ==> index 2
-    // health 2 ==> index 3
-    // surroundings 3 ==> index 4
-    // all ==> index 5
-    const needData = [[], [], [], [], [], []];
-    for (let i = 0; i < filteredNeeds.length; i += 1) {
-      if (filteredNeeds[i].isUrgent) {
-        needData[0].push(filteredNeeds[i]);
-      } else {
-        needData[filteredNeeds[i].category + 1].push(filteredNeeds[i]);
-      }
-    }
-    needData[5].push(...filteredNeeds);
-
-    return { ...user, doneNeeds: needData, total: filteredNeeds.length };
   }
 
-  createUser(request: UserParams): Promise<UserEntity> {
+  createUser(userDetails: UserParams): Promise<UserEntity> {
     const newUser = this.userRepository.create({
-      userId: request.userId,
-      avatarUrl: request.avatarUrl,
-      // isActive: request.isActive,
+      userId: userDetails.userId,
+      avatarUrl: userDetails.avatarUrl,
+      // isActive: userDetails.isActive,
     });
     return this.userRepository.save(newUser);
   }

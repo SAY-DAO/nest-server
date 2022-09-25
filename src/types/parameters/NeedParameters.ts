@@ -1,8 +1,10 @@
+import { ProviderType } from "../interface";
 import { PaymentParams } from "./PaymentParams";
 import { UserParams } from "./UserParameters";
 
 export type NeedParams = {
-    needId: number;
+    flaskNeedId: number;
+    flaskChildId: number
     title: string;
     affiliateLinkUrl: string;
     bankTrackId: string | null;
@@ -10,7 +12,6 @@ export type NeedParams = {
     childGeneratedCode: string;
     childSayName: string;
     childDeliveryDate: Date | null;
-    childId: number;
     confirmDate: Date | null;
     confirmUser: number;
     cost: number;
@@ -47,7 +48,7 @@ export type NeedParams = {
     status: number;
     statusDescription: any;
     statusUpdatedAt: Date | null;
-    type: number;
+    type: ProviderType;
     typeName: string;
     unavailableFrom: Date | null;
     unconfirmedAt: Date | null;
@@ -55,8 +56,6 @@ export type NeedParams = {
     unpayable: boolean;
     unpayableFrom: Date | null;
     updated: Date;
-    payments?: PaymentParams[];
-    participants?: UserParams[];
 }
 
 

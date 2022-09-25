@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ProviderType } from '../../types/interface';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from './need.service';
@@ -33,18 +34,18 @@ export class NeedController {
 
   }
 
-  @Get(`:needId`)
+  @Get(`:flaskNeedId`)
   @ApiOperation({ description: 'Get one need' })
-  async getOneNeed(@Query('needId', ParseIntPipe) needId: number) {
-    return await this.needService.getNeedById(needId);
+  async getOneNeed(@Query('flaskNeedId', ParseIntPipe) flaskNeedId: number) {
+    return await this.needService.getNeedById(flaskNeedId);
   }
 
   @Post(`add`)
   @ApiOperation({ description: 'Get one need' })
   async createNeed(@Body() { request: data }: { request: CreateNeedDto }) {
     const newNeed = {
-      childId: data.childId,
-      needId: data.needId,
+      flaskNeedId: data.needId,
+      flaskChildId: data.childId,
       title: data.title,
       affiliateLinkUrl: data.affiliateLinkUrl,
       bankTrackId: data.bankTrackId,
@@ -101,7 +102,7 @@ export class NeedController {
       statusUpdatedAt:
         data.statusUpdatedAt &&
         new Date(data?.statusUpdatedAt),
-      type: data.type,
+      type: data.type === 0 ? ProviderType.SERVICE : ProviderType.PRODUCT,
       typeName: data.typeName,
       unavailableFrom:
         data.unavailableFrom &&

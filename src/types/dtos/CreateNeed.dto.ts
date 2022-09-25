@@ -1,5 +1,6 @@
 import { ChildrenEntity } from "../../entities/children.entity";
 import { IsNotEmpty } from 'class-validator'
+import { ProviderType } from "../interface";
 
 // need from panel - flask server
 export class CreateNeedDto {

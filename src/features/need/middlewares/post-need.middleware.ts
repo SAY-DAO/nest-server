@@ -10,6 +10,7 @@ export class PostNeedMiddleware implements NestMiddleware {
     const origins = [
       process.env.AUTHORIZED_DAPP_LOCAL,
       process.env.AUTHORIZED_PANEL_LOCAL,
+      process.env.AUTHORIZED_DOCS_LOCAL
     ]
 
     if (!origins.includes(origin)) {

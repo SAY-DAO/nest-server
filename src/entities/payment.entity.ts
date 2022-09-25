@@ -12,7 +12,7 @@ import { UserEntity } from './user.entity';
 export class PaymentEntity extends BaseEntity {
     @Index({ unique: true })
     @Column()
-    paymentId: number;
+    flaskPaymentId: number;
 
     @Column({ nullable: true })
     bankAmount: number;
@@ -36,7 +36,7 @@ export class PaymentEntity extends BaseEntity {
     gatewayTrackId: string;
 
     @Column({ nullable: true })
-    hashedCardNo: string;
+    hashedCardNumber: string;
 
     @Column({ nullable: true })
     link: string;
@@ -55,6 +55,12 @@ export class PaymentEntity extends BaseEntity {
 
     @Column({ type: 'timestamptz', nullable: true })
     verified: Date;
+
+    @Column()
+    flaskNeedId: number;
+
+    @Column()
+    flaskUserId: number;
 
     @ManyToOne(() => NeedEntity, (need) => need.payments, { eager: false })
     need: NeedEntity;

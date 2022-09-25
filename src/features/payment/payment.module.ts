@@ -8,10 +8,11 @@ import { UserService } from '../user/user.service';
 import { PaymentService } from './payment.service';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildrenService } from '../children/children.service';
+import { PaymentController } from './payment.controller';
 
 @Module({
     imports: [TypeOrmModule.forFeature([PaymentEntity, UserEntity, NeedEntity, ChildrenEntity])],
-    controllers: [],
+    controllers: [PaymentController],
     providers: [PaymentService, UserService, NeedService, ChildrenService],
 })
 

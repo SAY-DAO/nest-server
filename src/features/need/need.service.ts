@@ -13,6 +13,10 @@ import { PaymentService } from '../payment/payment.service';
 import { UserService } from '../user/user.service';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { NeedParams } from 'src/types/parameters/NeedParameters';
+import { PaymentParams } from 'src/types/parameters/PaymentParams';
+import { UserParams } from 'src/types/parameters/UserParameters';
+import { PaymentEntity } from 'src/entities/payment.entity';
+import { UserEntity } from 'src/entities/user.entity';
 
 @Injectable()
 export class NeedService {
@@ -31,7 +35,7 @@ export class NeedService {
       paginate<NeedEntity>(this.needRepository, options, {
         relations: ['child', 'participants'],
         where: {
-          isDeleted: false,
+          // isDeleted: false,
           // isDone: true
         },
       }),
@@ -47,10 +51,10 @@ export class NeedService {
     return doneNeeds;
   }
 
-  async getNeedById(needId: number): Promise<NeedEntity> {
+  async getNeedById(flaskNeedId: number): Promise<NeedEntity> {
     const need = await this.needRepository.findOne({
       where: {
-        needId: needId,
+        flaskNeedId: flaskNeedId,
       },
       relations: {
         signatures: true,
@@ -63,7 +67,8 @@ export class NeedService {
   createNeed(theChild: ChildrenEntity, needDetails: NeedParams): Promise<NeedEntity> {
     const newNeed = this.needRepository.create({
       child: theChild,
-      needId: needDetails.needId,
+      flaskChildId: needDetails.flaskChildId,
+      flaskNeedId: needDetails.flaskNeedId,
       title: needDetails.title,
       affiliateLinkUrl: needDetails.affiliateLinkUrl,
       bankTrackId: needDetails.bankTrackId,
@@ -142,12 +147,17 @@ export class NeedService {
     return this.needRepository.save(newNeed);
   }
 
-
-  updateNeed(
-    id: string,
+  updateSyncNeed(
+    need: NeedEntity,
     updateNeedDetails: NeedParams,
+    paymentList: PaymentEntity[],
+    participantList: UserEntity[]
+
   ): Promise<UpdateResult> {
-    return this.needRepository.update({ id }, { ...updateNeedDetails });
+    need.payments = paymentList
+    need.participants = participantList
+    this.needRepository.save(need)
+    return this.needRepository.update({ id: need.id }, { ...updateNeedDetails });
 
   }
 

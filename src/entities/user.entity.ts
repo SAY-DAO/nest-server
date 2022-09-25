@@ -34,7 +34,7 @@ export class UserEntity {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToMany(() => NeedEntity, need => need.participants, { eager: true })
+  @ManyToMany(() => NeedEntity, need => need.participants, { eager: false })
   doneNeeds: NeedEntity[]
 
   @ManyToMany(() => PaymentEntity, payment => payment.user)

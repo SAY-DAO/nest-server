@@ -5,16 +5,15 @@ import { SyncRequestDto } from '../../../types/dtos/SyncRequest.dto';
 export class ValidateSyncRequestPipe implements PipeTransform {
   transform(value: SyncRequestDto, metadata: ArgumentMetadata) {
     console.log("Validating sync data...")
+    const finalValue = value.needData
     // use pipes to transform request data to a desireable type
     for (let i = 0; i < value.needData.length; i++) {
       const parseTypeInt = parseInt(value.needData[i].type.toString())
-      const parseNeedIdInt = parseInt(value.needData[i].needId.toString())
-      if (!parseTypeInt) {
-        console.log(`${value.needData[0].type} is not a number`)
+      if (parseTypeInt !== 0 && parseTypeInt !== 1) {
+        console.log(`${value.needData[i].type} is not a number`)
         throw new HttpException('invalid data type', HttpStatus.BAD_REQUEST)
-      } else {
-        return { ...value.needData[i], type: parseTypeInt, needId: parseNeedIdInt }
       }
     }
+    return value
   }
 }

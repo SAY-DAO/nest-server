@@ -21,7 +21,7 @@ export class PaymentService {
     getPayment(payment_id: number): Promise<PaymentEntity> {
         const user = this.paymentRepository.findOne({
             where: {
-                paymentId: payment_id,
+                flaskPaymentId: payment_id,
             },
         });
         return user;

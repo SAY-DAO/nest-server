@@ -7,7 +7,7 @@ export interface Domain {
 }
 
 export interface SocialWorkerVoucher {
-    needId: number;
+    flaskNeedId: number;
     userId: number;
     child: string;
     provider: string; // Amazon, Local doctor ,...
@@ -16,7 +16,7 @@ export interface SocialWorkerVoucher {
 }
 
 export interface FamilyVoucher {
-    needId: number;
+    flaskNeedId: number;
     userId: number;
     child: number;
     wallet: string;
@@ -31,6 +31,7 @@ export enum SignatureType {
 
 
 export enum ProviderType {
-    PRODUCT = 'product',
     SERVICE = 'service',
+    PRODUCT = 'product',
+
 }

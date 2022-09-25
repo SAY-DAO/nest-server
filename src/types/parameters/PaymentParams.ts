@@ -1,6 +1,6 @@
 export type PaymentParams = {
     bankAmount: number;
-    cardNo: string;
+    cardNumber: string;
     cartPaymentId: string;
     created: Date | null;
     creditAmount: number;
@@ -8,9 +8,9 @@ export type PaymentParams = {
     donationAmount: number;
     gatewayPaymentId: string;
     gatewayTrackId: string;
-    hashedCardNo: string;
-    paymentId: number;
-    needId: number;
+    hashedCardNumber: string;
+    flaskPaymentId: number;
+    flaskNeedId: number;
     userId: number;
     link: string;
     needAmount: number;
