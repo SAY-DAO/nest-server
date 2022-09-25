@@ -64,7 +64,12 @@ export class NeedService {
     return need;
   }
 
-  createNeed(theChild: ChildrenEntity, needDetails: NeedParams): Promise<NeedEntity> {
+  createNeed(
+    theChild: ChildrenEntity,
+    needDetails: NeedParams,
+    paymentList?: PaymentEntity[],
+    participantList?: UserEntity[],
+  ): Promise<NeedEntity> {
     const newNeed = this.needRepository.create({
       child: theChild,
       flaskChildId: needDetails.flaskChildId,
@@ -79,24 +84,19 @@ export class NeedService {
         needDetails.childDeliveryDate &&
         new Date(needDetails.childDeliveryDate),
       confirmDate:
-        needDetails.confirmDate &&
-        new Date(needDetails?.confirmDate),
+        needDetails.confirmDate && new Date(needDetails?.confirmDate),
       confirmUser: needDetails.confirmUser,
       cost: needDetails.cost,
-      created:
-        needDetails.created && new Date(needDetails?.created),
+      created: needDetails.created && new Date(needDetails?.created),
       createdById: needDetails.createdById,
-      deletedAt:
-        needDetails.deletedAt &&
-        new Date(needDetails?.deletedAt),
+      deletedAt: needDetails.deletedAt && new Date(needDetails?.deletedAt),
       description: needDetails.description, // { en: '' , fa: ''}
       descriptionTranslations: needDetails.descriptionTranslations, // { en: '' , fa: ''}
       titleTranslations: needDetails.titleTranslations,
       details: needDetails.details,
       doingDuration: needDetails.doingDuration,
       donated: needDetails.donated,
-      doneAt:
-        needDetails.doneAt && new Date(needDetails?.doneAt),
+      doneAt: needDetails.doneAt && new Date(needDetails?.doneAt),
       expectedDeliveryDate:
         needDetails.expectedDeliveryDate &&
         new Date(needDetails?.expectedDeliveryDate),
@@ -110,40 +110,35 @@ export class NeedService {
       ngoAddress: needDetails.ngoAddress,
       ngoName: needDetails.ngoName,
       ngoDeliveryDate:
-        needDetails.ngoDeliveryDate &&
-        new Date(needDetails?.ngoDeliveryDate),
+        needDetails.ngoDeliveryDate && new Date(needDetails?.ngoDeliveryDate),
       oncePurchased: needDetails.oncePurchased,
       paid: needDetails.paid,
       purchaseCost: needDetails.purchaseCost,
       purchaseDate:
-        needDetails.purchaseDate &&
-        new Date(needDetails?.purchaseDate),
+        needDetails.purchaseDate && new Date(needDetails?.purchaseDate),
       receiptCount: needDetails.receiptCount,
       receipts: needDetails.receipts,
       status: needDetails.status,
       statusDescription: needDetails.statusDescription,
       statusUpdatedAt:
-        needDetails.statusUpdatedAt &&
-        new Date(needDetails?.statusUpdatedAt),
+        needDetails.statusUpdatedAt && new Date(needDetails?.statusUpdatedAt),
       type: needDetails.type,
       typeName: needDetails.typeName,
       unavailableFrom:
-        needDetails.unavailableFrom &&
-        new Date(needDetails?.unavailableFrom),
+        needDetails.unavailableFrom && new Date(needDetails?.unavailableFrom),
       unconfirmedAt:
-        needDetails.unconfirmedAt &&
-        new Date(needDetails?.unconfirmedAt),
+        needDetails.unconfirmedAt && new Date(needDetails?.unconfirmedAt),
       unpaidCost: needDetails.unpaidCost,
       unpayable: needDetails.unpayable,
       unpayableFrom:
-        needDetails.unpayableFrom &&
-        new Date(needDetails?.unpayableFrom),
-      updated:
-        needDetails.updated && new Date(needDetails?.updated),
+        needDetails.unpayableFrom && new Date(needDetails?.unpayableFrom),
+      updated: needDetails.updated && new Date(needDetails?.updated),
       imageUrl: needDetails.imageUrl,
       needRetailerImg: needDetails.needRetailerImg,
       progress: needDetails?.progress,
     });
+    newNeed.participants = participantList;
+    newNeed.payments = paymentList;
     return this.needRepository.save(newNeed);
   }
 
@@ -151,14 +146,14 @@ export class NeedService {
     need: NeedEntity,
     updateNeedDetails: NeedParams,
     paymentList: PaymentEntity[],
-    participantList: UserEntity[]
-
+    participantList: UserEntity[],
   ): Promise<UpdateResult> {
-    need.payments = paymentList
-    need.participants = participantList
-    this.needRepository.save(need)
-    return this.needRepository.update({ id: need.id }, { ...updateNeedDetails });
-
+    need.payments = paymentList;
+    need.participants = participantList;
+    this.needRepository.save(need);
+    return this.needRepository.update(
+      { id: need.id },
+      { ...updateNeedDetails },
+    );
   }
-
 }
