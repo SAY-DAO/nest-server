@@ -1,5 +1,5 @@
-import { ProviderType } from "../interface";
-import { PaymentParams } from "./PaymentParams";
+import { NeedTypeEnum } from "../interface";
+import { PaymentParams } from "./PaymentParameters";
 import { UserParams } from "./UserParameters";
 
 export type NeedParams = {
@@ -44,11 +44,10 @@ export type NeedParams = {
     purchaseCost: any;
     purchaseDate: Date | null;
     receiptCount: number;
-    receipts: any;
     status: number;
     statusDescription: any;
     statusUpdatedAt: Date | null;
-    type: ProviderType;
+    type: NeedTypeEnum;
     typeName: string;
     unavailableFrom: Date | null;
     unconfirmedAt: Date | null;

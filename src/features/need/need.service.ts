@@ -2,30 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
 import { Repository, UpdateResult } from 'typeorm';
-import { ChildrenService } from '../children/children.service';
 import { from, map, Observable } from 'rxjs';
 import {
   Pagination,
   IPaginationOptions,
   paginate,
 } from 'nestjs-typeorm-paginate';
-import { PaymentService } from '../payment/payment.service';
-import { UserService } from '../user/user.service';
+
 import { ChildrenEntity } from '../../entities/children.entity';
-import { NeedParams } from 'src/types/parameters/NeedParameters';
-import { PaymentParams } from 'src/types/parameters/PaymentParams';
-import { UserParams } from 'src/types/parameters/UserParameters';
-import { PaymentEntity } from 'src/entities/payment.entity';
-import { UserEntity } from 'src/entities/user.entity';
+import { NeedParams } from '../../types/parameters/NeedParameters';
+import { PaymentEntity } from '../../entities/payment.entity';
+import { UserEntity } from '../../entities/user.entity';
+import { ReceiptEntity } from '../../entities/receipt.entity';
 
 @Injectable()
 export class NeedService {
   constructor(
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
-    private childrenService: ChildrenService,
-    private userService: UserService,
-    private paymentService: PaymentService,
   ) { }
 
   async getNeeds(
@@ -33,9 +27,9 @@ export class NeedService {
   ): Promise<Observable<Pagination<NeedEntity>>> {
     return from(
       paginate<NeedEntity>(this.needRepository, options, {
-        relations: ['child', 'participants'],
+        relations: ['payments', 'participants', 'receipts'],
         where: {
-          // isDeleted: false,
+          isDeleted: false,
           // isDone: true
         },
       }),
@@ -67,6 +61,7 @@ export class NeedService {
   createNeed(
     theChild: ChildrenEntity,
     needDetails: NeedParams,
+    receiptList?: ReceiptEntity[],
     paymentList?: PaymentEntity[],
     participantList?: UserEntity[],
   ): Promise<NeedEntity> {
@@ -117,7 +112,6 @@ export class NeedService {
       purchaseDate:
         needDetails.purchaseDate && new Date(needDetails?.purchaseDate),
       receiptCount: needDetails.receiptCount,
-      receipts: needDetails.receipts,
       status: needDetails.status,
       statusDescription: needDetails.statusDescription,
       statusUpdatedAt:
@@ -139,17 +133,20 @@ export class NeedService {
     });
     newNeed.participants = participantList;
     newNeed.payments = paymentList;
+    newNeed.receipts = receiptList;
     return this.needRepository.save(newNeed);
   }
 
   updateSyncNeed(
     need: NeedEntity,
     updateNeedDetails: NeedParams,
-    paymentList: PaymentEntity[],
-    participantList: UserEntity[],
+    receiptList?: ReceiptEntity[],
+    paymentList?: PaymentEntity[],
+    participantList?: UserEntity[],
   ): Promise<UpdateResult> {
     need.payments = paymentList;
     need.participants = participantList;
+    need.receipts = receiptList;
     this.needRepository.save(need);
     return this.needRepository.update(
       { id: need.id },

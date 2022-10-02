@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { NeedEntity } from './need.entity';
-import { SignatureType } from '../types/interface';
+import { SignatureEnum } from '../types/interface';
 
 @Entity()
 export class SignatureEntity {
@@ -28,8 +28,8 @@ export class SignatureEntity {
   @Column()
   hash: string;
 
-  @Column({ type: 'enum', enum: SignatureType, nullable: true })
-  role: SignatureType;
+  @Column({ type: 'enum', enum: SignatureEnum, nullable: true })
+  role: SignatureEnum;
 
   @ManyToOne(() => NeedEntity, (need) => need.signatures, { eager: false })
   need: NeedEntity;

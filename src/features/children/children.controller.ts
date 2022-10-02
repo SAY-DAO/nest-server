@@ -1,8 +1,8 @@
 
 
 
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Controller, Get} from '@nestjs/common';
+import { ApiOperation,  ApiTags } from '@nestjs/swagger';
 import { ChildrenService } from './children.service';
 
 @ApiTags('Children')

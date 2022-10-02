@@ -11,7 +11,7 @@ export type PaymentParams = {
     hashedCardNumber: string;
     flaskPaymentId: number;
     flaskNeedId: number;
-    userId: number;
+    flaskUserId: number;
     link: string;
     needAmount: number;
     orderId: string;

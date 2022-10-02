@@ -1,9 +1,12 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ProviderType } from '../../types/interface';
+import { NeedTypeEnum } from '../../types/interface';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from './need.service';
+import { ValidateNeedPipe } from './pipes/validate-need.pipe';
+import { NeedEntity } from '../../entities/need.entity';
+import { ServerError } from '../../filters/server-exception.filter';
 
 export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
 
@@ -36,100 +39,111 @@ export class NeedController {
 
   @Get(`:flaskNeedId`)
   @ApiOperation({ description: 'Get one need' })
-  async getOneNeed(@Query('flaskNeedId', ParseIntPipe) flaskNeedId: number) {
-    return await this.needService.getNeedById(flaskNeedId);
+  async getOneNeed(@Query('flaskNeedId') flaskNeedId: number) {
+    let need: NeedEntity
+    try {
+      need = await this.needService.getNeedById(flaskNeedId)
+    } catch (e) {
+      throw new ServerError(e);
+    }
+    return need;
   }
 
   @Post(`add`)
   @ApiOperation({ description: 'Get one need' })
-  async createNeed(@Body() { request: data }: { request: CreateNeedDto }) {
+  async createNeed(@Body(ValidateNeedPipe) request: CreateNeedDto) {
+    let need: NeedEntity
     const newNeed = {
-      flaskNeedId: data.needId,
-      flaskChildId: data.childId,
-      title: data.title,
-      affiliateLinkUrl: data.affiliateLinkUrl,
-      bankTrackId: data.bankTrackId,
-      category: data.category,
-      childGeneratedCode: data?.childGeneratedCode,
-      childSayName: data.childSayName,
+      flaskNeedId: request.needId,
+      flaskChildId: request.childId,
+      title: request.title,
+      affiliateLinkUrl: request.affiliateLinkUrl,
+      bankTrackId: request.bankTrackId,
+      category: request.category,
+      childGeneratedCode: request?.childGeneratedCode,
+      childSayName: request.childSayName,
       childDeliveryDate:
-        data.childDeliveryDate &&
-        new Date(data.childDeliveryDate),
+        request.childDeliveryDate &&
+        new Date(request.childDeliveryDate),
       confirmDate:
-        data.confirmDate &&
-        new Date(data?.confirmDate),
-      confirmUser: data.confirmUser,
-      cost: data.cost,
+        request.confirmDate &&
+        new Date(request?.confirmDate),
+      confirmUser: request.confirmUser,
+      cost: request.cost,
       created:
-        data.created && new Date(data?.created),
-      createdById: data.createdById,
+        request.created && new Date(request?.created),
+      createdById: request.createdById,
       deletedAt:
-        data.deleted_at &&
-        new Date(data?.deleted_at),
-      description: data.description, // { en: '' , fa: ''}
-      descriptionTranslations: data.descriptionTranslations, // { en: '' , fa: ''}
-      titleTranslations: data.titleTranslations,
-      details: data.details,
-      doingDuration: data.doing_duration,
-      donated: data.donated,
+        request.deleted_at &&
+        new Date(request?.deleted_at),
+      description: request.description, // { en: '' , fa: ''}
+      descriptionTranslations: request.descriptionTranslations, // { en: '' , fa: ''}
+      titleTranslations: request.titleTranslations,
+      details: request.details,
+      doingDuration: request.doing_duration,
+      donated: request.donated,
       doneAt:
-        data.doneAt && new Date(data?.doneAt),
+        request.doneAt && new Date(request?.doneAt),
       expectedDeliveryDate:
-        data.expectedDeliveryDate &&
-        new Date(data?.expectedDeliveryDate),
-      information: data.information,
-      isConfirmed: data.isConfirmed,
-      isDeleted: data.isDeleted,
-      isDone: data.isDone,
-      isReported: data.isReported,
-      isUrgent: data.isUrgent,
-      ngoId: data.ngoId,
-      ngoAddress: data.ngoAddress,
-      ngoName: data.ngoName,
+        request.expectedDeliveryDate &&
+        new Date(request?.expectedDeliveryDate),
+      information: request.information,
+      isConfirmed: request.isConfirmed,
+      isDeleted: request.isDeleted,
+      isDone: request.isDone,
+      isReported: request.isReported,
+      isUrgent: request.isUrgent,
+      ngoId: request.ngoId,
+      ngoAddress: request.ngoAddress,
+      ngoName: request.ngoName,
       ngoDeliveryDate:
-        data.ngoDeliveryDate &&
-        new Date(data?.ngoDeliveryDate),
-      oncePurchased: data.oncePurchased,
-      paid: data.paid,
-      purchaseCost: data.purchaseCost,
+        request.ngoDeliveryDate &&
+        new Date(request?.ngoDeliveryDate),
+      oncePurchased: request.oncePurchased,
+      paid: request.paid,
+      purchaseCost: request.purchaseCost,
       purchaseDate:
-        data.purchaseDate &&
-        new Date(data?.purchaseDate),
-      receiptCount: data.receiptCount,
-      receipts: data.receipts,
-      status: data.status,
-      statusDescription: data.statusDescription,
+        request.purchaseDate &&
+        new Date(request?.purchaseDate),
+      receiptCount: request.receiptCount,
+      status: request.status,
+      statusDescription: request.statusDescription,
       statusUpdatedAt:
-        data.statusUpdatedAt &&
-        new Date(data?.statusUpdatedAt),
-      type: data.type === 0 ? ProviderType.SERVICE : ProviderType.PRODUCT,
-      typeName: data.typeName,
+        request.statusUpdatedAt &&
+        new Date(request?.statusUpdatedAt),
+      type: request.type === 0 ? NeedTypeEnum.SERVICE : NeedTypeEnum.PRODUCT,
+      typeName: request.typeName,
       unavailableFrom:
-        data.unavailableFrom &&
-        new Date(data?.unavailableFrom),
+        request.unavailableFrom &&
+        new Date(request?.unavailableFrom),
       unconfirmedAt:
-        data.unconfirmedAt &&
-        new Date(data?.unconfirmedAt),
-      unpaidCost: data.unpaidCost,
-      unpayable: data.unpayable,
+        request.unconfirmedAt &&
+        new Date(request?.unconfirmedAt),
+      unpaidCost: request.unpaidCost,
+      unpayable: request.unpayable,
       unpayableFrom:
-        data.unpayableFrom &&
-        new Date(data?.unpayableFrom),
+        request.unpayableFrom &&
+        new Date(request?.unpayableFrom),
       updated:
-        data.updated && new Date(data?.updated),
-      imageUrl: data.imageUrl,
-      needRetailerImg: data.needRetailerImg,
-      progress: data?.progress,
+        request.updated && new Date(request?.updated),
+      imageUrl: request.imageUrl,
+      needRetailerImg: request.needRetailerImg,
+      progress: request?.progress,
     };
-    const theChild = await this.childrenService.getChildById(data.childId)
-    return await this.needService.createNeed(theChild, newNeed);
+    const theChild = await this.childrenService.getChildById(request.childId)
+    try {
+      need = await this.needService.createNeed(theChild, newNeed)
+    } catch (e) {
+      throw new ServerError(e);
+    }
+    return need;
   }
 
 
   @Get(`child/done/:id`)
   @ApiOperation({ description: 'Get child all done need' })
-  async getChildNeeds(@Param('id', ParseIntPipe) id: number) {
-    const theChild = await this.childrenService.getChildById(id);
+  async getChildNeeds(@Param('childId', ParseIntPipe) childId: number) {
+    const theChild = await this.childrenService.getChildById(childId);
     return theChild.needs;
   }
 }

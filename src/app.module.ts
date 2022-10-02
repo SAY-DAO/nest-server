@@ -21,6 +21,8 @@ import { ProviderModule } from './features/provider/provider.module';
 import { ProviderEntity } from './entities/provider.entity';
 import { PaymentEntity } from './entities/payment.entity';
 import { PaymentModule } from './features/payment/payment.module';
+import { ReceiptEntity } from './entities/receipt.entity';
+import { ReceiptModule } from './features/receipt/receipt.module';
 
 const imports = [
   LoggerModule.forRoot(),
@@ -30,6 +32,7 @@ const imports = [
     entities: [
       UserEntity,
       PaymentEntity,
+      ReceiptEntity,
       NeedEntity,
       ProviderEntity,
       MileStoneEntity,
@@ -41,6 +44,7 @@ const imports = [
   SyncModule,
   UserModule,
   PaymentModule,
+  ReceiptModule,
   ChildrenModule,
   NeedModule,
   ProviderModule,

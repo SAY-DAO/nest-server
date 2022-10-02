@@ -1,9 +1,19 @@
-export class CreateSignatureDto {
-    verifyContractAddress: string
-    chainId: string;
-    signerAddress: string;
-    needId: number;
-    userId: number;
-    impacts: number
+import { IsNotEmpty } from 'class-validator';
+
+export class SwCreateSwSignatureDto {
+    @IsNotEmpty()
+    flaskSwId: number;
+    @IsNotEmpty()
+    flaskNeedId: number;
+    @IsNotEmpty()
+    flaskChildId: number;
+    @IsNotEmpty()
+    signerAddress: string
 }
 
+export class FamilyCreateSwSignatureDto {
+    flaskSwId: number;
+    flaskNeedId: number;
+    flaskChildId: number;
+    signerAddress: string;
+}

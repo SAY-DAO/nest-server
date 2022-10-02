@@ -1,6 +1,6 @@
 import { ChildrenEntity } from "../../entities/children.entity";
 import { IsNotEmpty } from 'class-validator'
-import { ProviderType } from "../interface";
+import { CreateReceiptDto } from "./CreateReceipt.dto";
 
 // need from panel - flask server
 export class CreateNeedDto {
@@ -9,8 +9,7 @@ export class CreateNeedDto {
   @IsNotEmpty()
   title: string;
   affiliateLinkUrl: string;
-  @IsNotEmpty()
-  bankTrackId: string | null;
+  bankTrackId: string;
   category: number;
   childGeneratedCode: string;
   childSayName: string;
@@ -51,7 +50,6 @@ export class CreateNeedDto {
   purchaseCost: any;
   purchaseDate: Date | null;
   receiptCount: number;
-  receipts: any;
   status: number;
   statusDescription: any;
   statusUpdatedAt: Date | null;
@@ -64,6 +62,7 @@ export class CreateNeedDto {
   unpayableFrom: Date | null;
   updated: Date;
   payments: CreatePaymentDto[];
+  receipts: CreateReceiptDto[];
   participants: CreateParticipantDto[];
   child: ChildrenEntity;
 }

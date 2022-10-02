@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaymentEntity } from '../../entities/payment.entity';
-import { PaymentParams } from '../../types/parameters/PaymentParams';
+import { PaymentParams } from '../../types/parameters/PaymentParameters';
 import { UserEntity } from '../../entities/user.entity';
 
 @Injectable()

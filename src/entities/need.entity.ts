@@ -14,7 +14,8 @@ import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
 import { PaymentEntity } from './payment.entity';
 import { BaseEntity } from './BaseEntity';
-import { ProviderType } from '../types/interface';
+import { CategoryEnum, NeedTypeEnum } from '../types/interface';
+import { ReceiptEntity } from './receipt.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
@@ -37,7 +38,7 @@ export class NeedEntity extends BaseEntity {
   @Column({ nullable: true })
   bankTrackId?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'enum', enum: CategoryEnum, nullable: true })
   category: number;
 
   @Column({ nullable: true })
@@ -72,9 +73,6 @@ export class NeedEntity extends BaseEntity {
 
   @Column({ nullable: true })
   details: string;
-
-  @Column({ nullable: true })
-  doing_duration: number;
 
   @Column({ nullable: true })
   donated: number;
@@ -146,9 +144,6 @@ export class NeedEntity extends BaseEntity {
   receiptCount?: number;
 
   @Column({ nullable: true })
-  receipts?: string;
-
-  @Column({ nullable: true })
   status: number;
 
   @Column({ nullable: true })
@@ -157,8 +152,8 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   statusUpdatedAt?: Date;
 
-  @Column({ type: 'enum', enum: ProviderType, nullable: true })
-  type: ProviderType;
+  @Column({ type: 'enum', enum: NeedTypeEnum, nullable: true })
+  type: NeedTypeEnum;
 
   @Column({ nullable: true })
   typeName?: string;
@@ -190,6 +185,9 @@ export class NeedEntity extends BaseEntity {
 
   @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: false })
   payments?: PaymentEntity[];
+
+  @OneToMany(() => ReceiptEntity, (receipt) => receipt.need, { eager: true })
+  receipts?: ReceiptEntity[];
 
   @Column()
   flaskChildId: number;
