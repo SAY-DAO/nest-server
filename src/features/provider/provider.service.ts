@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProviderEntity } from '../../entities/provider.entity';
 import { Repository } from 'typeorm';
 import { ProviderParams } from '../../types/parameters/ProviderParams';
+import { from, Observable } from 'rxjs';
 
 
 @Injectable()
@@ -33,11 +34,13 @@ export class ProviderService {
             name: providerDetails.name,
             description: providerDetails.description,
             type: providerDetails.type,
+            typeName: providerDetails.typeName,
             website: providerDetails.website,
             city: providerDetails.city,
             state: providerDetails.state,
             country: providerDetails.country,
             logoUrl: providerDetails.logoUrl,
+            isActive: providerDetails.isActive,
         });
         return this.providerRepository.save(newProvider);
     }
@@ -47,9 +50,13 @@ export class ProviderService {
         updateProviderDetails: ProviderParams,
     ) {
         return this.providerRepository.update(
-            { id: id },
+            id,
             { ...updateProviderDetails },
         );
+    }
+
+    deleteOne(id: number): Observable<any> {
+        return from(this.providerRepository.delete(id));
     }
 
 }

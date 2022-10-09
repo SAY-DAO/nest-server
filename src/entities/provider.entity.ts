@@ -1,4 +1,4 @@
-import { NeedTypeEnum } from '../types/interface'
+import { NeedTypeDefinitionEnum, NeedTypeEnum } from '../types/interface'
 import { Entity, Column, OneToMany } from 'typeorm'
 import { BaseEntity } from './BaseEntity'
 import { NeedEntity } from './need.entity'
@@ -8,7 +8,7 @@ export class ProviderEntity extends BaseEntity {
     @Column()
     name: string
 
-    @Column()
+    @Column({ nullable: true })
     website: string
 
     @Column({ nullable: true })
@@ -25,6 +25,9 @@ export class ProviderEntity extends BaseEntity {
 
     @Column()
     type: NeedTypeEnum
+
+    @Column()
+    typeName: NeedTypeDefinitionEnum
 
     @Column({ nullable: true })
     logoUrl: string

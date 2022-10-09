@@ -79,13 +79,13 @@ export class SyncController {
                     bioSummary: request.childData[i].bioSummary,
                     bioSummaryTranslations: request.childData[i].bioSummaryTranslations,
                     bioTranslations: request.childData[i].bioTranslations,
-                    birthDate: new Date(request.childData[i].birthDate),
+                    birthDate: request.childData[i].birthDate && new Date(request.childData[i].birthDate),
                     birthPlace: request.childData[i].birthPlace,
                     city: request.childData[i].city,
-                    confirmDate: new Date(request.childData[i].confirmDate),
+                    confirmDate: request.childData[i].confirmDate && new Date(request.childData[i].confirmDate),
                     confirmUser: request.childData[i].confirmUser,
                     country: request.childData[i].country,
-                    created: new Date(request.childData[i].created),
+                    created: request.childData[i].created && new Date(request.childData[i].created),
                     doneNeedsCount: request.childData[i].doneNeedsCount,
                     education: request.childData[i].education,
                     existenceStatus: request.childData[i].existence_status,
@@ -98,7 +98,7 @@ export class SyncController {
                     isDeleted: request.childData[i].isDeleted,
                     isMigrated: request.childData[i].isMigrated,
                     isGone: request.childData[i].isGone,
-                    migrateDate: new Date(request.childData[i].migrateDate),
+                    migrateDate: request.childData[i].migrateDate && new Date(request.childData[i].migrateDate),
                     migratedId: request.childData[i].migratedId,
                     nationality: request.childData[i].nationality,
                     sayFamilyCount: request.childData[i].sayFamilyCount,
@@ -106,7 +106,7 @@ export class SyncController {
                     sayNameTranslations: request.childData[i].sayNameTranslations,
                     sleptAvatarUrl: request.childData[i].sleptAvatarUrl,
                     status: request.childData[i].status,
-                    updated: new Date(request.childData[i].updated),
+                    updated: request.childData[i].updated && new Date(request.childData[i].updated),
                     voiceUrl: request.childData[i].voiceUrl,
                 };
                 try {
@@ -525,7 +525,6 @@ export class SyncController {
         let childResult: ChildrenEntity;
         let newNeedResult: NeedEntity | UpdateResult;
         let newChildrenList: ChildrenEntity;
-
         let theChild: ChildrenEntity;
         const participantList = [];
         const paymentList = [];

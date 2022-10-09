@@ -1,10 +1,10 @@
 import { IsNotEmpty } from 'class-validator'
+import { EducationEnum, HousingEnum } from '../interface';
 export class CreateChildrenDto {
     childData: CreateChildDto[];
 }
 
 export class CreateChildDto {
-    @IsNotEmpty()
     childId: number;
     @IsNotEmpty()
     awakeAvatarUrl: string;
@@ -22,11 +22,11 @@ export class CreateChildDto {
     country: number;
     created: Date;
     doneNeedsCount: number;
-    education: string;
+    education: EducationEnum;
     existence_status: number;
     familyCount: number;
     generatedCode: string;
-    housingStatus: string;
+    housingStatus: HousingEnum;
     ngoId: number;
     idSocialWorker: number;
     isConfirmed: boolean;

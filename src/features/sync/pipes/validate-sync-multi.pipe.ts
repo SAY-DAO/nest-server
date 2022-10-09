@@ -15,7 +15,15 @@ export class ValidateSyncMultiPipe implements PipeTransform {
         console.log(`Category ${value.needData[i].category} is not correct!`)
         throw new HttpException('invalid data type', HttpStatus.BAD_REQUEST)
       }
+
     }
+    for (let i = 0; i < value.childData.length; i++) {
+      if (!value.childData[i].childId) {
+        console.log(`passing from a child with no Id in Flask! - index= ${i}`)
+        value.childData.splice(i, 1);
+      }
+    }
+
     return value
   }
 }

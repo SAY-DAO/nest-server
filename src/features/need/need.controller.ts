@@ -139,11 +139,4 @@ export class NeedController {
     return need;
   }
 
-
-  @Get(`child/done/:id`)
-  @ApiOperation({ description: 'Get child all done need' })
-  async getChildNeeds(@Param('childId', ParseIntPipe) childId: number) {
-    const theChild = await this.childrenService.getChildById(childId);
-    return theChild.needs;
-  }
 }

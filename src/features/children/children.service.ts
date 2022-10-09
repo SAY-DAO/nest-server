@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChildParams } from 'src/types/parameters/ChildParameters';
+import { ChildParams } from '../../types/parameters/ChildParameters';
 import { Repository } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
 
@@ -63,7 +63,7 @@ export class ChildrenService {
       voiceUrl: childDetails.voiceUrl,
     });
     return this.childrenRepository.save(newChild)
-
   }
 
+  
 }

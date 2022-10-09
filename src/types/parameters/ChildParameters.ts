@@ -1,4 +1,5 @@
 import { NeedEntity } from "../../entities/need.entity";
+import { EducationEnum, HousingEnum } from "../interface";
 
 export type ChildParams = {
     childId: number;
@@ -15,11 +16,11 @@ export type ChildParams = {
     country?: number;
     created?: Date;
     doneNeedsCount?: number;
-    education?: string;
+    education?: EducationEnum;
     existence_status?: number;
     familyCount?: number;
     generatedCode?: string;
-    housingStatus?: string;
+    housingStatus?: HousingEnum;
     ngoId?: number;
     idSocialWorker?: number;
     isConfirmed?: boolean;

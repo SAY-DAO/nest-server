@@ -153,4 +153,14 @@ export class NeedService {
       { ...updateNeedDetails },
     );
   }
+
+  createNeedsTemplates(childId: number): Promise<NeedEntity[]> {
+    return this.needRepository.find({
+      where: {
+        unpayable: false,
+        flaskChildId: childId
+      },
+    });
+
+  }
 }

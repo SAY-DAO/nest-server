@@ -6,6 +6,7 @@ import {
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
+import { EducationEnum, HousingEnum } from '../types/interface';
 
 @Entity()
 export class ChildrenEntity extends BaseEntity {
@@ -56,7 +57,7 @@ export class ChildrenEntity extends BaseEntity {
   doneNeedsCount: number;
 
   @Column({ nullable: true })
-  education: string;
+  education: EducationEnum;
 
   @Column({ nullable: true })
   existenceStatus: number;
@@ -68,7 +69,7 @@ export class ChildrenEntity extends BaseEntity {
   generatedCode: string;
 
   @Column({ nullable: true })
-  housingStatus: string;
+  housingStatus: HousingEnum;
 
   @Column({ nullable: true })
   ngoId: number;

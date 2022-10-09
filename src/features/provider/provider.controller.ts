@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Post, Query, Res, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Query, Res, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProviderService } from './provider.service';
 import { ProviderEntity } from '../../entities/provider.entity';
@@ -8,7 +8,7 @@ import { Observable, of } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storage } from '../../storage';
 import { UpdateResult } from 'typeorm';
-import { NeedTypeEnum } from '../../types/interface';
+import { NeedTypeDefinitionEnum, NeedTypeEnum } from '../../types/interface';
 import { ValidateProviderPipe } from './pipes/validate-provider.pipe';
 
 @ApiTags('Provider')
@@ -42,10 +42,11 @@ export class ProviderController {
     }
 
     @Post('add')
+    @UsePipes(new ValidationPipe()) // validation for dto files
     @UseInterceptors(FileInterceptor('file', storage))
     @ApiOperation({ description: 'Create one provider' })
-    async createProvider(@UploadedFile() file, @Body() request: CreateProviderDto): Promise<Observable<any>> {
-
+    async createProvider(@UploadedFile() file, @Body(ValidateProviderPipe) request: CreateProviderDto): Promise<ProviderEntity> {
+        let provider: ProviderEntity
         const newProvider = {
             name: request.name,
             description: request?.description,
@@ -53,41 +54,56 @@ export class ProviderController {
                 request.type === 0
                     ? NeedTypeEnum.SERVICE
                     : NeedTypeEnum.PRODUCT,
+            typeName:
+                request.type === 0
+                    ? NeedTypeDefinitionEnum.SERVICE
+                    : NeedTypeDefinitionEnum.PRODUCT,
             website: request.website,
             city: request?.city,
             state: request?.state,
             country: request.country,
-            logoUrl: file?.filename
+            logoUrl: file?.filename,
+            isActive: request?.isActive,
         };
+
         try {
-            await this.providerService.createProvider(newProvider)
+            provider = await this.providerService.createProvider(newProvider)
         } catch (e) {
             throw new ServerError(e);
         }
-        return of({ imagePath: file?.path });
+        return provider;
     }
 
     @Patch('update/:id')
     @UsePipes(new ValidationPipe()) // validation for dto files
     @UseInterceptors(FileInterceptor('file', storage))
     async updateProvider(@Param('id') id, @UploadedFile() file, @Body(ValidateProviderPipe) request: CreateProviderDto): Promise<UpdateResult> {
-        console.log(request)
-        console.log("file")
-        console.log(id)
         const newProvider = {
             name: request?.name,
             description: request?.description,
             type:
-                request.type === 1
-                    ? NeedTypeEnum.PRODUCT
-                    : NeedTypeEnum.SERVICE,
+                request.type === 0
+                    ? NeedTypeEnum.SERVICE
+                    : NeedTypeEnum.PRODUCT,
+            typeName:
+                request.type === 0
+                    ? NeedTypeDefinitionEnum.SERVICE
+                    : NeedTypeDefinitionEnum.PRODUCT,
             website: request?.website,
             city: request?.city,
             state: request?.state,
             country: request?.country,
-            logoUrl: file?.filename
+            logoUrl: file?.filename,
+            isActive: Boolean(request.isActive)
         };
+        console.log(request)
+        console.log(newProvider)
         return this.providerService.updateProvider(id, newProvider)
+    }
+
+    @Delete(':id')
+    deleteOne(@Param('id') id: number): Observable<any> {
+        return this.providerService.deleteOne(id);
     }
 
 

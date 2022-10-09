@@ -63,10 +63,6 @@ complete money transfer to NGO for service status = 3
 complete delivery to child for service status = 4
 */
 
-export enum NeedTypeEnum {
-    SERVICE = 0,
-    PRODUCT = 1,
-}
 
 export enum PaymentStatusEnum {
     PARTIAL_PAY = 1,
@@ -95,9 +91,49 @@ export enum CategoryEnum {
     SURROUNDING = 3,
 }
 
+//  -3:Deprived of education | -2:Kindergarten | -1:Not attending | 0:Pre-school | 1:1st grade | 2:2nd grade | ... | 13:University
+export enum EducationEnum {
+    DEPRIVED = -3,
+    KINDERGARTEN = -2,
+    NOT_ATTENDING = -1,
+    PRE_SCHOOL = 0,
+    FIRST_GRADE = 1,
+    SECOND_GRADE = 2,
+    THIRD_GRADE = 3,
+    FOURTH_GRADE = 4,
+    FIVE_GRADE = 5,
+    SIX_GRADE = 6,
+    SEVEN_GRADE = 7,
+    EIGHT_GRADE = 8,
+    NINE_GRADE = 9,
+    TEN_GRADE = 10,
+    ELEVEN_GRADE = 11,
+    TWELVE_GRADE = 12,
+    THIRTEEN_GRADE = 13,
+}
+
+// 0:homeless | 1:Resident| 2:Care centers
+export enum HousingEnum {
+    HOMELESS = 0,
+    RESIDENT = 1,
+    CARE_CENTERS = 2,
+}
+
 export enum CategoryDefinitionEnum {
     GROWTH = "Growth",
     JOY = "Joy",
     HEALTH = "Health",
     SURROUNDING = "Surrounding",
+}
+
+
+export enum NeedTypeEnum {
+    SERVICE = 0,
+    PRODUCT = 1,
+}
+
+
+export enum NeedTypeDefinitionEnum {
+    SERVICE = "Service",
+    PRODUCT = "Product",
 }
