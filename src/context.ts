@@ -7,6 +7,8 @@ import config from './config';
 let context: INestApplication = null;
 export const ApplicationContext = async () => {
   if (!context) {
+    console.log('1')
+    console.log(AppModule)
     context = await NestFactory.create(AppModule, {
       cors: {
         allowedHeaders: ['Content-Type', 'Authorization'],
@@ -14,6 +16,7 @@ export const ApplicationContext = async () => {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       },
     });
+
     const options = new DocumentBuilder()
       .setTitle('SAY DAO')
       .setDescription('DAO API')

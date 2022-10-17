@@ -3,6 +3,7 @@ import { LoggerModule } from 'nestjs-pino';
 import config from './config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import 'reflect-metadata';
 import { MileStoneEntity } from './entities/milestone.entity';
 import { NeedEntity } from './entities/need.entity';
@@ -26,6 +27,7 @@ import { ReceiptModule } from './features/receipt/receipt.module';
 
 const imports = [
   LoggerModule.forRoot(),
+  ConfigModule.forRoot({ isGlobal: true }),
   TypeOrmModule.forRoot({
     ...config().db,
     dropSchema: false,

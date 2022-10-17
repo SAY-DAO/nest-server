@@ -38,6 +38,7 @@ async function startServer() {
     res.header('Access-Control-Allow-Origin', '*');
     next();
   });
+
   await app.listen(config().serverPort);
 }
 

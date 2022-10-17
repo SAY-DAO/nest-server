@@ -9,13 +9,15 @@ function loadConfig() {
     db: {
       type: 'postgres' as const,
       port: 5432,
+      host: 'say_nest_db',
       username: 'postgres',
       password: 'postgres',
-      database: 'nest',
+      database: 'say_nest',
       enabled: true,
       synchronize: true,
       logging: true,
       dropSchema: false,
+      autoLoadEntities: true,
       entities: [`${__dirname}/entity/*.js`]
 
     },
