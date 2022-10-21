@@ -4,13 +4,21 @@ let configObject;
 
 function loadConfig() {
   return {
-    serverPort: process.env.NODE_ENV === 'development' ? 8002 : 5000,
-    host: process.env.NODE_ENV === 'development' ? "localHost" : process.env.AWS_SERVER,
+    serverPort: 8002,
+    host:
+      process.env.NODE_ENV === 'development'
+        ? 'localHost'
+        : process.env.NODE_ENV === 'docker-local'
+        ? 'localHost'
+        : process.env.AWS_SERVER,
     logLevel: 'debug',
     db: {
       type: 'postgres' as const,
       port: 5432,
-      host: process.env.NODE_ENV === 'development' ? "localHost" : process.env.DB_HOST,
+      host:
+        process.env.NODE_ENV === 'development'
+          ? 'localHost'
+          : process.env.DB_HOST,
       username: 'postgres',
       password: 'postgres',
       database: 'say_nest',
@@ -19,11 +27,9 @@ function loadConfig() {
       logging: true,
       dropSchema: false,
       autoLoadEntities: true,
-      entities: [`${__dirname}/entity/*.js`]
-
+      entities: [`${__dirname}/entity/*.js`],
     },
     logPretty: 'LOG_PRETTY_PRINT',
-
   };
 }
 

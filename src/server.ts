@@ -9,7 +9,9 @@ async function startServer() {
   console.log('Environment:' + process.env.NODE_ENV);
   console.log('Started server');
   console.log('Host:' + config().host);
+  console.log('Port:' + config().serverPort);
   console.log('db Host:' + config().db.host);
+  console.log('db Port:' + config().db.port);
 
   // const app = await NestFactory.createMicroservice<MicroserviceOptions>(
   //   AppModule,
