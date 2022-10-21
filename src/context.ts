@@ -7,8 +7,6 @@ import config from './config';
 let context: INestApplication = null;
 export const ApplicationContext = async () => {
   if (!context) {
-    console.log('1')
-    console.log(AppModule)
     context = await NestFactory.create(AppModule, {
       cors: {
         allowedHeaders: ['Content-Type', 'Authorization'],
@@ -23,7 +21,7 @@ export const ApplicationContext = async () => {
       .setVersion('v0.1.0')
       // .addTag('Needs')
       .addServer(
-        `http://localhost:${config().serverPort}/api/dao`,
+        `http://${config().host}:${config().serverPort}/api/dao`,
         "Codefi's Example Server",
       )
       .build();

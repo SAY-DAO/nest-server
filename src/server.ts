@@ -6,7 +6,11 @@ import config from './config';
 import * as bodyParser from 'body-parser';
 
 async function startServer() {
+  console.log('Environment:' + process.env.NODE_ENV);
   console.log('Started server');
+  console.log('Host:' + config().host);
+  console.log('db Host:' + config().db.host);
+
   // const app = await NestFactory.createMicroservice<MicroserviceOptions>(
   //   AppModule,
   //   {
@@ -32,7 +36,12 @@ async function startServer() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
-    origin: [process.env.AUTHORIZED_DAPP_LOCAL, process.env.AUTHORIZED_PANEL_LOCAL],
+    origin: [
+      process.env.AUTHORIZED_DAPP_LOCAL,
+      process.env.AUTHORIZED_PANEL_LOCAL,
+      process.env.AUTHORIZED_PANEL_PRODUCTION,
+      process.env.AWS_SERVER,
+    ],
   });
   app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');

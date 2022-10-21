@@ -20,6 +20,7 @@ services:
             NODE_ENV: development
             PORT: 8002
         ports:
+            # containar : local server
             - 5000:8002
             # debugging port
             - 9229:9229
@@ -37,7 +38,7 @@ services:
         volumes:
             - "./data/postgres:/var/lib/postgresql/data"
         ports:
-            - "5432:5432"
+            - "35000:5432"
         command: postgres -c listen_addresses='*'
 
 

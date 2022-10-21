@@ -4,12 +4,13 @@ let configObject;
 
 function loadConfig() {
   return {
-    serverPort: 8002,
+    serverPort: process.env.NODE_ENV === 'development' ? 8002 : 5000,
+    host: process.env.NODE_ENV === 'development' ? "localHost" : process.env.AWS_SERVER,
     logLevel: 'debug',
     db: {
       type: 'postgres' as const,
       port: 5432,
-      host: 'say_nest_db',
+      host: process.env.NODE_ENV === 'development' ? "localHost" : process.env.DB_HOST,
       username: 'postgres',
       password: 'postgres',
       database: 'say_nest',
