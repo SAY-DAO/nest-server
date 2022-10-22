@@ -4,7 +4,11 @@ let configObject;
 
 function loadConfig() {
   return {
-    serverPort: 8002,
+    serverPort: process.env.NODE_ENV === 'development'
+    ? 8002
+    : process.env.NODE_ENV === 'docker-local'
+    ? 5000
+    : 5000,
     host:
       process.env.NODE_ENV === 'development'
         ? 'localHost'
