@@ -1,8 +1,8 @@
 FROM node:16.14.2-alpine as build
 
 WORKDIR /usr/src/app
-
-COPY package.json package-lock.json /usr/src/app/
+COPY [ "package.json", "yarn.lock*", "./" ]
+RUN yarn install --frozen-lockfile
 RUN npm ci
 
 COPY . .
