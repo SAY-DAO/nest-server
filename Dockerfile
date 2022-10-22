@@ -1,4 +1,4 @@
-FROM node:16.8-alpine3.11 as builder
+FROM node:16.18.0-alpine3.15 as builder
 
 ENV NODE_ENV build
 
@@ -12,7 +12,7 @@ RUN npm ci \
 
 # ---
 
-FROM node:16.8-alpine3.11
+FROM node:16.18.0-alpine3.15
 
 USER node
 WORKDIR /usr/src/app
