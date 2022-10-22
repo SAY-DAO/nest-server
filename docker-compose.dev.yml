@@ -18,7 +18,7 @@ services:
         environment: 
             # DATABASE_URL: postgres://postgres:postgres@say_nest_db:5432/say_nest
             NODE_ENV: docker-local
-            PORT: 8002
+            # PORT: 8002
         ports:
             # containar : local server
             - 5000:8002
