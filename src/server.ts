@@ -42,6 +42,7 @@ async function startServer() {
       process.env.AUTHORIZED_DAPP_LOCAL,
       process.env.AUTHORIZED_PANEL_LOCAL,
       process.env.AUTHORIZED_PANEL_PRODUCTION,
+      process.env.AUTHORIZED_DOCS_PRODUCTION,
       process.env.AWS_SERVER,
     ],
   });
