@@ -10,3 +10,7 @@ Dockerfile*
 LICENSE
 npm-debug.log
 README.md
+
+/dist
+/node_modules
+/data
