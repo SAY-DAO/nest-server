@@ -1,4 +1,4 @@
-FROM node:14-alpine3.14 AS development
+FROM node:16.14.2-alpine AS development
 
 ARG NPM_PRIVATE_REGISTRY_URL
 ARG NPM_PRIVATE_REGISTRY_TOKEN
