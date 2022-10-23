@@ -44,7 +44,8 @@ async function startServer() {
       process.env.AUTHORIZED_PANEL_PRODUCTION,
       process.env.AUTHORIZED_DOCS_PRODUCTION_1,
       process.env.AUTHORIZED_DOCS_PRODUCTION_2,
-      process.env.AUTHORIZED_DOCS_STAGING,
+      process.env.AUTHORIZED_DOCS_STAGING_1,
+      process.env.AUTHORIZED_DOCS_STAGING_2,
       process.env.AWS_SERVER,
     ],
   });
@@ -53,7 +54,8 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_PRODUCTION_1);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_PRODUCTION_2);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_STAGING);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_STAGING_1);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_STAGING_2);
   console.log('Cors Enabled:' + process.env.AWS_SERVER);
 
   app.use(function (req, res, next) {

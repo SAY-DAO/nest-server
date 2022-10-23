@@ -9,8 +9,8 @@ function loadConfig() {
       process.env.NODE_ENV === 'development'
         ? 'localHost'
         : process.env.NODE_ENV === 'docker-local'
-        ? 'localHost'
-        : process.env.AWS_SERVER,
+          ? 'localHost'
+          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_DOCS_STAGING_2 : 'localHost',
     logLevel: 'debug',
     db: {
       type: 'postgres' as const,
