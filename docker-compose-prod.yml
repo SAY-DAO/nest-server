@@ -1,0 +1,61 @@
+
+version: '3.6'
+services:
+    api:
+        image: ${CONTAINER_IMAGE:-backend}
+        volumes:
+            - .:/usr/src/app
+        container_name: say_dapp_backend
+        depends_on:
+            - db
+        environment:
+            NODE_ENV: production
+            PORT: 8002
+        ports:
+            # containar : local server
+            - 5000:8002
+            # debugging port
+            - 9229:9229
+        command: npm run start:dev
+        networks:
+            - traefik-public
+        deploy:
+        replicas: 1
+        update_config:
+            parallelism: 1
+            order: start-first
+        placement:
+            constraints:
+            - node.labels.${ENVIRONMENT} == true
+        mode: replicated
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=traefik-public
+            - traefik.constraint-label=traefik-public
+            - traefik.http.routers.${STACK_NAME}-dapp-backend-http.entrypoints=http
+            - traefik.http.routers.${STACK_NAME}-dapp-backend-http.rule=HostRegexp(`{www:(www.)?}${DOMAIN?Variable not set}`)
+            - traefik.http.routers.${STACK_NAME}-dapp-backend-http.service=${STACK_NAME}-dapp-backend
+            - traefik.http.routers.${STACK_NAME}-dapp-backend-http.middlewares=https-redirect
+            - traefik.http.routers.${STACK_NAME}-dapp-backend.entrypoints=https
+            - traefik.http.routers.${STACK_NAME}-dapp-backend.rule=HostRegexp(`{www:(www.)?}${DOMAIN?Variable not set}`)
+            - traefik.http.routers.${STACK_NAME}-dapp-backend.service=${STACK_NAME}-dapp-backend
+            - traefik.http.routers.${STACK_NAME}-dapp-backend.tls=true
+            - traefik.http.routers.${STACK_NAME}-dapp-backend.tls.certresolver=le
+            - traefik.http.services.${STACK_NAME}-dapp-backend.loadbalancer.server.port=5000
+            - traefik.http.middlewares.www-redirect.redirectregex.regex=https://(www.)?(.*)
+            - traefik.http.middlewares.www-redirect.redirectregex.replacement=https://$$2
+            - traefik.http.routers.${STACK_NAME}-dapp-backend.middlewares=www-redirect
+
+    db:
+        image: postgres:12
+        environment:
+        POSTGRES_DB: say_dapp
+        POSTGRES_USER: postgres
+        ports:
+          - 127.0.0.1:5432:5432
+        volumes:
+        - postgres_volume:/var/lib/postgresql/data
+
+
+volumes:
+    postgres_volume:
