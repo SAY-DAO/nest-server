@@ -1,6 +1,6 @@
 FROM node:16.18.0-alpine3.15 as builder
 
-ENV NODE_ENV production
+ENV NODE_ENV build
 
 WORKDIR /usr/src/app
 
