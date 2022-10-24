@@ -7,21 +7,23 @@ function loadConfig() {
     serverPort: 8002,
     host:
       process.env.NODE_ENV === 'development'
-        ? 'localHost'
+        ? 'localhost'
         : process.env.NODE_ENV === 'docker-local'
-          ? 'localHost'
-          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_DOCS_STAGING_2 : 'localHost',
+        ? 'localhost'
+        : process.env.NODE_ENV === 'staging'
+        ? process.env.AUTHORIZED_DOCS_STAGING_2
+        : 'localhost',
     logLevel: 'debug',
     db: {
       type: 'postgres' as const,
       port: 5432,
       host:
         process.env.NODE_ENV === 'development'
-          ? 'localHost'
+          ? 'localhost'
           : process.env.DB_HOST,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'say_nest',
+      username: process.env.DB_USER ?? 'postgres',
+      password: process.env.DB_PASS ?? 'postgres',
+      database: process.env.DB_NAME ?? 'say_nest',
       enabled: true,
       synchronize: true,
       logging: true,
