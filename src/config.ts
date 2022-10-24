@@ -4,7 +4,8 @@ import { readFileSync } from 'fs';
 let configObject;
 
 function loadConfig() {
-  let dbPassword = null;
+  let dbPassword = undefined;
+  console.dir(process.env);
 
   try {
     if (process.env.DB_PASS_FILE)
@@ -14,7 +15,7 @@ function loadConfig() {
   }
 
   return {
-    serverPort: 8002,
+    serverPort: process.env.PORT ?? 8002,
     host:
       process.env.NODE_ENV === 'development'
         ? 'localhost'

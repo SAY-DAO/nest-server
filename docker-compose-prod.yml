@@ -8,6 +8,7 @@ services:
       - db
     environment:
       NODE_ENV: production
+      PORT: 3000
       DB_HOST: db
       DB_USER: postgres
       DB_NAME: say_dapp
@@ -30,19 +31,16 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.routers.${STACK_NAME}-dapp-backend-http.entrypoints=http
-        - traefik.http.routers.${STACK_NAME}-dapp-backend-http.rule=HostRegexp(`{www:(www.)?}${DOMAIN?Variable not set}`)
-        - traefik.http.routers.${STACK_NAME}-dapp-backend-http.service=${STACK_NAME}-dapp-backend
-        - traefik.http.routers.${STACK_NAME}-dapp-backend-http.middlewares=https-redirect
-        - traefik.http.routers.${STACK_NAME}-dapp-backend.entrypoints=https
-        - traefik.http.routers.${STACK_NAME}-dapp-backend.rule=HostRegexp(`{www:(www.)?}${DOMAIN?Variable not set}`)
-        - traefik.http.routers.${STACK_NAME}-dapp-backend.service=${STACK_NAME}-dapp-backend
-        - traefik.http.routers.${STACK_NAME}-dapp-backend.tls=true
-        - traefik.http.routers.${STACK_NAME}-dapp-backend.tls.certresolver=le
-        - traefik.http.services.${STACK_NAME}-dapp-backend.loadbalancer.server.port=8002
-        - traefik.http.middlewares.www-redirect.redirectregex.regex=https://(www.)?(.*)
-        - traefik.http.middlewares.www-redirect.redirectregex.replacement=https://$$2
-        - traefik.http.routers.${STACK_NAME}-dapp-backend.middlewares=www-redirect
+        - traefik.http.routers.${STACK_NAME}-api-http.entrypoints=http
+        - traefik.http.routers.${STACK_NAME}-api-http.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.${STACK_NAME}-api-http.service=${STACK_NAME}-api
+        - traefik.http.routers.${STACK_NAME}-api-http.middlewares=https-redirect
+        - traefik.http.routers.${STACK_NAME}-api.entrypoints=https
+        - traefik.http.routers.${STACK_NAME}-api.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.${STACK_NAME}-api.service=${STACK_NAME}-api
+        - traefik.http.routers.${STACK_NAME}-api.tls=true
+        - traefik.http.routers.${STACK_NAME}-api.tls.certresolver=le
+        - traefik.http.services.${STACK_NAME}-api.loadbalancer.server.port=3000
 
   db:
     image: postgres:12
