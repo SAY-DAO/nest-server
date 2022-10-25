@@ -11,9 +11,9 @@ env:
   PRODUCTION_DOMAIN: nest.saydao.org
   TARGET_LAYER: production
   TEST_TARGET_LAYER: development
-  DEV_STACK_NAME: say-dev-backend
-  STAGING_STACK_NAME: say-staging-backend
-  PRODUCTION_STACK_NAME: say-backend
+  DEV_STACK_NAME: say-dev-nest1-backend
+  STAGING_STACK_NAME: say-staging-nest1-backend
+  PRODUCTION_STACK_NAME: say-nest1-backend
   DOCKER_STACK_PATH: docker-compose.production.yml
 
 on:
