@@ -16,6 +16,9 @@ services:
     networks:
       - default
       - traefik-public
+    configs:
+      - source: nest-config
+        target: .env
     deploy:
       replicas: 1
       update_config:
@@ -70,4 +73,9 @@ networks:
 secrets:
   postgres-password:
     name: ${STACK_NAME}-postgres-password
+    external: true
+
+configs:
+  nest-config:
+    name: ${STACK_NAME}-nest.env
     external: true

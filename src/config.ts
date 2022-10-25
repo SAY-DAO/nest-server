@@ -3,9 +3,16 @@ import { readFileSync } from 'fs';
 
 let configObject;
 
+const Environments = {
+  development: 'development',
+  docker: 'docker-local',
+  staging: 'staging',
+  production: 'production',
+};
+
 function loadConfig() {
   let dbPassword = undefined;
-  console.dir(process.env);
+  const NODE_ENV = process.env.NODE_ENV ?? Environments.development;
 
   try {
     if (process.env.DB_PASS_FILE)
@@ -14,24 +21,24 @@ function loadConfig() {
     console.log(`${process.env.DB_PASS_FILE} DOES NOT EXISTS!`);
   }
 
-  return {
+  const configs = {
     serverPort: process.env.PORT ?? 8002,
     host:
-      process.env.NODE_ENV === 'development'
+      NODE_ENV === Environments.development
         ? 'localhost'
-        : process.env.NODE_ENV === 'docker-local'
+        : NODE_ENV === Environments.docker
         ? 'localhost'
-        : process.env.NODE_ENV === 'staging'
+        : NODE_ENV === Environments.staging
         ? process.env.AUTHORIZED_DOCS_STAGING_2
+        : NODE_ENV === Environments.production
+        ? process.env.PRODUCTION_DOMAIN
         : 'localhost',
     logLevel: 'debug',
+    documentUrl: '',
     db: {
       type: 'postgres' as const,
       port: 5432,
-      host:
-        process.env.NODE_ENV === 'development'
-          ? 'localhost'
-          : process.env.DB_HOST,
+      host: NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,
       username: process.env.DB_USER ?? 'postgres',
       password: dbPassword ?? process.env.DB_PASS ?? 'postgres',
       database: process.env.DB_NAME ?? 'say_nest',
@@ -44,6 +51,13 @@ function loadConfig() {
     },
     logPretty: 'LOG_PRETTY_PRINT',
   };
+
+  configs.documentUrl =
+    NODE_ENV == Environments.development || NODE_ENV == Environments.docker
+      ? `http://${configs.host}:${configs.serverPort}/api/dao`
+      : `http://${configs.host}/api/dao`;
+
+  return configs;
 }
 
 export type ConfigType = ReturnType<typeof loadConfig>;
