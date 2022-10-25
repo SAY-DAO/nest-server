@@ -18,7 +18,7 @@ services:
       - traefik-public
     configs:
       - source: nest-config
-        target: .env
+        target: /usr/src/app/.env
     deploy:
       replicas: 1
       update_config:
