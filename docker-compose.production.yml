@@ -77,5 +77,5 @@ secrets:
 
 configs:
   nest-config:
-    name: ${STACK_NAME}-nest.env
+    name: ${STACK_NAME}.env
     external: true
