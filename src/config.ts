@@ -13,7 +13,6 @@ const Environments = {
 function loadConfig() {
   let dbPassword = undefined;
   const NODE_ENV = process.env.NODE_ENV ?? Environments.development;
-
   try {
     if (process.env.DB_PASS_FILE)
       dbPassword = readFileSync(process.env.DB_PASS_FILE, 'utf-8');
@@ -56,6 +55,9 @@ function loadConfig() {
     NODE_ENV == Environments.development || NODE_ENV == Environments.docker
       ? `http://${configs.host}:${configs.serverPort}/api/dao`
       : `http://${configs.host}/api/dao`;
+
+  console.dir(configs);
+  console.dir(process.env);
 
   return configs;
 }
