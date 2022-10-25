@@ -56,9 +56,6 @@ function loadConfig() {
       ? `https://${configs.host}/api/dao`
       : `http://${configs.host}:${configs.serverPort}/api/dao`;
 
-  console.dir(configs);
-  console.dir(process.env);
-
   return configs;
 }
 
