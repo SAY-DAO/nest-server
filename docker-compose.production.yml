@@ -4,8 +4,6 @@ services:
     image: ${CONTAINER_IMAGE:-backend}
     volumes:
       - uploads_volume:/usr/src/app/uploads
-    depends_on:
-      - db
     environment:
       NODE_ENV: production
       PORT: 3000
