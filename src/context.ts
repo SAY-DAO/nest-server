@@ -20,7 +20,7 @@ export const ApplicationContext = async () => {
       .setDescription('DAO API')
       .setVersion('v0.1.0')
       // .addTag('Needs')
-      .addServer(config().documentUrl, "Codefi's Example Server")
+      .addServer(config().documentUrl, "The Server")
       .build();
     const document = SwaggerModule.createDocument(context, options);
     SwaggerModule.setup('docs', context, document);

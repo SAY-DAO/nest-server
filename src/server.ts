@@ -13,24 +13,6 @@ async function startServer() {
   console.log('db Host:' + config().db.host);
   console.log('db Port:' + config().db.port);
 
-  // const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-  //   AppModule,
-  //   {
-  //     transport: Transport.RMQ,
-  //     options: {
-  //       urls: [
-  //         'amqps://erfsyjet:FArnrq1t2YJW9ZLGzBIrYcBUz2HvHpNS@shark.rmq.cloudamqp.com/erfsyjet',
-  //       ],
-  //       queue: 'main_queue',
-  //       queueOptions: {
-  //         durable: false,
-  //       },
-  //     },
-  //   },
-  // );
-
-  // await app.listen();
-
   const app = await ApplicationContext();
   app.enableShutdownHooks();
   app.setGlobalPrefix('api/dao');

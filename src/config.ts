@@ -48,7 +48,7 @@ function loadConfig() {
   };
 
   configs.documentUrl =
-    NODE_ENV == Environments.staging || NODE_ENV == Environments.production
+    NODE_ENV === Environments.staging || NODE_ENV === Environments.production
       ? `https://${configs.host}/api/dao`
       : `http://${configs.host}:${configs.serverPort}/api/dao`;
 
