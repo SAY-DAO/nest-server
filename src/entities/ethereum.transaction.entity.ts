@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToOne } from 'typeorm'
 import { BaseEntity } from './BaseEntity'
-import { EthereumAccount } from './EthereumAccount'
+import { EthereumAccount } from './ethereum.account.entity'
 
 @Entity()
 export class EthereumTransaction extends BaseEntity {
