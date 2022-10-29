@@ -21,11 +21,11 @@ async function startServer() {
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
     origin: [
-      // process.env.AUTHORIZED_DAPP_LOCAL,
-      // process.env.AUTHORIZED_PANEL_LOCAL,
-      // process.env.AUTHORIZED_PANEL_PRODUCTION,
-      // process.env.AUTHORIZED_PRODUCTION,
-      // process.env.AUTHORIZED_STAGING,
+      process.env.AUTHORIZED_DAPP_LOCAL,
+      process.env.AUTHORIZED_PANEL_LOCAL,
+      process.env.AUTHORIZED_PANEL_PRODUCTION,
+      process.env.AUTHORIZED_PRODUCTION,
+      process.env.AUTHORIZED_STAGING,
     ],
   });
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
@@ -35,7 +35,6 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_STAGING);
 
   app.use(function (req, res, next) {
-    // req.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Origin', '*');
     next();
   });
