@@ -1,3 +1,17 @@
+
+
+export enum RolesEnum {
+    NO_ROLE = 0,
+    SUPER_ADMIN = 1,
+    SOCIAL_WORKER = 2,
+    COORDINATOR = 3, // contributor
+    NGO_SUPERVISOR = 4,
+    SAY_SUPERVISOR = 5,
+    ADMIN = 6, // team lead
+    FAMILY = 7,
+    FRIEND = 8,
+};
+
 export interface Domain {
     name: string;
     version: string;
@@ -36,7 +50,7 @@ export interface SwProductVoucher {
 
 export interface FamilyVoucher {
     flaskNeedId: number;
-    userId: number;
+    flaskUserId: number;
     child: number;
     wallet: string;
     content: string;

@@ -18,19 +18,19 @@ export class UserService {
   }
 
 
-  async getUser(userId: number): Promise<UserEntity> {
+  async getUser(flaskUserId: number): Promise<UserEntity> {
     const user = await this.userRepository.findOne({
       where: {
-        userId: userId,
+        flaskUserId: flaskUserId,
       },
     });
     return user;
   }
 
-  async getUserDoneNeeds(userId: number): Promise<UserEntity> {
+  async getUserDoneNeeds(flaskUserId: number): Promise<UserEntity> {
     return await this.userRepository.findOne({
       where: {
-        userId,
+        flaskUserId,
       },
       relations: {
         doneNeeds: true,
@@ -40,8 +40,9 @@ export class UserService {
 
   createUser(userDetails: UserParams): Promise<UserEntity> {
     const newUser = this.userRepository.create({
-      userId: userDetails.userId,
+      flaskUserId: userDetails.flaskUserId,
       avatarUrl: userDetails.avatarUrl,
+      role: userDetails.role
       // isActive: userDetails.isActive,
     });
     return this.userRepository.save(newUser);

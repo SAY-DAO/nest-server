@@ -24,7 +24,7 @@ export class UserController {
         let user: UserEntity
         user = await this.userService.getUserDoneNeeds(userId);
         if (!user) {
-            user = await this.userService.createUser({ userId });
+            user = await this.userService.createUser({ flaskUserId: userId });
         }
         let filteredNeeds = [];
         function isMatched(doneNeed: NeedEntity) {

@@ -22,7 +22,7 @@ import { UpdateResult } from 'typeorm';
 import { NeedParams } from '../../types/parameters/NeedParameters';
 import { UserParams } from '../../types/parameters/UserParameters';
 import { PaymentParams } from '../../types/parameters/PaymentParameters';
-import { NeedTypeEnum } from '../../types/interface';
+import { NeedTypeEnum, RolesEnum } from '../../types/interface';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
 import { ValidateSyncMultiPipe } from './pipes/validate-sync-multi.pipe';
 import { ValidateSyncOnePipe } from './pipes/validate-sync-one.pipe';
@@ -162,8 +162,9 @@ export class SyncController {
                             let newUser: UserParams;
                             try {
                                 newUser = {
-                                    userId: request.needData[i].participants[k].id_user,
+                                    flaskUserId: request.needData[i].participants[k].id_user,
                                     avatarUrl: request.needData[i].participants[k].user_avatar,
+                                    role: RolesEnum.FAMILY
                                 };
 
                                 user = await this.userService.createUser(newUser);
@@ -182,7 +183,8 @@ export class SyncController {
                             let newUser: UserParams;
                             try {
                                 newUser = {
-                                    userId: request.needData[i].payments[k].id_user,
+                                    flaskUserId: request.needData[i].payments[k].id_user,
+                                    role: RolesEnum.FAMILY
                                 };
 
                                 user = await this.userService.createUser(newUser);
@@ -255,7 +257,7 @@ export class SyncController {
                             let newUser: UserParams;
                             try {
                                 newUser = {
-                                    userId: request.needData[i]?.receipts[k].ownerId,
+                                    flaskSwId: request.needData[i]?.receipts[k].ownerId,
                                 };
 
                                 user = await this.userService.createUser(newUser);
@@ -568,8 +570,9 @@ export class SyncController {
                     let newUser: UserParams;
                     try {
                         newUser = {
-                            userId: request.participants[k].id_user,
+                            flaskUserId: request.participants[k].id_user,
                             avatarUrl: request.participants[k].user_avatar,
+                            role: RolesEnum.FAMILY
                         };
 
                         user = await this.userService.createUser(newUser);
@@ -588,7 +591,8 @@ export class SyncController {
                     let newUser: UserParams;
                     try {
                         newUser = {
-                            userId: request.payments[k].id_user,
+                            flaskUserId: request.payments[k].id_user,
+                            role: RolesEnum.FAMILY
                         };
 
                         user = await this.userService.createUser(newUser);
