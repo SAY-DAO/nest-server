@@ -25,7 +25,7 @@ services:
         order: start-first
       placement:
         constraints:
-          - node.labels.${ENVIRONMENT} == false
+          - node.labels.${ENVIRONMENT} == true
       mode: replicated
       labels:
         - traefik.enable=true
