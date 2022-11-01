@@ -7,13 +7,7 @@ import config from './config';
 let context: INestApplication = null;
 export const ApplicationContext = async () => {
   if (!context) {
-    context = await NestFactory.create(AppModule, {
-      cors: {
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        origin: '*',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      },
-    });
+    context = await NestFactory.create(AppModule);
 
     const options = new DocumentBuilder()
       .setTitle('SAY DAO')

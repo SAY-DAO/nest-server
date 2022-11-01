@@ -27,6 +27,8 @@ async function startServer() {
       process.env.AUTHORIZED_HOST_PRODUCTION,
       process.env.AUTHORIZED_HOST_STAGING,
     ],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
@@ -36,7 +38,7 @@ async function startServer() {
 
   app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header("Access-Control-Allow-Headers", "*");
+    res.header('Access-Control-Allow-Headers', '*');
 
     next();
   });
