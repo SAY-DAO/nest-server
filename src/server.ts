@@ -20,7 +20,13 @@ async function startServer() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
-    origin: process.env.AUTHORIZED_PANEL_PRODUCTION,
+    origin: [
+      process.env.AUTHORIZED_DAPP_LOCAL,
+      process.env.AUTHORIZED_PANEL_LOCAL,
+      process.env.AUTHORIZED_PANEL_PRODUCTION,
+      process.env.AUTHORIZED_HOST_PRODUCTION,
+      process.env.AUTHORIZED_HOST_STAGING,
+    ],
     allowedHeaders: ['Origin,X-Requested-With,Content-Type,Accept'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     optionsSuccessStatus: 200,
@@ -32,13 +38,6 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
-
-  // app.use(function (req, res, next) {
-  //   res.header('Access-Control-Allow-Origin', '*');
-  //   res.header('Access-Control-Allow-Headers', '*');
-
-  //   next();
-  // });
 
   await app.listen(config().serverPort);
 }

@@ -3,7 +3,7 @@
 STACK=say-staging-nest1
 SERVICE=api
 CONFIG=$STACK.env
-ENV=../.env
+ENV=.env
 
 FULL_SERVICE="${STACK}_${SERVICE}"
 
