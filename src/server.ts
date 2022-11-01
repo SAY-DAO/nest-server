@@ -27,7 +27,7 @@ async function startServer() {
       process.env.AUTHORIZED_HOST_PRODUCTION,
       process.env.AUTHORIZED_HOST_STAGING,
     ],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Origin,X-Requested-With,Content-Type,Accept'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     optionsSuccessStatus: 200,
   });
