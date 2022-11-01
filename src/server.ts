@@ -29,7 +29,9 @@ async function startServer() {
     ],
     allowedHeaders: ['Content-Type', 'Authorization'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    optionsSuccessStatus: 200,
   });
+
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
