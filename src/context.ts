@@ -11,7 +11,7 @@ export const ApplicationContext = async () => {
       cors: {
         allowedHeaders: ['Content-Type', 'Authorization'],
         origin: '*',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       },
     });
 
@@ -20,7 +20,7 @@ export const ApplicationContext = async () => {
       .setDescription('DAO API')
       .setVersion('v0.1.0')
       // .addTag('Needs')
-      .addServer(config().documentUrl, "The Server")
+      .addServer(config().documentUrl, 'The Server')
       .build();
     const document = SwaggerModule.createDocument(context, options);
     SwaggerModule.setup('docs', context, document);
