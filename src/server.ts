@@ -30,6 +30,7 @@ async function startServer() {
     allowedHeaders: ['Origin,X-Requested-With,Content-Type,Accept'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     optionsSuccessStatus: 200,
+    credentials: true,
   });
 
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
