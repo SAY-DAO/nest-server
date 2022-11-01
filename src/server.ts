@@ -24,15 +24,15 @@ async function startServer() {
       process.env.AUTHORIZED_DAPP_LOCAL,
       process.env.AUTHORIZED_PANEL_LOCAL,
       process.env.AUTHORIZED_PANEL_PRODUCTION,
-      process.env.AUTHORIZED_PRODUCTION,
-      process.env.AUTHORIZED_STAGING,
+      process.env.AUTHORIZED_HOST_PRODUCTION,
+      process.env.AUTHORIZED_HOST_STAGING,
     ],
   });
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_PRODUCTION);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_STAGING);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
 
   app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');

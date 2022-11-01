@@ -27,7 +27,7 @@ function loadConfig() {
         ? 'localHost'
         : process.env.NODE_ENV === 'docker-local'
           ? 'localHost'
-          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_STAGING : process.env.AUTHORIZED_HOST_PRODUCTION,
+          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_HOST_STAGING : process.env.AUTHORIZED_HOST_PRODUCTION,
     logLevel: 'debug',
     documentUrl: '',
     db: {
