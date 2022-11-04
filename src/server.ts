@@ -26,9 +26,10 @@ async function startServer() {
       process.env.AUTHORIZED_PANEL_PRODUCTION,
       process.env.AUTHORIZED_HOST_PRODUCTION,
       process.env.AUTHORIZED_HOST_STAGING,
+      process.env.AUTHORIZED_DOCS_LOCAL,
     ],
     allowedHeaders: ['Origin,X-Requested-With,Content-Type,Accept'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    methods: ['GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'],
     optionsSuccessStatus: 200,
     credentials: true,
   });
@@ -38,6 +39,7 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
 
   await app.listen(config().serverPort);
 }

@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DoneNeedRequestDto } from '../../types/dtos/DoneNeedRequest.dto';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../../entities/user.entity';
-import { NeedEntity } from '../../entities/need.entity';
 import { UserParams } from '../../types/parameters/UserParameters';
 
 @Injectable()
@@ -47,5 +45,6 @@ export class UserService {
     });
     return this.userRepository.save(newUser);
   }
+
 
 }

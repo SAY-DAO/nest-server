@@ -163,4 +163,21 @@ export class NeedService {
     });
 
   }
+
+
+  async getSocialWorkerCreatedNeeds(flaskId,
+    options: IPaginationOptions,
+  ): Promise<Observable<Pagination<NeedEntity>>> {
+    return from(
+      paginate<NeedEntity>(this.needRepository, options, {
+        relations: ['receipts'],
+        where: {
+          isDeleted: false,
+          isConfirmed: true,
+          createdById: flaskId
+        },
+      }),
+    ).pipe(map((needs: Pagination<NeedEntity>) => needs));
+  }
+
 }

@@ -1,13 +1,20 @@
-import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { NeedEntity } from 'src/entities/need.entity';
-import { UserEntity } from 'src/entities/user.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { UserEntity } from '../../entities/user.entity';
 import { UserService } from './user.service';
+import { RolesEnum } from '../../types/interface';
+import { NEEDS_URL } from '../need/need.controller';
+import { NeedService } from '../need/need.service';
+import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
-    constructor(private userService: UserService) { }
+    constructor(
+        private userService: UserService,
+        private needService: NeedService
+    ) { }
 
     @Get(`all`)
     @ApiOperation({ description: 'Get a single transaction by ID' })
@@ -62,4 +69,39 @@ export class UserController {
             total: filteredNeeds.length,
         };
     }
+
+
+    @Get(`tasks/:flaskId`)
+    @ApiOperation({ description: 'Get user contribution' })
+    async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 10) {
+        limit = limit > 100 ? 100 : limit;
+        const user = await this.userService.getUser(flaskId);
+        if (user) {
+            console.log(user.role)
+            if (user.role === RolesEnum.SOCIAL_WORKER) {
+                await this.needService.getSocialWorkerCreatedNeeds(user.flaskSwId, {
+                    limit: Number(limit),
+                    page: Number(page),
+                    route: NEEDS_URL
+                })
+            }
+        } else {
+            throw new ObjectNotFound();
+        }
+
+        // return user;
+    }
 }
+
+
+// export enum RolesEnum {
+//     NO_ROLE = 0,
+//     SUPER_ADMIN = 1,
+//     SOCIAL_WORKER = 2,
+//     COORDINATOR = 3, // contributor
+//     NGO_SUPERVISOR = 4,
+//     SAY_SUPERVISOR = 5,
+//     ADMIN = 6, // team lead
+//     FAMILY = 7,
+//     FRIEND = 8,
+// };
