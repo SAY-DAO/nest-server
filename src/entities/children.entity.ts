@@ -3,16 +3,20 @@ import {
   Column,
   Index,
   OneToMany,
+  JoinColumn,
+  OneToOne,
+  ManyToOne,
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
 import { EducationEnum, HousingEnum } from '../types/interface';
+import { NgoEntity } from './ngo.entity';
 
 @Entity()
 export class ChildrenEntity extends BaseEntity {
   @Index({ unique: true })
   @Column()
-  childId: number;
+  flaskChildId: number;
 
   @Column({ nullable: true })
   address: string;
@@ -72,9 +76,6 @@ export class ChildrenEntity extends BaseEntity {
   housingStatus: HousingEnum;
 
   @Column({ nullable: true })
-  ngoId: number;
-
-  @Column({ nullable: true })
   idSocialWorker: number;
 
   @Column({ nullable: true })
@@ -121,5 +122,9 @@ export class ChildrenEntity extends BaseEntity {
 
   @OneToMany(() => NeedEntity, (need) => need.child)
   needs?: NeedEntity[]
+
+  @ManyToOne(() => NgoEntity, (n) => n.children, { eager: false })
+  ngo: NgoEntity;
+
 }
 

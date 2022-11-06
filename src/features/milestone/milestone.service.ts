@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { Repository } from 'typeorm';
 import { MileStoneEntity } from '../../entities/milestone.entity';
-import { StepEntity } from 'src/entities/step.entity';
+import { StepEntity } from '../../entities/step.entity';
 
 
 @Injectable()

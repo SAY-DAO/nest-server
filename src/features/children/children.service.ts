@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChildParams } from '../../types/parameters/ChildParameters';
 import { Repository } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
+import { NgoEntity } from '../../entities/ngo.entity';
 
 @Injectable()
 export class ChildrenService {
@@ -15,10 +16,10 @@ export class ChildrenService {
     return this.childrenRepository.find();
   }
 
-  getChildById(childId: number): Promise<ChildrenEntity> {
+  getChildById(flaskChildId: number): Promise<ChildrenEntity> {
     const child = this.childrenRepository.findOne({
       where: {
-        childId: childId,
+        flaskChildId: flaskChildId,
       },
     });
     return child;
@@ -26,7 +27,7 @@ export class ChildrenService {
 
   createChild(childDetails: ChildParams): Promise<ChildrenEntity> {
     const newChild = this.childrenRepository.create({
-      childId: childDetails.childId,
+      flaskChildId: childDetails.flaskChildId,
       sleptAvatarUrl: childDetails.sleptAvatarUrl,
       awakeAvatarUrl: childDetails.awakeAvatarUrl,
       bio: childDetails.bio,
@@ -46,7 +47,7 @@ export class ChildrenService {
       familyCount: childDetails.familyCount,
       generatedCode: childDetails.generatedCode,
       housingStatus: childDetails.housingStatus,
-      ngoId: childDetails.ngoId,
+      ngo: childDetails.ngo,
       idSocialWorker: childDetails.idSocialWorker,
       isConfirmed: childDetails.isConfirmed,
       isDeleted: childDetails.isDeleted,
@@ -65,5 +66,5 @@ export class ChildrenService {
     return this.childrenRepository.save(newChild)
   }
 
-  
+
 }

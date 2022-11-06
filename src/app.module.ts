@@ -10,7 +10,7 @@ import { NeedEntity } from './entities/need.entity';
 import { SignatureModule } from './features/signature/signature.module';
 import { SignatureEntity } from './entities/signature.entity';
 import { ChildrenEntity } from './entities/children.entity';
-import { UserEntity } from './entities/user.entity';
+import { FamilyEntity, SocialWorkerEntity } from './entities/user.entity';
 import { SyncModule } from './features/sync/sync.module';
 import { ChildrenModule } from './features/children/children.module';
 import { NeedModule } from './features/need/need.module';
@@ -24,6 +24,10 @@ import { PaymentEntity } from './entities/payment.entity';
 import { PaymentModule } from './features/payment/payment.module';
 import { ReceiptEntity } from './entities/receipt.entity';
 import { ReceiptModule } from './features/receipt/receipt.module';
+import { EthereumAccount } from './entities/ethereum.account.entity';
+import { EthereumTransaction } from './entities/ethereum.transaction.entity';
+import { NgoModule } from './features/ngo/ngo.module';
+import { NgoEntity } from './entities/ngo.entity';
 
 const imports = [
   LoggerModule.forRoot(),
@@ -32,7 +36,9 @@ const imports = [
     ...config().db,
     dropSchema: false,
     entities: [
-      UserEntity,
+      FamilyEntity,
+      SocialWorkerEntity,
+      NgoEntity,
       PaymentEntity,
       ReceiptEntity,
       NeedEntity,
@@ -41,10 +47,13 @@ const imports = [
       StepEntity,
       SignatureEntity,
       ChildrenEntity,
+      EthereumAccount,
+      EthereumTransaction
     ],
   }),
   SyncModule,
   UserModule,
+  NgoModule,
   PaymentModule,
   ReceiptModule,
   ChildrenModule,

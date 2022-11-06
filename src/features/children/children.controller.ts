@@ -41,7 +41,7 @@ export class ChildrenController {
                 confirmUser: needs[i].confirmUser,
                 cost: needs[i].cost,
                 created: needs[i].created && new Date(needs[i]?.created),
-                createdById: needs[i].createdById,
+                createdById: needs[i].flaskSwId,
                 deletedAt: needs[i].deletedAt && new Date(needs[i]?.deletedAt),
                 description: needs[i].description, // { en: '' , fa: ''}
                 descriptionTranslations: needs[i].descriptionTranslations, // { en: '' , fa: ''}

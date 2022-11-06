@@ -5,7 +5,7 @@ import { MilestoneService } from './milestone.service';
 import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
 import { StepService } from '../step/step.service';
-import { ChildrenEntity } from 'src/entities/children.entity';
+import { ChildrenEntity } from '../../entities/children.entity';
 
 @ApiTags('Milestone')
 @Controller('Milestone')
@@ -32,7 +32,7 @@ export class MilestoneController {
         data.epics[i].needId,
       );
       if (!theChild) {
-        theChild = await this.childrenService.getChildById(theNeed.child.childId);
+        theChild = await this.childrenService.getChildById(theNeed.child.flaskChildId);
       }
 
       const step = this.stepService.createStep(theNeed, data.epics[i]);

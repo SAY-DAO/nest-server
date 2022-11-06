@@ -2,7 +2,7 @@ import { ChildrenEntity } from "../children.entity";
 import { PaymentEntity } from "../payment.entity";
 import { ProviderEntity } from "../provider.entity";
 import { SignatureEntity } from "../signature.entity";
-import { UserEntity } from "../user.entity";
+import { FamilyEntity } from "../user.entity";
 
 export interface NeedInterface {
     id?: string;
@@ -61,7 +61,7 @@ export interface NeedInterface {
     unpayable?: boolean;
     unpayableFrom?: Date;
     updated?: Date;
-    participants?: UserEntity[];
+    participants?: FamilyEntity[];
     payments?: PaymentEntity[];
     signatures?: SignatureEntity[];
     childId: number;

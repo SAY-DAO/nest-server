@@ -9,19 +9,21 @@ import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildrenService } from '../children/children.service';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
-import { UserEntity } from '../../entities/user.entity';
+import { FamilyEntity, SocialWorkerEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
 import { GetNeedMiddleware } from './middlewares/get-need.middleware';
 import { PostNeedMiddleware } from './middlewares/post-need.middleware';
+import { NgoEntity } from '../../entities/ngo.entity';
+import { NgoService } from '../ngo/ngo.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([NeedEntity, ChildrenEntity, PaymentEntity, UserEntity]),
+    TypeOrmModule.forFeature([NeedEntity, ChildrenEntity, PaymentEntity, FamilyEntity, SocialWorkerEntity, NgoEntity]),
     ScheduleModule.forRoot(),
     HttpModule,
   ],
   controllers: [NeedController],
-  providers: [NeedService, ChildrenService, PaymentService, UserService],
+  providers: [NeedService, ChildrenService, PaymentService, UserService, NgoService],
 })
 export class NeedModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

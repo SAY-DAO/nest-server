@@ -7,4 +7,5 @@ export class SyncRequestDto {
     @IsNotEmpty() // through the ValidationPipe
     needData: CreateNeedDto[];
     childId?: number;
+    ngoId?: number;
 }

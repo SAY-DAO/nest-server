@@ -12,8 +12,9 @@ import {
 import { ChildrenEntity } from '../../entities/children.entity';
 import { NeedParams } from '../../types/parameters/NeedParameters';
 import { PaymentEntity } from '../../entities/payment.entity';
-import { UserEntity } from '../../entities/user.entity';
+import { FamilyEntity } from '../../entities/user.entity';
 import { ReceiptEntity } from '../../entities/receipt.entity';
+import { NgoEntity } from '../../entities/ngo.entity';
 
 @Injectable()
 export class NeedService {
@@ -63,12 +64,13 @@ export class NeedService {
     needDetails: NeedParams,
     receiptList?: ReceiptEntity[],
     paymentList?: PaymentEntity[],
-    participantList?: UserEntity[],
+    participantList?: FamilyEntity[],
   ): Promise<NeedEntity> {
     const newNeed = this.needRepository.create({
       child: theChild,
       flaskChildId: needDetails.flaskChildId,
       flaskNeedId: needDetails.flaskNeedId,
+      flaskNgoId: needDetails.flaskNgoId,
       title: needDetails.title,
       affiliateLinkUrl: needDetails.affiliateLinkUrl,
       bankTrackId: needDetails.bankTrackId,
@@ -84,6 +86,7 @@ export class NeedService {
       cost: needDetails.cost,
       created: needDetails.created && new Date(needDetails?.created),
       createdById: needDetails.createdById,
+      flaskSwId: needDetails.flaskSwId,
       deletedAt: needDetails.deletedAt && new Date(needDetails?.deletedAt),
       description: needDetails.description, // { en: '' , fa: ''}
       descriptionTranslations: needDetails.descriptionTranslations, // { en: '' , fa: ''}
@@ -101,7 +104,7 @@ export class NeedService {
       isDone: needDetails.isDone,
       isReported: needDetails.isReported,
       isUrgent: needDetails.isUrgent,
-      ngoId: needDetails.ngoId,
+      ngo: needDetails.ngo,
       ngoAddress: needDetails.ngoAddress,
       ngoName: needDetails.ngoName,
       ngoDeliveryDate:
@@ -142,7 +145,7 @@ export class NeedService {
     updateNeedDetails: NeedParams,
     receiptList?: ReceiptEntity[],
     paymentList?: PaymentEntity[],
-    participantList?: UserEntity[],
+    participantList?: FamilyEntity[],
   ): Promise<UpdateResult> {
     need.payments = paymentList;
     need.participants = participantList;
@@ -165,7 +168,7 @@ export class NeedService {
   }
 
 
-  async getSocialWorkerCreatedNeeds(flaskId,
+  async getSocialWorkerCreatedNeeds(flaskSwId: number,
     options: IPaginationOptions,
   ): Promise<Observable<Pagination<NeedEntity>>> {
     return from(
@@ -174,7 +177,7 @@ export class NeedService {
         where: {
           isDeleted: false,
           isConfirmed: true,
-          createdById: flaskId
+          flaskSwId: flaskSwId
         },
       }),
     ).pipe(map((needs: Pagination<NeedEntity>) => needs));

@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HttpModule } from '@nestjs/axios';
 import { UserService } from './user.service';
-import { UserEntity } from '../../entities/user.entity';
+import { FamilyEntity, SocialWorkerEntity } from '../../entities/user.entity';
 import { UserController } from './user.controller';
 import { UserMiddleware } from './middlewares/user.middleware';
 import { NeedEntity } from '../../entities/need.entity';
@@ -11,7 +11,7 @@ import { NeedService } from '../need/need.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, NeedEntity]),
+    TypeOrmModule.forFeature([FamilyEntity, SocialWorkerEntity, NeedEntity]),
     ScheduleModule.forRoot(),
     HttpModule,
   ],

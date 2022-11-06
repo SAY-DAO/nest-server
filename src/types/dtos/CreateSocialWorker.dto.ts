@@ -1,19 +1,5 @@
-import { NeedEntity } from "../../entities/need.entity";
-import { PaymentEntity } from "../../entities/payment.entity";
-import { RolesEnum } from "../interface";
 
-
-export type FamilyParams = {
-    createdAt?: Date;
-    updatedAt?: Date;
-    flaskUserId?: number;
-    avatarUrl?: string;
-    isActive?: boolean;
-    doneNeeds?: NeedEntity[]
-    payments?: PaymentEntity[]
-}
-
-export type SocialWorkerParams = {
+export class SocialWorkerDto {
     cityId?: number;
     firstName?: string;
     lastName?: string;
@@ -36,7 +22,7 @@ export type SocialWorkerParams = {
     avatarUrl?: string;
     idCardUrl?: string;
     passportUrl?: string;
-    flaskSwId: number;
+    id: number;
     username?: string;
     generatedCode?: string;
     childCount?: number;
@@ -52,9 +38,3 @@ export type SocialWorkerParams = {
     typeName?: string;
     ngoName?: string;
 }
-
-export class CreateParticipantDto {
-    id_user: number;
-    user_avatar: string;
-}
-

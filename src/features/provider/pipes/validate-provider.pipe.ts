@@ -1,5 +1,5 @@
 import { ArgumentMetadata, HttpException, HttpStatus, Injectable, PipeTransform } from '@nestjs/common';
-import { CreateProviderDto } from 'src/types/dtos/CreateProvider.dto';
+import { CreateProviderDto } from '../../../types/dtos/CreateProvider.dto';
 
 @Injectable()
 export class ValidateProviderPipe implements PipeTransform {

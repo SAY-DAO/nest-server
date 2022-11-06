@@ -7,13 +7,14 @@ import { ChildrenEntity } from '../../entities/children.entity';
 import { NeedService } from '../need/need.service';
 import { ChildrenController } from './children.controller';
 import { ChildrenService } from './children.service';
+import { NgoEntity } from '../../entities/ngo.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([ChildrenEntity, NeedEntity]),
+        TypeOrmModule.forFeature([ChildrenEntity, NeedEntity, NgoEntity]),
         ScheduleModule.forRoot(),
         HttpModule,
     ],
     controllers: [ChildrenController],
-    providers: [ChildrenService, NeedService],
+    providers: [ChildrenService, NeedService, ChildrenService],
 }) export class ChildrenModule { }

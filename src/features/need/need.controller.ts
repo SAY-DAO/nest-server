@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NeedTypeEnum } from '../../types/interface';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
@@ -7,6 +7,11 @@ import { NeedService } from './need.service';
 import { ValidateNeedPipe } from './pipes/validate-need.pipe';
 import { NeedEntity } from '../../entities/need.entity';
 import { ServerError } from '../../filters/server-exception.filter';
+import { UserService } from '../user/user.service';
+import { SocialWorkerParams } from '../../types/parameters/UserParameters';
+import { AllExceptionsFilter } from '../../filters/all-exception.filter';
+import { NgoService } from '../ngo/ngo.service';
+import { NgoParams } from '../../types/parameters/NgoParammeters';
 
 export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
 
@@ -15,7 +20,10 @@ export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
 @Controller('needs')
 export class NeedController {
   constructor(private needService: NeedService,
-    private childrenService: ChildrenService) { }
+    private childrenService: ChildrenService,
+    private userService: UserService,
+    private ngoService: NgoService,
+  ) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs from flask' })
@@ -30,7 +38,7 @@ export class NeedController {
 
 
   @Get(`all/done`)
-  @ApiOperation({ description: 'Get all needs from flask' })
+  @ApiOperation({ description: 'Get all done needs from flask' })
   async getDoneNeeds() {
     const doneNeeds = await this.needService.getDoneNeeds()
     return doneNeeds.length
@@ -50,12 +58,46 @@ export class NeedController {
   }
 
   @Post(`add`)
-  @ApiOperation({ description: 'Get one need' })
+  @ApiOperation({ description: 'Create one need' })
   async createNeed(@Body(ValidateNeedPipe) request: CreateNeedDto) {
+    let theNgo = await this.ngoService.getNgo(
+      request.ngoId
+    );
+    //  if ngo does not exist create
+    if (!theNgo) {
+      let newNgo: NgoParams;
+      try {
+        newNgo = {
+          flaskNgoId: request.ngoId,
+        };
+
+        theNgo = await this.ngoService.createNgo(newNgo);
+      } catch (e) {
+        throw new AllExceptionsFilter(e);
+      }
+    }
+
+    let socialWorker = await this.userService.getSocialWorker(
+      request.createdById
+    );
+    //  if social worker does not exist create
+    if (!socialWorker) {
+      let newSocialWorker: SocialWorkerParams;
+      try {
+        newSocialWorker = {
+          flaskSwId: request.createdById,
+        };
+
+        socialWorker = await this.userService.createSocialWorker(newSocialWorker);
+      } catch (e) {
+        throw new AllExceptionsFilter(e);
+      }
+    }
     let need: NeedEntity
     const newNeed = {
       flaskNeedId: request.needId,
       flaskChildId: request.childId,
+      flaskNgoId: request.ngoId,
       title: request.title,
       affiliateLinkUrl: request.affiliateLinkUrl,
       bankTrackId: request.bankTrackId,
@@ -72,7 +114,8 @@ export class NeedController {
       cost: request.cost,
       created:
         request.created && new Date(request?.created),
-      createdById: request.createdById,
+      createdById: socialWorker,
+      flaskSwId: request?.createdById,
       deletedAt:
         request.deleted_at &&
         new Date(request?.deleted_at),
@@ -93,7 +136,7 @@ export class NeedController {
       isDone: request.isDone,
       isReported: request.isReported,
       isUrgent: request.isUrgent,
-      ngoId: request.ngoId,
+      ngo: theNgo,
       ngoAddress: request.ngoAddress,
       ngoName: request.ngoName,
       ngoDeliveryDate:

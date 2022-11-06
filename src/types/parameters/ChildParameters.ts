@@ -1,8 +1,9 @@
+import { NgoEntity } from "../../entities/ngo.entity";
 import { NeedEntity } from "../../entities/need.entity";
 import { EducationEnum, HousingEnum } from "../interface";
 
 export type ChildParams = {
-    childId: number;
+    flaskChildId: number;
     awakeAvatarUrl?: string;
     bio?: string;
     bioSummary?: string;
@@ -21,7 +22,7 @@ export type ChildParams = {
     familyCount?: number;
     generatedCode?: string;
     housingStatus?: HousingEnum;
-    ngoId?: number;
+    ngo: NgoEntity;
     idSocialWorker?: number;
     isConfirmed?: boolean;
     isDeleted?: boolean;

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentParams } from '../../types/parameters/PaymentParameters';
-import { UserEntity } from '../../entities/user.entity';
+import { FamilyEntity } from '../../entities/user.entity';
 
 @Injectable()
 export class PaymentService {
@@ -27,7 +27,7 @@ export class PaymentService {
         return user;
     }
 
-    createPayment(theUser: UserEntity, paymentDetails: PaymentParams): Promise<PaymentEntity> {
+    createPayment(theUser: FamilyEntity, paymentDetails: PaymentParams): Promise<PaymentEntity> {
         const newPayment = this.paymentRepository.create({
             ...paymentDetails,
             user: theUser,

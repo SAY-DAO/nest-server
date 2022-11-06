@@ -1,12 +1,11 @@
-import { Controller, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NeedEntity } from '../../entities/need.entity';
-import { UserEntity } from '../../entities/user.entity';
+import { FamilyEntity } from '../../entities/user.entity';
 import { UserService } from './user.service';
-import { RolesEnum } from '../../types/interface';
 import { NEEDS_URL } from '../need/need.controller';
 import { NeedService } from '../need/need.service';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 
 @ApiTags('Users')
 @Controller('users')
@@ -19,7 +18,9 @@ export class UserController {
     @Get(`all`)
     @ApiOperation({ description: 'Get a single transaction by ID' })
     async getUSers() {
-        return await this.userService.getUsers();
+        const families = await this.userService.getFamilies();
+        const socialWorkers = await this.userService.getSocialWorkers();
+        return { 'families': families, 'socialWorkers': socialWorkers }
     }
 
     @Get(`done`)
@@ -28,10 +29,10 @@ export class UserController {
         @Query('childId', ParseIntPipe) childId: number,
         @Query('userId', ParseIntPipe) userId: number,
     ) {
-        let user: UserEntity
+        let user: FamilyEntity
         user = await this.userService.getUserDoneNeeds(userId);
         if (!user) {
-            user = await this.userService.createUser({ flaskUserId: userId });
+            user = await this.userService.createFamilyMember({ flaskUserId: userId });
         }
         let filteredNeeds = [];
         function isMatched(doneNeed: NeedEntity) {
@@ -71,25 +72,26 @@ export class UserController {
     }
 
 
-    @Get(`tasks/:flaskId`)
-    @ApiOperation({ description: 'Get user contribution' })
+    @Get(`sw/tasks/:flaskId`)
+    @ApiOperation({ description: 'Get social worker created needs' })
     async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 10) {
+        let needs: any
         limit = limit > 100 ? 100 : limit;
-        const user = await this.userService.getUser(flaskId);
-        if (user) {
-            console.log(user.role)
-            if (user.role === RolesEnum.SOCIAL_WORKER) {
-                await this.needService.getSocialWorkerCreatedNeeds(user.flaskSwId, {
+        const socialWorker = await this.userService.getSocialWorker(flaskId);
+        if (socialWorker) {
+            console.log(socialWorker.role)
+            try {
+                needs = await this.needService.getSocialWorkerCreatedNeeds(socialWorker.flaskSwId, {
                     limit: Number(limit),
                     page: Number(page),
                     route: NEEDS_URL
                 })
+            } catch (e) {
+                throw new ObjectNotFound();
             }
-        } else {
-            throw new ObjectNotFound();
         }
 
-        // return user;
+        return needs;
     }
 }
 
