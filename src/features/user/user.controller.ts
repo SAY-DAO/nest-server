@@ -72,9 +72,9 @@ export class UserController {
     }
 
 
-    @Get(`sw/tasks/:flaskId`)
+    @Get(`social-worker/tasks/:flaskId`)
     @ApiOperation({ description: 'Get social worker created needs' })
-    async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 10) {
+    async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 25) {
         let needs: any
         limit = limit > 100 ? 100 : limit;
         const socialWorker = await this.userService.getSocialWorker(flaskId);
@@ -86,6 +86,7 @@ export class UserController {
                     page: Number(page),
                     route: NEEDS_URL
                 })
+                
             } catch (e) {
                 throw new ObjectNotFound();
             }

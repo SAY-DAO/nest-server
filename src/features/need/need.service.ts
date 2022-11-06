@@ -173,7 +173,7 @@ export class NeedService {
   ): Promise<Observable<Pagination<NeedEntity>>> {
     return from(
       paginate<NeedEntity>(this.needRepository, options, {
-        relations: ['receipts'],
+        relations: ['receipts', 'child', 'provider'],
         where: {
           isDeleted: false,
           isConfirmed: true,
