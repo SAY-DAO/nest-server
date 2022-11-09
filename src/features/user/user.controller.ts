@@ -74,12 +74,11 @@ export class UserController {
 
     @Get(`social-worker/tasks/:flaskId`)
     @ApiOperation({ description: 'Get social worker created needs' })
-    async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 25) {
+    async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 50) {
         let needs: any
         limit = limit > 100 ? 100 : limit;
         const socialWorker = await this.userService.getSocialWorker(flaskId);
         if (socialWorker) {
-            console.log(socialWorker.role)
             try {
                 needs = await this.needService.getSocialWorkerCreatedNeeds(socialWorker.flaskSwId, {
                     limit: Number(limit),
