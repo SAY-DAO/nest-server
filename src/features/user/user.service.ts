@@ -15,12 +15,15 @@ export class UserService {
   ) { }
 
   async getFamilies(): Promise<FamilyEntity[]> {
-    return await this.FamilyRepository.find();
+    return await this.FamilyRepository.find({
+      relations: {
+        payments: true,
+      },
+    });
   }
 
   async getSocialWorkers(): Promise<SocialWorkerEntity[]> {
     return await this.socialWorkerRepository.find();
-
   }
 
   async getFamily(flaskId: number): Promise<FamilyEntity> {
@@ -56,8 +59,8 @@ export class UserService {
     const newUser = this.FamilyRepository.create({
       flaskUserId: userDetails.flaskUserId,
       avatarUrl: userDetails.avatarUrl,
-      role: RolesEnum.FAMILY
-      // isActive: userDetails.isActive,
+      role: RolesEnum.FAMILY,
+      isActive: userDetails.isActive,
     });
     return this.FamilyRepository.save(newUser);
   }
@@ -65,9 +68,10 @@ export class UserService {
   createSocialWorker(swDetails: SocialWorkerParams): Promise<SocialWorkerEntity> {
     const newSw = this.socialWorkerRepository.create({
       flaskSwId: swDetails.flaskSwId,
+      ngo: swDetails.ngo,
       avatarUrl: swDetails.avatarUrl,
-      role: RolesEnum.SOCIAL_WORKER
-      // isActive: userDetails.isActive,
+      role: RolesEnum.SOCIAL_WORKER,
+      isActive: swDetails.isActive,
     });
     return this.socialWorkerRepository.save(newSw);
   }

@@ -14,7 +14,8 @@ export class PaymentService {
     ) { }
 
     getPayments(): Promise<PaymentEntity[]> {
-        return this.paymentRepository.find();
+        return this.paymentRepository.find({
+        });
     }
 
 
@@ -27,10 +28,9 @@ export class PaymentService {
         return user;
     }
 
-    createPayment(theUser: FamilyEntity, paymentDetails: PaymentParams): Promise<PaymentEntity> {
+    createPayment(paymentDetails: PaymentParams): Promise<PaymentEntity> {
         const newPayment = this.paymentRepository.create({
             ...paymentDetails,
-            user: theUser,
         });
         return this.paymentRepository.save(newPayment);
     }

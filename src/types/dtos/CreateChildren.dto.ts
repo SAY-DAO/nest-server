@@ -28,7 +28,7 @@ export class CreateChildDto {
     generatedCode: string;
     housingStatus: HousingEnum;
     ngoId: number;
-    idSocialWorker: number;
+    flaskSwId: number;
     isConfirmed: boolean;
     isDeleted: boolean;
     isMigrated: boolean;

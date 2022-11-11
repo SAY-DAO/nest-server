@@ -190,7 +190,7 @@ export class NeedEntity extends BaseEntity {
   @Column()
   flaskSwId: number;
 
-  @Column()
+  @Column({ nullable: true }) 
   flaskNgoId: number;
 
   @ManyToOne(() => ChildrenEntity, (child) => child.needs, { eager: false })
@@ -203,6 +203,6 @@ export class NeedEntity extends BaseEntity {
   ngo: NgoEntity;
 
   @ManyToOne(() => SocialWorkerEntity, (sw) => sw.createdNeeds, { eager: true })
-  createdById: SocialWorkerEntity;
+  socialWorker: SocialWorkerEntity;
 }
 

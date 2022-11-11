@@ -11,6 +11,7 @@ import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
 import { EducationEnum, HousingEnum } from '../types/interface';
 import { NgoEntity } from './ngo.entity';
+import { SocialWorkerEntity } from './user.entity';
 
 @Entity()
 export class ChildrenEntity extends BaseEntity {
@@ -76,7 +77,7 @@ export class ChildrenEntity extends BaseEntity {
   housingStatus: HousingEnum;
 
   @Column({ nullable: true })
-  idSocialWorker: number;
+  flaskSwId: number;
 
   @Column({ nullable: true })
   isConfirmed: boolean;
@@ -125,6 +126,9 @@ export class ChildrenEntity extends BaseEntity {
 
   @ManyToOne(() => NgoEntity, (n) => n.children, { eager: false })
   ngo: NgoEntity;
+
+  @ManyToOne(() => SocialWorkerEntity, (s) => s.children, { eager: false })
+  socialWorker: SocialWorkerEntity;
 
 }
 

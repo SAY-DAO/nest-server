@@ -8,4 +8,5 @@ export class SyncRequestDto {
     needData: CreateNeedDto[];
     childId?: number;
     ngoId?: number;
+    swId?: number;
 }

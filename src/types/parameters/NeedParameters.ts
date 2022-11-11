@@ -17,7 +17,7 @@ export type NeedParams = {
     confirmUser: number;
     cost: number;
     created: Date | null;
-    createdById: SocialWorkerEntity;
+    socialWorker: SocialWorkerEntity;
     flaskSwId: number,
     deletedAt: Date | null;
     description: string;

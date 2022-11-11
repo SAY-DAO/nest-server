@@ -6,12 +6,17 @@ import {
   OneToMany,
   OneToOne,
   JoinColumn,
+  ManyToOne,
+  JoinTable,
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { PaymentEntity } from './payment.entity';
 import { RolesEnum } from '../types/interface';
 import { BaseEntity } from './BaseEntity';
 import { EthereumAccount } from './ethereum.account.entity';
+import { ChildrenEntity } from './children.entity';
+import { NgoEntity } from './ngo.entity';
+import { ReceiptEntity } from './receipt.entity';
 
 
 @Entity()
@@ -37,9 +42,10 @@ export class FamilyEntity extends AllUserEntity {
   flaskUserId: number;
 
   @ManyToMany(() => NeedEntity, need => need.participants, { eager: false })
+  @JoinTable()
   doneNeeds: NeedEntity[]
 
-  @ManyToMany(() => PaymentEntity, payment => payment.user)
+  @OneToMany(() => PaymentEntity, payment => payment.user, { eager: false })
   payments: PaymentEntity[]
 }
 
@@ -49,6 +55,16 @@ export class SocialWorkerEntity extends AllUserEntity {
   @Column({ nullable: true })
   flaskSwId: number;
 
-  @OneToMany(() => NeedEntity, (need) => need.createdById)
+  @OneToMany(() => NeedEntity, (n) => n.socialWorker)
   createdNeeds: NeedEntity[];
+
+  @OneToMany(() => ChildrenEntity, (c) => c.socialWorker)
+  children: ChildrenEntity[];
+
+  @OneToMany(() => ReceiptEntity, (r) => r.socialWorker, { eager: false })
+  receipts: ReceiptEntity[];
+
+  @ManyToOne(() => NgoEntity, (n) => n.socialWorkers, { eager: true })
+  ngo: NgoEntity;
+
 }

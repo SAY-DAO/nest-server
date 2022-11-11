@@ -14,7 +14,6 @@ import { NeedParams } from '../../types/parameters/NeedParameters';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { FamilyEntity } from '../../entities/user.entity';
 import { ReceiptEntity } from '../../entities/receipt.entity';
-import { NgoEntity } from '../../entities/ngo.entity';
 
 @Injectable()
 export class NeedService {
@@ -35,6 +34,20 @@ export class NeedService {
         },
       }),
     ).pipe(map((needs: Pagination<NeedEntity>) => needs));
+  }
+
+
+
+  async getLastNeed(): Promise<NeedEntity> {
+    const lastNeed = await this.needRepository.findOne({
+      where: {
+        isDeleted: false,
+        isConfirmed: true,
+      },
+      select: ['id', 'createdAt', 'socialWorker', 'title',],
+      order: { createdAt: "DESC" },
+    })
+    return lastNeed;
   }
 
   async getDoneNeeds(): Promise<NeedEntity[]> {
@@ -85,7 +98,7 @@ export class NeedService {
       confirmUser: needDetails.confirmUser,
       cost: needDetails.cost,
       created: needDetails.created && new Date(needDetails?.created),
-      createdById: needDetails.createdById,
+      socialWorker: needDetails.socialWorker,
       flaskSwId: needDetails.flaskSwId,
       deletedAt: needDetails.deletedAt && new Date(needDetails?.deletedAt),
       description: needDetails.description, // { en: '' , fa: ''}

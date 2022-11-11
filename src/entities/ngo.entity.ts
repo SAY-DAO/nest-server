@@ -2,6 +2,7 @@ import { Entity, Column, OneToMany, Index } from 'typeorm'
 import { BaseEntity } from './BaseEntity'
 import { NeedEntity } from './need.entity'
 import { ChildrenEntity } from './children.entity'
+import { SocialWorkerEntity } from './user.entity'
 
 @Entity()
 export class NgoEntity extends BaseEntity {
@@ -44,5 +45,8 @@ export class NgoEntity extends BaseEntity {
 
     @OneToMany(() => ChildrenEntity, (c) => c.ngo)
     children?: ChildrenEntity[]
+
+    @OneToMany(() => SocialWorkerEntity, (sw) => sw.ngo)
+    socialWorkers?: SocialWorkerEntity[]
 }
 

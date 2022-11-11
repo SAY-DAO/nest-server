@@ -6,18 +6,21 @@ import { UserService } from './user.service';
 import { NEEDS_URL } from '../need/need.controller';
 import { NeedService } from '../need/need.service';
 import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
+import { ChildrenService } from '../children/children.service';
+import { ChildrenEntity } from '../../entities/children.entity';
 
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
     constructor(
         private userService: UserService,
-        private needService: NeedService
+        private needService: NeedService,
+        private childrenService: ChildrenService
     ) { }
 
     @Get(`all`)
     @ApiOperation({ description: 'Get a single transaction by ID' })
-    async getUSers() {
+    async getFamilies() {
         const families = await this.userService.getFamilies();
         const socialWorkers = await this.userService.getSocialWorkers();
         return { 'families': families, 'socialWorkers': socialWorkers }
@@ -72,10 +75,11 @@ export class UserController {
     }
 
 
-    @Get(`social-worker/tasks/:flaskId`)
+    @Get(`social-worker/:flaskId/createdNeeds`)
     @ApiOperation({ description: 'Get social worker created needs' })
-    async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 50) {
+    async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
         let needs: any
+        let children: ChildrenEntity[]
         limit = limit > 100 ? 100 : limit;
         const socialWorker = await this.userService.getSocialWorker(flaskId);
         if (socialWorker) {
@@ -85,12 +89,13 @@ export class UserController {
                     page: Number(page),
                     route: NEEDS_URL
                 })
-                
+
+                children = await this.childrenService.getSocialWorkerChildren(socialWorker.flaskSwId)
+
             } catch (e) {
                 throw new ObjectNotFound();
             }
         }
-
         return needs;
     }
 }

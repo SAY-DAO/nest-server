@@ -1,3 +1,5 @@
+import { FamilyEntity } from "src/entities/user.entity";
+
 export type PaymentParams = {
     bankAmount: number;
     cardNumber: string;
@@ -12,6 +14,7 @@ export type PaymentParams = {
     flaskPaymentId: number;
     flaskNeedId: number;
     flaskUserId: number;
+    user: FamilyEntity;
     link: string;
     needAmount: number;
     orderId: string;

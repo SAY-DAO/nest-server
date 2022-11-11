@@ -3,7 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChildParams } from '../../types/parameters/ChildParameters';
 import { Repository } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { NgoEntity } from '../../entities/ngo.entity';
+import { from, map, Observable } from 'rxjs';
+import {
+  Pagination,
+  IPaginationOptions,
+  paginate,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class ChildrenService {
@@ -48,7 +53,8 @@ export class ChildrenService {
       generatedCode: childDetails.generatedCode,
       housingStatus: childDetails.housingStatus,
       ngo: childDetails.ngo,
-      idSocialWorker: childDetails.idSocialWorker,
+      socialWorker: childDetails.socialWorker,
+      flaskSwId: childDetails.flaskSwId,
       isConfirmed: childDetails.isConfirmed,
       isDeleted: childDetails.isDeleted,
       isMigrated: childDetails.isMigrated,
@@ -64,6 +70,14 @@ export class ChildrenService {
       voiceUrl: childDetails.voiceUrl,
     });
     return this.childrenRepository.save(newChild)
+  }
+
+  getSocialWorkerChildren(flaskSwId: number): Promise<ChildrenEntity[]> {
+    return this.childrenRepository.find({
+      where: {
+        flaskSwId
+      }
+    });
   }
 
 

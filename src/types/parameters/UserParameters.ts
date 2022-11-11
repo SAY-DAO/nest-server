@@ -1,6 +1,6 @@
+import { NgoEntity } from "../../entities/ngo.entity";
 import { NeedEntity } from "../../entities/need.entity";
 import { PaymentEntity } from "../../entities/payment.entity";
-import { RolesEnum } from "../interface";
 
 
 export type FamilyParams = {
@@ -27,7 +27,8 @@ export type SocialWorkerParams = {
     telegramId?: string;
     idNumber?: string;
     isCoordinator?: true;
-    ngoId?: number;
+    flaskNgoId?: number;
+    ngo: NgoEntity;
     typeId?: number; // user type
     gender?: false;
     phoneNumber?: string;

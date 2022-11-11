@@ -86,6 +86,7 @@ export class NeedController {
       try {
         newSocialWorker = {
           flaskSwId: request.createdById,
+          ngo: theNgo
         };
 
         socialWorker = await this.userService.createSocialWorker(newSocialWorker);
@@ -114,7 +115,7 @@ export class NeedController {
       cost: request.cost,
       created:
         request.created && new Date(request?.created),
-      createdById: socialWorker,
+      socialWorker: socialWorker,
       flaskSwId: request?.createdById,
       deletedAt:
         request.deleted_at &&

@@ -21,12 +21,15 @@ export class ValidateSyncMultiPipe implements PipeTransform {
       }
 
     }
-    for (let i = 0; i < value.childData.length; i++) {
-      if (!value.childData[i].childId) {
-        console.log(`passing from a child with no Id in Flask! - index= ${i}`)
-        value.childData.splice(i, 1);
+    if (value.childData) {
+      for (let i = 0; i < value.childData.length; i++) {
+        if (!value.childData[i].childId) {
+          console.log(`passing from a child with no Id in Flask! - index= ${i}`)
+          value.childData.splice(i, 1);
+        }
       }
     }
+
 
     return value
   }

@@ -1,5 +1,8 @@
+import { SocialWorkerEntity } from "src/entities/user.entity";
+
 export type NgoParams = {
-    flaskNgoId: number
+    flaskNgoId: number;
+    socialWorker?: SocialWorkerEntity;
     name?: string;
     website?: string;
     city?: number

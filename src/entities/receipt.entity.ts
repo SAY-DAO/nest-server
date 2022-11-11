@@ -1,6 +1,7 @@
 import { Entity, Column, Index, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { NeedEntity } from './need.entity';
+import { SocialWorkerEntity } from './user.entity';
 
 @Entity()
 export class ReceiptEntity extends BaseEntity {
@@ -37,4 +38,7 @@ export class ReceiptEntity extends BaseEntity {
 
     @ManyToOne(() => NeedEntity, (need) => need.receipts, { eager: false })
     need: NeedEntity;
+
+    @ManyToOne(() => SocialWorkerEntity, (s) => s.receipts, { eager: true })
+    socialWorker: SocialWorkerEntity;
 }
