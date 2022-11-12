@@ -28,6 +28,9 @@ export class NeedEntity extends BaseEntity {
   flaskNeedId: number;
 
   @Column({ nullable: true })
+  flaskSupervisorId?: number; //confirmUser from flask
+
+  @Column({ nullable: true })
   title: string;
 
   @Column({ nullable: true })
@@ -53,9 +56,6 @@ export class NeedEntity extends BaseEntity {
 
   @Column({ type: 'timestamptz', nullable: true })
   confirmDate?: Date;
-
-  @Column({ nullable: true })
-  confirmUser?: number;
 
   @Column({ nullable: true })
   cost: number;
@@ -190,7 +190,7 @@ export class NeedEntity extends BaseEntity {
   @Column()
   flaskSwId: number;
 
-  @Column({ nullable: true }) 
+  @Column({ nullable: true })
   flaskNgoId: number;
 
   @ManyToOne(() => ChildrenEntity, (child) => child.needs, { eager: false })
@@ -202,7 +202,10 @@ export class NeedEntity extends BaseEntity {
   @ManyToOne(() => NgoEntity, (n) => n.needs, { eager: false })
   ngo: NgoEntity;
 
-  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.createdNeeds, { eager: true })
+  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.createdNeeds, { eager: false })
   socialWorker: SocialWorkerEntity;
+
+  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.confirmedNeeds, { eager: false })
+  supervisor: SocialWorkerEntity;
 }
 

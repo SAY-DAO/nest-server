@@ -5,6 +5,7 @@ import { SocialWorkerEntity } from "src/entities/user.entity";
 
 export type ChildParams = {
     flaskChildId: number;
+    flaskSupervisorId?: number;
     awakeAvatarUrl?: string;
     bio?: string;
     bioSummary?: string;
@@ -14,18 +15,18 @@ export type ChildParams = {
     birthPlace?: string;
     city?: number;
     confirmDate?: Date;
-    confirmUser?: number;
     country?: number;
     created?: Date;
     doneNeedsCount?: number;
     education?: EducationEnum;
-    existence_status?: number;
+    existenceStatus?: number;
     familyCount?: number;
     generatedCode?: string;
     housingStatus?: HousingEnum;
     flaskSwId?: number;
     ngo: NgoEntity;
     socialWorker: SocialWorkerEntity;
+    supervisor?: SocialWorkerEntity;
     isConfirmed?: boolean;
     isDeleted?: boolean;
     isMigrated?: boolean;

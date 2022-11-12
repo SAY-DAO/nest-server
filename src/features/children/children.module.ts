@@ -17,4 +17,4 @@ import { NgoEntity } from '../../entities/ngo.entity';
     ],
     controllers: [ChildrenController],
     providers: [ChildrenService, NeedService, ChildrenService],
-}) export class ChildrenModule { }
+}) export class ChildrenModule {}

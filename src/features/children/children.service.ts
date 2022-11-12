@@ -3,12 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChildParams } from '../../types/parameters/ChildParameters';
 import { Repository } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { from, map, Observable } from 'rxjs';
 import {
   Pagination,
   IPaginationOptions,
   paginate,
 } from 'nestjs-typeorm-paginate';
+import { from, map, Observable } from 'rxjs';
 
 @Injectable()
 export class ChildrenService {
@@ -43,18 +43,19 @@ export class ChildrenService {
       birthPlace: childDetails.birthPlace,
       city: childDetails.city,
       confirmDate: childDetails.confirmDate && new Date(childDetails.confirmDate),
-      confirmUser: childDetails.confirmUser,
       country: childDetails.country,
       created: childDetails.created && new Date(childDetails.created),
       doneNeedsCount: childDetails.doneNeedsCount,
       education: childDetails.education,
-      existenceStatus: childDetails.existence_status,
+      existenceStatus: childDetails.existenceStatus,
       familyCount: childDetails.familyCount,
       generatedCode: childDetails.generatedCode,
       housingStatus: childDetails.housingStatus,
       ngo: childDetails.ngo,
       socialWorker: childDetails.socialWorker,
+      supervisor: childDetails.supervisor,
       flaskSwId: childDetails.flaskSwId,
+      flaskSupervisorId: childDetails.flaskSupervisorId,
       isConfirmed: childDetails.isConfirmed,
       isDeleted: childDetails.isDeleted,
       isMigrated: childDetails.isMigrated,
@@ -81,4 +82,20 @@ export class ChildrenService {
   }
 
 
+  async getSupervisorConfirmedChildren(flaskSwId: number,
+    options: IPaginationOptions,
+  ): Promise<Observable<Pagination<ChildrenEntity>>> {
+    return from(
+      paginate<ChildrenEntity>(this.childrenRepository, options, {
+        relations: {
+          supervisor: true
+        },
+        where: {
+          isDeleted: false,
+          isConfirmed: true,
+          flaskSupervisorId: flaskSwId
+        },
+      }),
+    ).pipe(map((needs: Pagination<ChildrenEntity>) => needs));
+  }
 }

@@ -37,8 +37,10 @@ export class ChildrenController {
                 flaskNeedId: needs[i].flaskNeedId,
                 title: needs[i].title,
                 affiliateLinkUrl: needs[i].affiliateLinkUrl,
+                link: needs[i].link,
                 category: needs[i].category,
-                confirmUser: needs[i].confirmUser,
+                confirmUser: needs[i].flaskSupervisorId,
+                flaskSupervisorId: needs[i].flaskSupervisorId,
                 cost: needs[i].cost,
                 created: needs[i].created && new Date(needs[i]?.created),
                 createdById: needs[i].flaskSwId,
@@ -60,5 +62,6 @@ export class ChildrenController {
         }
         return templates;
     }
+
 }
 

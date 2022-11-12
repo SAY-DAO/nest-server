@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { NeedTypeEnum } from '../../types/interface';
+import { NeedTypeEnum, RolesEnum } from '../../types/interface';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from './need.service';
@@ -77,6 +77,25 @@ export class NeedController {
       }
     }
 
+    let supervisor = await this.userService.getSocialWorker(
+      request.confirmUser
+    );
+    //  if supervisor does not exist create
+    if (!supervisor) {
+      let newSupervisor: SocialWorkerParams;
+      try {
+        newSupervisor = {
+          flaskSwId: request.confirmUser,
+          typeId: RolesEnum.SAY_SUPERVISOR,
+          ngo: theNgo
+        };
+
+        supervisor = await this.userService.createSocialWorker(newSupervisor);
+      } catch (e) {
+        throw new AllExceptionsFilter(e);
+      }
+    }
+
     let socialWorker = await this.userService.getSocialWorker(
       request.createdById
     );
@@ -86,6 +105,7 @@ export class NeedController {
       try {
         newSocialWorker = {
           flaskSwId: request.createdById,
+          typeId: RolesEnum.SOCIAL_WORKER,
           ngo: theNgo
         };
 
@@ -99,8 +119,10 @@ export class NeedController {
       flaskNeedId: request.needId,
       flaskChildId: request.childId,
       flaskNgoId: request.ngoId,
+      flaskSupervisorId: request?.confirmUser,
       title: request.title,
       affiliateLinkUrl: request.affiliateLinkUrl,
+      link: request.link,
       bankTrackId: request.bankTrackId,
       category: request.category,
       childGeneratedCode: request?.childGeneratedCode,
@@ -111,11 +133,11 @@ export class NeedController {
       confirmDate:
         request.confirmDate &&
         new Date(request?.confirmDate),
-      confirmUser: request.confirmUser,
       cost: request.cost,
       created:
         request.created && new Date(request?.created),
       socialWorker: socialWorker,
+      supervisor: supervisor,
       flaskSwId: request?.createdById,
       deletedAt:
         request.deleted_at &&

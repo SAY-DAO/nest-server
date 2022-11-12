@@ -20,6 +20,9 @@ export class ChildrenEntity extends BaseEntity {
   flaskChildId: number;
 
   @Column({ nullable: true })
+  flaskSupervisorId?: number; //confirmUser from flask
+
+  @Column({ nullable: true })
   address: string;
 
   @Column({ nullable: true })
@@ -48,9 +51,6 @@ export class ChildrenEntity extends BaseEntity {
 
   @Column({ type: 'timestamptz', nullable: true })
   confirmDate: Date;
-
-  @Column({ nullable: true })
-  confirmUser: number;
 
   @Column({ nullable: true })
   country: number;
@@ -130,5 +130,7 @@ export class ChildrenEntity extends BaseEntity {
   @ManyToOne(() => SocialWorkerEntity, (s) => s.children, { eager: false })
   socialWorker: SocialWorkerEntity;
 
+  @ManyToOne(() => SocialWorkerEntity, (s) => s.children, { eager: false })
+  supervisor: SocialWorkerEntity;
 }
 

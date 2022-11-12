@@ -55,11 +55,17 @@ export class SocialWorkerEntity extends AllUserEntity {
   @Column({ nullable: true })
   flaskSwId: number;
 
-  @OneToMany(() => NeedEntity, (n) => n.socialWorker)
+  @OneToMany(() => NeedEntity, (n) => n.socialWorker, { eager: false })
   createdNeeds: NeedEntity[];
+
+  @OneToMany(() => NeedEntity, (n) => n.supervisor, { eager: false })
+  confirmedNeeds: NeedEntity[];
 
   @OneToMany(() => ChildrenEntity, (c) => c.socialWorker)
   children: ChildrenEntity[];
+
+  @OneToMany(() => ChildrenEntity, (c) => c.supervisor)
+  confirmedChildren: ChildrenEntity[];
 
   @OneToMany(() => ReceiptEntity, (r) => r.socialWorker, { eager: false })
   receipts: ReceiptEntity[];

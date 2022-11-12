@@ -23,7 +23,11 @@ export class UserService {
   }
 
   async getSocialWorkers(): Promise<SocialWorkerEntity[]> {
-    return await this.socialWorkerRepository.find();
+    return await this.socialWorkerRepository.find({
+      relations: {
+        confirmedNeeds: true,
+      }
+    });
   }
 
   async getFamily(flaskId: number): Promise<FamilyEntity> {
@@ -70,10 +74,11 @@ export class UserService {
       flaskSwId: swDetails.flaskSwId,
       ngo: swDetails.ngo,
       avatarUrl: swDetails.avatarUrl,
-      role: RolesEnum.SOCIAL_WORKER,
+      role: swDetails.typeId,
       isActive: swDetails.isActive,
     });
     return this.socialWorkerRepository.save(newSw);
   }
+  
 
 }

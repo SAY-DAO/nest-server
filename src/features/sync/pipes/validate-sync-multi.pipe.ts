@@ -27,6 +27,12 @@ export class ValidateSyncMultiPipe implements PipeTransform {
           console.log(`passing from a child with no Id in Flask! - index= ${i}`)
           value.childData.splice(i, 1);
         }
+        if (!value.childData[i].existenceStatus) {
+          console.log(`passing from a child with no existenceStatus in Flask! - index= ${i}`)
+          throw new HttpException('invalid data type', HttpStatus.BAD_REQUEST)
+        } else {
+          console.log(value.childData[i].existenceStatus)
+        }
       }
     }
 

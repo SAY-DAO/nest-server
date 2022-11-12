@@ -6,19 +6,21 @@ export type NeedParams = {
     flaskNeedId: number;
     flaskChildId: number;
     flaskNgoId: number;
+    flaskSwId: number,
+    flaskSupervisorId: number;
     title: string;
     affiliateLinkUrl: string;
+    link: string;
     bankTrackId: string | null;
     category: number;
     childGeneratedCode: string;
     childSayName: string;
     childDeliveryDate: Date | null;
     confirmDate: Date | null;
-    confirmUser: number;
     cost: number;
     created: Date | null;
     socialWorker: SocialWorkerEntity;
-    flaskSwId: number,
+    supervisor: SocialWorkerEntity;
     deletedAt: Date | null;
     description: string;
     descriptionTranslations: { en: string, fa: string };

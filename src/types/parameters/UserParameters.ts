@@ -29,7 +29,6 @@ export type SocialWorkerParams = {
     isCoordinator?: true;
     flaskNgoId?: number;
     ngo: NgoEntity;
-    typeId?: number; // user type
     gender?: false;
     phoneNumber?: string;
     emergencyPhoneNumber?: string;
@@ -50,6 +49,7 @@ export type SocialWorkerParams = {
     isActive?: true;
     isDeleted?: false;
     locale?: string;
+    typeId?: number; // user type
     typeName?: string;
     ngoName?: string;
 }

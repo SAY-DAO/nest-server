@@ -22,7 +22,7 @@ import { UpdateResult } from 'typeorm';
 import { NeedParams } from '../../types/parameters/NeedParameters';
 import { SocialWorkerParams, FamilyParams } from '../../types/parameters/UserParameters';
 import { PaymentParams } from '../../types/parameters/PaymentParameters';
-import { NeedTypeEnum } from '../../types/interface';
+import { NeedTypeEnum, RolesEnum } from '../../types/interface';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
 import { ValidateSyncMultiPipe } from './pipes/validate-sync-multi.pipe';
 import { ValidateSyncOnePipe } from './pipes/validate-sync-one.pipe';
@@ -82,6 +82,7 @@ export class SyncController {
                     }
                 }
 
+
                 let socialWorker = await this.userService.getSocialWorker(
                     request.swId
                 );
@@ -136,6 +137,26 @@ export class SyncController {
                     }
                 }
 
+                let supervisor = await this.userService.getSocialWorker(
+                    request.childData[i].confirmUser
+                );
+                //  if supervisor does not exist create
+                if (!supervisor) {
+                    let newSupervisor: SocialWorkerParams;
+                    try {
+                        newSupervisor = {
+                            flaskSwId: request?.childData[i].confirmUser,
+                            typeId: RolesEnum.SAY_SUPERVISOR,
+                            ngo: theNgo
+                        };
+
+                        supervisor = await this.userService.createSocialWorker(newSupervisor);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
+
                 let socialWorker = await this.userService.getSocialWorker(
                     request.childData[i].flaskSwId
                 );
@@ -144,6 +165,7 @@ export class SyncController {
                     try {
                         newSocialWorker = {
                             flaskSwId: request.childData[i].flaskSwId,
+                            typeId: RolesEnum.SOCIAL_WORKER,
                             ngo: theNgo,
                         };
 
@@ -164,17 +186,18 @@ export class SyncController {
                     birthPlace: request.childData[i].birthPlace,
                     city: request.childData[i].city,
                     confirmDate: request.childData[i].confirmDate && new Date(request.childData[i].confirmDate),
-                    confirmUser: request.childData[i].confirmUser,
                     country: request.childData[i].country,
                     created: request.childData[i].created && new Date(request.childData[i].created),
                     doneNeedsCount: request.childData[i].doneNeedsCount,
                     education: request.childData[i].education,
-                    existenceStatus: request.childData[i].existence_status,
+                    existenceStatus: request.childData[i].existenceStatus,
                     familyCount: request.childData[i].familyCount,
                     generatedCode: request.childData[i].generatedCode,
                     housingStatus: request.childData[i].housingStatus,
                     ngo: theNgo,
+                    supervisor: supervisor,
                     socialWorker: socialWorker,
+                    flaskSupervisorId: request.needData[i]?.confirmUser,
                     flaskSwId: request.childData[i].flaskSwId,
                     isConfirmed: request.childData[i].isConfirmed,
                     isDeleted: request.childData[i].isDeleted,
@@ -420,6 +443,26 @@ export class SyncController {
                 }
 
 
+
+                let supervisor = await this.userService.getSocialWorker(
+                    request.needData[i]?.confirmUser
+                );
+                //  if supervisor does not exist create
+                if (!supervisor) {
+                    let newSupervisor: SocialWorkerParams;
+                    try {
+                        newSupervisor = {
+                            flaskSwId: request.needData[i]?.confirmUser,
+                            typeId: RolesEnum.SAY_SUPERVISOR,
+                            ngo: theNgo
+                        };
+
+                        supervisor = await this.userService.createSocialWorker(newSupervisor);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
                 let socialWorker = await this.userService.getSocialWorker(
                     request.needData[i]?.createdById
                 );
@@ -429,6 +472,7 @@ export class SyncController {
                     try {
                         newSocialWorker = {
                             flaskSwId: request.needData[i]?.createdById,
+                            typeId: RolesEnum.SOCIAL_WORKER,
                             ngo: theNgo,
                         };
 
@@ -449,7 +493,9 @@ export class SyncController {
                             flaskNeedId: request.needData[i].needId,
                             flaskChildId: request.needData[i].childId || request.childId,
                             flaskNgoId: request.needData[i].ngoId || request.ngoId,
+                            flaskSupervisorId: request.needData[i]?.confirmUser,
                             title: request.needData[i].title,
+                            link: request.needData[i].link,
                             affiliateLinkUrl: request.needData[i].affiliateLinkUrl,
                             bankTrackId: request.needData[i].bankTrackId,
                             category: request.needData[i].category,
@@ -461,7 +507,7 @@ export class SyncController {
                             confirmDate:
                                 request.needData[i].confirmDate &&
                                 new Date(request.needData[i]?.confirmDate),
-                            confirmUser: request.needData[i].confirmUser,
+                            supervisor: supervisor,
                             cost: request.needData[i].cost,
                             created:
                                 request.needData[i].created &&
@@ -554,6 +600,7 @@ export class SyncController {
                             flaskNeedId: request.needData[i].needId,
                             flaskChildId: request.needData[i].childId,
                             flaskNgoId: request.needData[i].ngoId,
+                            link: request.needData[i].link,
                             title: request.needData[i].title,
                             affiliateLinkUrl: request.needData[i].affiliateLinkUrl,
                             bankTrackId: request.needData[i].bankTrackId,
@@ -566,13 +613,14 @@ export class SyncController {
                             confirmDate:
                                 request.needData[i].confirmDate &&
                                 new Date(request.needData[i]?.confirmDate),
-                            confirmUser: request.needData[i].confirmUser,
                             cost: request.needData[i].cost,
                             created:
                                 request.needData[i].created &&
                                 new Date(request.needData[i]?.created),
+                            supervisor: supervisor,
                             socialWorker: socialWorker,
                             flaskSwId: request.needData[i]?.createdById,
+                            flaskSupervisorId: request.needData[i]?.confirmUser,
                             deletedAt:
                                 request.needData[i].deleted_at &&
                                 new Date(request.needData[i]?.deleted_at),
@@ -701,6 +749,25 @@ export class SyncController {
             throw new AllExceptionsFilter(e);
         }
 
+        let supervisor = await this.userService.getSocialWorker(
+            request.confirmUser
+        );
+        //  if supervisor does not exist create
+        if (!supervisor) {
+            let newSupervisor: SocialWorkerParams;
+            try {
+                newSupervisor = {
+                    flaskSwId: request?.confirmUser,
+                    typeId: RolesEnum.SAY_SUPERVISOR,
+                    ngo: theNgo
+                };
+
+                supervisor = await this.userService.createSocialWorker(newSupervisor);
+            } catch (e) {
+                throw new AllExceptionsFilter(e);
+            }
+        }
+
         let socialWorker = await this.userService.getSocialWorker(
             request.createdById
         );
@@ -710,6 +777,7 @@ export class SyncController {
             try {
                 newSocialWorker = {
                     flaskSwId: request?.createdById,
+                    typeId: RolesEnum.SOCIAL_WORKER,
                     ngo: theNgo
                 };
 
@@ -720,7 +788,7 @@ export class SyncController {
         }
         if (!theChild) {
             try {
-                await this.childrenService.createChild({ flaskChildId: request.childId, socialWorker: socialWorker, ngo: theNgo });
+                await this.childrenService.createChild({ flaskChildId: request.childId, flaskSupervisorId: request.confirmUser, socialWorker, supervisor, ngo: theNgo });
             } catch (e) {
                 throw new ServerError(e);
             }
@@ -900,6 +968,7 @@ export class SyncController {
                         flaskChildId: request.childId,
                         flaskNgoId: request.ngoId,
                         title: request.title,
+                        link: request.link,
                         affiliateLinkUrl: request.affiliateLinkUrl,
                         bankTrackId: request.bankTrackId,
                         category: request.category,
@@ -911,12 +980,13 @@ export class SyncController {
                         confirmDate:
                             request.confirmDate &&
                             new Date(request?.confirmDate),
-                        confirmUser: request.confirmUser,
                         cost: request.cost,
                         created:
                             request.created &&
                             new Date(request?.created),
+                        supervisor: supervisor,
                         socialWorker: socialWorker,
+                        flaskSupervisorId: request?.confirmUser,
                         flaskSwId: request?.createdById,
                         deletedAt:
                             request.deleted_at &&
@@ -1005,6 +1075,7 @@ export class SyncController {
                         flaskChildId: request.childId,
                         flaskNgoId: request.ngoId,
                         title: request.title,
+                        link: request.link,
                         affiliateLinkUrl: request.affiliateLinkUrl,
                         bankTrackId: request.bankTrackId,
                         category: request.category,
@@ -1016,13 +1087,14 @@ export class SyncController {
                         confirmDate:
                             request.confirmDate &&
                             new Date(request?.confirmDate),
-                        confirmUser: request.confirmUser,
+                        supervisor: supervisor,
                         cost: request.cost,
                         created:
                             request.created &&
                             new Date(request?.created),
                         socialWorker: socialWorker,
                         flaskSwId: request?.createdById,
+                        flaskSupervisorId: request?.confirmUser,
                         deletedAt:
                             request.deleted_at &&
                             new Date(request?.deleted_at),

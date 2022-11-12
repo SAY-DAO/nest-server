@@ -84,8 +84,10 @@ export class NeedService {
       flaskChildId: needDetails.flaskChildId,
       flaskNeedId: needDetails.flaskNeedId,
       flaskNgoId: needDetails.flaskNgoId,
+      flaskSupervisorId: needDetails.flaskSupervisorId,
       title: needDetails.title,
       affiliateLinkUrl: needDetails.affiliateLinkUrl,
+      link: needDetails.link,
       bankTrackId: needDetails.bankTrackId,
       category: needDetails.category,
       childGeneratedCode: needDetails?.childGeneratedCode,
@@ -95,7 +97,7 @@ export class NeedService {
         new Date(needDetails.childDeliveryDate),
       confirmDate:
         needDetails.confirmDate && new Date(needDetails?.confirmDate),
-      confirmUser: needDetails.confirmUser,
+      supervisor: needDetails.supervisor,
       cost: needDetails.cost,
       created: needDetails.created && new Date(needDetails?.created),
       socialWorker: needDetails.socialWorker,
@@ -186,11 +188,35 @@ export class NeedService {
   ): Promise<Observable<Pagination<NeedEntity>>> {
     return from(
       paginate<NeedEntity>(this.needRepository, options, {
-        relations: ['receipts', 'child', 'provider'],
+        relations: {
+          receipts: true,
+          child: true,
+          socialWorker: true,
+        },
+        where: {
+          isDeleted: false,
+          flaskSwId: flaskSwId
+        },
+      }),
+    ).pipe(map((needs: Pagination<NeedEntity>) => needs));
+  }
+
+  async getSupervisorConfirmedNeeds(flaskSwId: number,
+    options: IPaginationOptions,
+  ): Promise<Observable<Pagination<NeedEntity>>> {
+    return from(
+      paginate<NeedEntity>(this.needRepository, options, {
+        relations: {
+          payments: true,
+          receipts: true,
+          child: true,
+          provider: true,
+          supervisor: true
+        },
         where: {
           isDeleted: false,
           isConfirmed: true,
-          flaskSwId: flaskSwId
+          flaskSupervisorId: flaskSwId
         },
       }),
     ).pipe(map((needs: Pagination<NeedEntity>) => needs));

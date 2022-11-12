@@ -8,6 +8,7 @@ import { NeedService } from '../need/need.service';
 import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 import { ChildrenService } from '../children/children.service';
 import { ChildrenEntity } from '../../entities/children.entity';
+import { RolesEnum } from 'src/types/interface';
 
 @ApiTags('Users')
 @Controller('users')
@@ -77,27 +78,86 @@ export class UserController {
 
     @Get(`social-worker/:flaskId/createdNeeds`)
     @ApiOperation({ description: 'Get social worker created needs' })
-    async getUserContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
+    async getSwCreatedNeeds(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
         let needs: any
-        let children: ChildrenEntity[]
         limit = limit > 100 ? 100 : limit;
         const socialWorker = await this.userService.getSocialWorker(flaskId);
-        if (socialWorker) {
+        if (socialWorker && socialWorker.role === RolesEnum.SOCIAL_WORKER) {
             try {
                 needs = await this.needService.getSocialWorkerCreatedNeeds(socialWorker.flaskSwId, {
                     limit: Number(limit),
                     page: Number(page),
                     route: NEEDS_URL
                 })
-
-                children = await this.childrenService.getSocialWorkerChildren(socialWorker.flaskSwId)
-
             } catch (e) {
                 throw new ObjectNotFound();
             }
         }
         return needs;
     }
+
+    @Get(`social-worker/:flaskId/confirmedNeeds`)
+    @ApiOperation({ description: 'Get supervisor confirmed needs' })
+    async getSwConfirmedNeeds(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
+        let needs: any
+        limit = limit > 100 ? 100 : limit;
+        const supervisor = await this.userService.getSocialWorker(flaskId);
+
+        if (supervisor && supervisor.role === RolesEnum.SAY_SUPERVISOR) {
+            try {
+                needs = await this.needService.getSupervisorConfirmedNeeds(supervisor.flaskSwId, {
+                    limit: Number(limit),
+                    page: Number(page),
+                    route: NEEDS_URL
+                })
+            } catch (e) {
+                throw new ObjectNotFound();
+            }
+        }
+        return needs;
+    }
+
+    @Get(`social-worker/:flaskId/confirmedChildren`)
+    @ApiOperation({ description: 'Get supervisor confirmed children' })
+    async getSwConfirmedChildren(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
+        let needs: any
+        limit = limit > 100 ? 100 : limit;
+        const supervisor = await this.userService.getSocialWorker(flaskId);
+
+        if (supervisor && supervisor.role === RolesEnum.SAY_SUPERVISOR) {
+            try {
+                needs = await this.childrenService.getSupervisorConfirmedChildren(supervisor.flaskSwId, {
+                    limit: Number(limit),
+                    page: Number(page),
+                    route: NEEDS_URL
+                })
+            } catch (e) {
+                throw new ObjectNotFound();
+            }
+        }
+ 
+        return needs;
+    }
+    // Nyaz -purchasing,...
+    // @Get(`social-worker/:flaskId/confirmedNeeds`)
+    // @ApiOperation({ description: 'Get social worker created needs' })
+    // async getContributorContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
+    //     let needs: any
+    //     limit = limit > 100 ? 100 : limit;
+    //     const socialWorker = await this.userService.getSocialWorker(flaskId);
+    //     if (socialWorker && socialWorker.role === RolesEnum.SUPER_ADMIN) {
+    //         try {
+    //             needs = await this.needService.getSocialWorkerConfirmedNeeds(socialWorker.flaskSwId, {
+    //                 limit: Number(limit),
+    //                 page: Number(page),
+    //                 route: NEEDS_URL
+    //             })
+    //         } catch (e) {
+    //             throw new ObjectNotFound();
+    //         }
+    //     }
+    //     return needs;
+    // }
 }
 
 

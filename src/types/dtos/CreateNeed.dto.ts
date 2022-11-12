@@ -11,6 +11,7 @@ export class CreateNeedDto {
   @IsNotEmpty()
   title: string;
   affiliateLinkUrl: string;
+  link: string;
   bankTrackId: string;
   category: number;
   childGeneratedCode: string;
@@ -39,7 +40,6 @@ export class CreateNeedDto {
   isReported: boolean;
   isUrgent: boolean;
   is_done: boolean;
-  link: string;
   titleTranslations: { en: string; fa: string };
   ngoAddress: string;
   ngoId: number;
