@@ -21,6 +21,7 @@ async function startServer() {
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
     origin: [
+      'localhost',
       process.env.AUTHORIZED_DAPP_LOCAL,
       process.env.AUTHORIZED_PANEL_LOCAL,
       process.env.AUTHORIZED_PANEL_PRODUCTION,
