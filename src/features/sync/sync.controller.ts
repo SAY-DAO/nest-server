@@ -20,14 +20,16 @@ import { UserService } from '../user/user.service';
 import { PaymentService } from '../payment/payment.service';
 import { UpdateResult } from 'typeorm';
 import { NeedParams } from '../../types/parameters/NeedParameters';
-import { UserParams } from '../../types/parameters/UserParameters';
+import { SocialWorkerParams, FamilyParams } from '../../types/parameters/UserParameters';
 import { PaymentParams } from '../../types/parameters/PaymentParameters';
-import { NeedTypeEnum } from '../../types/interface';
+import { NeedTypeEnum, RolesEnum } from '../../types/interface';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
 import { ValidateSyncMultiPipe } from './pipes/validate-sync-multi.pipe';
 import { ValidateSyncOnePipe } from './pipes/validate-sync-one.pipe';
 import { ReceiptService } from '../receipt/receipt.service';
 import { ReceiptParams } from '../../types/parameters/ReceiptParameter';
+import { NgoService } from '../ngo/ngo.service';
+import { NgoParams } from 'src/types/parameters/NgoParammeters';
 @ApiTags('Sync')
 @Controller('sync')
 @UseGuards(AuthGuard)
@@ -37,9 +39,17 @@ export class SyncController {
         private needService: NeedService,
         private childrenService: ChildrenService,
         private userService: UserService,
+        private ngoService: NgoService,
         private paymentService: PaymentService,
         private receiptService: ReceiptService,
     ) { }
+
+    @Post('update/latest')
+    @UsePipes(new ValidationPipe())
+    async fetchLatest() {
+        return await this.needService.getLastNeed()
+    }
+
 
     @Post(`update/multi`)
     @UsePipes(new ValidationPipe()) // validation for dto files
@@ -49,12 +59,50 @@ export class SyncController {
         const newChildrenList = [];
         let thisChild: ChildrenEntity;
 
+
         // from dapp
         if (request.childId) {
             thisChild = await this.childrenService.getChildById(request.childId);
             if (!thisChild) {
+
+                let theNgo = await this.ngoService.getNgo(
+                    request.ngoId
+                );
+                //  if ngo does not exist create
+                if (!theNgo) {
+                    let newNgo: NgoParams;
+                    try {
+                        newNgo = {
+                            flaskNgoId: request.ngoId,
+                        };
+
+                        theNgo = await this.ngoService.createNgo(newNgo);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
+
+                let socialWorker = await this.userService.getSocialWorker(
+                    request.swId
+                );
+                //  if social worker does not exist create
+                if (!socialWorker) {
+                    let newSocialWorker: SocialWorkerParams;
+                    try {
+                        newSocialWorker = {
+                            flaskSwId: request.swId,
+                            ngo: theNgo
+                        };
+
+                        socialWorker = await this.userService.createSocialWorker(newSocialWorker);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
                 try {
-                    await this.childrenService.createChild({ childId: request.childId });
+                    await this.childrenService.createChild({ flaskChildId: request.childId, ngo: theNgo, socialWorker: socialWorker });
                 } catch (e) {
                     throw new ServerError(e);
                 }
@@ -71,8 +119,63 @@ export class SyncController {
                     console.log('foundOne');
                     continue;
                 }
+
+                let theNgo = await this.ngoService.getNgo(
+                    request.childData[i].ngoId
+                );
+                //  if ngo does not exist create
+                if (!theNgo) {
+                    let newNgo: NgoParams;
+                    try {
+                        newNgo = {
+                            flaskNgoId: request.childData[i].ngoId,
+                        };
+
+                        theNgo = await this.ngoService.createNgo(newNgo);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
+                let supervisor = await this.userService.getSocialWorker(
+                    request.childData[i].confirmUser
+                );
+                //  if supervisor does not exist create
+                if (!supervisor) {
+                    let newSupervisor: SocialWorkerParams;
+                    try {
+                        newSupervisor = {
+                            flaskSwId: request?.childData[i].confirmUser,
+                            typeId: RolesEnum.SAY_SUPERVISOR,
+                            ngo: theNgo
+                        };
+
+                        supervisor = await this.userService.createSocialWorker(newSupervisor);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
+
+                let socialWorker = await this.userService.getSocialWorker(
+                    request.childData[i].flaskSwId
+                );
+                if (!socialWorker) {
+                    let newSocialWorker: SocialWorkerParams;
+                    try {
+                        newSocialWorker = {
+                            flaskSwId: request.childData[i].flaskSwId,
+                            typeId: RolesEnum.SOCIAL_WORKER,
+                            ngo: theNgo,
+                        };
+
+                        socialWorker = await this.userService.createSocialWorker(newSocialWorker);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
                 const child = {
-                    childId: request.childData[i].childId,
+                    flaskChildId: request.childData[i].childId,
                     avatarUrl: request.childData[i].avatarUrl,
                     awakeAvatarUrl: request.childData[i].awakeAvatarUrl,
                     bio: request.childData[i].bio,
@@ -83,17 +186,19 @@ export class SyncController {
                     birthPlace: request.childData[i].birthPlace,
                     city: request.childData[i].city,
                     confirmDate: request.childData[i].confirmDate && new Date(request.childData[i].confirmDate),
-                    confirmUser: request.childData[i].confirmUser,
                     country: request.childData[i].country,
                     created: request.childData[i].created && new Date(request.childData[i].created),
                     doneNeedsCount: request.childData[i].doneNeedsCount,
                     education: request.childData[i].education,
-                    existenceStatus: request.childData[i].existence_status,
+                    existenceStatus: request.childData[i].existenceStatus,
                     familyCount: request.childData[i].familyCount,
                     generatedCode: request.childData[i].generatedCode,
                     housingStatus: request.childData[i].housingStatus,
-                    ngoId: request.childData[i].ngoId,
-                    idSocialWorker: request.childData[i].idSocialWorker,
+                    ngo: theNgo,
+                    supervisor: supervisor,
+                    socialWorker: socialWorker,
+                    flaskSupervisorId: request.needData[i]?.confirmUser,
+                    flaskSwId: request.childData[i].flaskSwId,
                     isConfirmed: request.childData[i].isConfirmed,
                     isDeleted: request.childData[i].isDeleted,
                     isMigrated: request.childData[i].isMigrated,
@@ -155,18 +260,18 @@ export class SyncController {
                 if (request.needData[i].isDone) {
                     // Participants - from need summery api
                     for (let k = 0; k < request.needData[i]?.participants?.length; k++) {
-                        let user = await this.userService.getUser(
-                            request.needData[i].participants[k].id_user,
+                        let user = await this.userService.getFamily(
+                            request.needData[i].participants[k].id_user
                         );
                         if (!user) {
-                            let newUser: UserParams;
+                            let newUser: FamilyParams;
                             try {
                                 newUser = {
-                                    userId: request.needData[i].participants[k].id_user,
+                                    flaskUserId: request.needData[i].participants[k].id_user,
                                     avatarUrl: request.needData[i].participants[k].user_avatar,
                                 };
 
-                                user = await this.userService.createUser(newUser);
+                                user = await this.userService.createFamilyMember(newUser);
                             } catch (e) {
                                 throw new AllExceptionsFilter(e);
                             }
@@ -175,17 +280,17 @@ export class SyncController {
                     }
                     // payments - from done needs
                     for (let k = 0; k < request.needData[i]?.payments?.length; k++) {
-                        let user = await this.userService.getUser(
-                            request.needData[i].payments[k].id_user,
+                        let user = await this.userService.getFamily(
+                            request.needData[i].payments[k].id_user
                         );
                         if (!user) {
-                            let newUser: UserParams;
+                            let newUser: FamilyParams;
                             try {
                                 newUser = {
-                                    userId: request.needData[i].payments[k].id_user,
+                                    flaskUserId: request.needData[i].payments[k].id_user,
                                 };
 
-                                user = await this.userService.createUser(newUser);
+                                user = await this.userService.createFamilyMember(newUser);
                             } catch (e) {
                                 throw new AllExceptionsFilter(e);
                             }
@@ -234,9 +339,10 @@ export class SyncController {
                                     verified:
                                         request.needData[i].payments[k] &&
                                         new Date(request.needData[i].payments[k].verified),
+                                    user,
+
                                 };
                                 payment = await this.paymentService.createPayment(
-                                    user,
                                     newPayment,
                                 );
                             } catch (e) {
@@ -248,17 +354,36 @@ export class SyncController {
                     }
                     // Receipts - from panel reports
                     for (let k = 0; k < request.needData[i]?.receipts?.length; k++) {
-                        let user = await this.userService.getUser(
-                            request.needData[i]?.receipts[k].ownerId,
+
+                        let theNgo = await this.ngoService.getNgo(
+                            request.childData[i].ngoId
                         );
-                        if (!user) {
-                            let newUser: UserParams;
+                        //  if ngo does not exist create
+                        if (!theNgo) {
+                            let newNgo: NgoParams;
                             try {
-                                newUser = {
-                                    userId: request.needData[i]?.receipts[k].ownerId,
+                                newNgo = {
+                                    flaskNgoId: request.childData[i].ngoId,
                                 };
 
-                                user = await this.userService.createUser(newUser);
+                                theNgo = await this.ngoService.createNgo(newNgo);
+                            } catch (e) {
+                                throw new AllExceptionsFilter(e);
+                            }
+                        }
+
+                        let socialWorker = await this.userService.getSocialWorker(
+                            request.needData[i]?.receipts[k].ownerId
+                        );
+                        if (!socialWorker) {
+                            let newSocialWorker: SocialWorkerParams;
+                            try {
+                                newSocialWorker = {
+                                    flaskSwId: request.needData[i]?.receipts[k].ownerId,
+                                    ngo: theNgo,
+                                };
+
+                                socialWorker = await this.userService.createSocialWorker(newSocialWorker);
                             } catch (e) {
                                 throw new AllExceptionsFilter(e);
                             }
@@ -280,6 +405,8 @@ export class SyncController {
                                     isPublic: request.needData[i]?.receipts[k].isPublic,
                                     code: request.needData[i]?.receipts[k].code,
                                     flaskSwId: request.needData[i]?.receipts[k].ownerId,
+                                    socialWorker: socialWorker,
+                                    child: theChild,
                                     needStatus: request.needData[i]?.receipts[k].needStatus,
                                     flaskReceiptId: request.needData[i]?.receipts[k].id,
                                     deleted: request.needData[i]?.receipts[k].deleted,
@@ -298,16 +425,77 @@ export class SyncController {
 
                 }
 
+                let theNgo = await this.ngoService.getNgo(
+                    request.needData[i].ngoId
+                );
+                //  if ngo does not exist create
+                if (!theNgo) {
+                    let newNgo: NgoParams;
+                    try {
+                        newNgo = {
+                            flaskNgoId: request.needData[i].ngoId,
+                        };
+
+                        theNgo = await this.ngoService.createNgo(newNgo);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
+
+
+                let supervisor = await this.userService.getSocialWorker(
+                    request.needData[i]?.confirmUser
+                );
+                //  if supervisor does not exist create
+                if (!supervisor) {
+                    let newSupervisor: SocialWorkerParams;
+                    try {
+                        newSupervisor = {
+                            flaskSwId: request.needData[i]?.confirmUser,
+                            typeId: RolesEnum.SAY_SUPERVISOR,
+                            ngo: theNgo
+                        };
+
+                        supervisor = await this.userService.createSocialWorker(newSupervisor);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
+                let socialWorker = await this.userService.getSocialWorker(
+                    request.needData[i]?.createdById
+                );
+                //  if social worker does not exist create
+                if (!socialWorker) {
+                    let newSocialWorker: SocialWorkerParams;
+                    try {
+                        newSocialWorker = {
+                            flaskSwId: request.needData[i]?.createdById,
+                            typeId: RolesEnum.SOCIAL_WORKER,
+                            ngo: theNgo,
+                        };
+
+                        socialWorker = await this.userService.createSocialWorker(newSocialWorker);
+                    } catch (e) {
+                        throw new AllExceptionsFilter(e);
+                    }
+                }
+
                 // 4- if does not exist create
+                // if not created save need
                 if (!thisNeed) {
-                    // if not created save need
                     let need: NeedEntity;
                     let newNeed: NeedParams;
+
                     try {
                         newNeed = {
                             flaskNeedId: request.needData[i].needId,
                             flaskChildId: request.needData[i].childId || request.childId,
+                            flaskNgoId: request.needData[i].ngoId || request.ngoId,
+                            flaskSupervisorId: request.needData[i]?.confirmUser,
                             title: request.needData[i].title,
+                            link: request.needData[i].link,
                             affiliateLinkUrl: request.needData[i].affiliateLinkUrl,
                             bankTrackId: request.needData[i].bankTrackId,
                             category: request.needData[i].category,
@@ -319,12 +507,13 @@ export class SyncController {
                             confirmDate:
                                 request.needData[i].confirmDate &&
                                 new Date(request.needData[i]?.confirmDate),
-                            confirmUser: request.needData[i].confirmUser,
+                            supervisor: supervisor,
                             cost: request.needData[i].cost,
                             created:
                                 request.needData[i].created &&
                                 new Date(request.needData[i]?.created),
-                            createdById: request.needData[i].createdById,
+                            socialWorker: socialWorker,
+                            flaskSwId: request.needData[i]?.createdById,
                             deletedAt:
                                 request.needData[i].deleted_at &&
                                 new Date(request.needData[i]?.deleted_at),
@@ -347,7 +536,7 @@ export class SyncController {
                             isDone: request.needData[i].isDone,
                             isReported: request.needData[i].isReported,
                             isUrgent: request.needData[i].isUrgent,
-                            ngoId: request.needData[i].ngoId,
+                            ngo: theNgo,
                             ngoAddress: request.needData[i].ngoAddress,
                             ngoName: request.needData[i].ngoName,
                             ngoDeliveryDate:
@@ -410,6 +599,8 @@ export class SyncController {
                         updateNeedDetails = {
                             flaskNeedId: request.needData[i].needId,
                             flaskChildId: request.needData[i].childId,
+                            flaskNgoId: request.needData[i].ngoId,
+                            link: request.needData[i].link,
                             title: request.needData[i].title,
                             affiliateLinkUrl: request.needData[i].affiliateLinkUrl,
                             bankTrackId: request.needData[i].bankTrackId,
@@ -422,12 +613,14 @@ export class SyncController {
                             confirmDate:
                                 request.needData[i].confirmDate &&
                                 new Date(request.needData[i]?.confirmDate),
-                            confirmUser: request.needData[i].confirmUser,
                             cost: request.needData[i].cost,
                             created:
                                 request.needData[i].created &&
                                 new Date(request.needData[i]?.created),
-                            createdById: request.needData[i].createdById,
+                            supervisor: supervisor,
+                            socialWorker: socialWorker,
+                            flaskSwId: request.needData[i]?.createdById,
+                            flaskSupervisorId: request.needData[i]?.confirmUser,
                             deletedAt:
                                 request.needData[i].deleted_at &&
                                 new Date(request.needData[i]?.deleted_at),
@@ -450,7 +643,7 @@ export class SyncController {
                             isDone: request.needData[i].isDone,
                             isReported: request.needData[i].isReported,
                             isUrgent: request.needData[i].isUrgent,
-                            ngoId: request.needData[i].ngoId,
+                            ngo: theNgo,
                             ngoAddress: request.needData[i].ngoAddress,
                             ngoName: request.needData[i].ngoName,
                             ngoDeliveryDate:
@@ -530,6 +723,23 @@ export class SyncController {
         const paymentList = [];
         const receiptList = [];
 
+        let theNgo = await this.ngoService.getNgo(
+            request.ngoId
+        );
+        //  if ngo does not exist create
+        if (!theNgo) {
+            let newNgo: NgoParams;
+            try {
+                newNgo = {
+                    flaskNgoId: request.ngoId,
+                };
+
+                theNgo = await this.ngoService.createNgo(newNgo);
+            } catch (e) {
+                throw new AllExceptionsFilter(e);
+            }
+        }
+
         // 1- Child
         try {
             theChild = await this.childrenService.getChildById(
@@ -539,9 +749,46 @@ export class SyncController {
             throw new AllExceptionsFilter(e);
         }
 
+        let supervisor = await this.userService.getSocialWorker(
+            request.confirmUser
+        );
+        //  if supervisor does not exist create
+        if (!supervisor) {
+            let newSupervisor: SocialWorkerParams;
+            try {
+                newSupervisor = {
+                    flaskSwId: request?.confirmUser,
+                    typeId: RolesEnum.SAY_SUPERVISOR,
+                    ngo: theNgo
+                };
+
+                supervisor = await this.userService.createSocialWorker(newSupervisor);
+            } catch (e) {
+                throw new AllExceptionsFilter(e);
+            }
+        }
+
+        let socialWorker = await this.userService.getSocialWorker(
+            request.createdById
+        );
+        //  if social worker does not exist create
+        if (!socialWorker) {
+            let newSocialWorker: SocialWorkerParams;
+            try {
+                newSocialWorker = {
+                    flaskSwId: request?.createdById,
+                    typeId: RolesEnum.SOCIAL_WORKER,
+                    ngo: theNgo
+                };
+
+                socialWorker = await this.userService.createSocialWorker(newSocialWorker);
+            } catch (e) {
+                throw new AllExceptionsFilter(e);
+            }
+        }
         if (!theChild) {
             try {
-                await this.childrenService.createChild({ childId: request.childId });
+                await this.childrenService.createChild({ flaskChildId: request.childId, flaskSupervisorId: request.confirmUser, socialWorker, supervisor, ngo: theNgo });
             } catch (e) {
                 throw new ServerError(e);
             }
@@ -561,18 +808,18 @@ export class SyncController {
         if (request.isDone) {
             // Participants - from Dapp need summery api
             for (let k = 0; k < request.participants?.length; k++) {
-                let user = await this.userService.getUser(
-                    request.participants[k].id_user,
+                let user = await this.userService.getFamily(
+                    request.participants[k].id_user
                 );
                 if (!user) {
-                    let newUser: UserParams;
+                    let newUser: FamilyParams;
                     try {
                         newUser = {
-                            userId: request.participants[k].id_user,
-                            avatarUrl: request.participants[k].user_avatar,
+                            flaskUserId: request.participants[k].id_user,
+                            avatarUrl: request.participants[k].user_avatar
                         };
 
-                        user = await this.userService.createUser(newUser);
+                        user = await this.userService.createFamilyMember(newUser);
                     } catch (e) {
                         throw new AllExceptionsFilter(e);
                     }
@@ -581,17 +828,17 @@ export class SyncController {
             }
             // Payments - from done needs
             for (let k = 0; k < request.payments?.length; k++) {
-                let user = await this.userService.getUser(
-                    request.payments[k].id_user,
+                let user = await this.userService.getFamily(
+                    request.payments[k].id_user
                 );
                 if (!user) {
-                    let newUser: UserParams;
+                    let newUser: FamilyParams;
                     try {
                         newUser = {
-                            userId: request.payments[k].id_user,
+                            flaskUserId: request.payments[k].id_user
                         };
 
-                        user = await this.userService.createUser(newUser);
+                        user = await this.userService.createFamilyMember(newUser);
                     } catch (e) {
                         throw new AllExceptionsFilter(e);
                     }
@@ -640,9 +887,9 @@ export class SyncController {
                             verified:
                                 request.payments[k] &&
                                 new Date(request.payments[k].verified),
+                            user,
                         };
                         payment = await this.paymentService.createPayment(
-                            user,
                             newPayment,
                         );
                     } catch (e) {
@@ -652,11 +899,16 @@ export class SyncController {
 
                 paymentList.push(payment);
             }
+
+
+
             // Receipts - from panel reports
             for (let k = 0; k < request.receipts?.length; k++) {
                 let receipt = await this.receiptService.getReceipt(
                     request.receipts[k].id,
                 );
+
+
                 if (!receipt) {
                     let newReceipt: ReceiptParams;
                     try {
@@ -667,6 +919,8 @@ export class SyncController {
                             isPublic: request.receipts[k].isPublic,
                             code: request.receipts[k].code,
                             flaskSwId: request.receipts[k].ownerId,
+                            socialWorker: socialWorker,
+                            child: theChild,
                             needStatus: request.receipts[k].needStatus,
                             flaskReceiptId: request.receipts[k].id,
                             deleted: request.receipts[k].deleted,
@@ -683,6 +937,26 @@ export class SyncController {
                 receiptList.push(receipt);
             }
 
+            let theNgo = await this.ngoService.getNgo(
+                request.ngoId
+            );
+            //  if ngo does not exist create
+            if (!theNgo) {
+                let newNgo: NgoParams;
+                try {
+                    newNgo = {
+                        flaskNgoId: request?.ngoId,
+                        socialWorker
+                    };
+
+                    theNgo = await this.ngoService.createNgo(newNgo);
+                } catch (e) {
+                    throw new AllExceptionsFilter(e);
+                }
+            }
+
+
+
             // 4- if does not exist create
             if (!thisNeed) {
                 // if not created save need
@@ -691,8 +965,10 @@ export class SyncController {
                 try {
                     newNeed = {
                         flaskNeedId: request.needId,
-                        flaskChildId: request.childId || request.childId,
+                        flaskChildId: request.childId,
+                        flaskNgoId: request.ngoId,
                         title: request.title,
+                        link: request.link,
                         affiliateLinkUrl: request.affiliateLinkUrl,
                         bankTrackId: request.bankTrackId,
                         category: request.category,
@@ -704,12 +980,14 @@ export class SyncController {
                         confirmDate:
                             request.confirmDate &&
                             new Date(request?.confirmDate),
-                        confirmUser: request.confirmUser,
                         cost: request.cost,
                         created:
                             request.created &&
                             new Date(request?.created),
-                        createdById: request.createdById,
+                        supervisor: supervisor,
+                        socialWorker: socialWorker,
+                        flaskSupervisorId: request?.confirmUser,
+                        flaskSwId: request?.createdById,
                         deletedAt:
                             request.deleted_at &&
                             new Date(request?.deleted_at),
@@ -732,7 +1010,7 @@ export class SyncController {
                         isDone: request.isDone,
                         isReported: request.isReported,
                         isUrgent: request.isUrgent,
-                        ngoId: request.ngoId,
+                        ngo: theNgo,
                         ngoAddress: request.ngoAddress,
                         ngoName: request.ngoName,
                         ngoDeliveryDate:
@@ -795,7 +1073,9 @@ export class SyncController {
                     updateNeedDetails = {
                         flaskNeedId: request.needId,
                         flaskChildId: request.childId,
+                        flaskNgoId: request.ngoId,
                         title: request.title,
+                        link: request.link,
                         affiliateLinkUrl: request.affiliateLinkUrl,
                         bankTrackId: request.bankTrackId,
                         category: request.category,
@@ -807,12 +1087,14 @@ export class SyncController {
                         confirmDate:
                             request.confirmDate &&
                             new Date(request?.confirmDate),
-                        confirmUser: request.confirmUser,
+                        supervisor: supervisor,
                         cost: request.cost,
                         created:
                             request.created &&
                             new Date(request?.created),
-                        createdById: request.createdById,
+                        socialWorker: socialWorker,
+                        flaskSwId: request?.createdById,
+                        flaskSupervisorId: request?.confirmUser,
                         deletedAt:
                             request.deleted_at &&
                             new Date(request?.deleted_at),
@@ -835,7 +1117,7 @@ export class SyncController {
                         isDone: request.isDone,
                         isReported: request.isReported,
                         isUrgent: request.isUrgent,
-                        ngoId: request.ngoId,
+                        ngo: theNgo,
                         ngoAddress: request.ngoAddress,
                         ngoName: request.ngoName,
                         ngoDeliveryDate:

@@ -29,9 +29,8 @@ export class SignatureController {
     try {
       const need = await this.needService.getNeedById(request.flaskNeedId);
       const child = await this.childrenService.getChildById(need.flaskChildId);
-      const isCreator = need.createdById === request.flaskSwId; // request.userId
+      const isCreator = need.socialWorker.flaskSwId === request.flaskSwId; // request.userId
       if (isCreator) {
-
         const list = [];
         for (let i = 0; i < need.receipts.length; i++) {
           list.push(need.receipts[i].title);

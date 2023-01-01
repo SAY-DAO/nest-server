@@ -1,6 +1,8 @@
-import { ChildrenEntity } from "../../entities/children.entity";
-import { IsNotEmpty } from 'class-validator'
-import { CreateReceiptDto } from "./CreateReceipt.dto";
+import { ChildrenEntity } from '../../entities/children.entity';
+import { IsNotEmpty } from 'class-validator';
+import { CreateReceiptDto } from './CreateReceipt.dto';
+import { SocialWorkerDto } from './CreateSocialWorker.dto';
+import { CreateChildDto } from './CreateChildren.dto';
 
 // need from panel - flask server
 export class CreateNeedDto {
@@ -9,6 +11,7 @@ export class CreateNeedDto {
   @IsNotEmpty()
   title: string;
   affiliateLinkUrl: string;
+  link: string;
   bankTrackId: string;
   category: number;
   childGeneratedCode: string;
@@ -19,10 +22,9 @@ export class CreateNeedDto {
   confirmUser: number;
   cost: number;
   created: Date | null;
-  createdById: number;
   deleted_at: Date | null;
   description: string;
-  descriptionTranslations: { en: string, fa: string };
+  descriptionTranslations: { en: string; fa: string };
   details: string;
   doing_duration: number;
   donated: number;
@@ -38,7 +40,6 @@ export class CreateNeedDto {
   isReported: boolean;
   isUrgent: boolean;
   is_done: boolean;
-  link: string;
   titleTranslations: { en: string; fa: string };
   ngoAddress: string;
   ngoId: number;
@@ -64,31 +65,32 @@ export class CreateNeedDto {
   payments: CreatePaymentDto[];
   receipts: CreateReceiptDto[];
   participants: CreateParticipantDto[];
-  child: ChildrenEntity;
+  child: CreateChildDto;
+  createdById: number;
 }
 
 // // need from panel - flask server
 export class CreatePaymentDto {
-  bank_amount: number;
-  card_no: string;
-  cart_payment_id: string;
-  created: Date | null;
-  credit_amount: number;
-  desc: string;
-  donation_amount: number;
-  gateway_payment_id: string;
-  gateway_track_id: string;
-  hashed_card_no: string;
-  id: number;
-  id_need: number;
-  id_user: number;
-  link: string;
-  need_amount: number;
-  order_id: string;
-  total_amount: number;
-  transaction_date: Date | null;
-  updated: Date | null;
-  verified: Date | null;
+  bank_amount?: number;
+  card_no?: string;
+  cart_payment_id?: string;
+  created?: Date | null;
+  credit_amount?: number;
+  desc?: string;
+  donation_amount?: number;
+  gateway_payment_id?: string;
+  gateway_track_id?: string;
+  hashed_card_no?: string;
+  id?: number;
+  id_need?: number;
+  id_user?: number;
+  link?: string;
+  need_amount?: number;
+  order_id?: string;
+  total_amount?: number;
+  transaction_date?: Date | null;
+  updated?: Date | null;
+  verified?: Date | null;
 }
 
 export class CreateParticipantDto {

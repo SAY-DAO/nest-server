@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
 import { BaseEntity } from './BaseEntity'
-import { EthereumTransaction } from './EthereumTransaction'
+import { EthereumTransaction } from './ethereum.transaction.entity'
 
 @Entity()
 export class EthereumAccount extends BaseEntity {

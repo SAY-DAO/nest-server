@@ -10,19 +10,21 @@ import { ChildrenEntity } from '../../entities/children.entity';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { UserService } from '../user/user.service';
-import { UserEntity } from '../../entities/user.entity';
+import { FamilyEntity, SocialWorkerEntity } from '../../entities/user.entity';
 import { SyncMiddleware } from './middlewares/sync.middleware';
 import { ReceiptService } from '../receipt/receipt.service';
 import { ReceiptEntity } from '../../entities/receipt.entity';
+import { NgoEntity } from '../../entities/ngo.entity';
+import { NgoService } from '../ngo/ngo.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ChildrenEntity, NeedEntity, PaymentEntity, ReceiptEntity, UserEntity]), // add entity and services to be available in the module
+    TypeOrmModule.forFeature([ChildrenEntity, NeedEntity, PaymentEntity, ReceiptEntity, FamilyEntity, SocialWorkerEntity, NgoEntity]), // add entity and services to be available in the module
     ScheduleModule.forRoot(),
     HttpModule,
   ],
   controllers: [SyncController],
-  providers: [ChildrenService, NeedService, PaymentService, ReceiptService, UserService], // add entity and services to be available in the module
+  providers: [ChildrenService, NeedService, PaymentService, ReceiptService, UserService, NgoService], // add entity and services to be available in the module
 })
 export class SyncModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

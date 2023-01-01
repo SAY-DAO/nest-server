@@ -13,7 +13,7 @@ import { StepEntity } from '../../entities/step.entity';
 import { StepService } from '../step/step.service';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
-import { UserEntity } from '../../entities/user.entity';
+import { FamilyEntity, SocialWorkerEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
 
 @Module({
@@ -23,7 +23,8 @@ import { UserService } from '../user/user.service';
       ChildrenEntity,
       NeedEntity,
       StepEntity,
-      UserEntity,
+      FamilyEntity,
+      SocialWorkerEntity,
       PaymentEntity
     ]),
     ScheduleModule.forRoot(),

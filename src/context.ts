@@ -7,20 +7,14 @@ import config from './config';
 let context: INestApplication = null;
 export const ApplicationContext = async () => {
   if (!context) {
-    context = await NestFactory.create(AppModule, {
-      cors: {
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        origin: '*',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      },
-    });
+    context = await NestFactory.create(AppModule);
 
     const options = new DocumentBuilder()
       .setTitle('SAY DAO')
       .setDescription('DAO API')
       .setVersion('v0.1.0')
       // .addTag('Needs')
-      .addServer(config().documentUrl, "Codefi's Example Server")
+      .addServer(config().documentUrl, 'The Server')
       .build();
     const document = SwaggerModule.createDocument(context, options);
     SwaggerModule.setup('docs', context, document);

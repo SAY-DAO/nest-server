@@ -1,36 +1,61 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Response } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { NeedTypeEnum } from '../../types/interface';
+import { NeedTypeEnum, RolesEnum } from '../../types/interface';
 import { CreateNeedDto } from '../../types/dtos/CreateNeed.dto';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from './need.service';
 import { ValidateNeedPipe } from './pipes/validate-need.pipe';
 import { NeedEntity } from '../../entities/need.entity';
 import { ServerError } from '../../filters/server-exception.filter';
+import { UserService } from '../user/user.service';
+import { SocialWorkerParams } from '../../types/parameters/UserParameters';
+import { AllExceptionsFilter } from '../../filters/all-exception.filter';
+import { NgoService } from '../ngo/ngo.service';
+import { NgoParams } from '../../types/parameters/NgoParammeters';
+import { AuthenticationService } from '../authentication/auth.service';
+
 
 export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
-
 
 @ApiTags('Needs')
 @Controller('needs')
 export class NeedController {
   constructor(private needService: NeedService,
-    private childrenService: ChildrenService) { }
+    private childrenService: ChildrenService,
+    private userService: UserService,
+    private ngoService: NgoService,
+    private authService: AuthenticationService,
+  ) { }
 
-  @Get(`all`)
+  @Get(`flask/random`)
+  @ApiOperation({ description: 'Get all done needs from flask' })
+  async getRandomNeed() {
+    return await this.needService.getRandomNeed()
+
+  }
+
+  @Get(`flask/preneed`)
+  @ApiOperation({ description: 'Get all done needs from flask' })
+  async getPrNeed() {
+    const accessToken = await this.authService.authPanel()
+    const preNeeds = await this.needService.getPreNeed(accessToken)
+    return preNeeds
+  }
+
+  @Get(`flask/all`)
   @ApiOperation({ description: 'Get all needs from flask' })
-  async getNeeds(@Query('page') page = 1, @Query('limit') limit = 10) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.needService.getNeeds({
-      limit: Number(limit),
-      page: Number(page),
-      route: NEEDS_URL
+  async getNeeds(@Query('skip') skip = 0, @Query('take') take = 100) {
+    const accessToken = await this.authService.authPanel()
+    take = take > 100 ? 100 : take;
+    return await this.needService.getNeeds(accessToken, {
+      X_TAKE: Number(take),
+      X_SKIP: Number(skip),
     })
   }
 
 
   @Get(`all/done`)
-  @ApiOperation({ description: 'Get all needs from flask' })
+  @ApiOperation({ description: 'Get all done needs from flask' })
   async getDoneNeeds() {
     const doneNeeds = await this.needService.getDoneNeeds()
     return doneNeeds.length
@@ -50,14 +75,71 @@ export class NeedController {
   }
 
   @Post(`add`)
-  @ApiOperation({ description: 'Get one need' })
+  @ApiOperation({ description: 'Create one need' })
   async createNeed(@Body(ValidateNeedPipe) request: CreateNeedDto) {
+    let theNgo = await this.ngoService.getNgo(
+      request.ngoId
+    );
+    //  if ngo does not exist create
+    if (!theNgo) {
+      let newNgo: NgoParams;
+      try {
+        newNgo = {
+          flaskNgoId: request.ngoId,
+        };
+
+        theNgo = await this.ngoService.createNgo(newNgo);
+      } catch (e) {
+        throw new AllExceptionsFilter(e);
+      }
+    }
+
+    let supervisor = await this.userService.getSocialWorker(
+      request.confirmUser
+    );
+    //  if supervisor does not exist create
+    if (!supervisor) {
+      let newSupervisor: SocialWorkerParams;
+      try {
+        newSupervisor = {
+          flaskSwId: request.confirmUser,
+          typeId: RolesEnum.SAY_SUPERVISOR,
+          ngo: theNgo
+        };
+
+        supervisor = await this.userService.createSocialWorker(newSupervisor);
+      } catch (e) {
+        throw new AllExceptionsFilter(e);
+      }
+    }
+
+    let socialWorker = await this.userService.getSocialWorker(
+      request.createdById
+    );
+    //  if social worker does not exist create
+    if (!socialWorker) {
+      let newSocialWorker: SocialWorkerParams;
+      try {
+        newSocialWorker = {
+          flaskSwId: request.createdById,
+          typeId: RolesEnum.SOCIAL_WORKER,
+          ngo: theNgo
+        };
+
+        socialWorker = await this.userService.createSocialWorker(newSocialWorker);
+      } catch (e) {
+        throw new AllExceptionsFilter(e);
+      }
+    }
     let need: NeedEntity
     const newNeed = {
       flaskNeedId: request.needId,
       flaskChildId: request.childId,
+      flaskNgoId: request.ngoId,
+      flaskSupervisorId: request?.confirmUser,
       title: request.title,
       affiliateLinkUrl: request.affiliateLinkUrl,
+      link: request.link,
       bankTrackId: request.bankTrackId,
       category: request.category,
       childGeneratedCode: request?.childGeneratedCode,
@@ -68,11 +150,12 @@ export class NeedController {
       confirmDate:
         request.confirmDate &&
         new Date(request?.confirmDate),
-      confirmUser: request.confirmUser,
       cost: request.cost,
       created:
         request.created && new Date(request?.created),
-      createdById: request.createdById,
+      socialWorker: socialWorker,
+      supervisor: supervisor,
+      flaskSwId: request?.createdById,
       deletedAt:
         request.deleted_at &&
         new Date(request?.deleted_at),
@@ -93,7 +176,7 @@ export class NeedController {
       isDone: request.isDone,
       isReported: request.isReported,
       isUrgent: request.isUrgent,
-      ngoId: request.ngoId,
+      ngo: theNgo,
       ngoAddress: request.ngoAddress,
       ngoName: request.ngoName,
       ngoDeliveryDate:

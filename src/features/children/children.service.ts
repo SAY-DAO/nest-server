@@ -3,6 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChildParams } from '../../types/parameters/ChildParameters';
 import { Repository } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
+import {
+  Pagination,
+  IPaginationOptions,
+  paginate,
+} from 'nestjs-typeorm-paginate';
+import { from, map, Observable } from 'rxjs';
+import { ChildAPIApi } from 'src/generated-sources/openapi';
 
 @Injectable()
 export class ChildrenService {
@@ -11,14 +18,23 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
   ) { }
 
+  async getChildNeedsSummeay(accessToken: any, childId: number
+  ): Promise<ChildAPIApi> {
+    const childApi = new ChildAPIApi();
+    const needs: Promise<ChildAPIApi> = childApi.apiV2ChildChildIdNeedsSummaryGet(accessToken, childId).then((r) => r
+    ).catch((e) => e)
+    return needs;
+  }
+
+
   getChildren(): Promise<ChildrenEntity[]> {
     return this.childrenRepository.find();
   }
 
-  getChildById(childId: number): Promise<ChildrenEntity> {
+  getChildById(flaskChildId: number): Promise<ChildrenEntity> {
     const child = this.childrenRepository.findOne({
       where: {
-        childId: childId,
+        flaskChildId: flaskChildId,
       },
     });
     return child;
@@ -26,7 +42,7 @@ export class ChildrenService {
 
   createChild(childDetails: ChildParams): Promise<ChildrenEntity> {
     const newChild = this.childrenRepository.create({
-      childId: childDetails.childId,
+      flaskChildId: childDetails.flaskChildId,
       sleptAvatarUrl: childDetails.sleptAvatarUrl,
       awakeAvatarUrl: childDetails.awakeAvatarUrl,
       bio: childDetails.bio,
@@ -37,17 +53,19 @@ export class ChildrenService {
       birthPlace: childDetails.birthPlace,
       city: childDetails.city,
       confirmDate: childDetails.confirmDate && new Date(childDetails.confirmDate),
-      confirmUser: childDetails.confirmUser,
       country: childDetails.country,
       created: childDetails.created && new Date(childDetails.created),
       doneNeedsCount: childDetails.doneNeedsCount,
       education: childDetails.education,
-      existenceStatus: childDetails.existence_status,
+      existenceStatus: childDetails.existenceStatus,
       familyCount: childDetails.familyCount,
       generatedCode: childDetails.generatedCode,
       housingStatus: childDetails.housingStatus,
-      ngoId: childDetails.ngoId,
-      idSocialWorker: childDetails.idSocialWorker,
+      ngo: childDetails.ngo,
+      socialWorker: childDetails.socialWorker,
+      supervisor: childDetails.supervisor,
+      flaskSwId: childDetails.flaskSwId,
+      flaskSupervisorId: childDetails.flaskSupervisorId,
       isConfirmed: childDetails.isConfirmed,
       isDeleted: childDetails.isDeleted,
       isMigrated: childDetails.isMigrated,
@@ -65,5 +83,29 @@ export class ChildrenService {
     return this.childrenRepository.save(newChild)
   }
 
-  
+  getSocialWorkerChildren(flaskSwId: number): Promise<ChildrenEntity[]> {
+    return this.childrenRepository.find({
+      where: {
+        flaskSwId
+      }
+    });
+  }
+
+
+  async getSupervisorConfirmedChildren(flaskSwId: number,
+    options: IPaginationOptions,
+  ): Promise<Observable<Pagination<ChildrenEntity>>> {
+    return from(
+      paginate<ChildrenEntity>(this.childrenRepository, options, {
+        relations: {
+          supervisor: true
+        },
+        where: {
+          isDeleted: false,
+          isConfirmed: true,
+          flaskSupervisorId: flaskSwId
+        },
+      }),
+    ).pipe(map((needs: Pagination<ChildrenEntity>) => needs));
+  }
 }

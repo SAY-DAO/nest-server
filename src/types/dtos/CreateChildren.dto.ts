@@ -6,16 +6,13 @@ export class CreateChildrenDto {
 
 export class CreateChildDto {
     childId: number;
-    @IsNotEmpty()
     awakeAvatarUrl: string;
-    @IsNotEmpty()
     bio: string;
     bioSummary: string;
     bioSummaryTranslations: { en: string, fa: string }
     bioTranslations: { en: string, fa: string }
     birthDate: Date;
     birthPlace: string;
-    @IsNotEmpty()
     city: number;
     confirmDate: Date;
     confirmUser: number;
@@ -23,12 +20,12 @@ export class CreateChildDto {
     created: Date;
     doneNeedsCount: number;
     education: EducationEnum;
-    existence_status: number;
+    existenceStatus: number;
     familyCount: number;
     generatedCode: string;
     housingStatus: HousingEnum;
     ngoId: number;
-    idSocialWorker: number;
+    flaskSwId: number;
     isConfirmed: boolean;
     isDeleted: boolean;
     isMigrated: boolean;

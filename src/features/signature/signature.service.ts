@@ -18,10 +18,9 @@ import { UserService } from '../user/user.service';
 import { ChildrenService } from '../children/children.service';
 import VerifyVoucher from '../../contracts/tokens/ERC721/VerifyVoucher.sol/VerifyVoucher.json';
 import { verifyContractAddress } from '../../contracts/network-settings.json';
-import { ChildrenEntity } from 'src/entities/children.entity';
-import { NeedEntity } from 'src/entities/need.entity';
-import { UserEntity } from 'src/entities/user.entity';
-import { SwCreateSwSignatureDto } from 'src/types/dtos/CreateSignature.dto';
+import { ChildrenEntity } from '../../entities/children.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { SwCreateSwSignatureDto } from '../../types/dtos/CreateSignature.dto';
 
 @Injectable()
 export class SignatureService {
@@ -91,7 +90,7 @@ export class SignatureService {
               : need.category === CategoryEnum.JOY
                 ? CategoryDefinitionEnum.JOY
                 : CategoryDefinitionEnum.SURROUNDING,
-        child: child.sayName || String(child.childId),
+        child: child.sayName || String(child.flaskChildId),
         receipts: receiptsTitles,
         bankTrackId: need.bankTrackId,
         signerAddress: request.signerAddress,
@@ -120,7 +119,7 @@ export class SignatureService {
               : need.category === CategoryEnum.JOY
                 ? CategoryDefinitionEnum.JOY
                 : CategoryDefinitionEnum.SURROUNDING,
-        child: child.sayName || String(child.childId),
+        child: child.sayName || String(child.flaskChildId),
         receipts: receiptsTitles,
         signerAddress: request.signerAddress,
         content: `Your ${impacts} impacts will be ready for a friend to mint!`,
@@ -151,7 +150,7 @@ export class SignatureService {
   //   let FamilyVoucher: FamilyVoucher;
   //   let types: { Voucher: { name: string; type: string; }[]; };
   //   const need = await this.needService.getNeedById(request.flaskNeedId);
-  //   const user = await this.userService.getUser(request.flaskSwId);
+  //   const user = await this.userService.getFamily(request.flaskSwId);
   //   const child = await this.childService.getChildById(need.child.childId);
 
   //   const isCreator = need.createdById === 13; // request.userId

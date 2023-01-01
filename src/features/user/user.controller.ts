@@ -1,18 +1,30 @@
-import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { NeedEntity } from 'src/entities/need.entity';
-import { UserEntity } from 'src/entities/user.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { FamilyEntity } from '../../entities/user.entity';
 import { UserService } from './user.service';
+import { NEEDS_URL } from '../need/need.controller';
+import { NeedService } from '../need/need.service';
+import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
+import { ChildrenService } from '../children/children.service';
+import { ChildrenEntity } from '../../entities/children.entity';
+import { RolesEnum } from 'src/types/interface';
 
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
-    constructor(private userService: UserService) { }
+    constructor(
+        private userService: UserService,
+        private needService: NeedService,
+        private childrenService: ChildrenService
+    ) { }
 
     @Get(`all`)
     @ApiOperation({ description: 'Get a single transaction by ID' })
-    async getUSers() {
-        return await this.userService.getUsers();
+    async getFamilies() {
+        const families = await this.userService.getFamilies();
+        const socialWorkers = await this.userService.getSocialWorkers();
+        return { 'families': families, 'socialWorkers': socialWorkers }
     }
 
     @Get(`done`)
@@ -21,10 +33,10 @@ export class UserController {
         @Query('childId', ParseIntPipe) childId: number,
         @Query('userId', ParseIntPipe) userId: number,
     ) {
-        let user: UserEntity
+        let user: FamilyEntity
         user = await this.userService.getUserDoneNeeds(userId);
         if (!user) {
-            user = await this.userService.createUser({ userId });
+            user = await this.userService.createFamilyMember({ flaskUserId: userId });
         }
         let filteredNeeds = [];
         function isMatched(doneNeed: NeedEntity) {
@@ -62,4 +74,101 @@ export class UserController {
             total: filteredNeeds.length,
         };
     }
+
+
+    @Get(`social-worker/:flaskId/createdNeeds`)
+    @ApiOperation({ description: 'Get social worker created needs' })
+    async getSwCreatedNeeds(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
+        let needs: any
+        limit = limit > 100 ? 100 : limit;
+        const socialWorker = await this.userService.getSocialWorker(flaskId);
+        if (socialWorker && socialWorker.role === RolesEnum.SOCIAL_WORKER) {
+            try {
+                needs = await this.needService.getSocialWorkerCreatedNeeds(socialWorker.flaskSwId, {
+                    limit: Number(limit),
+                    page: Number(page),
+                    route: NEEDS_URL
+                })
+            } catch (e) {
+                throw new ObjectNotFound();
+            }
+        }
+        return needs;
+    }
+
+    @Get(`social-worker/:flaskId/confirmedNeeds`)
+    @ApiOperation({ description: 'Get supervisor confirmed needs' })
+    async getSwConfirmedNeeds(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
+        let needs: any
+        limit = limit > 100 ? 100 : limit;
+        const supervisor = await this.userService.getSocialWorker(flaskId);
+
+        if (supervisor && supervisor.role === RolesEnum.SAY_SUPERVISOR) {
+            try {
+                needs = await this.needService.getSupervisorConfirmedNeeds(supervisor.flaskSwId, {
+                    limit: Number(limit),
+                    page: Number(page),
+                    route: NEEDS_URL
+                })
+            } catch (e) {
+                throw new ObjectNotFound();
+            }
+        }
+        return needs;
+    }
+
+    @Get(`social-worker/:flaskId/confirmedChildren`)
+    @ApiOperation({ description: 'Get supervisor confirmed children' })
+    async getSwConfirmedChildren(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
+        let needs: any
+        limit = limit > 100 ? 100 : limit;
+        const supervisor = await this.userService.getSocialWorker(flaskId);
+
+        if (supervisor && supervisor.role === RolesEnum.SAY_SUPERVISOR) {
+            try {
+                needs = await this.childrenService.getSupervisorConfirmedChildren(supervisor.flaskSwId, {
+                    limit: Number(limit),
+                    page: Number(page),
+                    route: NEEDS_URL
+                })
+            } catch (e) {
+                throw new ObjectNotFound();
+            }
+        }
+ 
+        return needs;
+    }
+    // Nyaz -purchasing,...
+    // @Get(`social-worker/:flaskId/confirmedNeeds`)
+    // @ApiOperation({ description: 'Get social worker created needs' })
+    // async getContributorContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
+    //     let needs: any
+    //     limit = limit > 100 ? 100 : limit;
+    //     const socialWorker = await this.userService.getSocialWorker(flaskId);
+    //     if (socialWorker && socialWorker.role === RolesEnum.SUPER_ADMIN) {
+    //         try {
+    //             needs = await this.needService.getSocialWorkerConfirmedNeeds(socialWorker.flaskSwId, {
+    //                 limit: Number(limit),
+    //                 page: Number(page),
+    //                 route: NEEDS_URL
+    //             })
+    //         } catch (e) {
+    //             throw new ObjectNotFound();
+    //         }
+    //     }
+    //     return needs;
+    // }
 }
+
+
+// export enum RolesEnum {
+//     NO_ROLE = 0,
+//     SUPER_ADMIN = 1,
+//     SOCIAL_WORKER = 2,
+//     COORDINATOR = 3, // contributor
+//     NGO_SUPERVISOR = 4,
+//     SAY_SUPERVISOR = 5,
+//     ADMIN = 6, // team lead
+//     FAMILY = 7,
+//     FRIEND = 8,
+// };

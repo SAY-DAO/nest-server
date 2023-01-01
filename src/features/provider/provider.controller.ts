@@ -18,7 +18,7 @@ export class ProviderController {
     ) { }
 
     @Get(`all`)
-    @ApiOperation({ description: 'Get all providers from flask' })
+    @ApiOperation({ description: 'Get all providers' })
     async getProviders() {
         return await this.providerService.getProviders()
     }

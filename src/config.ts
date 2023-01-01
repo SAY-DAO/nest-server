@@ -21,17 +21,13 @@ function loadConfig() {
   }
 
   const configs = {
-    serverPort: process.env.PORT ?? 8002,
+    serverPort: process.env.PORT || 8002,
     host:
-      NODE_ENV === Environments.development
-        ? 'localhost'
-        : NODE_ENV === Environments.docker
-        ? 'localhost'
-        : NODE_ENV === Environments.staging
-        ? process.env.AUTHORIZED_DOCS_STAGING_2
-        : NODE_ENV === Environments.production
-        ? process.env.PRODUCTION_DOMAIN
-        : 'localhost',
+      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined
+        ? 'localHost'
+        : process.env.NODE_ENV === 'docker-local'
+          ? 'localHost'
+          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_HOST_STAGING : process.env.AUTHORIZED_HOST_PRODUCTION,
     logLevel: 'debug',
     documentUrl: '',
     db: {
@@ -40,7 +36,7 @@ function loadConfig() {
       host: NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,
       username: process.env.DB_USER ?? 'postgres',
       password: dbPassword ?? process.env.DB_PASS ?? 'postgres',
-      database: process.env.DB_NAME ?? 'say_nest',
+      database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
       synchronize: true,
       logging: true,
@@ -52,7 +48,7 @@ function loadConfig() {
   };
 
   configs.documentUrl =
-    NODE_ENV == Environments.staging || NODE_ENV == Environments.production
+    NODE_ENV === Environments.staging || NODE_ENV === Environments.production
       ? `https://${configs.host}/api/dao`
       : `http://${configs.host}:${configs.serverPort}/api/dao`;
 

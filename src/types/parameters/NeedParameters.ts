@@ -1,22 +1,26 @@
+import { NgoEntity } from "../../entities/ngo.entity";
+import { SocialWorkerEntity } from "../../entities/user.entity";
 import { NeedTypeEnum } from "../interface";
-import { PaymentParams } from "./PaymentParameters";
-import { UserParams } from "./UserParameters";
 
 export type NeedParams = {
     flaskNeedId: number;
-    flaskChildId: number
+    flaskChildId: number;
+    flaskNgoId: number;
+    flaskSwId: number,
+    flaskSupervisorId: number;
     title: string;
     affiliateLinkUrl: string;
+    link: string;
     bankTrackId: string | null;
     category: number;
     childGeneratedCode: string;
     childSayName: string;
     childDeliveryDate: Date | null;
     confirmDate: Date | null;
-    confirmUser: number;
     cost: number;
     created: Date | null;
-    createdById: number;
+    socialWorker: SocialWorkerEntity;
+    supervisor: SocialWorkerEntity;
     deletedAt: Date | null;
     description: string;
     descriptionTranslations: { en: string, fa: string };
@@ -35,7 +39,7 @@ export type NeedParams = {
     isUrgent: boolean;
     titleTranslations: { en: string; fa: string };
     ngoAddress: string;
-    ngoId: number;
+    ngo: NgoEntity;
     ngoName: string;
     ngoDeliveryDate: Date | null;
     oncePurchased: boolean;

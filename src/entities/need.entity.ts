@@ -8,7 +8,7 @@ import {
   ManyToOne,
   DeleteDateColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { SocialWorkerEntity, FamilyEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
 import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
@@ -16,6 +16,7 @@ import { PaymentEntity } from './payment.entity';
 import { BaseEntity } from './BaseEntity';
 import { CategoryEnum, NeedTypeEnum } from '../types/interface';
 import { ReceiptEntity } from './receipt.entity';
+import { NgoEntity } from './ngo.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
@@ -25,6 +26,9 @@ export class NeedEntity extends BaseEntity {
   @Index({ unique: true })
   @Column()
   flaskNeedId: number;
+
+  @Column({ nullable: true })
+  flaskSupervisorId?: number; //confirmUser from flask
 
   @Column({ nullable: true })
   title: string;
@@ -54,16 +58,10 @@ export class NeedEntity extends BaseEntity {
   confirmDate?: Date;
 
   @Column({ nullable: true })
-  confirmUser?: number;
-
-  @Column({ nullable: true })
   cost: number;
 
   @Column({ type: 'timestamptz', nullable: true })
   created: Date;
-
-  @Column({ nullable: true })
-  createdById?: number;
 
   @Column({ nullable: true })
   description: string;
@@ -115,9 +113,6 @@ export class NeedEntity extends BaseEntity {
 
   @Column({ nullable: true })
   ngoAddress: string;
-
-  @Column({ nullable: true })
-  ngoId: number;
 
   @Column({ nullable: true })
   ngoName: string;
@@ -176,9 +171,9 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
-  @ManyToMany(() => UserEntity, (user) => user.doneNeeds, { eager: false })
+  @ManyToMany(() => FamilyEntity, (user) => user.doneNeeds, { eager: false })
   @JoinTable()
-  participants?: UserEntity[];
+  participants?: FamilyEntity[];
 
   @OneToMany(() => SignatureEntity, (signature) => signature.need, { eager: true })
   signatures?: SignatureEntity[];
@@ -192,10 +187,25 @@ export class NeedEntity extends BaseEntity {
   @Column()
   flaskChildId: number;
 
+  @Column()
+  flaskSwId: number;
+
+  @Column({ nullable: true })
+  flaskNgoId: number;
+
   @ManyToOne(() => ChildrenEntity, (child) => child.needs, { eager: false })
   child: ChildrenEntity;
 
   @ManyToOne(() => ProviderEntity, (p) => p.needs, { eager: true })
   provider?: ProviderEntity;
+
+  @ManyToOne(() => NgoEntity, (n) => n.needs, { eager: false })
+  ngo: NgoEntity;
+
+  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.createdNeeds, { eager: false })
+  socialWorker: SocialWorkerEntity;
+
+  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.confirmedNeeds, { eager: false })
+  supervisor: SocialWorkerEntity;
 }
 

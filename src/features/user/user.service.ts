@@ -1,36 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DoneNeedRequestDto } from '../../types/dtos/DoneNeedRequest.dto';
+import { RolesEnum } from '../../types/interface';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../../entities/user.entity';
-import { NeedEntity } from '../../entities/need.entity';
-import { UserParams } from '../../types/parameters/UserParameters';
+import { SocialWorkerEntity, FamilyEntity } from '../../entities/user.entity';
+import { FamilyParams, SocialWorkerParams } from '../../types/parameters/UserParameters';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    @InjectRepository(FamilyEntity)
+    private FamilyRepository: Repository<FamilyEntity>,
+    @InjectRepository(SocialWorkerEntity)
+    private socialWorkerRepository: Repository<SocialWorkerEntity>
   ) { }
 
-  async getUsers(): Promise<UserEntity[]> {
-    return await this.userRepository.find();
+  async getFamilies(): Promise<FamilyEntity[]> {
+    return await this.FamilyRepository.find({
+      relations: {
+        payments: true,
+      },
+    });
   }
 
+  async getSocialWorkers(): Promise<SocialWorkerEntity[]> {
+    return await this.socialWorkerRepository.find({
+      relations: {
+        confirmedNeeds: true,
+      }
+    });
+  }
 
-  async getUser(userId: number): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({
+  async getFamily(flaskId: number): Promise<FamilyEntity> {
+    const user = await this.FamilyRepository.findOne({
       where: {
-        userId: userId,
+        flaskUserId: flaskId,
       },
     });
     return user;
   }
 
-  async getUserDoneNeeds(userId: number): Promise<UserEntity> {
-    return await this.userRepository.findOne({
+  async getSocialWorker(flaskSwId: number): Promise<SocialWorkerEntity> {
+    const socialWorker = await this.socialWorkerRepository.findOne({
       where: {
-        userId,
+        flaskSwId: flaskSwId,
+      },
+    });
+    return socialWorker;
+  }
+
+  async getUserDoneNeeds(flaskUserId: number): Promise<FamilyEntity> {
+    return await this.FamilyRepository.findOne({
+      where: {
+        flaskUserId,
       },
       relations: {
         doneNeeds: true,
@@ -38,13 +59,26 @@ export class UserService {
     });
   }
 
-  createUser(userDetails: UserParams): Promise<UserEntity> {
-    const newUser = this.userRepository.create({
-      userId: userDetails.userId,
+  createFamilyMember(userDetails: FamilyParams): Promise<FamilyEntity> {
+    const newUser = this.FamilyRepository.create({
+      flaskUserId: userDetails.flaskUserId,
       avatarUrl: userDetails.avatarUrl,
-      // isActive: userDetails.isActive,
+      role: RolesEnum.FAMILY,
+      isActive: userDetails.isActive,
     });
-    return this.userRepository.save(newUser);
+    return this.FamilyRepository.save(newUser);
   }
+
+  createSocialWorker(swDetails: SocialWorkerParams): Promise<SocialWorkerEntity> {
+    const newSw = this.socialWorkerRepository.create({
+      flaskSwId: swDetails.flaskSwId,
+      ngo: swDetails.ngo,
+      avatarUrl: swDetails.avatarUrl,
+      role: swDetails.typeId,
+      isActive: swDetails.isActive,
+    });
+    return this.socialWorkerRepository.save(newSw);
+  }
+  
 
 }

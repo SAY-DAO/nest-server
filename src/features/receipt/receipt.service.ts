@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../../entities/user.entity';
 import { ReceiptEntity } from '../../entities/receipt.entity';
 import { ReceiptParams } from '../../types/parameters/ReceiptParameter';
 import { NeedService } from '../need/need.service';
-import { NeedEntity } from '../../entities/need.entity';
 
 @Injectable()
 export class ReceiptService {
