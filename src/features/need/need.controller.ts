@@ -77,7 +77,7 @@ export class NeedController {
           }
         }
         return fetch(url, options)
-      })
+      }),"https://api.s.sayapp.company"
       )
       
          

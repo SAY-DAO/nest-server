@@ -8988,7 +8988,7 @@ export const PanelAuthAPIApiFp = function (configuration?: Configuration) {
                         console.log("fetched it")
                         return response;
                     } else {
-                        console.log("fetched :(")
+                        console.log("not fetched :(")
                         console.log(localVarFetchArgs)
                         // console.log(response)
                         throw response;
