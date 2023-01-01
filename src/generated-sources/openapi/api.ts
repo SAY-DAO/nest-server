@@ -2030,19 +2030,19 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2AuthLoginPost(username: string, password: string, isInstalled: number, lang: string, options: any = {}): FetchArgs {
             // verify required parameter 'username' is not null or undefined
             if (username === null || username === undefined) {
-                throw new RequiredError('username','Required parameter username was null or undefined when calling apiV2AuthLoginPost.');
+                throw new RequiredError('username', 'Required parameter username was null or undefined when calling apiV2AuthLoginPost.');
             }
             // verify required parameter 'password' is not null or undefined
             if (password === null || password === undefined) {
-                throw new RequiredError('password','Required parameter password was null or undefined when calling apiV2AuthLoginPost.');
+                throw new RequiredError('password', 'Required parameter password was null or undefined when calling apiV2AuthLoginPost.');
             }
             // verify required parameter 'isInstalled' is not null or undefined
             if (isInstalled === null || isInstalled === undefined) {
-                throw new RequiredError('isInstalled','Required parameter isInstalled was null or undefined when calling apiV2AuthLoginPost.');
+                throw new RequiredError('isInstalled', 'Required parameter isInstalled was null or undefined when calling apiV2AuthLoginPost.');
             }
             // verify required parameter 'lang' is not null or undefined
             if (lang === null || lang === undefined) {
-                throw new RequiredError('lang','Required parameter lang was null or undefined when calling apiV2AuthLoginPost.');
+                throw new RequiredError('lang', 'Required parameter lang was null or undefined when calling apiV2AuthLoginPost.');
             }
             const localVarPath = `/api/v2/auth/login`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2090,7 +2090,7 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2AuthLogoutTokenPost(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2AuthLogoutTokenPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2AuthLogoutTokenPost.');
             }
             const localVarPath = `/api/v2/auth/logout/token`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2124,15 +2124,15 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2AuthPasswordResetConfirmTokentokenPost(token: string, password: string, confirmPassword: string, options: any = {}): FetchArgs {
             // verify required parameter 'token' is not null or undefined
             if (token === null || token === undefined) {
-                throw new RequiredError('token','Required parameter token was null or undefined when calling apiV2AuthPasswordResetConfirmTokentokenPost.');
+                throw new RequiredError('token', 'Required parameter token was null or undefined when calling apiV2AuthPasswordResetConfirmTokentokenPost.');
             }
             // verify required parameter 'password' is not null or undefined
             if (password === null || password === undefined) {
-                throw new RequiredError('password','Required parameter password was null or undefined when calling apiV2AuthPasswordResetConfirmTokentokenPost.');
+                throw new RequiredError('password', 'Required parameter password was null or undefined when calling apiV2AuthPasswordResetConfirmTokentokenPost.');
             }
             // verify required parameter 'confirmPassword' is not null or undefined
             if (confirmPassword === null || confirmPassword === undefined) {
-                throw new RequiredError('confirmPassword','Required parameter confirmPassword was null or undefined when calling apiV2AuthPasswordResetConfirmTokentokenPost.');
+                throw new RequiredError('confirmPassword', 'Required parameter confirmPassword was null or undefined when calling apiV2AuthPasswordResetConfirmTokentokenPost.');
             }
             const localVarPath = `/api/v2/auth/password/reset/confirm/token={token}`
                 .replace(`{${"token"}}`, encodeURIComponent(String(token)));
@@ -2173,7 +2173,7 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2AuthPasswordResetEmailPost(email: string, options: any = {}): FetchArgs {
             // verify required parameter 'email' is not null or undefined
             if (email === null || email === undefined) {
-                throw new RequiredError('email','Required parameter email was null or undefined when calling apiV2AuthPasswordResetEmailPost.');
+                throw new RequiredError('email', 'Required parameter email was null or undefined when calling apiV2AuthPasswordResetEmailPost.');
             }
             const localVarPath = `/api/v2/auth/password/reset/email`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2209,7 +2209,7 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2AuthPasswordResetPhonePost(phoneNumber: string, options: any = {}): FetchArgs {
             // verify required parameter 'phoneNumber' is not null or undefined
             if (phoneNumber === null || phoneNumber === undefined) {
-                throw new RequiredError('phoneNumber','Required parameter phoneNumber was null or undefined when calling apiV2AuthPasswordResetPhonePost.');
+                throw new RequiredError('phoneNumber', 'Required parameter phoneNumber was null or undefined when calling apiV2AuthPasswordResetPhonePost.');
             }
             const localVarPath = `/api/v2/auth/password/reset/phone`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2253,31 +2253,31 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, cityId?: number, email?: string, options: any = {}): FetchArgs {
             // verify required parameter 'username' is not null or undefined
             if (username === null || username === undefined) {
-                throw new RequiredError('username','Required parameter username was null or undefined when calling apiV2AuthRegisterPost.');
+                throw new RequiredError('username', 'Required parameter username was null or undefined when calling apiV2AuthRegisterPost.');
             }
             // verify required parameter 'phoneNumber' is not null or undefined
             if (phoneNumber === null || phoneNumber === undefined) {
-                throw new RequiredError('phoneNumber','Required parameter phoneNumber was null or undefined when calling apiV2AuthRegisterPost.');
+                throw new RequiredError('phoneNumber', 'Required parameter phoneNumber was null or undefined when calling apiV2AuthRegisterPost.');
             }
             // verify required parameter 'username2' is not null or undefined
             if (username2 === null || username2 === undefined) {
-                throw new RequiredError('username2','Required parameter username2 was null or undefined when calling apiV2AuthRegisterPost.');
+                throw new RequiredError('username2', 'Required parameter username2 was null or undefined when calling apiV2AuthRegisterPost.');
             }
             // verify required parameter 'password' is not null or undefined
             if (password === null || password === undefined) {
-                throw new RequiredError('password','Required parameter password was null or undefined when calling apiV2AuthRegisterPost.');
+                throw new RequiredError('password', 'Required parameter password was null or undefined when calling apiV2AuthRegisterPost.');
             }
             // verify required parameter 'verifyCode' is not null or undefined
             if (verifyCode === null || verifyCode === undefined) {
-                throw new RequiredError('verifyCode','Required parameter verifyCode was null or undefined when calling apiV2AuthRegisterPost.');
+                throw new RequiredError('verifyCode', 'Required parameter verifyCode was null or undefined when calling apiV2AuthRegisterPost.');
             }
             // verify required parameter 'isInstalled' is not null or undefined
             if (isInstalled === null || isInstalled === undefined) {
-                throw new RequiredError('isInstalled','Required parameter isInstalled was null or undefined when calling apiV2AuthRegisterPost.');
+                throw new RequiredError('isInstalled', 'Required parameter isInstalled was null or undefined when calling apiV2AuthRegisterPost.');
             }
             // verify required parameter 'lang' is not null or undefined
             if (lang === null || lang === undefined) {
-                throw new RequiredError('lang','Required parameter lang was null or undefined when calling apiV2AuthRegisterPost.');
+                throw new RequiredError('lang', 'Required parameter lang was null or undefined when calling apiV2AuthRegisterPost.');
             }
             const localVarPath = `/api/v2/auth/register`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2342,7 +2342,7 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
  * AuthAPIApi - functional programming interface
  * @export
  */
-export const AuthAPIApiFp = function(configuration?: Configuration) {
+export const AuthAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -2666,7 +2666,7 @@ export const CartAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2MycartGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2MycartGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2MycartGet.');
             }
             const localVarPath = `/api/v2/mycart`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2699,11 +2699,11 @@ export const CartAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2MycartNeedsDelete(authorization: string, needId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2MycartNeedsDelete.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2MycartNeedsDelete.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2MycartNeedsDelete.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2MycartNeedsDelete.');
             }
             const localVarPath = `/api/v2/mycart/needs`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2744,11 +2744,11 @@ export const CartAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2MycartNeedsPost(authorization: string, needId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2MycartNeedsPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2MycartNeedsPost.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2MycartNeedsPost.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2MycartNeedsPost.');
             }
             const localVarPath = `/api/v2/mycart/needs`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2790,7 +2790,7 @@ export const CartAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2MycartPaymentPost(authorization: string, donation?: number, useCredit?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2MycartPaymentPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2MycartPaymentPost.');
             }
             const localVarPath = `/api/v2/mycart/payment`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2835,11 +2835,11 @@ export const CartAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2MycartPut(authorization: string, body: Body, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2MycartPut.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2MycartPut.');
             }
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling apiV2MycartPut.');
+                throw new RequiredError('body', 'Required parameter body was null or undefined when calling apiV2MycartPut.');
             }
             const localVarPath = `/api/v2/mycart`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -2858,7 +2858,7 @@ export const CartAPIApiFetchParamCreator = function (configuration?: Configurati
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
             const needsSerialization = (<any>"Body" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
-            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+            localVarRequestOptions.body = needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
                 url: url.format(localVarUrlObj),
@@ -2872,7 +2872,7 @@ export const CartAPIApiFetchParamCreator = function (configuration?: Configurati
  * CartAPIApi - functional programming interface
  * @export
  */
-export const CartAPIApiFp = function(configuration?: Configuration) {
+export const CartAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -3131,7 +3131,7 @@ export const ChangeCostAPIApiFetchParamCreator = function (configuration?: Confi
         apiV2ChangeCostPendingGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChangeCostPendingGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChangeCostPendingGet.');
             }
             const localVarPath = `/api/v2/change_cost/pending`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -3164,11 +3164,11 @@ export const ChangeCostAPIApiFetchParamCreator = function (configuration?: Confi
         apiV2NeedNeedIdChangeCostGet(authorization: string, needId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedNeedIdChangeCostGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedNeedIdChangeCostGet.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2NeedNeedIdChangeCostGet.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2NeedNeedIdChangeCostGet.');
             }
             const localVarPath = `/api/v2/need/{need_id}/change_cost`
                 .replace(`{${"need_id"}}`, encodeURIComponent(String(needId)));
@@ -3205,15 +3205,15 @@ export const ChangeCostAPIApiFetchParamCreator = function (configuration?: Confi
         apiV2NeedNeedIdChangeCostIdAcceptPost(authorization: string, needId: number, id: number, to?: number, description?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedNeedIdChangeCostIdAcceptPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedNeedIdChangeCostIdAcceptPost.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2NeedNeedIdChangeCostIdAcceptPost.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2NeedNeedIdChangeCostIdAcceptPost.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2NeedNeedIdChangeCostIdAcceptPost.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2NeedNeedIdChangeCostIdAcceptPost.');
             }
             const localVarPath = `/api/v2/need/{need_id}/change_cost/{id}/accept`
                 .replace(`{${"need_id"}}`, encodeURIComponent(String(needId)))
@@ -3262,15 +3262,15 @@ export const ChangeCostAPIApiFetchParamCreator = function (configuration?: Confi
         apiV2NeedNeedIdChangeCostIdRejectPost(authorization: string, needId: number, id: number, rejectCause?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedNeedIdChangeCostIdRejectPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedNeedIdChangeCostIdRejectPost.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2NeedNeedIdChangeCostIdRejectPost.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2NeedNeedIdChangeCostIdRejectPost.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2NeedNeedIdChangeCostIdRejectPost.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2NeedNeedIdChangeCostIdRejectPost.');
             }
             const localVarPath = `/api/v2/need/{need_id}/change_cost/{id}/reject`
                 .replace(`{${"need_id"}}`, encodeURIComponent(String(needId)))
@@ -3315,15 +3315,15 @@ export const ChangeCostAPIApiFetchParamCreator = function (configuration?: Confi
         apiV2NeedNeedIdChangeCostPut(authorization: string, needId: number, to: number, description?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedNeedIdChangeCostPut.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedNeedIdChangeCostPut.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2NeedNeedIdChangeCostPut.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2NeedNeedIdChangeCostPut.');
             }
             // verify required parameter 'to' is not null or undefined
             if (to === null || to === undefined) {
-                throw new RequiredError('to','Required parameter to was null or undefined when calling apiV2NeedNeedIdChangeCostPut.');
+                throw new RequiredError('to', 'Required parameter to was null or undefined when calling apiV2NeedNeedIdChangeCostPut.');
             }
             const localVarPath = `/api/v2/need/{need_id}/change_cost`
                 .replace(`{${"need_id"}}`, encodeURIComponent(String(needId)));
@@ -3365,7 +3365,7 @@ export const ChangeCostAPIApiFetchParamCreator = function (configuration?: Confi
  * ChangeCostAPIApi - functional programming interface
  * @export
  */
-export const ChangeCostAPIApiFp = function(configuration?: Configuration) {
+export const ChangeCostAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -3642,7 +3642,7 @@ export const CheckAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2CheckEmailEmailGet(email: string, options: any = {}): FetchArgs {
             // verify required parameter 'email' is not null or undefined
             if (email === null || email === undefined) {
-                throw new RequiredError('email','Required parameter email was null or undefined when calling apiV2CheckEmailEmailGet.');
+                throw new RequiredError('email', 'Required parameter email was null or undefined when calling apiV2CheckEmailEmailGet.');
             }
             const localVarPath = `/api/v2/check/email/{email}`
                 .replace(`{${"email"}}`, encodeURIComponent(String(email)));
@@ -3671,7 +3671,7 @@ export const CheckAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2CheckPhonePhoneGet(phone: string, options: any = {}): FetchArgs {
             // verify required parameter 'phone' is not null or undefined
             if (phone === null || phone === undefined) {
-                throw new RequiredError('phone','Required parameter phone was null or undefined when calling apiV2CheckPhonePhoneGet.');
+                throw new RequiredError('phone', 'Required parameter phone was null or undefined when calling apiV2CheckPhonePhoneGet.');
             }
             const localVarPath = `/api/v2/check/phone/{phone}`
                 .replace(`{${"phone"}}`, encodeURIComponent(String(phone)));
@@ -3700,7 +3700,7 @@ export const CheckAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2CheckUsernameUsernameGet(username: string, options: any = {}): FetchArgs {
             // verify required parameter 'username' is not null or undefined
             if (username === null || username === undefined) {
-                throw new RequiredError('username','Required parameter username was null or undefined when calling apiV2CheckUsernameUsernameGet.');
+                throw new RequiredError('username', 'Required parameter username was null or undefined when calling apiV2CheckUsernameUsernameGet.');
             }
             const localVarPath = `/api/v2/check/username/{username}`
                 .replace(`{${"username"}}`, encodeURIComponent(String(username)));
@@ -3726,7 +3726,7 @@ export const CheckAPIApiFetchParamCreator = function (configuration?: Configurat
  * CheckAPIApi - functional programming interface
  * @export
  */
-export const CheckAPIApiFp = function(configuration?: Configuration) {
+export const CheckAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -3888,7 +3888,7 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildActivesGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildActivesGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildActivesGet.');
             }
             const localVarPath = `/api/v2/child/actives`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -3942,47 +3942,47 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildAddPost(authorization: string, awakeAvatarUrl: any, sleptAvatarUrl: any, voiceUrl: any, saynameTranslations: string, bioTranslations: string, bioSummaryTranslations: string, phoneNumber: string, country: number, city: number, gender: boolean, ngoId?: number, swId?: number, firstNameTranslations?: string, lastNameTranslations?: string, nationality?: number, birthPlace?: string, birthDate?: string, address?: string, housingStatus?: number, familyCount?: number, education?: number, status?: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'awakeAvatarUrl' is not null or undefined
             if (awakeAvatarUrl === null || awakeAvatarUrl === undefined) {
-                throw new RequiredError('awakeAvatarUrl','Required parameter awakeAvatarUrl was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('awakeAvatarUrl', 'Required parameter awakeAvatarUrl was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'sleptAvatarUrl' is not null or undefined
             if (sleptAvatarUrl === null || sleptAvatarUrl === undefined) {
-                throw new RequiredError('sleptAvatarUrl','Required parameter sleptAvatarUrl was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('sleptAvatarUrl', 'Required parameter sleptAvatarUrl was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'voiceUrl' is not null or undefined
             if (voiceUrl === null || voiceUrl === undefined) {
-                throw new RequiredError('voiceUrl','Required parameter voiceUrl was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('voiceUrl', 'Required parameter voiceUrl was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'saynameTranslations' is not null or undefined
             if (saynameTranslations === null || saynameTranslations === undefined) {
-                throw new RequiredError('saynameTranslations','Required parameter saynameTranslations was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('saynameTranslations', 'Required parameter saynameTranslations was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'bioTranslations' is not null or undefined
             if (bioTranslations === null || bioTranslations === undefined) {
-                throw new RequiredError('bioTranslations','Required parameter bioTranslations was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('bioTranslations', 'Required parameter bioTranslations was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'bioSummaryTranslations' is not null or undefined
             if (bioSummaryTranslations === null || bioSummaryTranslations === undefined) {
-                throw new RequiredError('bioSummaryTranslations','Required parameter bioSummaryTranslations was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('bioSummaryTranslations', 'Required parameter bioSummaryTranslations was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'phoneNumber' is not null or undefined
             if (phoneNumber === null || phoneNumber === undefined) {
-                throw new RequiredError('phoneNumber','Required parameter phoneNumber was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('phoneNumber', 'Required parameter phoneNumber was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'country' is not null or undefined
             if (country === null || country === undefined) {
-                throw new RequiredError('country','Required parameter country was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('country', 'Required parameter country was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'city' is not null or undefined
             if (city === null || city === undefined) {
-                throw new RequiredError('city','Required parameter city was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('city', 'Required parameter city was null or undefined when calling apiV2ChildAddPost.');
             }
             // verify required parameter 'gender' is not null or undefined
             if (gender === null || gender === undefined) {
-                throw new RequiredError('gender','Required parameter gender was null or undefined when calling apiV2ChildAddPost.');
+                throw new RequiredError('gender', 'Required parameter gender was null or undefined when calling apiV2ChildAddPost.');
             }
             const localVarPath = `/api/v2/child/add/`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -4112,11 +4112,11 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildAllConfirmconfirmGet(authorization: string, confirm: number, ngoId?: any, swId?: any, take?: any, skip?: any, existenceStatus?: any, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildAllConfirmconfirmGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildAllConfirmconfirmGet.');
             }
             // verify required parameter 'confirm' is not null or undefined
             if (confirm === null || confirm === undefined) {
-                throw new RequiredError('confirm','Required parameter confirm was null or undefined when calling apiV2ChildAllConfirmconfirmGet.');
+                throw new RequiredError('confirm', 'Required parameter confirm was null or undefined when calling apiV2ChildAllConfirmconfirmGet.');
             }
             const localVarPath = `/api/v2/child/all/confirm={confirm}`
                 .replace(`{${"confirm"}}`, encodeURIComponent(String(confirm)));
@@ -4170,11 +4170,11 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildChildIdNeedsSummaryGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildChildIdNeedsSummaryGet.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2ChildChildIdNeedsSummaryGet.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2ChildChildIdNeedsSummaryGet.');
             }
             const localVarPath = `/api/v2/child/{child_id}/needs/summary`
                 .replace(`{${"child_id"}}`, encodeURIComponent(String(childId)));
@@ -4208,11 +4208,11 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildChildIdchildIdNeedsGet(authorization: string, childId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildChildIdchildIdNeedsGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildChildIdchildIdNeedsGet.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2ChildChildIdchildIdNeedsGet.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2ChildChildIdchildIdNeedsGet.');
             }
             const localVarPath = `/api/v2/child/childId={child_id}/needs`
                 .replace(`{${"child_id"}}`, encodeURIComponent(String(childId)));
@@ -4247,15 +4247,15 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildChildIdchildIdconfirmconfirmGet(authorization: string, childId: number, confirm: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildChildIdchildIdconfirmconfirmGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildChildIdchildIdconfirmconfirmGet.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2ChildChildIdchildIdconfirmconfirmGet.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2ChildChildIdchildIdconfirmconfirmGet.');
             }
             // verify required parameter 'confirm' is not null or undefined
             if (confirm === null || confirm === undefined) {
-                throw new RequiredError('confirm','Required parameter confirm was null or undefined when calling apiV2ChildChildIdchildIdconfirmconfirmGet.');
+                throw new RequiredError('confirm', 'Required parameter confirm was null or undefined when calling apiV2ChildChildIdchildIdconfirmconfirmGet.');
             }
             const localVarPath = `/api/v2/child/childId={child_id}&confirm={confirm}`
                 .replace(`{${"child_id"}}`, encodeURIComponent(String(childId)))
@@ -4290,11 +4290,11 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildConfirmChildIdchildIdPatch(authorization: string, childId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildConfirmChildIdchildIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildConfirmChildIdchildIdPatch.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2ChildConfirmChildIdchildIdPatch.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2ChildConfirmChildIdchildIdPatch.');
             }
             const localVarPath = `/api/v2/child/confirm/childId={child_id}`
                 .replace(`{${"child_id"}}`, encodeURIComponent(String(childId)));
@@ -4328,11 +4328,11 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildDeleteChildIdchildIdPatch(authorization: string, childId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildDeleteChildIdchildIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildDeleteChildIdchildIdPatch.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2ChildDeleteChildIdchildIdPatch.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2ChildDeleteChildIdchildIdPatch.');
             }
             const localVarPath = `/api/v2/child/delete/childId={child_id}`
                 .replace(`{${"child_id"}}`, encodeURIComponent(String(childId)));
@@ -4366,7 +4366,7 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildInvitationsTokenGet(token: string, authorization?: string, options: any = {}): FetchArgs {
             // verify required parameter 'token' is not null or undefined
             if (token === null || token === undefined) {
-                throw new RequiredError('token','Required parameter token was null or undefined when calling apiV2ChildInvitationsTokenGet.');
+                throw new RequiredError('token', 'Required parameter token was null or undefined when calling apiV2ChildInvitationsTokenGet.');
             }
             const localVarPath = `/api/v2/child/invitations/{token}`
                 .replace(`{${"token"}}`, encodeURIComponent(String(token)));
@@ -4401,15 +4401,15 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildMigrateChildIdchildIdPatch(authorization: string, childId: number, newSwId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildMigrateChildIdchildIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildMigrateChildIdchildIdPatch.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2ChildMigrateChildIdchildIdPatch.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2ChildMigrateChildIdchildIdPatch.');
             }
             // verify required parameter 'newSwId' is not null or undefined
             if (newSwId === null || newSwId === undefined) {
-                throw new RequiredError('newSwId','Required parameter newSwId was null or undefined when calling apiV2ChildMigrateChildIdchildIdPatch.');
+                throw new RequiredError('newSwId', 'Required parameter newSwId was null or undefined when calling apiV2ChildMigrateChildIdchildIdPatch.');
             }
             const localVarPath = `/api/v2/child/migrate/childId={child_id}`
                 .replace(`{${"child_id"}}`, encodeURIComponent(String(childId)));
@@ -4473,11 +4473,11 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
         apiV2ChildUpdateChildIdchildIdPatch(authorization: string, childId: number, awakeAvatarUrl?: any, sleptAvatarUrl?: any, voiceUrl?: any, firstNameTranslations?: string, saynameTranslations?: string, bioTranslations?: string, bioSummaryTranslations?: string, lastNameTranslations?: string, sayName?: string, phoneNumber?: string, nationality?: number, country?: number, city?: number, gender?: boolean, birthPlace?: string, birthDate?: string, address?: string, housingStatus?: number, familyCount?: number, education?: number, status?: number, existenceStatus?: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildUpdateChildIdchildIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ChildUpdateChildIdchildIdPatch.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2ChildUpdateChildIdchildIdPatch.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2ChildUpdateChildIdchildIdPatch.');
             }
             const localVarPath = `/api/v2/child/update/childId={child_id}`
                 .replace(`{${"child_id"}}`, encodeURIComponent(String(childId)));
@@ -4599,7 +4599,7 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
  * ChildAPIApi - functional programming interface
  * @export
  */
-export const ChildAPIApiFp = function(configuration?: Configuration) {
+export const ChildAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -5269,7 +5269,7 @@ export const DashboardAPIApiFetchParamCreator = function (configuration?: Config
         apiV2DashboardGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2DashboardGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2DashboardGet.');
             }
             const localVarPath = `/api/v2/dashboard`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -5298,7 +5298,7 @@ export const DashboardAPIApiFetchParamCreator = function (configuration?: Config
  * DashboardAPIApi - functional programming interface
  * @export
  */
-export const DashboardAPIApiFp = function(configuration?: Configuration) {
+export const DashboardAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * Returns required information for dashboard as a json object.<br/>It contains user data and user urgent needs.<br/>Calling this API affects need, child, child_need, need_family and user tables.<br/>
@@ -5379,11 +5379,11 @@ export const FamilyAPIApiFetchParamCreator = function (configuration?: Configura
         apiV2FamilyAddPost(authorization: string, invitationToken: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2FamilyAddPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2FamilyAddPost.');
             }
             // verify required parameter 'invitationToken' is not null or undefined
             if (invitationToken === null || invitationToken === undefined) {
-                throw new RequiredError('invitationToken','Required parameter invitationToken was null or undefined when calling apiV2FamilyAddPost.');
+                throw new RequiredError('invitationToken', 'Required parameter invitationToken was null or undefined when calling apiV2FamilyAddPost.');
             }
             const localVarPath = `/api/v2/family/add`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -5423,7 +5423,7 @@ export const FamilyAPIApiFetchParamCreator = function (configuration?: Configura
         apiV2FamilyAllGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2FamilyAllGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2FamilyAllGet.');
             }
             const localVarPath = `/api/v2/family/all`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -5456,11 +5456,11 @@ export const FamilyAPIApiFetchParamCreator = function (configuration?: Configura
         apiV2FamilyFamilyIdLeavePatch(authorization: string, familyId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2FamilyFamilyIdLeavePatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2FamilyFamilyIdLeavePatch.');
             }
             // verify required parameter 'familyId' is not null or undefined
             if (familyId === null || familyId === undefined) {
-                throw new RequiredError('familyId','Required parameter familyId was null or undefined when calling apiV2FamilyFamilyIdLeavePatch.');
+                throw new RequiredError('familyId', 'Required parameter familyId was null or undefined when calling apiV2FamilyFamilyIdLeavePatch.');
             }
             const localVarPath = `/api/v2/family/{family_id}/leave`
                 .replace(`{${"family_id"}}`, encodeURIComponent(String(familyId)));
@@ -5494,11 +5494,11 @@ export const FamilyAPIApiFetchParamCreator = function (configuration?: Configura
         apiV2FamilyFamilyIdfamilyIdGet(authorization: string, familyId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2FamilyFamilyIdfamilyIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2FamilyFamilyIdfamilyIdGet.');
             }
             // verify required parameter 'familyId' is not null or undefined
             if (familyId === null || familyId === undefined) {
-                throw new RequiredError('familyId','Required parameter familyId was null or undefined when calling apiV2FamilyFamilyIdfamilyIdGet.');
+                throw new RequiredError('familyId', 'Required parameter familyId was null or undefined when calling apiV2FamilyFamilyIdfamilyIdGet.');
             }
             const localVarPath = `/api/v2/family/familyId={family_id}`
                 .replace(`{${"family_id"}}`, encodeURIComponent(String(familyId)));
@@ -5533,15 +5533,15 @@ export const FamilyAPIApiFetchParamCreator = function (configuration?: Configura
         apiV3FamiliesFamilyIdJoinPost(authorization: string, familyId: number, role: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV3FamiliesFamilyIdJoinPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV3FamiliesFamilyIdJoinPost.');
             }
             // verify required parameter 'familyId' is not null or undefined
             if (familyId === null || familyId === undefined) {
-                throw new RequiredError('familyId','Required parameter familyId was null or undefined when calling apiV3FamiliesFamilyIdJoinPost.');
+                throw new RequiredError('familyId', 'Required parameter familyId was null or undefined when calling apiV3FamiliesFamilyIdJoinPost.');
             }
             // verify required parameter 'role' is not null or undefined
             if (role === null || role === undefined) {
-                throw new RequiredError('role','Required parameter role was null or undefined when calling apiV3FamiliesFamilyIdJoinPost.');
+                throw new RequiredError('role', 'Required parameter role was null or undefined when calling apiV3FamiliesFamilyIdJoinPost.');
             }
             const localVarPath = `/api/v3/families/{family_id}/join`
                 .replace(`{${"family_id"}}`, encodeURIComponent(String(familyId)));
@@ -5579,7 +5579,7 @@ export const FamilyAPIApiFetchParamCreator = function (configuration?: Configura
  * FamilyAPIApi - functional programming interface
  * @export
  */
-export const FamilyAPIApiFp = function(configuration?: Configuration) {
+export const FamilyAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * Adds a user to the family.<br/>Calling this API affects family and user_family tables.<br/>Each user has a role in family.<br/>
@@ -5838,7 +5838,7 @@ export const GeoAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2CitiesIdGet(id: number, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2CitiesIdGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2CitiesIdGet.');
             }
             const localVarPath = `/api/v2/cities/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -5890,7 +5890,7 @@ export const GeoAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2CountriesIdGet(id: number, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2CountriesIdGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2CountriesIdGet.');
             }
             const localVarPath = `/api/v2/countries/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -5919,7 +5919,7 @@ export const GeoAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2CountriesIdStatesGet(id: number, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2CountriesIdStatesGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2CountriesIdStatesGet.');
             }
             const localVarPath = `/api/v2/countries/{id}/states`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -5948,7 +5948,7 @@ export const GeoAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2StatesIdCitiesGet(id: number, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2StatesIdCitiesGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2StatesIdCitiesGet.');
             }
             const localVarPath = `/api/v2/states/{id}/cities`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -5977,7 +5977,7 @@ export const GeoAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2StatesIdGet(id: number, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2StatesIdGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2StatesIdGet.');
             }
             const localVarPath = `/api/v2/states/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -6003,7 +6003,7 @@ export const GeoAPIApiFetchParamCreator = function (configuration?: Configuratio
  * GeoAPIApi - functional programming interface
  * @export
  */
-export const GeoAPIApiFp = function(configuration?: Configuration) {
+export const GeoAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -6288,7 +6288,7 @@ export const InvitationAPIApiFetchParamCreator = function (configuration?: Confi
         apiV2InvitationsPost(familyId: number, authorization?: string, role?: number, text?: string, options: any = {}): FetchArgs {
             // verify required parameter 'familyId' is not null or undefined
             if (familyId === null || familyId === undefined) {
-                throw new RequiredError('familyId','Required parameter familyId was null or undefined when calling apiV2InvitationsPost.');
+                throw new RequiredError('familyId', 'Required parameter familyId was null or undefined when calling apiV2InvitationsPost.');
             }
             const localVarPath = `/api/v2/invitations/`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -6339,15 +6339,15 @@ export const InvitationAPIApiFetchParamCreator = function (configuration?: Confi
         apiV3InvitationsPost(authorization: string, familyId: number, role: number, text?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV3InvitationsPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV3InvitationsPost.');
             }
             // verify required parameter 'familyId' is not null or undefined
             if (familyId === null || familyId === undefined) {
-                throw new RequiredError('familyId','Required parameter familyId was null or undefined when calling apiV3InvitationsPost.');
+                throw new RequiredError('familyId', 'Required parameter familyId was null or undefined when calling apiV3InvitationsPost.');
             }
             // verify required parameter 'role' is not null or undefined
             if (role === null || role === undefined) {
-                throw new RequiredError('role','Required parameter role was null or undefined when calling apiV3InvitationsPost.');
+                throw new RequiredError('role', 'Required parameter role was null or undefined when calling apiV3InvitationsPost.');
             }
             const localVarPath = `/api/v3/invitations/`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -6396,11 +6396,11 @@ export const InvitationAPIApiFetchParamCreator = function (configuration?: Confi
         apiV3InvitationsTokenAcceptPost(authorization: string, token: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV3InvitationsTokenAcceptPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV3InvitationsTokenAcceptPost.');
             }
             // verify required parameter 'token' is not null or undefined
             if (token === null || token === undefined) {
-                throw new RequiredError('token','Required parameter token was null or undefined when calling apiV3InvitationsTokenAcceptPost.');
+                throw new RequiredError('token', 'Required parameter token was null or undefined when calling apiV3InvitationsTokenAcceptPost.');
             }
             const localVarPath = `/api/v3/invitations/{token}/accept`
                 .replace(`{${"token"}}`, encodeURIComponent(String(token)));
@@ -6433,7 +6433,7 @@ export const InvitationAPIApiFetchParamCreator = function (configuration?: Confi
         apiV3InvitationsTokenGet(token: string, options: any = {}): FetchArgs {
             // verify required parameter 'token' is not null or undefined
             if (token === null || token === undefined) {
-                throw new RequiredError('token','Required parameter token was null or undefined when calling apiV3InvitationsTokenGet.');
+                throw new RequiredError('token', 'Required parameter token was null or undefined when calling apiV3InvitationsTokenGet.');
             }
             const localVarPath = `/api/v3/invitations/{token}`
                 .replace(`{${"token"}}`, encodeURIComponent(String(token)));
@@ -6459,7 +6459,7 @@ export const InvitationAPIApiFetchParamCreator = function (configuration?: Confi
  * InvitationAPIApi - functional programming interface
  * @export
  */
-export const InvitationAPIApiFp = function(configuration?: Configuration) {
+export const InvitationAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * The roles are listed below:<br/>[0]father, [1]mother, [2] uncle, [3]aunt [4]daii [5]amme<br/>
@@ -6684,11 +6684,11 @@ export const NGOAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2NgoActivateNgoIdngoIdPatch(authorization: string, ngoId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NgoActivateNgoIdngoIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NgoActivateNgoIdngoIdPatch.');
             }
             // verify required parameter 'ngoId' is not null or undefined
             if (ngoId === null || ngoId === undefined) {
-                throw new RequiredError('ngoId','Required parameter ngoId was null or undefined when calling apiV2NgoActivateNgoIdngoIdPatch.');
+                throw new RequiredError('ngoId', 'Required parameter ngoId was null or undefined when calling apiV2NgoActivateNgoIdngoIdPatch.');
             }
             const localVarPath = `/api/v2/ngo/activate/ngoId={ngo_id}`
                 .replace(`{${"ngo_id"}}`, encodeURIComponent(String(ngoId)));
@@ -6729,31 +6729,31 @@ export const NGOAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2NgoAddPost(authorization: string, cityId: number, name: string, postalAddress: string, emailAddress: string, phoneNumber: string, logoUrl: any, website?: string, balance?: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NgoAddPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NgoAddPost.');
             }
             // verify required parameter 'cityId' is not null or undefined
             if (cityId === null || cityId === undefined) {
-                throw new RequiredError('cityId','Required parameter cityId was null or undefined when calling apiV2NgoAddPost.');
+                throw new RequiredError('cityId', 'Required parameter cityId was null or undefined when calling apiV2NgoAddPost.');
             }
             // verify required parameter 'name' is not null or undefined
             if (name === null || name === undefined) {
-                throw new RequiredError('name','Required parameter name was null or undefined when calling apiV2NgoAddPost.');
+                throw new RequiredError('name', 'Required parameter name was null or undefined when calling apiV2NgoAddPost.');
             }
             // verify required parameter 'postalAddress' is not null or undefined
             if (postalAddress === null || postalAddress === undefined) {
-                throw new RequiredError('postalAddress','Required parameter postalAddress was null or undefined when calling apiV2NgoAddPost.');
+                throw new RequiredError('postalAddress', 'Required parameter postalAddress was null or undefined when calling apiV2NgoAddPost.');
             }
             // verify required parameter 'emailAddress' is not null or undefined
             if (emailAddress === null || emailAddress === undefined) {
-                throw new RequiredError('emailAddress','Required parameter emailAddress was null or undefined when calling apiV2NgoAddPost.');
+                throw new RequiredError('emailAddress', 'Required parameter emailAddress was null or undefined when calling apiV2NgoAddPost.');
             }
             // verify required parameter 'phoneNumber' is not null or undefined
             if (phoneNumber === null || phoneNumber === undefined) {
-                throw new RequiredError('phoneNumber','Required parameter phoneNumber was null or undefined when calling apiV2NgoAddPost.');
+                throw new RequiredError('phoneNumber', 'Required parameter phoneNumber was null or undefined when calling apiV2NgoAddPost.');
             }
             // verify required parameter 'logoUrl' is not null or undefined
             if (logoUrl === null || logoUrl === undefined) {
-                throw new RequiredError('logoUrl','Required parameter logoUrl was null or undefined when calling apiV2NgoAddPost.');
+                throw new RequiredError('logoUrl', 'Required parameter logoUrl was null or undefined when calling apiV2NgoAddPost.');
             }
             const localVarPath = `/api/v2/ngo/add`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -6821,7 +6821,7 @@ export const NGOAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2NgoAllGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NgoAllGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NgoAllGet.');
             }
             const localVarPath = `/api/v2/ngo/all`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -6853,7 +6853,7 @@ export const NGOAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2NgoDeactivateNgoIdngoIdPatch(ngoId: number, options: any = {}): FetchArgs {
             // verify required parameter 'ngoId' is not null or undefined
             if (ngoId === null || ngoId === undefined) {
-                throw new RequiredError('ngoId','Required parameter ngoId was null or undefined when calling apiV2NgoDeactivateNgoIdngoIdPatch.');
+                throw new RequiredError('ngoId', 'Required parameter ngoId was null or undefined when calling apiV2NgoDeactivateNgoIdngoIdPatch.');
             }
             const localVarPath = `/api/v2/ngo/deactivate/ngoId={ngo_id}`
                 .replace(`{${"ngo_id"}}`, encodeURIComponent(String(ngoId)));
@@ -6883,11 +6883,11 @@ export const NGOAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2NgoDeleteNgoIdngoIdPatch(authorization: string, ngoId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NgoDeleteNgoIdngoIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NgoDeleteNgoIdngoIdPatch.');
             }
             // verify required parameter 'ngoId' is not null or undefined
             if (ngoId === null || ngoId === undefined) {
-                throw new RequiredError('ngoId','Required parameter ngoId was null or undefined when calling apiV2NgoDeleteNgoIdngoIdPatch.');
+                throw new RequiredError('ngoId', 'Required parameter ngoId was null or undefined when calling apiV2NgoDeleteNgoIdngoIdPatch.');
             }
             const localVarPath = `/api/v2/ngo/delete/ngoId={ngo_id}`
                 .replace(`{${"ngo_id"}}`, encodeURIComponent(String(ngoId)));
@@ -6921,11 +6921,11 @@ export const NGOAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2NgoNgoIdngoIdGet(authorization: string, ngoId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NgoNgoIdngoIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NgoNgoIdngoIdGet.');
             }
             // verify required parameter 'ngoId' is not null or undefined
             if (ngoId === null || ngoId === undefined) {
-                throw new RequiredError('ngoId','Required parameter ngoId was null or undefined when calling apiV2NgoNgoIdngoIdGet.');
+                throw new RequiredError('ngoId', 'Required parameter ngoId was null or undefined when calling apiV2NgoNgoIdngoIdGet.');
             }
             const localVarPath = `/api/v2/ngo/ngoId={ngo_id}`
                 .replace(`{${"ngo_id"}}`, encodeURIComponent(String(ngoId)));
@@ -6967,11 +6967,11 @@ export const NGOAPIApiFetchParamCreator = function (configuration?: Configuratio
         apiV2NgoUpdateNgoIdngoIdPatch(authorization: string, ngoId: number, cityId?: number, name?: string, website?: string, postalAddress?: string, emailAddress?: string, phoneNumber?: string, logoUrl?: any, balance?: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NgoUpdateNgoIdngoIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NgoUpdateNgoIdngoIdPatch.');
             }
             // verify required parameter 'ngoId' is not null or undefined
             if (ngoId === null || ngoId === undefined) {
-                throw new RequiredError('ngoId','Required parameter ngoId was null or undefined when calling apiV2NgoUpdateNgoIdngoIdPatch.');
+                throw new RequiredError('ngoId', 'Required parameter ngoId was null or undefined when calling apiV2NgoUpdateNgoIdngoIdPatch.');
             }
             const localVarPath = `/api/v2/ngo/update/ngoId={ngo_id}`
                 .replace(`{${"ngo_id"}}`, encodeURIComponent(String(ngoId)));
@@ -7037,7 +7037,7 @@ export const NGOAPIApiFetchParamCreator = function (configuration?: Configuratio
  * NGOAPIApi - functional programming interface
  * @export
  */
-export const NGOAPIApiFp = function(configuration?: Configuration) {
+export const NGOAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * Activates a deactive NGO.<br/>Calling this API only affects ngo table by updating a row.<br/>
@@ -7423,7 +7423,7 @@ export const NakamaAPIApiFetchParamCreator = function (configuration?: Configura
         apiV2NakamaTxHashPost(txHash: string, options: any = {}): FetchArgs {
             // verify required parameter 'txHash' is not null or undefined
             if (txHash === null || txHash === undefined) {
-                throw new RequiredError('txHash','Required parameter txHash was null or undefined when calling apiV2NakamaTxHashPost.');
+                throw new RequiredError('txHash', 'Required parameter txHash was null or undefined when calling apiV2NakamaTxHashPost.');
             }
             const localVarPath = `/api/v2/nakama/{tx_hash}`
                 .replace(`{${"tx_hash"}}`, encodeURIComponent(String(txHash)));
@@ -7449,7 +7449,7 @@ export const NakamaAPIApiFetchParamCreator = function (configuration?: Configura
  * NakamaAPIApi - functional programming interface
  * @export
  */
-export const NakamaAPIApiFp = function(configuration?: Configuration) {
+export const NakamaAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * <br/>
@@ -7530,11 +7530,11 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedConfirmNeedIdneedIdPatch(authorization: string, needId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedConfirmNeedIdneedIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedConfirmNeedIdneedIdPatch.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2NeedConfirmNeedIdneedIdPatch.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2NeedConfirmNeedIdneedIdPatch.');
             }
             const localVarPath = `/api/v2/need/confirm/needId={need_id}`
                 .replace(`{${"need_id"}}`, encodeURIComponent(String(needId)));
@@ -7568,11 +7568,11 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedDeleteNeedIdneedIdPatch(authorization: string, needId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedDeleteNeedIdneedIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedDeleteNeedIdneedIdPatch.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2NeedDeleteNeedIdneedIdPatch.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2NeedDeleteNeedIdneedIdPatch.');
             }
             const localVarPath = `/api/v2/need/delete/needId={need_id}`
                 .replace(`{${"need_id"}}`, encodeURIComponent(String(needId)));
@@ -7606,11 +7606,11 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedNeedIdneedIdGet(authorization: string, needId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedNeedIdneedIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedNeedIdneedIdGet.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2NeedNeedIdneedIdGet.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2NeedNeedIdneedIdGet.');
             }
             const localVarPath = `/api/v2/need/needId={need_id}`
                 .replace(`{${"need_id"}}`, encodeURIComponent(String(needId)));
@@ -7659,35 +7659,35 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedPost(authorization: string, childId: number, nameTranslations: string, descriptionTranslations: string, category: number, isUrgent: boolean, cost: number, type: number, swId?: number, imageUrl?: any, link?: string, affiliateLinkUrl?: string, receipts?: any, doingDuration?: number, details?: string, informations?: string, deliveryDate?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedPost.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2NeedPost.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2NeedPost.');
             }
             // verify required parameter 'nameTranslations' is not null or undefined
             if (nameTranslations === null || nameTranslations === undefined) {
-                throw new RequiredError('nameTranslations','Required parameter nameTranslations was null or undefined when calling apiV2NeedPost.');
+                throw new RequiredError('nameTranslations', 'Required parameter nameTranslations was null or undefined when calling apiV2NeedPost.');
             }
             // verify required parameter 'descriptionTranslations' is not null or undefined
             if (descriptionTranslations === null || descriptionTranslations === undefined) {
-                throw new RequiredError('descriptionTranslations','Required parameter descriptionTranslations was null or undefined when calling apiV2NeedPost.');
+                throw new RequiredError('descriptionTranslations', 'Required parameter descriptionTranslations was null or undefined when calling apiV2NeedPost.');
             }
             // verify required parameter 'category' is not null or undefined
             if (category === null || category === undefined) {
-                throw new RequiredError('category','Required parameter category was null or undefined when calling apiV2NeedPost.');
+                throw new RequiredError('category', 'Required parameter category was null or undefined when calling apiV2NeedPost.');
             }
             // verify required parameter 'isUrgent' is not null or undefined
             if (isUrgent === null || isUrgent === undefined) {
-                throw new RequiredError('isUrgent','Required parameter isUrgent was null or undefined when calling apiV2NeedPost.');
+                throw new RequiredError('isUrgent', 'Required parameter isUrgent was null or undefined when calling apiV2NeedPost.');
             }
             // verify required parameter 'cost' is not null or undefined
             if (cost === null || cost === undefined) {
-                throw new RequiredError('cost','Required parameter cost was null or undefined when calling apiV2NeedPost.');
+                throw new RequiredError('cost', 'Required parameter cost was null or undefined when calling apiV2NeedPost.');
             }
             // verify required parameter 'type' is not null or undefined
             if (type === null || type === undefined) {
-                throw new RequiredError('type','Required parameter type was null or undefined when calling apiV2NeedPost.');
+                throw new RequiredError('type', 'Required parameter type was null or undefined when calling apiV2NeedPost.');
             }
             const localVarPath = `/api/v2/need/`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -7807,11 +7807,11 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedUpdateNeedIdneedIdPatch(authorization: string, needId: number, imageUrl?: any, nameTranslations?: string, descriptionTranslations?: string, category?: number, isUrgent?: boolean, cost?: number, purchaseCost?: number, type?: number, link?: string, affiliateLinkUrl?: string, receipts?: any, status?: number, doingDuration?: number, details?: string, expectedDeliveryDate?: string, ngoDeliveryDate?: string, dkc?: string, informations?: string, bankTrackId?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedUpdateNeedIdneedIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedUpdateNeedIdneedIdPatch.');
             }
             // verify required parameter 'needId' is not null or undefined
             if (needId === null || needId === undefined) {
-                throw new RequiredError('needId','Required parameter needId was null or undefined when calling apiV2NeedUpdateNeedIdneedIdPatch.');
+                throw new RequiredError('needId', 'Required parameter needId was null or undefined when calling apiV2NeedUpdateNeedIdneedIdPatch.');
             }
             const localVarPath = `/api/v2/need/update/needId={need_id}`
                 .replace(`{${"need_id"}}`, encodeURIComponent(String(needId)));
@@ -7934,7 +7934,7 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedsGet(authorization: string, X_SKIP?: number, X_TAKE?: number, isConfirmed?: boolean, isDone?: boolean, isReported?: boolean, status?: string, type?: number, ngoId?: number, isChildConfirmed?: boolean, unpayable?: boolean, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedsGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedsGet.');
             }
             const localVarPath = `/api/v2/needs`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -8007,7 +8007,7 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedsIdReceiptsGet(id: any, authorization?: string, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2NeedsIdReceiptsGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2NeedsIdReceiptsGet.');
             }
             const localVarPath = `/api/v2/needs/{id}/receipts`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -8047,19 +8047,19 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedsIdReceiptsPost(authorization: string, id: any, attachment: any, title: string, code?: string, description?: string, isPublic?: boolean, needStatus?: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedsIdReceiptsPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedsIdReceiptsPost.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2NeedsIdReceiptsPost.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2NeedsIdReceiptsPost.');
             }
             // verify required parameter 'attachment' is not null or undefined
             if (attachment === null || attachment === undefined) {
-                throw new RequiredError('attachment','Required parameter attachment was null or undefined when calling apiV2NeedsIdReceiptsPost.');
+                throw new RequiredError('attachment', 'Required parameter attachment was null or undefined when calling apiV2NeedsIdReceiptsPost.');
             }
             // verify required parameter 'title' is not null or undefined
             if (title === null || title === undefined) {
-                throw new RequiredError('title','Required parameter title was null or undefined when calling apiV2NeedsIdReceiptsPost.');
+                throw new RequiredError('title', 'Required parameter title was null or undefined when calling apiV2NeedsIdReceiptsPost.');
             }
             const localVarPath = `/api/v2/needs/{id}/receipts`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -8122,15 +8122,15 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2NeedsIdReceiptsReceiptIdDelete(authorization: string, id: any, receiptId: any, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedsIdReceiptsReceiptIdDelete.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedsIdReceiptsReceiptIdDelete.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2NeedsIdReceiptsReceiptIdDelete.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2NeedsIdReceiptsReceiptIdDelete.');
             }
             // verify required parameter 'receiptId' is not null or undefined
             if (receiptId === null || receiptId === undefined) {
-                throw new RequiredError('receiptId','Required parameter receiptId was null or undefined when calling apiV2NeedsIdReceiptsReceiptIdDelete.');
+                throw new RequiredError('receiptId', 'Required parameter receiptId was null or undefined when calling apiV2NeedsIdReceiptsReceiptIdDelete.');
             }
             const localVarPath = `/api/v2/needs/{id}/receipts/{receiptId}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)))
@@ -8161,7 +8161,7 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
  * NeedAPIApi - functional programming interface
  * @export
  */
-export const NeedAPIApiFp = function(configuration?: Configuration) {
+export const NeedAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * Confirms a need, so you can add a payment for it and add it to a confirmed child but you cannot update its price (cost) anymore.<br/>Calling this API affects need, child and social_worker tables.<br/>
@@ -8751,7 +8751,7 @@ export const NeedStatusUpdatesAPIApiFetchParamCreator = function (configuration?
         apiV2NeedStatusUpdatesGet(authorization: string, xTake?: number, xSkip?: number, orderBy?: string, needId?: number, swId?: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2NeedStatusUpdatesGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2NeedStatusUpdatesGet.');
             }
             const localVarPath = `/api/v2/need-status-updates`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -8800,7 +8800,7 @@ export const NeedStatusUpdatesAPIApiFetchParamCreator = function (configuration?
  * NeedStatusUpdatesAPIApi - functional programming interface
  * @export
  */
-export const NeedStatusUpdatesAPIApiFp = function(configuration?: Configuration) {
+export const NeedStatusUpdatesAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * Orderin, Filtering, Pagination<br/>
@@ -8896,11 +8896,11 @@ export const PanelAuthAPIApiFetchParamCreator = function (configuration?: Config
         apiV2PanelAuthLoginPost(username: any, password: any, options: any = {}): FetchArgs {
             // verify required parameter 'username' is not null or undefined
             if (username === null || username === undefined) {
-                throw new RequiredError('username','Required parameter username was null or undefined when calling apiV2PanelAuthLoginPost.');
+                throw new RequiredError('username', 'Required parameter username was null or undefined when calling apiV2PanelAuthLoginPost.');
             }
             // verify required parameter 'password' is not null or undefined
             if (password === null || password === undefined) {
-                throw new RequiredError('password','Required parameter password was null or undefined when calling apiV2PanelAuthLoginPost.');
+                throw new RequiredError('password', 'Required parameter password was null or undefined when calling apiV2PanelAuthLoginPost.');
             }
             const localVarPath = `/api/v2/panel/auth/login`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -8924,6 +8924,7 @@ export const PanelAuthAPIApiFetchParamCreator = function (configuration?: Config
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
             localVarRequestOptions.body = localVarFormParams.toString();
+   
             return {
                 url: url.format(localVarUrlObj),
                 options: localVarRequestOptions,
@@ -8939,7 +8940,7 @@ export const PanelAuthAPIApiFetchParamCreator = function (configuration?: Config
         apiV2PanelAuthLogoutTokenPost(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PanelAuthLogoutTokenPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PanelAuthLogoutTokenPost.');
             }
             const localVarPath = `/api/v2/panel/auth/logout/token`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -8968,7 +8969,7 @@ export const PanelAuthAPIApiFetchParamCreator = function (configuration?: Config
  * PanelAuthAPIApi - functional programming interface
  * @export
  */
-export const PanelAuthAPIApiFp = function(configuration?: Configuration) {
+export const PanelAuthAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -8982,9 +8983,14 @@ export const PanelAuthAPIApiFp = function(configuration?: Configuration) {
             const localVarFetchArgs = PanelAuthAPIApiFetchParamCreator(configuration).apiV2PanelAuthLoginPost(username, password, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    console.log("responseresponseresponseresponse")
                     if (response.status >= 200 && response.status < 300) {
+                        console.log("fetched it")
                         return response;
                     } else {
+                        console.log("fetched :(")
+                        console.log(localVarFetchArgs)
+                        // console.log(response)
                         throw response;
                     }
                 });
@@ -9095,7 +9101,7 @@ export const PaymentAPIApiFetchParamCreator = function (configuration?: Configur
         apiV2PaymentAllGet(authorization: string, needId?: any, take?: any, skip?: any, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PaymentAllGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PaymentAllGet.');
             }
             const localVarPath = `/api/v2/payment/all`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -9140,11 +9146,11 @@ export const PaymentAPIApiFetchParamCreator = function (configuration?: Configur
         apiV2PaymentIdGet(authorization: string, id: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PaymentIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PaymentIdGet.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2PaymentIdGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2PaymentIdGet.');
             }
             const localVarPath = `/api/v2/payment/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -9178,11 +9184,11 @@ export const PaymentAPIApiFetchParamCreator = function (configuration?: Configur
         apiV2PaymentPost(authorization: string, register: Register, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PaymentPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PaymentPost.');
             }
             // verify required parameter 'register' is not null or undefined
             if (register === null || register === undefined) {
-                throw new RequiredError('register','Required parameter register was null or undefined when calling apiV2PaymentPost.');
+                throw new RequiredError('register', 'Required parameter register was null or undefined when calling apiV2PaymentPost.');
             }
             const localVarPath = `/api/v2/payment`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -9201,7 +9207,7 @@ export const PaymentAPIApiFetchParamCreator = function (configuration?: Configur
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
             const needsSerialization = (<any>"Register" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
-            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(register || {}) : (register || "");
+            localVarRequestOptions.body = needsSerialization ? JSON.stringify(register || {}) : (register || "");
 
             return {
                 url: url.format(localVarUrlObj),
@@ -9215,7 +9221,7 @@ export const PaymentAPIApiFetchParamCreator = function (configuration?: Configur
  * PaymentAPIApi - functional programming interface
  * @export
  */
-export const PaymentAPIApiFp = function(configuration?: Configuration) {
+export const PaymentAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * <br/>
@@ -9392,7 +9398,7 @@ export const PreneedAPIApiFetchParamCreator = function (configuration?: Configur
         apiV2PreneedsGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PreneedsGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PreneedsGet.');
             }
             const localVarPath = `/api/v2/preneeds/`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -9421,7 +9427,7 @@ export const PreneedAPIApiFetchParamCreator = function (configuration?: Configur
  * PreneedAPIApi - functional programming interface
  * @export
  */
-export const PreneedAPIApiFp = function(configuration?: Configuration) {
+export const PreneedAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -9503,15 +9509,15 @@ export const PrivilegeAPIApiFetchParamCreator = function (configuration?: Config
         apiV2PrivilegeAddPost(authorization: string, privilege: number, name: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PrivilegeAddPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PrivilegeAddPost.');
             }
             // verify required parameter 'privilege' is not null or undefined
             if (privilege === null || privilege === undefined) {
-                throw new RequiredError('privilege','Required parameter privilege was null or undefined when calling apiV2PrivilegeAddPost.');
+                throw new RequiredError('privilege', 'Required parameter privilege was null or undefined when calling apiV2PrivilegeAddPost.');
             }
             // verify required parameter 'name' is not null or undefined
             if (name === null || name === undefined) {
-                throw new RequiredError('name','Required parameter name was null or undefined when calling apiV2PrivilegeAddPost.');
+                throw new RequiredError('name', 'Required parameter name was null or undefined when calling apiV2PrivilegeAddPost.');
             }
             const localVarPath = `/api/v2/privilege/add`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -9555,7 +9561,7 @@ export const PrivilegeAPIApiFetchParamCreator = function (configuration?: Config
         apiV2PrivilegeAllGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PrivilegeAllGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PrivilegeAllGet.');
             }
             const localVarPath = `/api/v2/privilege/all`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -9588,11 +9594,11 @@ export const PrivilegeAPIApiFetchParamCreator = function (configuration?: Config
         apiV2PrivilegeNamenameGet(authorization: string, name: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PrivilegeNamenameGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PrivilegeNamenameGet.');
             }
             // verify required parameter 'name' is not null or undefined
             if (name === null || name === undefined) {
-                throw new RequiredError('name','Required parameter name was null or undefined when calling apiV2PrivilegeNamenameGet.');
+                throw new RequiredError('name', 'Required parameter name was null or undefined when calling apiV2PrivilegeNamenameGet.');
             }
             const localVarPath = `/api/v2/privilege/name={name}`
                 .replace(`{${"name"}}`, encodeURIComponent(String(name)));
@@ -9626,11 +9632,11 @@ export const PrivilegeAPIApiFetchParamCreator = function (configuration?: Config
         apiV2PrivilegePrivilegeIdprivilegeIdGet(authorization: string, privilegeId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PrivilegePrivilegeIdprivilegeIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PrivilegePrivilegeIdprivilegeIdGet.');
             }
             // verify required parameter 'privilegeId' is not null or undefined
             if (privilegeId === null || privilegeId === undefined) {
-                throw new RequiredError('privilegeId','Required parameter privilegeId was null or undefined when calling apiV2PrivilegePrivilegeIdprivilegeIdGet.');
+                throw new RequiredError('privilegeId', 'Required parameter privilegeId was null or undefined when calling apiV2PrivilegePrivilegeIdprivilegeIdGet.');
             }
             const localVarPath = `/api/v2/privilege/privilegeId={privilege_id}`
                 .replace(`{${"privilege_id"}}`, encodeURIComponent(String(privilegeId)));
@@ -9664,11 +9670,11 @@ export const PrivilegeAPIApiFetchParamCreator = function (configuration?: Config
         apiV2PrivilegePrivilegeprivilegeTypeGet(authorization: string, privilegeType: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PrivilegePrivilegeprivilegeTypeGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PrivilegePrivilegeprivilegeTypeGet.');
             }
             // verify required parameter 'privilegeType' is not null or undefined
             if (privilegeType === null || privilegeType === undefined) {
-                throw new RequiredError('privilegeType','Required parameter privilegeType was null or undefined when calling apiV2PrivilegePrivilegeprivilegeTypeGet.');
+                throw new RequiredError('privilegeType', 'Required parameter privilegeType was null or undefined when calling apiV2PrivilegePrivilegeprivilegeTypeGet.');
             }
             const localVarPath = `/api/v2/privilege/privilege={privilege_type}`
                 .replace(`{${"privilege_type"}}`, encodeURIComponent(String(privilegeType)));
@@ -9704,19 +9710,19 @@ export const PrivilegeAPIApiFetchParamCreator = function (configuration?: Config
         apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch(authorization: string, privilegeId: number, privilege: number, name: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch.');
             }
             // verify required parameter 'privilegeId' is not null or undefined
             if (privilegeId === null || privilegeId === undefined) {
-                throw new RequiredError('privilegeId','Required parameter privilegeId was null or undefined when calling apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch.');
+                throw new RequiredError('privilegeId', 'Required parameter privilegeId was null or undefined when calling apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch.');
             }
             // verify required parameter 'privilege' is not null or undefined
             if (privilege === null || privilege === undefined) {
-                throw new RequiredError('privilege','Required parameter privilege was null or undefined when calling apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch.');
+                throw new RequiredError('privilege', 'Required parameter privilege was null or undefined when calling apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch.');
             }
             // verify required parameter 'name' is not null or undefined
             if (name === null || name === undefined) {
-                throw new RequiredError('name','Required parameter name was null or undefined when calling apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch.');
+                throw new RequiredError('name', 'Required parameter name was null or undefined when calling apiV2PrivilegeUpdatePrivilegeIdprivilegeIdPatch.');
             }
             const localVarPath = `/api/v2/privilege/update/privilegeId={privilege_id}`
                 .replace(`{${"privilege_id"}}`, encodeURIComponent(String(privilegeId)));
@@ -9758,7 +9764,7 @@ export const PrivilegeAPIApiFetchParamCreator = function (configuration?: Config
  * PrivilegeAPIApi - functional programming interface
  * @export
  */
-export const PrivilegeAPIApiFp = function(configuration?: Configuration) {
+export const PrivilegeAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * Adds a privilege.<br/>This API creates a row in social_worker_type table containing a new privilege information.<br/>privilege must be among these numbers:<br/>[0]super admin, [1]social worker, [2]coordinator, [3]NGO supervisor, [4]SAY supervisor, [5]admin<br/>
@@ -10096,7 +10102,7 @@ export const PublicAPIApiFetchParamCreator = function (configuration?: Configura
         apiV2PublicNeedsIdGet(id: string, lang?: string, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2PublicNeedsIdGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2PublicNeedsIdGet.');
             }
             const localVarPath = `/api/v2/public/needs/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -10154,7 +10160,7 @@ export const PublicAPIApiFetchParamCreator = function (configuration?: Configura
  * PublicAPIApi - functional programming interface
  * @export
  */
-export const PublicAPIApiFp = function(configuration?: Configuration) {
+export const PublicAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -10363,11 +10369,11 @@ export const ReceiptAPIApiFetchParamCreator = function (configuration?: Configur
         apiV2ReceiptsIdDelete(authorization: string, id: any, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ReceiptsIdDelete.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ReceiptsIdDelete.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2ReceiptsIdDelete.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2ReceiptsIdDelete.');
             }
             const localVarPath = `/api/v2/receipts/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -10401,7 +10407,7 @@ export const ReceiptAPIApiFetchParamCreator = function (configuration?: Configur
         apiV2ReceiptsIdGet(id: any, authorization?: string, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2ReceiptsIdGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2ReceiptsIdGet.');
             }
             const localVarPath = `/api/v2/receipts/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -10440,11 +10446,11 @@ export const ReceiptAPIApiFetchParamCreator = function (configuration?: Configur
         apiV2ReceiptsIdPatch(authorization: string, id: any, attachment?: any, description?: string, title?: string, needStatus?: number, isPublic?: boolean, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ReceiptsIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2ReceiptsIdPatch.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2ReceiptsIdPatch.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2ReceiptsIdPatch.');
             }
             const localVarPath = `/api/v2/receipts/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -10498,7 +10504,7 @@ export const ReceiptAPIApiFetchParamCreator = function (configuration?: Configur
  * ReceiptAPIApi - functional programming interface
  * @export
  */
-export const ReceiptAPIApiFp = function(configuration?: Configuration) {
+export const ReceiptAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * <br/>
@@ -10762,7 +10768,7 @@ export const SearchAPIApiFetchParamCreator = function (configuration?: Configura
         apiV2SearchSaybrainGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SearchSaybrainGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SearchSaybrainGet.');
             }
             const localVarPath = `/api/v2/search/saybrain`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -10819,7 +10825,7 @@ export const SearchAPIApiFetchParamCreator = function (configuration?: Configura
  * SearchAPIApi - functional programming interface
  * @export
  */
-export const SearchAPIApiFp = function(configuration?: Configuration) {
+export const SearchAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 
@@ -10981,7 +10987,7 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersGet(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersGet.');
             }
             const localVarPath = `/api/v2/socialworkers/`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -11013,7 +11019,7 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersGet_1(authorization: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersGet_1.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersGet_1.');
             }
             const localVarPath = `/api/v2/socialworkers`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -11046,11 +11052,11 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersIdActivatePost(authorization: string, id: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersIdActivatePost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersIdActivatePost.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2SocialworkersIdActivatePost.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2SocialworkersIdActivatePost.');
             }
             const localVarPath = `/api/v2/socialworkers/{id}/activate`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -11085,15 +11091,15 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersIdChildrenMigratePost(authorization: string, id: number, destinationSocialWorkerId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersIdChildrenMigratePost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersIdChildrenMigratePost.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2SocialworkersIdChildrenMigratePost.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2SocialworkersIdChildrenMigratePost.');
             }
             // verify required parameter 'destinationSocialWorkerId' is not null or undefined
             if (destinationSocialWorkerId === null || destinationSocialWorkerId === undefined) {
-                throw new RequiredError('destinationSocialWorkerId','Required parameter destinationSocialWorkerId was null or undefined when calling apiV2SocialworkersIdChildrenMigratePost.');
+                throw new RequiredError('destinationSocialWorkerId', 'Required parameter destinationSocialWorkerId was null or undefined when calling apiV2SocialworkersIdChildrenMigratePost.');
             }
             const localVarPath = `/api/v2/socialworkers/{id}/children/migrate`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -11137,11 +11143,11 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersIdCreatedNeedsGet(authorization: string, id: number, X_SKIP?: number, X_TAKE?: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersIdCreatedNeedsGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersIdCreatedNeedsGet.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2SocialworkersIdCreatedNeedsGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2SocialworkersIdCreatedNeedsGet.');
             }
             const localVarPath = `/api/v2/socialworkers/{id}/createdNeeds`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -11183,11 +11189,11 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersIdDeactivatePost(authorization: string, id: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersIdDeactivatePost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersIdDeactivatePost.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2SocialworkersIdDeactivatePost.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2SocialworkersIdDeactivatePost.');
             }
             const localVarPath = `/api/v2/socialworkers/{id}/deactivate`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -11221,11 +11227,11 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersIdDelete(authorization: string, id: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersIdDelete.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersIdDelete.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2SocialworkersIdDelete.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2SocialworkersIdDelete.');
             }
             const localVarPath = `/api/v2/socialworkers/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -11259,11 +11265,11 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersIdGet(authorization: string, id: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersIdGet.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2SocialworkersIdGet.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2SocialworkersIdGet.');
             }
             const localVarPath = `/api/v2/socialworkers/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -11321,15 +11327,15 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersIdPatch(authorization: string, id: number, isCoordinator: boolean, ngoId?: number, cityId?: number, typeId?: number, username?: string, password?: string, firstName?: string, lastName?: string, birthCertificateNumber?: string, idNumber?: string, idCardUrl?: any, passportNumber?: string, passportUrl?: any, gender?: boolean, birthDate?: string, phoneNumber?: string, emergencyPhoneNumber?: string, email?: string, telegramId?: string, postalAddress?: string, avatarUrl?: any, bankAccountNumber?: string, bankAccountShebaNumber?: string, bankAccountCardNumber?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersIdPatch.');
             }
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2SocialworkersIdPatch.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2SocialworkersIdPatch.');
             }
             // verify required parameter 'isCoordinator' is not null or undefined
             if (isCoordinator === null || isCoordinator === undefined) {
-                throw new RequiredError('isCoordinator','Required parameter isCoordinator was null or undefined when calling apiV2SocialworkersIdPatch.');
+                throw new RequiredError('isCoordinator', 'Required parameter isCoordinator was null or undefined when calling apiV2SocialworkersIdPatch.');
             }
             const localVarPath = `/api/v2/socialworkers/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -11484,51 +11490,51 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersPost(authorization: string, ngoId: number, typeId: number, isCoordinator: boolean, lastName: string, idNumber: string, gender: boolean, phoneNumber: string, emergencyPhoneNumber: string, email: string, telegramId: string, avatarUrl: any, cityId?: number, firstName?: string, birthCertificateNumber?: string, idCardUrl?: any, passportNumber?: string, passportUrl?: any, birthDate?: string, postalAddress?: string, bankAccountNumber?: string, bankAccountShebaNumber?: string, bankAccountCardNumber?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'ngoId' is not null or undefined
             if (ngoId === null || ngoId === undefined) {
-                throw new RequiredError('ngoId','Required parameter ngoId was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('ngoId', 'Required parameter ngoId was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'typeId' is not null or undefined
             if (typeId === null || typeId === undefined) {
-                throw new RequiredError('typeId','Required parameter typeId was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('typeId', 'Required parameter typeId was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'isCoordinator' is not null or undefined
             if (isCoordinator === null || isCoordinator === undefined) {
-                throw new RequiredError('isCoordinator','Required parameter isCoordinator was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('isCoordinator', 'Required parameter isCoordinator was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'lastName' is not null or undefined
             if (lastName === null || lastName === undefined) {
-                throw new RequiredError('lastName','Required parameter lastName was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('lastName', 'Required parameter lastName was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'idNumber' is not null or undefined
             if (idNumber === null || idNumber === undefined) {
-                throw new RequiredError('idNumber','Required parameter idNumber was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('idNumber', 'Required parameter idNumber was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'gender' is not null or undefined
             if (gender === null || gender === undefined) {
-                throw new RequiredError('gender','Required parameter gender was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('gender', 'Required parameter gender was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'phoneNumber' is not null or undefined
             if (phoneNumber === null || phoneNumber === undefined) {
-                throw new RequiredError('phoneNumber','Required parameter phoneNumber was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('phoneNumber', 'Required parameter phoneNumber was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'emergencyPhoneNumber' is not null or undefined
             if (emergencyPhoneNumber === null || emergencyPhoneNumber === undefined) {
-                throw new RequiredError('emergencyPhoneNumber','Required parameter emergencyPhoneNumber was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('emergencyPhoneNumber', 'Required parameter emergencyPhoneNumber was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'email' is not null or undefined
             if (email === null || email === undefined) {
-                throw new RequiredError('email','Required parameter email was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('email', 'Required parameter email was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'telegramId' is not null or undefined
             if (telegramId === null || telegramId === undefined) {
-                throw new RequiredError('telegramId','Required parameter telegramId was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('telegramId', 'Required parameter telegramId was null or undefined when calling apiV2SocialworkersPost.');
             }
             // verify required parameter 'avatarUrl' is not null or undefined
             if (avatarUrl === null || avatarUrl === undefined) {
-                throw new RequiredError('avatarUrl','Required parameter avatarUrl was null or undefined when calling apiV2SocialworkersPost.');
+                throw new RequiredError('avatarUrl', 'Required parameter avatarUrl was null or undefined when calling apiV2SocialworkersPost.');
             }
             const localVarPath = `/api/v2/socialworkers/`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -11674,51 +11680,51 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
         apiV2SocialworkersPost_2(authorization: string, ngoId: number, typeId: number, isCoordinator: boolean, lastName: string, idNumber: string, gender: boolean, phoneNumber: string, emergencyPhoneNumber: string, email: string, telegramId: string, avatarUrl: any, cityId?: number, firstName?: string, birthCertificateNumber?: string, idCardUrl?: any, passportNumber?: string, passportUrl?: any, birthDate?: string, postalAddress?: string, bankAccountNumber?: string, bankAccountShebaNumber?: string, bankAccountCardNumber?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'ngoId' is not null or undefined
             if (ngoId === null || ngoId === undefined) {
-                throw new RequiredError('ngoId','Required parameter ngoId was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('ngoId', 'Required parameter ngoId was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'typeId' is not null or undefined
             if (typeId === null || typeId === undefined) {
-                throw new RequiredError('typeId','Required parameter typeId was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('typeId', 'Required parameter typeId was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'isCoordinator' is not null or undefined
             if (isCoordinator === null || isCoordinator === undefined) {
-                throw new RequiredError('isCoordinator','Required parameter isCoordinator was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('isCoordinator', 'Required parameter isCoordinator was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'lastName' is not null or undefined
             if (lastName === null || lastName === undefined) {
-                throw new RequiredError('lastName','Required parameter lastName was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('lastName', 'Required parameter lastName was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'idNumber' is not null or undefined
             if (idNumber === null || idNumber === undefined) {
-                throw new RequiredError('idNumber','Required parameter idNumber was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('idNumber', 'Required parameter idNumber was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'gender' is not null or undefined
             if (gender === null || gender === undefined) {
-                throw new RequiredError('gender','Required parameter gender was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('gender', 'Required parameter gender was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'phoneNumber' is not null or undefined
             if (phoneNumber === null || phoneNumber === undefined) {
-                throw new RequiredError('phoneNumber','Required parameter phoneNumber was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('phoneNumber', 'Required parameter phoneNumber was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'emergencyPhoneNumber' is not null or undefined
             if (emergencyPhoneNumber === null || emergencyPhoneNumber === undefined) {
-                throw new RequiredError('emergencyPhoneNumber','Required parameter emergencyPhoneNumber was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('emergencyPhoneNumber', 'Required parameter emergencyPhoneNumber was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'email' is not null or undefined
             if (email === null || email === undefined) {
-                throw new RequiredError('email','Required parameter email was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('email', 'Required parameter email was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'telegramId' is not null or undefined
             if (telegramId === null || telegramId === undefined) {
-                throw new RequiredError('telegramId','Required parameter telegramId was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('telegramId', 'Required parameter telegramId was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             // verify required parameter 'avatarUrl' is not null or undefined
             if (avatarUrl === null || avatarUrl === undefined) {
-                throw new RequiredError('avatarUrl','Required parameter avatarUrl was null or undefined when calling apiV2SocialworkersPost_2.');
+                throw new RequiredError('avatarUrl', 'Required parameter avatarUrl was null or undefined when calling apiV2SocialworkersPost_2.');
             }
             const localVarPath = `/api/v2/socialworkers`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -11839,7 +11845,7 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
  * SocialWorkerAPIApi - functional programming interface
  * @export
  */
-export const SocialWorkerAPIApiFp = function(configuration?: Configuration) {
+export const SocialWorkerAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * Returns information of all social workers in a json.<br/>Json key is social worker id and json value is social worker object.<br/>Calling this API only affects social_worker table by selecting rows from it.<br/>
@@ -12573,23 +12579,23 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2UserAddPost(authorization: string, firstName: string, lastName: string, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserAddPost.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2UserAddPost.');
             }
             // verify required parameter 'firstName' is not null or undefined
             if (firstName === null || firstName === undefined) {
-                throw new RequiredError('firstName','Required parameter firstName was null or undefined when calling apiV2UserAddPost.');
+                throw new RequiredError('firstName', 'Required parameter firstName was null or undefined when calling apiV2UserAddPost.');
             }
             // verify required parameter 'lastName' is not null or undefined
             if (lastName === null || lastName === undefined) {
-                throw new RequiredError('lastName','Required parameter lastName was null or undefined when calling apiV2UserAddPost.');
+                throw new RequiredError('lastName', 'Required parameter lastName was null or undefined when calling apiV2UserAddPost.');
             }
             // verify required parameter 'userName' is not null or undefined
             if (userName === null || userName === undefined) {
-                throw new RequiredError('userName','Required parameter userName was null or undefined when calling apiV2UserAddPost.');
+                throw new RequiredError('userName', 'Required parameter userName was null or undefined when calling apiV2UserAddPost.');
             }
             // verify required parameter 'password' is not null or undefined
             if (password === null || password === undefined) {
-                throw new RequiredError('password','Required parameter password was null or undefined when calling apiV2UserAddPost.');
+                throw new RequiredError('password', 'Required parameter password was null or undefined when calling apiV2UserAddPost.');
             }
             const localVarPath = `/api/v2/user/add`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -12666,11 +12672,11 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2UserChildrenUserIduserIdGet(authorization: string, userId: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserChildrenUserIduserIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2UserChildrenUserIduserIdGet.');
             }
             // verify required parameter 'userId' is not null or undefined
             if (userId === null || userId === undefined) {
-                throw new RequiredError('userId','Required parameter userId was null or undefined when calling apiV2UserChildrenUserIduserIdGet.');
+                throw new RequiredError('userId', 'Required parameter userId was null or undefined when calling apiV2UserChildrenUserIduserIdGet.');
             }
             const localVarPath = `/api/v2/user/children/userId={user_id}`
                 .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
@@ -12704,11 +12710,11 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2UserDeleteUserIduserIdPatch(authorization: string, userId: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserDeleteUserIduserIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2UserDeleteUserIduserIdPatch.');
             }
             // verify required parameter 'userId' is not null or undefined
             if (userId === null || userId === undefined) {
-                throw new RequiredError('userId','Required parameter userId was null or undefined when calling apiV2UserDeleteUserIduserIdPatch.');
+                throw new RequiredError('userId', 'Required parameter userId was null or undefined when calling apiV2UserDeleteUserIduserIdPatch.');
             }
             const localVarPath = `/api/v2/user/delete/userId={user_id}`
                 .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
@@ -12743,15 +12749,15 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2UserRoleUserIduserIdchildIdchildIdGet(authorization: string, userId: string, childId: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserRoleUserIduserIdchildIdchildIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2UserRoleUserIduserIdchildIdchildIdGet.');
             }
             // verify required parameter 'userId' is not null or undefined
             if (userId === null || userId === undefined) {
-                throw new RequiredError('userId','Required parameter userId was null or undefined when calling apiV2UserRoleUserIduserIdchildIdchildIdGet.');
+                throw new RequiredError('userId', 'Required parameter userId was null or undefined when calling apiV2UserRoleUserIduserIdchildIdchildIdGet.');
             }
             // verify required parameter 'childId' is not null or undefined
             if (childId === null || childId === undefined) {
-                throw new RequiredError('childId','Required parameter childId was null or undefined when calling apiV2UserRoleUserIduserIdchildIdchildIdGet.');
+                throw new RequiredError('childId', 'Required parameter childId was null or undefined when calling apiV2UserRoleUserIduserIdchildIdchildIdGet.');
             }
             const localVarPath = `/api/v2/user/role/userId={user_id}&childId={child_id}`
                 .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)))
@@ -12786,11 +12792,11 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2UserSearchGet(authorization: string, q: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserSearchGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2UserSearchGet.');
             }
             // verify required parameter 'q' is not null or undefined
             if (q === null || q === undefined) {
-                throw new RequiredError('q','Required parameter q was null or undefined when calling apiV2UserSearchGet.');
+                throw new RequiredError('q', 'Required parameter q was null or undefined when calling apiV2UserSearchGet.');
             }
             const localVarPath = `/api/v2/user/search`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -12841,11 +12847,11 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserUpdateUserIduserIdPatch.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2UserUpdateUserIduserIdPatch.');
             }
             // verify required parameter 'userId' is not null or undefined
             if (userId === null || userId === undefined) {
-                throw new RequiredError('userId','Required parameter userId was null or undefined when calling apiV2UserUpdateUserIduserIdPatch.');
+                throw new RequiredError('userId', 'Required parameter userId was null or undefined when calling apiV2UserUpdateUserIduserIdPatch.');
             }
             const localVarPath = `/api/v2/user/update/userId={user_id}`
                 .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
@@ -12939,11 +12945,11 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
         apiV2UserUserIduserIdGet(authorization: string, userId: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserUserIduserIdGet.');
+                throw new RequiredError('authorization', 'Required parameter authorization was null or undefined when calling apiV2UserUserIduserIdGet.');
             }
             // verify required parameter 'userId' is not null or undefined
             if (userId === null || userId === undefined) {
-                throw new RequiredError('userId','Required parameter userId was null or undefined when calling apiV2UserUserIduserIdGet.');
+                throw new RequiredError('userId', 'Required parameter userId was null or undefined when calling apiV2UserUserIduserIdGet.');
             }
             const localVarPath = `/api/v2/user/userId={user_id}`
                 .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
@@ -12973,7 +12979,7 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
  * UserAPIApi - functional programming interface
  * @export
  */
-export const UserAPIApiFp = function(configuration?: Configuration) {
+export const UserAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
@@ -13392,7 +13398,7 @@ export const VerificationAPIApiFetchParamCreator = function (configuration?: Con
         apiV2AuthVerifyEmailPost(email: string, options: any = {}): FetchArgs {
             // verify required parameter 'email' is not null or undefined
             if (email === null || email === undefined) {
-                throw new RequiredError('email','Required parameter email was null or undefined when calling apiV2AuthVerifyEmailPost.');
+                throw new RequiredError('email', 'Required parameter email was null or undefined when calling apiV2AuthVerifyEmailPost.');
             }
             const localVarPath = `/api/v2/auth/verify/email`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -13429,11 +13435,11 @@ export const VerificationAPIApiFetchParamCreator = function (configuration?: Con
         apiV2AuthVerifyIdPatch(id: string, code: string, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2AuthVerifyIdPatch.');
+                throw new RequiredError('id', 'Required parameter id was null or undefined when calling apiV2AuthVerifyIdPatch.');
             }
             // verify required parameter 'code' is not null or undefined
             if (code === null || code === undefined) {
-                throw new RequiredError('code','Required parameter code was null or undefined when calling apiV2AuthVerifyIdPatch.');
+                throw new RequiredError('code', 'Required parameter code was null or undefined when calling apiV2AuthVerifyIdPatch.');
             }
             const localVarPath = `/api/v2/auth/verify/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
@@ -13470,7 +13476,7 @@ export const VerificationAPIApiFetchParamCreator = function (configuration?: Con
         apiV2AuthVerifyPhonePost(phoneNumber: string, options: any = {}): FetchArgs {
             // verify required parameter 'phoneNumber' is not null or undefined
             if (phoneNumber === null || phoneNumber === undefined) {
-                throw new RequiredError('phoneNumber','Required parameter phoneNumber was null or undefined when calling apiV2AuthVerifyPhonePost.');
+                throw new RequiredError('phoneNumber', 'Required parameter phoneNumber was null or undefined when calling apiV2AuthVerifyPhonePost.');
             }
             const localVarPath = `/api/v2/auth/verify/phone`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -13503,7 +13509,7 @@ export const VerificationAPIApiFetchParamCreator = function (configuration?: Con
  * VerificationAPIApi - functional programming interface
  * @export
  */
-export const VerificationAPIApiFp = function(configuration?: Configuration) {
+export const VerificationAPIApiFp = function (configuration?: Configuration) {
     return {
         /**
          * 

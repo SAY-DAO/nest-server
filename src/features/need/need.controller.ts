@@ -12,7 +12,7 @@ import { SocialWorkerParams } from '../../types/parameters/UserParameters';
 import { AllExceptionsFilter } from '../../filters/all-exception.filter';
 import { NgoService } from '../ngo/ngo.service';
 import { NgoParams } from '../../types/parameters/NgoParammeters';
-import { Configuration, PanelAuthAPIApiFactory, PanelAuthAPIApiFetchParamCreator, PreneedAPIApi, PublicAPIApi, PublicNeed } from "../../generated-sources/openapi";
+import { Configuration, PanelAuthAPIApiFactory, PanelAuthAPIApi, PreneedAPIApi, PublicAPIApi, PublicNeed } from "../../generated-sources/openapi";
 
 
 export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
@@ -50,31 +50,56 @@ export class NeedController {
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getPrNeed() {
     const configuration = new Configuration({
-      // basePath: "https://api.s.sayapp.company",
+      basePath: "https://api.s.sayapp.company",
       username: 'devdev',
       password: '0kSQ6T474ZOa'
     });
 
-    const authFactory = PanelAuthAPIApiFactory(configuration,
+
+    const authPanelApi = new PanelAuthAPIApi(configuration, "https://api.s.sayapp.company",
       ((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
         console.log(url)
         const options = {
           method: 'POST',
           headers: {
             "accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
           }
         }
         return fetch(url, options)
-      }), "https://api.s.sayapp.company")
+      }))
 
-    const loggedIn = await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password).then(
+      const authFactory = PanelAuthAPIApiFactory(configuration,((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
+        console.log(url)
+        const options = {
+          method: 'POST',
+          headers: {
+            "accept": "application/json",
+          }
+        }
+        return fetch(url, options)
+      })
+      )
+      
+         
+    const loggedIn1 = await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
+      headers: {
+        "accept": "application/json",
+      }
+    }).then(
       (r => console.log(r))).catch(
-        (e) => console.log(e))
+        (e) => console.log("eeeeeeeeeeeeeeeee1"))
+
+    const loggedIn2 = await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
+      headers: {
+        "accept": "application/json",
+      }
+    }).then(
+      (r => console.log(r))).catch(
+        (e) => console.log("eeeeeeeeeeeeeeeee2"))
 
     // const auth = PanelAuthAPIApiFetchParamCreator(configuration)
     // const loggedIn = auth.apiV2PanelAuthLoginPost(configuration.username, configuration.password)
-    // console.log(auth)
+    // console.log(authFactory)
     // console.log(loggedIn)
     // return loggedIn.options
   }
