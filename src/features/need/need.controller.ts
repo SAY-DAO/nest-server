@@ -68,11 +68,12 @@ export class NeedController {
         return fetch(url, options)
       }), "https://api.s.sayapp.company")
 
-
+    const loggedIn = await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password).then(
+      (r => console.log(r))).catch(
+        (e) => console.log(e))
 
     // const auth = PanelAuthAPIApiFetchParamCreator(configuration)
     // const loggedIn = auth.apiV2PanelAuthLoginPost(configuration.username, configuration.password)
-    console.log(await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password).then((r => console.log(r))).catch((e) => console.log(e)))
     // console.log(auth)
     // console.log(loggedIn)
     // return loggedIn.options
