@@ -81,7 +81,7 @@ export class NeedController {
       )
       
          
-    const loggedIn1 = await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
+    const loggedIn1 = await authPanelApi.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
       headers: {
         "accept": "application/json",
       }
