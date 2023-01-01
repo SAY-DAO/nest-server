@@ -8982,8 +8982,10 @@ export const PanelAuthAPIApiFp = function (configuration?: Configuration) {
         apiV2PanelAuthLoginPost(username: any, password: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
             const localVarFetchArgs = PanelAuthAPIApiFetchParamCreator(configuration).apiV2PanelAuthLoginPost(username, password, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then(async (response) => {
                     console.log("responseresponseresponseresponse")
+                    console.log( (await fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options)).status)
+                    console.log(await fetch("https://api.s.sayapp.company/api/v2/panel/auth/login"))
                     if (response.status >= 200 && response.status < 300) {
                         console.log("fetched it")
                         return response;

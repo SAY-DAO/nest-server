@@ -46,7 +46,7 @@ export class NeedController {
     return need;
   }
 
-  @Get(`flask/preneed`)
+  @Post(`flask/preneed`)
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getPrNeed() {
     const configuration = new Configuration({
