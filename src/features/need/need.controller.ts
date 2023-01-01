@@ -12,11 +12,10 @@ import { SocialWorkerParams } from '../../types/parameters/UserParameters';
 import { AllExceptionsFilter } from '../../filters/all-exception.filter';
 import { NgoService } from '../ngo/ngo.service';
 import { NgoParams } from '../../types/parameters/NgoParammeters';
-import { Configuration, PanelAuthAPIApiFactory, PanelAuthAPIApi, PreneedAPIApi, PublicAPIApi, PublicNeed } from "../../generated-sources/openapi";
+import { AuthenticationService } from '../authentication/auth.service';
 
 
 export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
-
 
 @ApiTags('Needs')
 @Controller('needs')
@@ -25,106 +24,32 @@ export class NeedController {
     private childrenService: ChildrenService,
     private userService: UserService,
     private ngoService: NgoService,
+    private authService: AuthenticationService,
   ) { }
 
   @Get(`flask/random`)
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getRandomNeed() {
-    const configuration = new Configuration({
-      basePath: "https://api.s.sayapp.company",
-    });
+    return await this.needService.getRandomNeed()
 
-    const publicApi = new PublicAPIApi(configuration, "https://api.s.sayapp.company",
-      (url: "https://api.s.sayapp.company/api"): Promise<Response> => {
-        console.log(url)
-        return fetch(url)
-      });
-
-    const need: Promise<PublicNeed> = publicApi.apiV2PublicRandomNeedGet().then((r) => r
-    ).catch((e) => e)
-
-    return need;
   }
 
-  @Post(`flask/preneed`)
+  @Get(`flask/preneed`)
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getPrNeed() {
-    // const configuration = new Configuration({
-    //   basePath: "https://api.s.sayapp.company",
-    //   username: 'devdev',
-    //   password: '0kSQ6T474ZOa'
-    // });
-
-    const panelAuthApi = new PanelAuthAPIApi()
-    const response = await panelAuthApi.apiV2PanelAuthLoginPost('devdev',  '0kSQ6T474ZOa')
-    const data = await response.json()
-    console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
-    console.log(data);
-
-    const access_token = data.access_token;
-    console.log(access_token);
-
-    const preneedApi = new PreneedAPIApi()
-    const preneeds = await preneedApi.apiV2PreneedsGet(access_token)
-    console.log('-----------------------------------');
-    console.log(preneeds);
-
-    // const authPanelApi = new PanelAuthAPIApi(configuration, "https://api.s.sayapp.company",
-    //   ((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
-    //     console.log(url)
-    //     const options = {
-    //       method: 'POST',
-    //       headers: {
-    //         "accept": "application/json",
-    //       }
-    //     }
-    //     return fetch(url, options)
-    //   }))
-
-    //   const authFactory = PanelAuthAPIApiFactory(configuration,((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
-    //     console.log(url)
-    //     const options = {
-    //       method: 'POST',
-    //       headers: {
-    //         "accept": "application/json",
-    //       }
-    //     }
-    //     return fetch(url, options)
-    //   }),"https://api.s.sayapp.company"
-    //   )
-
-
-    // const loggedIn1 = await authPanelApi.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
-    //   headers: {
-    //     "accept": "application/json",
-    //   }
-    // }).then(
-    //   (r => console.log(r))).catch(
-    //     (e) => console.log("eeeeeeeeeeeeeeeee1"))
-
-    // const loggedIn2 = await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
-    //   headers: {
-    //     "accept": "application/json",
-    //   }
-    // }).then(
-    //   (r => console.log(r))).catch(
-    //     (e) => console.log("eeeeeeeeeeeeeeeee2"))
-
-    // const auth = PanelAuthAPIApiFetchParamCreator(configuration)
-    // const loggedIn = auth.apiV2PanelAuthLoginPost(configuration.username, configuration.password)
-    // console.log(authFactory)
-    // console.log(loggedIn)
-    return preneeds
+    const accessToken = await this.authService.authPanel()
+    const preNeeds = await this.needService.getPreNeed(accessToken)
+    return preNeeds
   }
 
-  @Get(`all`)
+  @Get(`flask/all`)
   @ApiOperation({ description: 'Get all needs from flask' })
-  async getNeeds(@Query('page') page = 1, @Query('limit') limit = 10) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.needService.getNeeds({
-      limit: Number(limit),
-      page: Number(page),
-      route: NEEDS_URL
+  async getNeeds(@Query('skip') skip = 0, @Query('take') take = 100) {
+    const accessToken = await this.authService.authPanel()
+    take = take > 100 ? 100 : take;
+    return await this.needService.getNeeds(accessToken, {
+      X_TAKE: Number(take),
+      X_SKIP: Number(skip),
     })
   }
 

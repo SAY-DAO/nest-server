@@ -8,7 +8,7 @@ import {
   IPaginationOptions,
   paginate,
 } from 'nestjs-typeorm-paginate';
-
+import { Configuration, NeedAPIApi, PreneedAPIApi, PreneedSummary, PublicAPIApi, PublicNeed } from "../../generated-sources/openapi";
 import { ChildrenEntity } from '../../entities/children.entity';
 import { NeedParams } from '../../types/parameters/NeedParameters';
 import { PaymentEntity } from '../../entities/payment.entity';
@@ -22,19 +22,33 @@ export class NeedService {
     private needRepository: Repository<NeedEntity>,
   ) { }
 
-  async getNeeds(
-    options: IPaginationOptions,
-  ): Promise<Observable<Pagination<NeedEntity>>> {
-    return from(
-      paginate<NeedEntity>(this.needRepository, options, {
-        relations: ['payments', 'participants', 'receipts'],
-        where: {
-          isDeleted: false,
-          // isDone: true
-        },
-      }),
-    ).pipe(map((needs: Pagination<NeedEntity>) => needs));
+  async getRandomNeed(
+  ): Promise<PublicNeed> {
+    const configuration = new Configuration({
+      basePath: "https://api.s.sayapp.company",
+    });
+
+    const publicApi = new PublicAPIApi(configuration, "https://api.s.sayapp.company",
+      (url: "https://api.s.sayapp.company/api"): Promise<Response> => {
+        console.log(url)
+        return fetch(url)
+      });
+
+    const need: Promise<PublicNeed> = publicApi.apiV2PublicRandomNeedGet().then((r) => r
+    ).catch((e) => e)
+
+    return need;
   }
+
+  async getNeeds(accessToken: any, options
+  ): Promise<NeedAPIApi> {
+    const publicApi = new NeedAPIApi();
+
+    const needs: Promise<NeedAPIApi> = publicApi.apiV2NeedsGet(accessToken, options.X_SKIP, options.X_TAKE).then((r) => r
+    ).catch((e) => e)
+    return needs;
+  }
+
 
 
 
@@ -172,14 +186,10 @@ export class NeedService {
     );
   }
 
-  createNeedsTemplates(childId: number): Promise<NeedEntity[]> {
-    return this.needRepository.find({
-      where: {
-        unpayable: false,
-        flaskChildId: childId
-      },
-    });
-
+  getPreNeed(accessToken: any): Promise<PreneedSummary> {
+    const preneedApi = new PreneedAPIApi()
+    const preneeds = preneedApi.apiV2PreneedsGet(accessToken)
+    return preneeds
   }
 
 

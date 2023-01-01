@@ -9,6 +9,7 @@ import {
   paginate,
 } from 'nestjs-typeorm-paginate';
 import { from, map, Observable } from 'rxjs';
+import { ChildAPIApi } from 'src/generated-sources/openapi';
 
 @Injectable()
 export class ChildrenService {
@@ -16,6 +17,15 @@ export class ChildrenService {
     @InjectRepository(ChildrenEntity)
     private childrenRepository: Repository<ChildrenEntity>,
   ) { }
+
+  async getChildNeedsSummeay(accessToken: any, childId: number
+  ): Promise<ChildAPIApi> {
+    const childApi = new ChildAPIApi();
+    const needs: Promise<ChildAPIApi> = childApi.apiV2ChildChildIdNeedsSummaryGet(accessToken, childId).then((r) => r
+    ).catch((e) => e)
+    return needs;
+  }
+
 
   getChildren(): Promise<ChildrenEntity[]> {
     return this.childrenRepository.find();
