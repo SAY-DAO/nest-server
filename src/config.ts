@@ -36,7 +36,7 @@ function loadConfig() {
       host: NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,
       username: process.env.DB_USER ?? 'postgres',
       password: dbPassword ?? process.env.DB_PASS ?? 'postgres',
-      database: process.env.DB_NAME ?? 'say_nest',
+      database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
       synchronize: true,
       logging: true,
