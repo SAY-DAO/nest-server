@@ -56,10 +56,17 @@ export class NeedController {
     });
 
     const authFactory = PanelAuthAPIApiFactory(configuration,
-      (url: "https://api.s.sayapp.company/api"): Promise<Response> => {
+      ((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
         console.log(url)
-        return fetch(url)
-      }, "https://api.s.sayapp.company")
+        const options = {
+          method: 'POST',
+          headers: {
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+          }
+        }
+        return fetch(url, options)
+      }), "https://api.s.sayapp.company")
 
 
 
