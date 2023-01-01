@@ -23,7 +23,7 @@ function loadConfig() {
   const configs = {
     serverPort: process.env.PORT || 8002,
     host:
-      process.env.NODE_ENV === 'development'
+      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined
         ? 'localHost'
         : process.env.NODE_ENV === 'docker-local'
           ? 'localHost'

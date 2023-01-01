@@ -49,59 +49,72 @@ export class NeedController {
   @Post(`flask/preneed`)
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getPrNeed() {
-    const configuration = new Configuration({
-      basePath: "https://api.s.sayapp.company",
-      username: 'devdev',
-      password: '0kSQ6T474ZOa'
-    });
+    // const configuration = new Configuration({
+    //   basePath: "https://api.s.sayapp.company",
+    //   username: 'devdev',
+    //   password: '0kSQ6T474ZOa'
+    // });
+
+    const panelAuthApi = new PanelAuthAPIApi()
+    const response = await panelAuthApi.apiV2PanelAuthLoginPost('devdev',  '0kSQ6T474ZOa')
+    const data = await response.json()
+    console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+    console.log(data);
+
+    const access_token = data.access_token;
+    console.log(access_token);
+
+    const preneedApi = new PreneedAPIApi()
+    const preneeds = await preneedApi.apiV2PreneedsGet(access_token)
+    console.log('-----------------------------------');
+    console.log(preneeds);
+
+    // const authPanelApi = new PanelAuthAPIApi(configuration, "https://api.s.sayapp.company",
+    //   ((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
+    //     console.log(url)
+    //     const options = {
+    //       method: 'POST',
+    //       headers: {
+    //         "accept": "application/json",
+    //       }
+    //     }
+    //     return fetch(url, options)
+    //   }))
+
+    //   const authFactory = PanelAuthAPIApiFactory(configuration,((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
+    //     console.log(url)
+    //     const options = {
+    //       method: 'POST',
+    //       headers: {
+    //         "accept": "application/json",
+    //       }
+    //     }
+    //     return fetch(url, options)
+    //   }),"https://api.s.sayapp.company"
+    //   )
 
 
-    const authPanelApi = new PanelAuthAPIApi(configuration, "https://api.s.sayapp.company",
-      ((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
-        console.log(url)
-        const options = {
-          method: 'POST',
-          headers: {
-            "accept": "application/json",
-          }
-        }
-        return fetch(url, options)
-      }))
+    // const loggedIn1 = await authPanelApi.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
+    //   headers: {
+    //     "accept": "application/json",
+    //   }
+    // }).then(
+    //   (r => console.log(r))).catch(
+    //     (e) => console.log("eeeeeeeeeeeeeeeee1"))
 
-      const authFactory = PanelAuthAPIApiFactory(configuration,((url: "https://api.s.sayapp.company/api"): Promise<Response> => {
-        console.log(url)
-        const options = {
-          method: 'POST',
-          headers: {
-            "accept": "application/json",
-          }
-        }
-        return fetch(url, options)
-      }),"https://api.s.sayapp.company"
-      )
-      
-         
-    const loggedIn1 = await authPanelApi.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
-      headers: {
-        "accept": "application/json",
-      }
-    }).then(
-      (r => console.log(r))).catch(
-        (e) => console.log("eeeeeeeeeeeeeeeee1"))
-
-    const loggedIn2 = await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
-      headers: {
-        "accept": "application/json",
-      }
-    }).then(
-      (r => console.log(r))).catch(
-        (e) => console.log("eeeeeeeeeeeeeeeee2"))
+    // const loggedIn2 = await authFactory.apiV2PanelAuthLoginPost(configuration.username, configuration.password, {
+    //   headers: {
+    //     "accept": "application/json",
+    //   }
+    // }).then(
+    //   (r => console.log(r))).catch(
+    //     (e) => console.log("eeeeeeeeeeeeeeeee2"))
 
     // const auth = PanelAuthAPIApiFetchParamCreator(configuration)
     // const loggedIn = auth.apiV2PanelAuthLoginPost(configuration.username, configuration.password)
     // console.log(authFactory)
     // console.log(loggedIn)
-    // return loggedIn.options
+    return preneeds
   }
 
   @Get(`all`)

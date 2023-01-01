@@ -20,14 +20,6 @@ async function startServer() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
-    origin: [
-      process.env.AUTHORIZED_DAPP_LOCAL,
-      process.env.AUTHORIZED_PANEL_LOCAL,
-      process.env.AUTHORIZED_PANEL_PRODUCTION,
-      process.env.AUTHORIZED_HOST_PRODUCTION,
-      process.env.AUTHORIZED_HOST_STAGING,
-      process.env.AUTHORIZED_DOCS_LOCAL,
-    ],
     allowedHeaders: ['Origin,X-Requested-With,Content-Type,Accept'],
     methods: ['GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'],
     optionsSuccessStatus: 200,
