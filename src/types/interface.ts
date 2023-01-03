@@ -1,5 +1,4 @@
 
-
 export enum RolesEnum {
     NO_ROLE = 0,
     SUPER_ADMIN = 1,
@@ -11,6 +10,9 @@ export enum RolesEnum {
     FAMILY = 7,
     FRIEND = 8,
 };
+
+export interface HeaderOptions { accessToken: string, X_SKIP?: number, X_TAKE?: number }
+export interface NeedApiParams { isConfirmed?: boolean, isDone?: boolean, isReported?: boolean, status?: string, type?: number, ngoId?: number, isChildConfirmed?: boolean, unpayable?: boolean, options?: any }
 
 export interface Domain {
     name: string;

@@ -4,8 +4,14 @@ import { CreateReceiptDto } from './CreateReceipt.dto';
 import { SocialWorkerDto } from './CreateSocialWorker.dto';
 import { CreateChildDto } from './CreateChildren.dto';
 
-// need from panel - flask server
-export class CreateNeedDto {
+export class NeedsDataDto {
+  all_needs_count: number;
+  totalCount: number;
+  needs: NeedDto[]
+}
+
+
+export class NeedDto {
   @IsNotEmpty()
   needId: number;
   @IsNotEmpty()
@@ -66,7 +72,7 @@ export class CreateNeedDto {
   receipts: CreateReceiptDto[];
   participants: CreateParticipantDto[];
   child: CreateChildDto;
-  createdById: number;
+  created_by_id: number;
 }
 
 // // need from panel - flask server

@@ -8,7 +8,6 @@ import { NeedService } from '../need/need.service';
 import { ChildrenController } from './children.controller';
 import { ChildrenService } from './children.service';
 import { NgoEntity } from '../../entities/ngo.entity';
-import { AuthenticationService } from '../authentication/auth.service';
 
 @Module({
     imports: [
@@ -17,5 +16,5 @@ import { AuthenticationService } from '../authentication/auth.service';
         HttpModule,
     ],
     controllers: [ChildrenController],
-    providers: [AuthenticationService, ChildrenService, NeedService, ChildrenService],
+    providers: [ChildrenService, NeedService, ChildrenService],
 }) export class ChildrenModule { }

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NeedEntity } from '../../entities/need.entity';
 import { FamilyEntity } from '../../entities/user.entity';
@@ -8,7 +8,9 @@ import { NeedService } from '../need/need.service';
 import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 import { ChildrenService } from '../children/children.service';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { RolesEnum } from 'src/types/interface';
+import { NeedTypeEnum, PaymentStatusEnum, ProductStatusEnum, RolesEnum, ServiceStatusEnum } from 'src/types/interface';
+import { NeedAPIApi, NeedModel, SocialWorkerAPIApi } from 'src/generated-sources/openapi';
+import { NeedDto, NeedsDataDto } from 'src/types/dtos/CreateNeed.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -16,7 +18,7 @@ export class UserController {
     constructor(
         private userService: UserService,
         private needService: NeedService,
-        private childrenService: ChildrenService
+        private childrenService: ChildrenService,
     ) { }
 
     @Get(`all`)
@@ -76,24 +78,66 @@ export class UserController {
     }
 
 
-    @Get(`social-worker/:flaskId/createdNeeds`)
+    @Get(`myPage/:ngoId/:swId`)
     @ApiOperation({ description: 'Get social worker created needs' })
-    async getSwCreatedNeeds(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
-        let needs: any
-        limit = limit > 100 ? 100 : limit;
-        const socialWorker = await this.userService.getSocialWorker(flaskId);
-        if (socialWorker && socialWorker.role === RolesEnum.SOCIAL_WORKER) {
-            try {
-                needs = await this.needService.getSocialWorkerCreatedNeeds(socialWorker.flaskSwId, {
-                    limit: Number(limit),
-                    page: Number(page),
-                    route: NEEDS_URL
-                })
-            } catch (e) {
-                throw new ObjectNotFound();
-            }
+    async fetchMyPage(@Req() req: Request, @Param('ngoId') ngoId: number, @Param('swId') swId: number) {
+        const accessToken = req.headers["authorization"]
+        const X_SKIP = req.headers["x-skip"]
+        const X_TAKE = req.headers["x-take"]
+        let needsData: NeedsDataDto
+        try {
+
+            needsData = await this.needService.getNeeds({ accessToken, X_SKIP, X_TAKE }, { ngoId:1 })
+        } catch (e) {
+            throw new ObjectNotFound();
         }
-        return needs;
+        console.log(needsData.needs.length)
+
+        const filteredNeeds = needsData.needs.filter((n) => n.created_by_id === 27)
+
+        console.log(filteredNeeds.length)
+
+        const organizedNeeds = [[], [], [], []]; // [[not paid], [payment], [purchased/delivered Ngo], [Done]]
+        if (filteredNeeds) {
+            for (let i = 0; i < filteredNeeds.length; i++) {
+                // not Paid
+                if (filteredNeeds[i].status === 0) {
+                    organizedNeeds[0].push(filteredNeeds[i]);
+                }
+                // Payment Received
+                else if (
+                    filteredNeeds[i].status === PaymentStatusEnum.PARTIAL_PAY ||
+                    filteredNeeds[i].status === PaymentStatusEnum.COMPLETE_PAY
+                ) {
+                    organizedNeeds[1].push(filteredNeeds[i]);
+                }
+
+                if (filteredNeeds[i].type === NeedTypeEnum.SERVICE) {
+                    // Payment sent to NGO
+                    if (filteredNeeds[i].status === ServiceStatusEnum.MONEY_TO_NGO) {
+                        organizedNeeds[2].push(filteredNeeds[i]);
+                    }
+                    // Delivered to child
+                    if (filteredNeeds[i].status === ServiceStatusEnum.DELIVERED) {
+                        organizedNeeds[3].push(filteredNeeds[i]);
+                    }
+                } else if (filteredNeeds[i].type === NeedTypeEnum.PRODUCT) {
+                    // Purchased
+                    if (filteredNeeds[i].status === ProductStatusEnum.PURCHASED_PRODUCT) {
+                        organizedNeeds[2].push(filteredNeeds[i]);
+                    }
+                    // Delivered to Ngo
+                    if (filteredNeeds[i].status === ProductStatusEnum.DELIVERED_TO_NGO) {
+                        organizedNeeds[2].push(filteredNeeds[i]);
+                    }
+                    // Delivered to child
+                    if (filteredNeeds[i].status === ProductStatusEnum.DELIVERED) {
+                        organizedNeeds[3].push(filteredNeeds[i]);
+                    }
+                }
+            }
+            return organizedNeeds
+        }
     }
 
     @Get(`social-worker/:flaskId/confirmedNeeds`)
@@ -135,7 +179,7 @@ export class UserController {
                 throw new ObjectNotFound();
             }
         }
- 
+
         return needs;
     }
     // Nyaz -purchasing,...

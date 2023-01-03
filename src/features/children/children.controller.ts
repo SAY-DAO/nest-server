@@ -1,9 +1,8 @@
 
 
 
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthenticationService } from '../authentication/auth.service';
 import { NeedService } from '../need/need.service';
 import { ChildrenService } from './children.service';
 
@@ -12,7 +11,6 @@ import { ChildrenService } from './children.service';
 export class ChildrenController {
     constructor(private childrenService: ChildrenService,
         private needService: NeedService,
-        private authService: AuthenticationService,
     ) { }
 
     @Get(`all`)
@@ -23,8 +21,8 @@ export class ChildrenController {
 
     @Get(`flask/child/needs-summary/:childId`)
     @ApiOperation({ description: 'Get a single child needs summary by ID' })
-    async getChildNeedsSummary(@Param('childId') childId: number) {
-        const accessToken = await this.authService.authPanel()
+    async getChildNeedsSummary(@Req() req: Request, @Param('childId') childId: number) {
+        const accessToken = req.headers["authorization"]
         // const template = {
         //     flaskChildId: needs[i].flaskChildId,
         //     flaskNeedId: needs[i].flaskNeedId,
@@ -65,8 +63,8 @@ export class ChildrenController {
 
     @Get(`child/needs/templates/:id`)
     @ApiOperation({ description: 'Get child all done need' })
-    async createNeedsTemplates(@Param('id', ParseIntPipe) childId: number) {
-        const accessToken = await this.authService.authPanel()
+    async createNeedsTemplates(@Req() req: Request, @Param('id', ParseIntPipe) childId: number) {
+        const accessToken = req.headers["authorization"]
         const needs = await this.needService.getPreNeed(accessToken)
         const templates = []
         // for (let i = 0; i < needs.length; i++) {

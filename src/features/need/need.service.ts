@@ -14,6 +14,8 @@ import { NeedParams } from '../../types/parameters/NeedParameters';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { FamilyEntity } from '../../entities/user.entity';
 import { ReceiptEntity } from '../../entities/receipt.entity';
+import { HeaderOptions, NeedApiParams } from 'src/types/interface';
+import { NeedDto, NeedsDataDto } from 'src/types/dtos/CreateNeed.dto';
 
 @Injectable()
 export class NeedService {
@@ -40,11 +42,12 @@ export class NeedService {
     return need;
   }
 
-  async getNeeds(accessToken: any, options
-  ): Promise<NeedAPIApi> {
+  async getNeeds(options: HeaderOptions, params: NeedApiParams
+  ): Promise<NeedsDataDto> {
     const publicApi = new NeedAPIApi();
+    console.log(options.accessToken, options.X_SKIP, options.X_TAKE, params.ngoId)
 
-    const needs: Promise<NeedAPIApi> = publicApi.apiV2NeedsGet(accessToken, options.X_SKIP, options.X_TAKE).then((r) => r
+    const needs: Promise<NeedsDataDto> = publicApi.apiV2NeedsGet(options.accessToken, options.X_SKIP, options.X_TAKE, params.isConfirmed, params.isDone, params.isReported, params.status, params.type, params.ngoId).then((r) => r
     ).catch((e) => e)
     return needs;
   }
@@ -192,24 +195,6 @@ export class NeedService {
     return preneeds
   }
 
-
-  async getSocialWorkerCreatedNeeds(flaskSwId: number,
-    options: IPaginationOptions,
-  ): Promise<Observable<Pagination<NeedEntity>>> {
-    return from(
-      paginate<NeedEntity>(this.needRepository, options, {
-        relations: {
-          receipts: true,
-          child: true,
-          socialWorker: true,
-        },
-        where: {
-          isDeleted: false,
-          flaskSwId: flaskSwId
-        },
-      }),
-    ).pipe(map((needs: Pagination<NeedEntity>) => needs));
-  }
 
   async getSupervisorConfirmedNeeds(flaskSwId: number,
     options: IPaginationOptions,

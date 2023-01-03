@@ -15,7 +15,6 @@ import { GetNeedMiddleware } from './middlewares/get-need.middleware';
 import { PostNeedMiddleware } from './middlewares/post-need.middleware';
 import { NgoEntity } from '../../entities/ngo.entity';
 import { NgoService } from '../ngo/ngo.service';
-import { AuthenticationService } from '../authentication/auth.service';
 
 @Module({
   imports: [
@@ -24,7 +23,7 @@ import { AuthenticationService } from '../authentication/auth.service';
     HttpModule,
   ],
   controllers: [NeedController],
-  providers: [AuthenticationService, NeedService, ChildrenService, PaymentService, UserService, NgoService],
+  providers: [NeedService, ChildrenService, PaymentService, UserService, NgoService],
 })
 export class NeedModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

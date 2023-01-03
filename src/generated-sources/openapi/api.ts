@@ -7979,11 +7979,11 @@ export const NeedAPIApiFetchParamCreator = function (configuration?: Configurati
             }
 
             if (X_SKIP !== undefined && X_SKIP !== null) {
-                localVarHeaderParameter['X-SKIP'] = String(X_SKIP);
+                localVarHeaderParameter['X_SKIP'] = String(X_SKIP);
             }
 
             if (X_TAKE !== undefined && X_TAKE !== null) {
-                localVarHeaderParameter['X-TAKE'] = String(X_TAKE);
+                localVarHeaderParameter['X_TAKE'] = String(X_TAKE);
             }
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
@@ -8776,11 +8776,11 @@ export const NeedStatusUpdatesAPIApiFetchParamCreator = function (configuration?
             }
 
             if (xTake !== undefined && xTake !== null) {
-                localVarHeaderParameter['X-Take'] = String(xTake);
+                localVarHeaderParameter['X_TAKE'] = String(xTake);
             }
 
             if (xSkip !== undefined && xSkip !== null) {
-                localVarHeaderParameter['X-Skip'] = String(xSkip);
+                localVarHeaderParameter['X_SKIP'] = String(xSkip);
             }
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
@@ -11156,11 +11156,11 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
             }
 
             if (X_SKIP !== undefined && X_SKIP !== null) {
-                localVarHeaderParameter['X-SKIP'] = String(X_SKIP);
+                localVarHeaderParameter['X_SKIP'] = String(X_SKIP);
             }
 
             if (X_TAKE !== undefined && X_TAKE !== null) {
-                localVarHeaderParameter['X-TAKE'] = String(X_TAKE);
+                localVarHeaderParameter['X_TAKE'] = String(X_TAKE);
             }
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);

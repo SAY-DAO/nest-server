@@ -28,7 +28,6 @@ import { EthereumAccount } from './entities/ethereum.account.entity';
 import { EthereumTransaction } from './entities/ethereum.transaction.entity';
 import { NgoModule } from './features/ngo/ngo.module';
 import { NgoEntity } from './entities/ngo.entity';
-import { AuthenticationModule } from './features/authentication/auth.module';
 
 const imports = [
   LoggerModule.forRoot(),
@@ -52,7 +51,6 @@ const imports = [
       EthereumTransaction
     ],
   }),
-  AuthenticationModule,
   SyncModule,
   UserModule,
   NgoModule,

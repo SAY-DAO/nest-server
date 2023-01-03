@@ -1,9 +1,9 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { CreateNeedDto } from '../../../types/dtos/CreateNeed.dto';
+import { NeedDto } from '../../../types/dtos/CreateNeed.dto';
 
 @Injectable()
 export class ValidateNeedPipe implements PipeTransform {
-  transform(value: CreateNeedDto, metadata: ArgumentMetadata) {
+  transform(value: NeedDto, metadata: ArgumentMetadata) {
     return value;
   }
 }

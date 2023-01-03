@@ -108,7 +108,7 @@ export class ProviderController {
 
 
     @Get('images/:fileId')
-    async serveAvatar(@Param('fileId') fileId, @Res() res): Promise<any> {
+    async serveAvatar(@Param('fileId') fileId, @Res() res: any): Promise<any> {
         res.sendFile(fileId, { root: './uploads/providers/logos' });
     }
 

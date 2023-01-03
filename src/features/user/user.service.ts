@@ -4,6 +4,7 @@ import { RolesEnum } from '../../types/interface';
 import { Repository } from 'typeorm';
 import { SocialWorkerEntity, FamilyEntity } from '../../entities/user.entity';
 import { FamilyParams, SocialWorkerParams } from '../../types/parameters/UserParameters';
+import { NeedModel, SocialWorkerAPIApi } from 'src/generated-sources/openapi';
 
 @Injectable()
 export class UserService {
@@ -69,16 +70,14 @@ export class UserService {
     return this.FamilyRepository.save(newUser);
   }
 
-  createSocialWorker(swDetails: SocialWorkerParams): Promise<SocialWorkerEntity> {
-    const newSw = this.socialWorkerRepository.create({
-      flaskSwId: swDetails.flaskSwId,
-      ngo: swDetails.ngo,
-      avatarUrl: swDetails.avatarUrl,
-      role: swDetails.typeId,
-      isActive: swDetails.isActive,
-    });
-    return this.socialWorkerRepository.save(newSw);
+  fetchMyPage(accessToken: any, swId: number, pagination
+  ): Promise<NeedModel[]> {
+    const socialWorkerApi = new SocialWorkerAPIApi();
+    const needs: Promise<NeedModel[]> = socialWorkerApi.apiV2SocialworkersIdCreatedNeedsGet(accessToken, swId, pagination.X_SKIP, pagination.X_TAKE).then((r) => r
+    ).catch((e) => e)
+    return needs;
   }
-  
+
+
 
 }
