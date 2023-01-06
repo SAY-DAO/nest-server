@@ -4,7 +4,7 @@ export class CreateProviderDto {
     name: string;
     description: string;
     website: string;
-    type: number;
+    type: string;
     typeName: NeedTypeDefinitionEnum;
     city: number;
     state: number;
