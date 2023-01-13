@@ -27,19 +27,19 @@ export class SignatureController {
   async swSignTransaction(@Body(ValidateSignaturePipe) request: SwCreateSwSignatureDto) {
     let transaction: SwSignatureResult;
     try {
-      const need = await this.needService.getNeedById(request.flaskNeedId);
-      const child = await this.childrenService.getChildById(need.flaskChildId);
-      const isCreator = need.socialWorker.flaskSwId === request.flaskSwId; // request.userId
-      if (isCreator) {
-        const list = [];
-        for (let i = 0; i < need.receipts.length; i++) {
-          list.push(need.receipts[i].title);
-        }
-        const receiptsTitles = list[0]
-          ? list.join(', ')
-          : 'No receipts is provided!';
-        transaction = await this.signatureService.swSignTransaction(request, need, child, receiptsTitles);
-      }
+      // const need = await this.needService.getNeedById(request.flaskNeedId);
+      // const child = await this.childrenService.getChildById(need.flaskChildId);
+      // const isCreator = need.socialWorker.flaskSwId === request.flaskSwId; // request.userId
+      // if (isCreator) {
+      //   const list = [];
+      //   for (let i = 0; i < need.receipts.length; i++) {
+      //     list.push(need.receipts[i].title);
+      //   }
+      //   const receiptsTitles = list[0]
+      //     ? list.join(', ')
+      //     : 'No receipts is provided!';
+      //   transaction = await this.signatureService.swSignTransaction(request, need, child, receiptsTitles);
+      // }
     } catch (e) {
       console.log(e)
       throw new ServerError(e);

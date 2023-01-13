@@ -11,7 +11,6 @@ import { SignatureModule } from './features/signature/signature.module';
 import { SignatureEntity } from './entities/signature.entity';
 import { ChildrenEntity } from './entities/children.entity';
 import { FamilyEntity, SocialWorkerEntity } from './entities/user.entity';
-import { SyncModule } from './features/sync/sync.module';
 import { ChildrenModule } from './features/children/children.module';
 import { NeedModule } from './features/need/need.module';
 import { MilestoneModule } from './features/milestone/milestone.module';
@@ -51,7 +50,6 @@ const imports = [
       EthereumTransaction
     ],
   }),
-  SyncModule,
   UserModule,
   NgoModule,
   PaymentModule,

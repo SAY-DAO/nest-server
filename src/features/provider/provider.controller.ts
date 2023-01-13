@@ -96,8 +96,7 @@ export class ProviderController {
             logoUrl: file?.filename,
             isActive: Boolean(request.isActive)
         };
-        console.log(request)
-        console.log(newProvider)
+
         return this.providerService.updateProvider(id, newProvider)
     }
 
