@@ -18,7 +18,6 @@ export class ChildrenService {
     params: ChildApiParams,
   ): Promise<ChildrenData> {
     const childApi = new ChildAPIApi();
-    console.log(params)
     const needs = childApi.apiV2ChildAllConfirmconfirmGet(options.accessToken,
       params.confirm,
       params.ngoId,

@@ -7,6 +7,37 @@ import {
 import { NeedsData } from './types/interfaces/Need';
 
 
+export function getNeedsTimeLine(needsData: NeedsData, who: string) {
+    let needsTimeLine: { inTwoDays: number; inWeek: number; inMonth: number; };
+
+
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 1);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date();
+    monthAgo.setDate(monthAgo.getDate() - 30);
+
+    if (who == 'createdBy') {
+        const inTwoDays = needsData.needs.filter((n) => new Date(n.confirmDate).getTime() >= twoDaysAgo.getTime())
+        const inWeek = needsData.needs.filter((n) => new Date(n.confirmDate).getTime() >= weekAgo.getTime())
+        const inMonth = needsData.needs.filter((n) => new Date(n.confirmDate).getTime() >= monthAgo.getTime())
+
+        needsTimeLine = { inTwoDays: inTwoDays.length, inWeek: inWeek.length, inMonth: inMonth.length }
+
+    } else {
+        const inTwoDays = needsData.needs.filter((n) => new Date(n.created).getTime() >= twoDaysAgo.getTime())
+        const inWeek = needsData.needs.filter((n) => new Date(n.created).getTime() >= weekAgo.getTime())
+        const inMonth = needsData.needs.filter((n) => new Date(n.created).getTime() >= monthAgo.getTime())
+
+        needsTimeLine = { inTwoDays: inTwoDays.length, inWeek: inWeek.length, inMonth: inMonth.length }
+
+    }
+
+
+    return needsTimeLine
+}
+
 export function getOrganizedNeeds(needsData: NeedsData) {
     const organizedNeeds = [[], [], [], []]; // [[not paid], [payment], [purchased/delivered Ngo], [Done]]
     if (needsData.needs) {
