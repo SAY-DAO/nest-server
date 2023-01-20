@@ -26,9 +26,9 @@ export function getNeedsTimeLine(needsData: NeedsData, who: string) {
         needsTimeLine = { inTwoDays: inTwoDays.length, inWeek: inWeek.length, inMonth: inMonth.length }
 
     } else {
-        const inTwoDays = needsData.needs.filter((n) => new Date(n.created).getTime() >= twoDaysAgo.getTime())
-        const inWeek = needsData.needs.filter((n) => new Date(n.created).getTime() >= weekAgo.getTime())
-        const inMonth = needsData.needs.filter((n) => new Date(n.created).getTime() >= monthAgo.getTime())
+        const inTwoDays = needsData.needs.filter((n) => new Date(n.confirmDate).getTime() >= twoDaysAgo.getTime())
+        const inWeek = needsData.needs.filter((n) => new Date(n.confirmDate).getTime() >= weekAgo.getTime())
+        const inMonth = needsData.needs.filter((n) => new Date(n.confirmDate).getTime() >= monthAgo.getTime())
 
         needsTimeLine = { inTwoDays: inTwoDays.length, inWeek: inWeek.length, inMonth: inMonth.length }
 

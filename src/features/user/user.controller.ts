@@ -52,7 +52,7 @@ export class UserController {
                     { accessToken, X_SKIP, X_TAKE },
                     { createdBy: Number(createdBy) },
                 );
-                needsTimeLine = getNeedsTimeLine(needsData, 'createdBy')
+                needsTimeLine = getNeedsTimeLine(needsData, 'confirmedBy')
 
             } else if (confirmedBy) {
                 needsData = await this.needService.getNeeds(
@@ -66,14 +66,14 @@ export class UserController {
                     { accessToken, X_SKIP, X_TAKE },
                     { purchasedBy: Number(purchasedBy) },
                 );
-                needsTimeLine = getNeedsTimeLine(needsData, 'purchasedBy')
+                needsTimeLine = getNeedsTimeLine(needsData, 'confirmedBy')
 
             } else if (ngoId) {
                 needsData = await this.needService.getNeeds(
                     { accessToken, X_SKIP, X_TAKE },
                     { ngoId: Number(ngoId) },
                 );
-                needsTimeLine = getNeedsTimeLine(needsData, 'ngo')
+                needsTimeLine = getNeedsTimeLine(needsData, 'confirmedBy')
 
             }
         } catch (e) {
