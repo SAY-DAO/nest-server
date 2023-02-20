@@ -7,6 +7,8 @@ import {
   OneToMany,
   ManyToOne,
   DeleteDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { SocialWorkerEntity, FamilyEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
@@ -28,9 +30,6 @@ export class NeedEntity extends BaseEntity {
   flaskNeedId: number;
 
   @Column({ nullable: true })
-  flaskSupervisorId?: number; //confirmUser from flask
-
-  @Column({ nullable: true })
   title: string;
 
   @Column({ nullable: true })
@@ -45,11 +44,6 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'enum', enum: CategoryEnum, nullable: true })
   category: number;
 
-  @Column({ nullable: true })
-  childGeneratedCode: string;
-
-  @Column({ nullable: true })
-  childSayName: string;
 
   @Column({ type: 'timestamptz', nullable: true })
   childDeliveryDate?: Date;
@@ -72,9 +66,6 @@ export class NeedEntity extends BaseEntity {
   @Column({ nullable: true })
   details: string;
 
-  @Column({ nullable: true })
-  donated: number;
-
   @Column({ type: 'timestamptz', nullable: true })
   doneAt: Date;
 
@@ -88,9 +79,6 @@ export class NeedEntity extends BaseEntity {
   needRetailerImg: string;
 
   @Column({ nullable: true })
-  information: string;
-
-  @Column({ nullable: true })
   isConfirmed: boolean;
 
   @Column({ nullable: true })
@@ -98,9 +86,6 @@ export class NeedEntity extends BaseEntity {
 
   @Column({ nullable: true })
   isDone: boolean;
-
-  @Column({ nullable: true })
-  isReported: boolean;
 
   @Column({ nullable: true })
   isUrgent: boolean;
@@ -111,23 +96,11 @@ export class NeedEntity extends BaseEntity {
   @Column('simple-json', { nullable: true })
   titleTranslations: { en: string; fa: string };
 
-  @Column({ nullable: true })
-  ngoAddress: string;
-
-  @Column({ nullable: true })
-  ngoName: string;
-
   @Column({ type: 'timestamptz', nullable: true })
   ngoDeliveryDate: Date;
 
   @Column({ nullable: true })
-  oncePurchased: boolean;
-
-  @Column({ nullable: true })
   paid: number;
-
-  @Column({ nullable: true })
-  progress: string;
 
   @Column({ nullable: true })
   purchaseCost: number;
@@ -136,31 +109,11 @@ export class NeedEntity extends BaseEntity {
   purchaseDate: Date;
 
   @Column({ nullable: true })
-  receiptCount?: number;
-
-  @Column({ nullable: true })
   status: number;
-
-  @Column({ nullable: true })
-  statusDescription?: string;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  statusUpdatedAt?: Date;
 
   @Column({ type: 'enum', enum: NeedTypeEnum, nullable: true })
   type: NeedTypeEnum;
 
-  @Column({ nullable: true })
-  typeName?: string;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  unavailableFrom?: Date;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  unconfirmedAt?: Date;
-
-  @Column({ nullable: true })
-  unpaidCost?: number;
 
   @Column({ nullable: true })
   unpayable?: boolean;
@@ -187,9 +140,6 @@ export class NeedEntity extends BaseEntity {
   @Column()
   flaskChildId: number;
 
-  @Column()
-  flaskSwId: number;
-
   @Column({ nullable: true })
   flaskNgoId: number;
 
@@ -202,10 +152,8 @@ export class NeedEntity extends BaseEntity {
   @ManyToOne(() => NgoEntity, (n) => n.needs, { eager: false })
   ngo: NgoEntity;
 
-  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.createdNeeds, { eager: false })
+  @OneToOne(() => SocialWorkerEntity)
+  @JoinColumn()
   socialWorker: SocialWorkerEntity;
-
-  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.confirmedNeeds, { eager: false })
-  supervisor: SocialWorkerEntity;
 }
 

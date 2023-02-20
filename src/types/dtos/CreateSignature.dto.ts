@@ -1,19 +1,22 @@
 import { IsNotEmpty } from 'class-validator';
+import { SwmypageInnerNeeds } from 'src/generated-sources/openapi';
+import { CreateChildrenDto } from './CreateChild.dto';
+import { CreateSocialWorkerDto } from './CreateUser.dto';
 
 export class SwCreateSwSignatureDto {
     @IsNotEmpty()
-    flaskSwId: number;
+    need: SwmypageInnerNeeds;
     @IsNotEmpty()
-    flaskNeedId: number;
+    child: CreateChildrenDto;
     @IsNotEmpty()
-    flaskChildId: number;
+    socialWorker: CreateSocialWorkerDto;
     @IsNotEmpty()
-    signerAddress: string
+    signerAddress: string;
 }
 
 export class FamilyCreateSwSignatureDto {
-    flaskSwId: number;
-    flaskNeedId: number;
-    flaskChildId: number;
+    userId: number;
+    needId: number;
+    childId: number;
     signerAddress: string;
 }

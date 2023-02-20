@@ -6,6 +6,7 @@ import { ChildAPIApi, NeedModel } from 'src/generated-sources/openapi';
 import { ChildApiParams, HeaderOptions } from 'src/types/interface';
 import { ChildrenData } from 'src/types/interfaces/Children';
 import { NeedSummary } from 'src/types/interfaces/Need';
+import { ChildParams } from 'src/types/parameters/ChildParameters';
 
 @Injectable()
 export class ChildrenService {
@@ -34,6 +35,18 @@ export class ChildrenService {
     const childApi = new ChildAPIApi();
     const needs = childApi.apiV2ChildChildIdNeedsSummaryGet(accessToken, childId)
     return needs;
+  }
+
+
+
+  createChild(childDetails: ChildParams): Promise<ChildrenEntity> {
+    const newChild = this.childrenRepository.create({
+      flaskChildId: childDetails.flaskChildId,
+      sayName: childDetails.sayName,
+      birthDate: childDetails.birthDate,
+      awakeAvatarUrl: childDetails.awakeAvatarUrl,
+    });
+    return this.childrenRepository.save(newChild)
   }
 
 }

@@ -1,16 +1,27 @@
+import { SwmypageInnerNeeds, SwmypageInnerReceipts_ } from "src/generated-sources/openapi";
+
 export enum RolesEnum {
     NO_ROLE = 0,
     SUPER_ADMIN = 1,
     SOCIAL_WORKER = 2,
-    COORDINATOR = 3, // contributor
+    COORDINATOR = 3,
     NGO_SUPERVISOR = 4,
     SAY_SUPERVISOR = 5,
-    ADMIN = 6, // team lead
+    ADMIN = 6,
     FAMILY = 7,
     FRIEND = 8,
 }
 
-export enum childExistance {
+export enum ContributorsEnum {
+    NO_ROLE = 0,
+    SOCIAL_WORKER = 1,
+    PURCHASER = 2,
+    AUDITOR = 3,
+    FAMILY = 4,
+    FRIEND = 5,
+}
+
+export enum childExistence {
     DEAD = 0,
     AlivePresent = 1,
     AliveGone = 2,
@@ -55,7 +66,7 @@ export interface Domain {
     name: string;
     version: string;
     verifyingContract: string;
-    chainId: string;
+    chainId: number;
 }
 
 export interface SwSignatureResult {
@@ -63,6 +74,7 @@ export interface SwSignatureResult {
     types: VoucherTypes;
     domain: Domain;
 }
+
 export interface VoucherTypes {
     Voucher: { name: string; type: string }[];
 }
@@ -70,9 +82,10 @@ export interface VoucherTypes {
 export interface SwServiceVoucher {
     title: string;
     category: CategoryDefinitionEnum;
-    child: string;
-    receipts: string; // title1, title2, ...
-    bankTrackId: string;
+    childSayName: string;
+    receipts: string;
+    // receipts: SwmypageInnerReceipts_[];
+    bankTrackId: string,
     signerAddress: string;
     content: string;
 }
@@ -80,17 +93,18 @@ export interface SwServiceVoucher {
 export interface SwProductVoucher {
     title: string;
     category: CategoryDefinitionEnum;
-    child: string;
-    receipts: string; // title1, title2, ...
+    childSayName: string;
+    receipts: string;
+    // receipts: SwmypageInnerReceipts_[];
     signerAddress: string;
     content: string;
 }
 
 export interface FamilyVoucher {
-    flaskNeedId: number;
-    flaskUserId: number;
-    child: number;
-    wallet: string;
+    needId: number;
+    userId: number;
+    childId: number;
+    signerAddress: string;
     content: string;
 }
 

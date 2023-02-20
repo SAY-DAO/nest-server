@@ -7,16 +7,17 @@ import {
     Req,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { NeedEntity } from '../../entities/need.entity';
-import { FamilyEntity } from '../../entities/user.entity';
 import { UserService } from './user.service';
 import { NeedService } from '../need/need.service';
-import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { ChildrenService } from '../children/children.service';
-import { childConfirmation, RolesEnum, childExistance } from 'src/types/interface';
-import { getNeedsTimeLine, getOrganizedNeeds } from 'src/helpers';
-import { Children } from 'src/types/interfaces/Children';
-import { NeedsData } from 'src/types/interfaces/Need';
+import { RolesEnum, ProductStatusEnum } from 'src/types/interface';
+import {
+    SwMyPage,
+    SwmypageInnerNeeds,
+} from 'src/generated-sources/openapi';
+import { getNeedsTimeLine, getOrganizedNeeds, timeDifference } from 'src/utils/helpers';
+import { ChildNeed } from 'src/types/interfaces/Need';
 
 @ApiTags('Users')
 @Controller('users')
@@ -27,96 +28,144 @@ export class UserController {
         private childrenService: ChildrenService,
     ) { }
 
-    @Get(`myPage/:typeId`)
+    @Get('myPage/:ngoId/:userId/:typeId')
     @ApiOperation({ description: 'Get user My page' })
     async fetchMyPage(
         @Req() req: Request,
-        @Param('typeId', ParseIntPipe) userType: number,
-        @Query('createdBy') createdBy: number,
-        @Query('confirmedBy') confirmedBy: number,
-        @Query('purchasedBy') purchasedBy: number,
-        @Query('ngoId') ngoId: boolean,
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('typeId', ParseIntPipe) typeId: number,
+        @Param('ngoId') ngoId: number,
+        @Query('isUser') isUser: string,
     ) {
+        const time1 = new Date().getTime();
 
         const accessToken = req.headers['authorization'];
         const X_SKIP = req.headers['x-skip'];
         const X_TAKE = req.headers['x-take'];
-        // needs
-        let needsData: NeedsData;
-        let totalChildrenCount: number
-        let needsTimeLine: { inTwoDays: number; inWeek: number; inMonth: number; };
-
+        let pageData: SwMyPage
         try {
-            if (createdBy) {
-                needsData = await this.needService.getNeeds(
-                    { accessToken, X_SKIP, X_TAKE },
-                    { createdBy: Number(createdBy) },
-                );
-                needsTimeLine = getNeedsTimeLine(needsData, 'confirmedBy')
+            pageData = await this.userService.getMyPage(
+                accessToken,
+                X_SKIP,
+                X_TAKE,
+                userId,
+                parseInt(isUser) // when 0 displays all children when 1 shows children/needs  created by them
+            );
 
-            } else if (confirmedBy) {
-                needsData = await this.needService.getNeeds(
-                    { accessToken, X_SKIP, X_TAKE },
-                    { confirmedBy: Number(confirmedBy) },
-                );
-                needsTimeLine = getNeedsTimeLine(needsData, 'confirmedBy')
-
-            } else if (purchasedBy) {
-                needsData = await this.needService.getNeeds(
-                    { accessToken, X_SKIP, X_TAKE },
-                    { purchasedBy: Number(purchasedBy) },
-                );
-                needsTimeLine = getNeedsTimeLine(needsData, 'confirmedBy')
-
-            } else if (ngoId) {
-                needsData = await this.needService.getNeeds(
-                    { accessToken, X_SKIP, X_TAKE },
-                    { ngoId: Number(ngoId) },
-                );
-                needsTimeLine = getNeedsTimeLine(needsData, 'confirmedBy')
-
-            }
         } catch (e) {
-            throw new ObjectNotFound();
+            console.log(e)
+
         }
 
-        // children
-        try {
-            if (userType === RolesEnum.SUPER_ADMIN || userType === RolesEnum.ADMIN) {
-                const aliveGone = await this.childrenService.getAllChildren(
-                    { accessToken },
-                    { confirm: childConfirmation.BOTH, existenceStatus: childExistance.AliveGone },
-                );
-                const alivePresent = await this.childrenService.getAllChildren(
-                    { accessToken },
-                    { confirm: childConfirmation.BOTH, existenceStatus: childExistance.AlivePresent },
-                );
-                const dead = await this.childrenService.getAllChildren(
-                    { accessToken },
-                    { confirm: childConfirmation.BOTH, existenceStatus: childExistance.DEAD },
-                );
-                const tempGone = await this.childrenService.getAllChildren(
-                    { accessToken },
-                    { confirm: childConfirmation.BOTH, existenceStatus: childExistance.TempGone },
-                );
-                totalChildrenCount = aliveGone.totalCount + alivePresent.totalCount + dead.totalCount + tempGone.totalCount
+        let child: {
+            id: number;
+            sayName: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            awakeAvatarUrl: string;
+        };
 
-            } else if (userType === RolesEnum.NGO_SUPERVISOR) {
-                this.childrenService.getAllChildren(
-                    { accessToken, X_SKIP, X_TAKE },
-                    { confirm: 0 },
-                );
-            } else if (userType === RolesEnum.SOCIAL_WORKER) {
-                this.childrenService.getAllChildren(
-                    { accessToken, X_SKIP, X_TAKE },
-                    { confirm: 0 },
-                );
+        let role = '';
+        let childNeed: ChildNeed;
+        let swNeedsList: SwmypageInnerNeeds[] = [];
+        // extract contributors related needss
+        const time2 = new Date().getTime();
+        timeDifference(time1, time2, "Fetched Flask In ")
+
+        const time3 = new Date().getTime();
+        try {
+            for (let i = 0; i < pageData.length; i++) {
+                const childNeedsList = [];
+                child = {
+                    id: pageData[i].id,
+                    sayName: pageData[i].sayName,
+                    firstName: pageData[i].firstName,
+                    lastName: pageData[i].lastName,
+                    birthDate: pageData[i].birthDate,
+                    awakeAvatarUrl: pageData[i].awakeAvatarUrl,
+                };
+
+                for (let k = 0; k < pageData[i].needs.length; k++) {
+                    childNeed = { child, ...pageData[i].needs[k] };
+                    childNeedsList.push(childNeed);
+                }
+
+                // SW
+                if (typeId === RolesEnum.SOCIAL_WORKER) {
+                    role = 'createdById';
+                    const swNeeds = childNeedsList.filter(
+                        (need) => need[role] === userId,
+                    );
+                    const newList = swNeedsList.concat(swNeeds); // Merging
+                    swNeedsList = newList;
+                }
+                // NGO supervisor
+                else if (typeId === RolesEnum.NGO_SUPERVISOR) {
+                    role = 'ngo';
+                    const swNeeds = childNeedsList;
+                    const newList = swNeedsList.concat(swNeeds); // Merging
+                    swNeedsList = newList;
+                }
+                // Auditor
+                else if (
+                    typeId === RolesEnum.ADMIN ||
+                    typeId === RolesEnum.SUPER_ADMIN ||
+                    RolesEnum.SAY_SUPERVISOR
+                ) {
+                    role = 'confirmedBy';
+                    const swNeeds = childNeedsList;
+                    const newList = swNeedsList.concat(swNeeds); // Merging
+                    swNeedsList = newList;
+                }
+                // Purchaser
+                else if (typeId === RolesEnum.COORDINATOR) {
+                    role = 'purchasedBy';
+                    const swNeeds = childNeedsList;
+                    for (let k = 0; k < pageData[i].needs.length; k++) {
+                        const statusUpdates = pageData[i].needs[k].statusUpdates.filter(
+                            (need) => need[role] === userId,
+                        );
+                        for (let j = 0; j < statusUpdates.length; j++) {
+                            if (
+                                statusUpdates[j].oldStatus === ProductStatusEnum.COMPLETE_PAY &&
+                                statusUpdates[j].newStatus ===
+                                ProductStatusEnum.PURCHASED_PRODUCT &&
+                                statusUpdates[j].swId === userId
+                            ) {
+                                const newList = swNeedsList.concat(swNeeds); // Merging
+                                swNeedsList = newList;
+                            }
+                        }
+                    }
+                }
             }
         } catch (e) {
             console.log(e)
+            throw new ServerError(e);
         }
+        const time4 = new Date().getTime();
+        timeDifference(time3, time4, "First organize In ")
 
-        const organizedNeeds = getOrganizedNeeds(needsData);
-        return { needs: organizedNeeds, childrenCount: totalChildrenCount, timeLine: needsTimeLine };
+        const time5 = new Date().getTime();
+        const organizedNeeds = getOrganizedNeeds(swNeedsList);
+        const time6 = new Date().getTime();
+        timeDifference(time5, time6, "Second organize In ")
+
+
+        const time7 = new Date().getTime();
+        const { summary, inMonth } = getNeedsTimeLine(swNeedsList, role);
+        const time8 = new Date().getTime();
+        timeDifference(time7, time8, "TimeLine In ")
+
+        return {
+            ngoId,
+            userId,
+            role,
+            typeId,
+            needs: organizedNeeds,
+            childrenCount: pageData.length,
+            timeLine: { summary, inMonth },
+        };
     }
 }

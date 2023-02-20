@@ -39,6 +39,6 @@ export class ReceiptEntity extends BaseEntity {
     @ManyToOne(() => NeedEntity, (need) => need.receipts, { eager: false })
     need: NeedEntity;
 
-    @ManyToOne(() => SocialWorkerEntity, (s) => s.receipts, { eager: true })
-    socialWorker: SocialWorkerEntity;
+    // @ManyToOne(() => SocialWorkerEntity, (s) => s.receipts, { eager: true })
+    // socialWorker: SocialWorkerEntity;
 }

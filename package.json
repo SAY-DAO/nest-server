@@ -38,7 +38,7 @@
     "class-validator": "^0.13.2",
     "dotenv": "^16.0.1",
     "es6-promise": "^4.2.8",
-    "ethers": "^5.0.0",
+    "ethers": "^6.0.4",
     "nestjs-ethers": "^1.0.3",
     "nestjs-pino": "^3.1.1",
     "nestjs-typeorm-paginate": "^4.0.2",

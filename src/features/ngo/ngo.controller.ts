@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { NgoService } from './ngo.service';
@@ -11,8 +11,13 @@ export class NgoController {
 
     @Get(`all`)
     @ApiOperation({ description: 'Get all ngos' })
-    async getNgos() {
-        return await this.ngoService.getNgos()
+    async getNgos(
+        @Req() req: Request,
+    ) {
+
+        const accessToken = req.headers['authorization'];
+
+        return await this.ngoService.getNgos(accessToken)
     }
 
 }

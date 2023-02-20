@@ -1,64 +1,49 @@
+import { PaymentEntity } from "src/entities/payment.entity";
+import { ReceiptEntity } from "src/entities/receipt.entity";
+import { SwmypageInnerParticipants, SwmypageInnerReceipts_, SwmypageInnerVerifiedPayments } from "src/generated-sources/openapi";
 import { NgoEntity } from "../../entities/ngo.entity";
-import { SocialWorkerEntity } from "../../entities/user.entity";
+import { FamilyEntity, SocialWorkerEntity } from "../../entities/user.entity";
 import { NeedTypeEnum } from "../interface";
+import { SocialWorkerParams } from "./UserParameters";
 
 export type NeedParams = {
-    flaskNeedId: number;
-    flaskChildId: number;
     flaskNgoId: number;
-    flaskSwId: number,
-    flaskSupervisorId: number;
+    flaskChildId: number;
+    flaskNeedId: number;
+    createdById: number
+    descriptionTranslations: { en: string, fa: string };
+    name: string,
     title: string;
+    status: number;
+    titleTranslations: { en: string; fa: string };
+    description: string;
+    details: string;
+    imageUrl: string;
+    category: number;
+    type: NeedTypeEnum;
+    isUrgent: boolean;
     affiliateLinkUrl: string;
     link: string;
-    bankTrackId: string | null;
-    category: number;
-    childGeneratedCode: string;
-    childSayName: string;
-    childDeliveryDate: Date | null;
-    confirmDate: Date | null;
-    cost: number;
-    created: Date | null;
-    socialWorker: SocialWorkerEntity;
-    supervisor: SocialWorkerEntity;
-    deletedAt: Date | null;
-    description: string;
-    descriptionTranslations: { en: string, fa: string };
-    details: string;
-    donated: number;
-    doneAt: Date | null;
-    expectedDeliveryDate: Date | null;
-    imageUrl: string;
-    needRetailerImg: string;
-    information: string;
-    isConfirmed: boolean;
     doingDuration: number;
-    isDeleted: boolean;
-    isDone: boolean;
-    isReported: boolean;
-    isUrgent: boolean;
-    titleTranslations: { en: string; fa: string };
-    ngoAddress: string;
-    ngo: NgoEntity;
-    ngoName: string;
-    ngoDeliveryDate: Date | null;
-    oncePurchased: boolean;
+    needRetailerImg: string;
     paid: number;
-    progress: string;
     purchaseCost: any;
-    purchaseDate: Date | null;
-    receiptCount: number;
-    status: number;
-    statusDescription: any;
-    statusUpdatedAt: Date | null;
-    type: NeedTypeEnum;
-    typeName: string;
-    unavailableFrom: Date | null;
-    unconfirmedAt: Date | null;
-    unpaidCost: number;
+    cost: number;
     unpayable: boolean;
+    isDone: boolean;
+    doneAt: Date | null;
+    isDeleted: boolean;
+    isConfirmed: boolean;
     unpayableFrom: Date | null;
+    created: Date;
     updated: Date;
+    purchaseDate: Date
+    ngoDeliveryDate: Date
+    confirmDate: Date | null;
+    auditor: SocialWorkerParams;
+    deletedAt: Date | null;
+    bankTrackId: string | null;
+    receipts: SwmypageInnerReceipts_[],
+    verifiedPayments: SwmypageInnerVerifiedPayments[],
+    participants: SwmypageInnerParticipants[],
 }
-
-

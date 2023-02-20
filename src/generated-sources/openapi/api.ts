@@ -15,7 +15,6 @@
 
 import * as url from "url";
 import portableFetch from "portable-fetch";
-
 import { Configuration } from "./configuration";
 
 const BASE_PATH = "https://api.sayapp.company/".replace(/\/+$/, "");
@@ -1111,6 +1110,12 @@ export interface NeedModel {
      * @memberof NeedModel
      */
     informations?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof NeedModel
+     */
+    createdBy?: number;
 }
 
 /**
@@ -1783,6 +1788,519 @@ export interface StateModel {
      * @memberof StateModel
      */
     type?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface SwMyPage
+ */
+export interface SwMyPage extends Array<SwmypageInner> {
+}
+
+/**
+ * 
+ * @export
+ * @interface SwmypageInner
+ */
+export interface SwmypageInner {
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInner
+     */
+    id?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInner
+     */
+    sayName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInner
+     */
+    firstName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInner
+     */
+    lastName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInner
+     */
+    birthDate?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInner
+     */
+    awakeAvatarUrl?: string;
+    /**
+     * 
+     * @type {Array<SwmypageInnerNeeds>}
+     * @memberof SwmypageInner
+     */
+    needs?: Array<SwmypageInnerNeeds>;
+}
+
+/**
+ * 
+ * @export
+ * @interface SwmypageInnerNeeds
+ */
+export interface SwmypageInnerNeeds {
+    status: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    id?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    createdById?: number;
+    /**
+     * 
+     * @type {any}
+     * @memberof SwmypageInnerNeeds
+     */
+    nameTranslations?: any;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    title?: string;
+    /**
+     * 
+     * @type {any}
+     * @memberof SwmypageInnerNeeds
+     */
+    descriptionTranslations?: any;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    description?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    details?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    imageUrl?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    category?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    type?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SwmypageInnerNeeds
+     */
+    isUrgent?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    link?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    affiliateLinkUrl?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    bankTrackId?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    doingDuration?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerNeeds
+     */
+    img?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    paid?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    purchaseCost?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    cost?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SwmypageInnerNeeds
+     */
+    unpayable?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SwmypageInnerNeeds
+     */
+    isDone?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SwmypageInnerNeeds
+     */
+    isDeleted?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SwmypageInnerNeeds
+     */
+    isConfirmed?: boolean;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    unpayableFrom?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    created?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    updated?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    confirmDate?: Date;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerNeeds
+     */
+    confirmedBy?: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    deletedAt?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    doneAt?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    ngoDeliveryDate?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    childDeliveryDate?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerNeeds
+     */
+    purchaseDate?: Date;
+    /**
+     * 
+     * @type {SwmypageInnerStatusUpdates}
+     * @memberof SwmypageInnerNeeds
+     */
+    statusUpdates?: SwmypageInnerStatusUpdates[];
+    /**
+     * 
+     * @type {SwmypageInnerReceipts_}
+     * @memberof SwmypageInnerNeeds
+     */
+    receipts_?: SwmypageInnerReceipts_[];
+    /**
+     * 
+     * @type {SwmypageInnerVerifiedPayments}
+     * @memberof SwmypageInnerNeeds
+     */
+    verifiedPayments?: SwmypageInnerVerifiedPayments[];
+    /**
+     * 
+     * @type {SwmypageInnerParticipants}
+     * @memberof SwmypageInnerNeeds
+     */
+    participants?: SwmypageInnerParticipants[];
+}
+
+/**
+ * 
+ * @export
+ * @interface SwmypageInnerParticipants
+ */
+export interface SwmypageInnerParticipants {
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerParticipants
+     */
+    id?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerParticipants
+     */
+    idFamily?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerParticipants
+     */
+    idUser?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerParticipants
+     */
+    idNeed?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerParticipants
+     */
+    type?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerParticipants
+     */
+    userRole?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerParticipants
+     */
+    paid?: number;
+}
+
+/**
+ * 
+ * @export
+ * @interface SwmypageInnerReceipts_
+ */
+export interface SwmypageInnerReceipts_ {
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerReceipts_
+     */
+    attachment?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerReceipts_
+     */
+    description?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerReceipts_
+     */
+    title?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SwmypageInnerReceipts_
+     */
+    isPublic?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageInnerReceipts_
+     */
+    code?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerReceipts_
+     */
+    ownerId?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerReceipts_
+     */
+    needStatus?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerReceipts_
+     */
+    id?: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerReceipts_
+     */
+    deleted?: Date;
+}
+
+/**
+ * 
+ * @export
+ * @interface SwmypageInnerStatusUpdates
+ */
+export interface SwmypageInnerStatusUpdates {
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerStatusUpdates
+     */
+    id?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerStatusUpdates
+     */
+    swId?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerStatusUpdates
+     */
+    needId?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerStatusUpdates
+     */
+    newStatus?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerStatusUpdates
+     */
+    oldStatus?: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerStatusUpdates
+     */
+    created?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerStatusUpdates
+     */
+    updated?: Date;
+}
+
+/**
+ * 
+ * @export
+ * @interface SwmypageInnerVerifiedPayments
+ */
+export interface SwmypageInnerVerifiedPayments {
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerVerifiedPayments
+     */
+    id?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerVerifiedPayments
+     */
+    idNeed?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerVerifiedPayments
+     */
+    idUser?: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SwmypageInnerVerifiedPayments
+     */
+    verified?: Date;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerVerifiedPayments
+     */
+    needAmount?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerVerifiedPayments
+     */
+    donationAmount?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageInnerVerifiedPayments
+     */
+    creditAmount?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SwmypageInnerVerifiedPayments
+     */
+    useCredit?: boolean;
 }
 
 /**
@@ -11479,6 +11997,53 @@ export const SocialWorkerAPIApiFetchParamCreator = function (configuration?: Con
             };
         },
         /**
+         * 
+         * @summary Social Worker Page
+         * @param {string} authorization Access Token
+         * @param {number} [X_SKIP] 
+         * @param {number} [X_TAKE] Max 50
+         * @param {number} [swId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV2SocialworkersMyPageGet(authorization: string, X_SKIP?: number, X_TAKE?: number, swId?: number, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2SocialworkersMyPageGet.');
+            }
+            const localVarPath = `/api/v2/socialworkers/my-page`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (swId !== undefined) {
+                localVarQueryParameter['swId'] = swId;
+            }
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['Authorization'] = String(authorization);
+            }
+
+            if (X_SKIP !== undefined && X_SKIP !== null) {
+                localVarHeaderParameter['X-SKIP'] = String(X_SKIP);
+            }
+
+            if (X_TAKE !== undefined && X_TAKE !== null) {
+                localVarHeaderParameter['X-TAKE'] = String(X_TAKE);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Adds a social worker.<br/>This API creates a row in social_worker table containing a new social worker information.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Adding birthCertificateNumber, idCardUrl, passportNumber, passportUrl, birthDate, postalAddress, bankAccountNumber, bankAccountShebaNumber and bankAccountCardNumber is optional.<br/>For idCardUrl, passportUrl and avatarUrl you have to upload a file.<br/>
          * @summary add social worker
          * @param {string} authorization Access Token
@@ -12073,6 +12638,28 @@ export const SocialWorkerAPIApiFp = function(configuration?: Configuration) {
             };
         },
         /**
+         * 
+         * @summary Social Worker Page
+         * @param {string} authorization Access Token
+         * @param {number} [X_SKIP] 
+         * @param {number} [X_TAKE] Max 50
+         * @param {number} [swId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV2SocialworkersMyPageGet(authorization: string, X_SKIP?: number, X_TAKE?: number, swId?: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<SwMyPage> {
+            const localVarFetchArgs = SocialWorkerAPIApiFetchParamCreator(configuration).apiV2SocialworkersMyPageGet(authorization, X_SKIP, X_TAKE, swId, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
          * Adds a social worker.<br/>This API creates a row in social_worker table containing a new social worker information.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Adding birthCertificateNumber, idCardUrl, passportNumber, passportUrl, birthDate, postalAddress, bankAccountNumber, bankAccountShebaNumber and bankAccountCardNumber is optional.<br/>For idCardUrl, passportUrl and avatarUrl you have to upload a file.<br/>
          * @summary add social worker
          * @param {string} authorization Access Token
@@ -12288,6 +12875,19 @@ export const SocialWorkerAPIApiFactory = function (configuration?: Configuration
             return SocialWorkerAPIApiFp(configuration).apiV2SocialworkersIdPatch(authorization, id, isCoordinator, ngoId, cityId, typeId, username, password, firstName, lastName, birthCertificateNumber, idNumber, idCardUrl, passportNumber, passportUrl, gender, birthDate, phoneNumber, emergencyPhoneNumber, email, telegramId, postalAddress, avatarUrl, bankAccountNumber, bankAccountShebaNumber, bankAccountCardNumber, options)(fetch, basePath);
         },
         /**
+         * 
+         * @summary Social Worker Page
+         * @param {string} authorization Access Token
+         * @param {number} [X_SKIP] 
+         * @param {number} [X_TAKE] Max 50
+         * @param {number} [swId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV2SocialworkersMyPageGet(authorization: string, X_SKIP?: number, X_TAKE?: number, swId?: number, options?: any) {
+            return SocialWorkerAPIApiFp(configuration).apiV2SocialworkersMyPageGet(authorization, X_SKIP, X_TAKE, swId, options)(fetch, basePath);
+        },
+        /**
          * Adds a social worker.<br/>This API creates a row in social_worker table containing a new social worker information.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Adding birthCertificateNumber, idCardUrl, passportNumber, passportUrl, birthDate, postalAddress, bankAccountNumber, bankAccountShebaNumber and bankAccountCardNumber is optional.<br/>For idCardUrl, passportUrl and avatarUrl you have to upload a file.<br/>
          * @summary add social worker
          * @param {string} authorization Access Token
@@ -12501,6 +13101,21 @@ export class SocialWorkerAPIApi extends BaseAPI {
      */
     public apiV2SocialworkersIdPatch(authorization: string, id: number, isCoordinator: boolean, ngoId?: number, cityId?: number, typeId?: number, username?: string, password?: string, firstName?: string, lastName?: string, birthCertificateNumber?: string, idNumber?: string, idCardUrl?: any, passportNumber?: string, passportUrl?: any, gender?: boolean, birthDate?: string, phoneNumber?: string, emergencyPhoneNumber?: string, email?: string, telegramId?: string, postalAddress?: string, avatarUrl?: any, bankAccountNumber?: string, bankAccountShebaNumber?: string, bankAccountCardNumber?: string, options?: any) {
         return SocialWorkerAPIApiFp(this.configuration).apiV2SocialworkersIdPatch(authorization, id, isCoordinator, ngoId, cityId, typeId, username, password, firstName, lastName, birthCertificateNumber, idNumber, idCardUrl, passportNumber, passportUrl, gender, birthDate, phoneNumber, emergencyPhoneNumber, email, telegramId, postalAddress, avatarUrl, bankAccountNumber, bankAccountShebaNumber, bankAccountCardNumber, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Social Worker Page
+     * @param {string} authorization Access Token
+     * @param {number} [X_SKIP] 
+     * @param {number} [X_TAKE] Max 50
+     * @param {number} [swId] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SocialWorkerAPIApi
+     */
+    public apiV2SocialworkersMyPageGet(authorization: string, X_SKIP?: number, X_TAKE?: number, swId?: number, options?: any) {
+        return SocialWorkerAPIApiFp(this.configuration).apiV2SocialworkersMyPageGet(authorization, X_SKIP, X_TAKE, swId, options)(this.fetch, this.basePath);
     }
 
     /**

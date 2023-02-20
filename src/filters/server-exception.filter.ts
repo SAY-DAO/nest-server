@@ -1,5 +1,4 @@
-import { Catch, HttpStatus, HttpException, ArgumentsHost, ExceptionFilter } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Catch, HttpStatus, HttpException, } from '@nestjs/common';
 
 @Catch(HttpException)
 export class ServerError extends HttpException {

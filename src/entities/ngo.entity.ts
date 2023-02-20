@@ -17,13 +17,13 @@ export class NgoEntity extends BaseEntity {
     flaskNgoId: number
 
     @Column({ nullable: true })
-    city: number
+    cityId: number
 
     @Column({ nullable: true })
-    state: number
+    stateId: number
 
     @Column({ nullable: true })
-    country: number
+    countryId: number
 
     @Column({ nullable: true })
     postalAddress: string
@@ -39,6 +39,17 @@ export class NgoEntity extends BaseEntity {
 
     @Column({ default: false })
     isActive: boolean
+
+    @Column({ type: 'timestamptz', nullable: true })
+    registerDate?: Date;
+
+    @Column({ type: 'timestamptz', nullable: true })
+    updated?: Date;
+
+
+    @Column({ nullable: true })
+    isDeleted?: boolean;
+
 
     @OneToMany(() => NeedEntity, (need) => need.ngo)
     needs: NeedEntity[];

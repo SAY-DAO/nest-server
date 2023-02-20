@@ -1,6 +1,8 @@
 import { NgoEntity } from "../../entities/ngo.entity";
 import { NeedEntity } from "../../entities/need.entity";
 import { PaymentEntity } from "../../entities/payment.entity";
+import { ContributorsEnum, RolesEnum } from "../interface";
+import { NgoParams } from "./NgoParammeters";
 
 
 export type FamilyParams = {
@@ -15,9 +17,14 @@ export type FamilyParams = {
 
 export type SocialWorkerParams = {
     cityId?: number;
+    stateId?: number
+    countryId?: number
+    cityName?: string
+    stateName?: string
+    countryName?: string
     firstName?: string;
     lastName?: string;
-    birthCertificateNumber?: number;
+    birthCertificateNumber?: string;
     passportNumber?: number;
     postalAddress?: string;
     bankAccountNumber?: number;
@@ -28,7 +35,7 @@ export type SocialWorkerParams = {
     idNumber?: string;
     isCoordinator?: true;
     flaskNgoId?: number;
-    ngo: NgoEntity;
+    ngo?: NgoParams;
     gender?: false;
     phoneNumber?: string;
     emergencyPhoneNumber?: string;
@@ -52,6 +59,7 @@ export type SocialWorkerParams = {
     typeId?: number; // user type
     typeName?: string;
     ngoName?: string;
+    role: ContributorsEnum
 }
 
 export class CreateParticipantDto {

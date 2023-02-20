@@ -1,8 +1,64 @@
+import {
+  SwmypageInnerParticipants,
+  SwmypageInnerReceipts_,
+  SwmypageInnerStatusUpdates,
+  SwmypageInnerVerifiedPayments,
+} from 'src/generated-sources/openapi';;
+
 export interface NeedsData {
   all_needs_count: number;
   totalCount: number;
   needs: Need[];
 }
+
+export interface ChildNeed {
+  id?: number;
+  createdById?: number;
+  nameTranslations?: any;
+  name?: string;
+  title?: string;
+  descriptionTranslations?: any;
+  description?: string;
+  details?: string;
+  imageUrl?: string;
+  category?: number;
+  type?: number;
+  isUrgent?: boolean;
+  link?: string;
+  affiliateLinkUrl?: string;
+  doingDuration?: number;
+  status?: number;
+  img?: string;
+  paid?: number;
+  purchaseCost?: number;
+  cost?: number;
+  unpayable?: boolean;
+  isDone?: boolean;
+  isDeleted?: boolean;
+  isConfirmed?: boolean;
+  unpayableFrom?: Date;
+  created?: Date;
+  updated?: Date;
+  confirmDate?: Date;
+  deletedAt?: Date;
+  statusUpdates?: SwmypageInnerStatusUpdates[];
+  receipts_?: SwmypageInnerReceipts_[];
+  verifiedPayments?: SwmypageInnerVerifiedPayments[];
+  participants?: SwmypageInnerParticipants[];
+  confirmedBy?: number;
+  doneAt?: Date;
+  ngoDeliveryDate?: Date;
+  childDeliveryDate?: Date;
+  purchaseDate?: Date;
+  child: {
+    id: number;
+    sayName: string;
+    firstName: string;
+    lastName: string;
+    birthDate: string;
+    awakeAvatarUrl: string;
+  };
+};
 
 export interface Need {
   id: number;
@@ -32,7 +88,7 @@ export interface Need {
   img: string;
   title: string;
   oncePurchased: boolean;
-  bank_track_id: number;
+  bank_track_id: string;
   unavailable_from: Date;
   doneAt: Date;
   purchase_date: Date;
@@ -69,7 +125,23 @@ export interface Need {
   childFirstName: string;
   childLastName: string;
   payments: Payment[];
+  receipt: Receipt[]
 };
+
+export type Receipt = {
+  title: string;
+  description: string;
+  attachment: string;
+  isPublic: boolean;
+  code: string;
+  flaskSwId: number;
+  socialWorker: number;
+  child: number;
+  needStatus: number;
+  flaskReceiptId: number;
+  deleted: boolean | null;
+  flaskNeedId: number;
+}
 
 export interface Payment {
   id: number
