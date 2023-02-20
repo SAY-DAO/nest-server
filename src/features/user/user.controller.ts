@@ -75,71 +75,74 @@ export class UserController {
 
         const time3 = new Date().getTime();
         try {
-            for (let i = 0; i < pageData.length; i++) {
-                const childNeedsList = [];
-                child = {
-                    id: pageData[i].id,
-                    sayName: pageData[i].sayName,
-                    firstName: pageData[i].firstName,
-                    lastName: pageData[i].lastName,
-                    birthDate: pageData[i].birthDate,
-                    awakeAvatarUrl: pageData[i].awakeAvatarUrl,
-                };
+            if (pageData) {
+                for (let i = 0; i < pageData.length; i++) {
+                    const childNeedsList = [];
+                    child = {
+                        id: pageData[i].id,
+                        sayName: pageData[i].sayName,
+                        firstName: pageData[i].firstName,
+                        lastName: pageData[i].lastName,
+                        birthDate: pageData[i].birthDate,
+                        awakeAvatarUrl: pageData[i].awakeAvatarUrl,
+                    };
 
-                for (let k = 0; k < pageData[i].needs.length; k++) {
-                    childNeed = { child, ...pageData[i].needs[k] };
-                    childNeedsList.push(childNeed);
-                }
-
-                // SW
-                if (typeId === RolesEnum.SOCIAL_WORKER) {
-                    role = 'createdById';
-                    const swNeeds = childNeedsList.filter(
-                        (need) => need[role] === userId,
-                    );
-                    const newList = swNeedsList.concat(swNeeds); // Merging
-                    swNeedsList = newList;
-                }
-                // NGO supervisor
-                else if (typeId === RolesEnum.NGO_SUPERVISOR) {
-                    role = 'ngo';
-                    const swNeeds = childNeedsList;
-                    const newList = swNeedsList.concat(swNeeds); // Merging
-                    swNeedsList = newList;
-                }
-                // Auditor
-                else if (
-                    typeId === RolesEnum.ADMIN ||
-                    typeId === RolesEnum.SUPER_ADMIN ||
-                    RolesEnum.SAY_SUPERVISOR
-                ) {
-                    role = 'confirmedBy';
-                    const swNeeds = childNeedsList;
-                    const newList = swNeedsList.concat(swNeeds); // Merging
-                    swNeedsList = newList;
-                }
-                // Purchaser
-                else if (typeId === RolesEnum.COORDINATOR) {
-                    role = 'purchasedBy';
-                    const swNeeds = childNeedsList;
                     for (let k = 0; k < pageData[i].needs.length; k++) {
-                        const statusUpdates = pageData[i].needs[k].statusUpdates.filter(
+                        childNeed = { child, ...pageData[i].needs[k] };
+                        childNeedsList.push(childNeed);
+                    }
+
+                    // SW
+                    if (typeId === RolesEnum.SOCIAL_WORKER) {
+                        role = 'createdById';
+                        const swNeeds = childNeedsList.filter(
                             (need) => need[role] === userId,
                         );
-                        for (let j = 0; j < statusUpdates.length; j++) {
-                            if (
-                                statusUpdates[j].oldStatus === ProductStatusEnum.COMPLETE_PAY &&
-                                statusUpdates[j].newStatus ===
-                                ProductStatusEnum.PURCHASED_PRODUCT &&
-                                statusUpdates[j].swId === userId
-                            ) {
-                                const newList = swNeedsList.concat(swNeeds); // Merging
-                                swNeedsList = newList;
+                        const newList = swNeedsList.concat(swNeeds); // Merging
+                        swNeedsList = newList;
+                    }
+                    // NGO supervisor
+                    else if (typeId === RolesEnum.NGO_SUPERVISOR) {
+                        role = 'ngo';
+                        const swNeeds = childNeedsList;
+                        const newList = swNeedsList.concat(swNeeds); // Merging
+                        swNeedsList = newList;
+                    }
+                    // Auditor
+                    else if (
+                        typeId === RolesEnum.ADMIN ||
+                        typeId === RolesEnum.SUPER_ADMIN ||
+                        RolesEnum.SAY_SUPERVISOR
+                    ) {
+                        role = 'confirmedBy';
+                        const swNeeds = childNeedsList;
+                        const newList = swNeedsList.concat(swNeeds); // Merging
+                        swNeedsList = newList;
+                    }
+                    // Purchaser
+                    else if (typeId === RolesEnum.COORDINATOR) {
+                        role = 'purchasedBy';
+                        const swNeeds = childNeedsList;
+                        for (let k = 0; k < pageData[i].needs.length; k++) {
+                            const statusUpdates = pageData[i].needs[k].statusUpdates.filter(
+                                (need) => need[role] === userId,
+                            );
+                            for (let j = 0; j < statusUpdates.length; j++) {
+                                if (
+                                    statusUpdates[j].oldStatus === ProductStatusEnum.COMPLETE_PAY &&
+                                    statusUpdates[j].newStatus ===
+                                    ProductStatusEnum.PURCHASED_PRODUCT &&
+                                    statusUpdates[j].swId === userId
+                                ) {
+                                    const newList = swNeedsList.concat(swNeeds); // Merging
+                                    swNeedsList = newList;
+                                }
                             }
                         }
                     }
                 }
             }
+
         } catch (e) {
             console.log(e)
             throw new ServerError(e);
@@ -164,7 +167,7 @@ export class UserController {
             role,
             typeId,
             needs: organizedNeeds,
-            childrenCount: pageData.length,
+            childrenCount: pageData ? pageData.length : 0,
             timeLine: { summary, inMonth },
         };
     }

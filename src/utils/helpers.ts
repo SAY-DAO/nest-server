@@ -34,18 +34,18 @@ export function timeDifference(time1: number, time2: number, comment: string) {
 
 export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
     let summary: { inTwoDays: number; inWeek: number; inThirtyDays: number; };
-    const farvardin = { 'created': 0, confirmed: 0 }
-    const ordibehesht = { 'created': 0, confirmed: 0 }
-    const khordad = { 'created': 0, confirmed: 0 }
-    const tir = { 'created': 0, confirmed: 0 }
-    const mordad = { 'created': 0, confirmed: 0 }
-    const shahrivar = { 'created': 0, confirmed: 0 }
-    const mehr = { 'created': 0, confirmed: 0 }
-    const aban = { 'created': 0, confirmed: 0 }
-    const azar = { 'created': 0, confirmed: 0 }
-    const dey = { 'created': 0, confirmed: 0 }
-    const bahman = { 'created': 0, confirmed: 0 }
-    const esfand = { 'created': 0, confirmed: 0 }
+    const farvardin = { 'created': 0, 'confirmed': 0 }
+    const ordibehesht = { 'created': 0, 'confirmed': 0 }
+    const khordad = { 'created': 0, 'confirmed': 0 }
+    const tir = { 'created': 0, 'confirmed': 0 }
+    const mordad = { 'created': 0, 'confirmed': 0 }
+    const shahrivar = { 'created': 0, 'confirmed': 0 }
+    const mehr = { 'created': 0, 'confirmed': 0 }
+    const aban = { 'created': 0, 'confirmed': 0 }
+    const azar = { 'created': 0, 'confirmed': 0 }
+    const dey = { 'created': 0, 'confirmed': 0 }
+    const bahman = { 'created': 0, 'confirmed': 0 }
+    const esfand = { 'created': 0, 'confirmed': 0 }
 
     const todayMonth = parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { month: 'numeric' }).format(new Date))
     for (let i = 0; i < needs.length; i++) {
@@ -162,6 +162,7 @@ export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
     weekAgo.setDate(weekAgo.getDate() - 7);
     const monthAgo = new Date();
     monthAgo.setDate(monthAgo.getDate() - 30);
+    
     if (who == 'createdBy') {
         const inTwoDays = needs.filter((n) => new Date(n.confirmDate).getTime() >= twoDaysAgo.getTime())
         const inWeek = needs.filter((n) => new Date(n.confirmDate).getTime() >= weekAgo.getTime())
