@@ -20,6 +20,11 @@ export function persianMonth(value: Date) {
     return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { month: 'numeric' }).format(value))
 }
 
+export function persianYear(value: Date) {
+    return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(value))
+}
+
+
 export function timeDifference(time1: number, time2: number, comment: string) {
     const diff = time2 - time1;
     let msec = diff;
@@ -47,11 +52,15 @@ export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
     const bahman = { 'created': 0, 'confirmed': 0 }
     const esfand = { 'created': 0, 'confirmed': 0 }
 
-    const todayMonth = parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { month: 'numeric' }).format(new Date))
+    const currentMonth = parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { month: 'numeric' }).format(new Date))
+    const currentYear = parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date))
     for (let i = 0; i < needs.length; i++) {
         const thePersianMonthCreated = persianMonth(new Date(needs[i].created))
         const thePersianMonthConfirm = persianMonth(new Date(needs[i].confirmDate))
-        if (todayMonth - 6 < thePersianMonthCreated) {
+        const thePersianYearCreated = persianYear(new Date(needs[i].created))
+        const thePersianYearConfirm = persianYear(new Date(needs[i].confirmDate))
+
+        if (currentMonth - 6 < thePersianMonthCreated && thePersianYearCreated === currentYear) {
             // farvardin
             if (thePersianMonthCreated === 1) {
                 farvardin.created += 1
@@ -103,7 +112,7 @@ export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
             }
 
         }
-        if (todayMonth - 6 < thePersianMonthConfirm) {
+        if (currentMonth - 6 < thePersianMonthConfirm && thePersianYearConfirm === currentYear) {
             // farvardin
             if (thePersianMonthConfirm === 1) {
                 farvardin.confirmed += 1
