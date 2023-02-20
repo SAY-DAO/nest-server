@@ -35,7 +35,7 @@ export class UserController {
         @Param('userId', ParseIntPipe) userId: number,
         @Param('typeId', ParseIntPipe) typeId: number,
         @Param('ngoId') ngoId: number,
-        @Query('isUser') isUser: string,
+        @Query('isUser') isUser: "0" | "1",
     ) {
         const time1 = new Date().getTime();
 
@@ -56,7 +56,6 @@ export class UserController {
             console.log(e)
 
         }
-
         let child: {
             id: number;
             sayName: string;

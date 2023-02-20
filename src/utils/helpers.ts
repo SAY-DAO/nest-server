@@ -162,7 +162,7 @@ export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
     weekAgo.setDate(weekAgo.getDate() - 7);
     const monthAgo = new Date();
     monthAgo.setDate(monthAgo.getDate() - 30);
-    
+
     if (who == 'createdBy') {
         const inTwoDays = needs.filter((n) => new Date(n.confirmDate).getTime() >= twoDaysAgo.getTime())
         const inWeek = needs.filter((n) => new Date(n.confirmDate).getTime() >= weekAgo.getTime())
@@ -198,6 +198,7 @@ export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
 export function getOrganizedNeeds(needsData: SwmypageInnerNeeds[]) {
     const organizedNeeds = [[], [], [], []]; // [[not paid], [payment], [purchased/delivered Ngo], [Done]]
     if (needsData) {
+        needsData = sortNeeds(needsData, "created")
         for (let i = 0; i < needsData.length; i++) {
             // not Paid
             if (needsData[i].status === 0) {
@@ -235,6 +236,7 @@ export function getOrganizedNeeds(needsData: SwmypageInnerNeeds[]) {
                 }
             }
         }
+        organizedNeeds[3] = sortNeeds(organizedNeeds[3], "doneAt")
         return organizedNeeds;
     }
 }
