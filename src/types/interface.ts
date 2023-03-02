@@ -1,4 +1,3 @@
-import { SwmypageInnerNeeds, SwmypageInnerReceipts_ } from "src/generated-sources/openapi";
 
 export enum RolesEnum {
     NO_ROLE = 0,
@@ -8,17 +7,26 @@ export enum RolesEnum {
     NGO_SUPERVISOR = 4,
     SAY_SUPERVISOR = 5,
     ADMIN = 6,
-    FAMILY = 7,
-    FRIEND = 8,
 }
 
-export enum ContributorsEnum {
+export enum PanelContributors {
+    AUDITOR = 1,
+    SOCIAL_WORKER = 2,
+    PURCHASER = 3,
+    NGO_SUPERVISOR = 4,
+}
+export enum AppContributors {
+    FAMILY = 5,
+    FRIEND = 6,
+}
+export enum SAYPlatformRoles {
     NO_ROLE = 0,
-    SOCIAL_WORKER = 1,
-    PURCHASER = 2,
-    AUDITOR = 3,
-    FAMILY = 4,
-    FRIEND = 5,
+    SOCIAL_WORKER = PanelContributors.SOCIAL_WORKER,
+    NGO_SUPERVISOR = PanelContributors.NGO_SUPERVISOR,
+    PURCHASER = PanelContributors.PURCHASER,
+    AUDITOR = PanelContributors.AUDITOR,
+    FAMILY = AppContributors.FAMILY,
+    FRIEND = AppContributors.FRIEND,
 }
 
 export enum childExistence {

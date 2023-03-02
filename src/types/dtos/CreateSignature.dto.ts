@@ -1,22 +1,40 @@
 import { IsNotEmpty } from 'class-validator';
-import { SwmypageInnerNeeds } from 'src/generated-sources/openapi';
-import { CreateChildrenDto } from './CreateChild.dto';
+import { SwmypageNeeds } from 'src/generated-sources/openapi';
 import { CreateSocialWorkerDto } from './CreateUser.dto';
 
+
+export class customNeed {
+  need: SwmypageNeeds;
+  child: {
+    id: number;
+    sayName: string;
+    firstName: string;
+    lastName: string;
+    birthDate: string;
+    awakeAvatarUrl: string;
+  };
+}
+
 export class SwCreateSwSignatureDto {
-    @IsNotEmpty()
-    need: SwmypageInnerNeeds;
-    @IsNotEmpty()
-    child: CreateChildrenDto;
-    @IsNotEmpty()
-    socialWorker: CreateSocialWorkerDto;
-    @IsNotEmpty()
-    signerAddress: string;
+  @IsNotEmpty()
+  panelData: customNeed;
+  @IsNotEmpty()
+  childId: number;
+  @IsNotEmpty()
+  roles: string[];
+  @IsNotEmpty()
+  callerId: number;
+  @IsNotEmpty()
+  ngoId: number;
+  @IsNotEmpty()
+  socialWorker: CreateSocialWorkerDto;
+  @IsNotEmpty()
+  signerAddress: string;
 }
 
 export class FamilyCreateSwSignatureDto {
-    userId: number;
-    needId: number;
-    childId: number;
-    signerAddress: string;
+  userId: number;
+  needId: number;
+  childId: number;
+  signerAddress: string;
 }

@@ -10,48 +10,48 @@ import { FamilyEntity } from './user.entity';
 
 @Entity()
 export class PaymentEntity extends BaseEntity {
-    @Index({ unique: true })
-    @Column()
-    flaskPaymentId: number;
-
+    @Index({unique: true})
     @Column({ nullable: true })
-    bankAmount: number;
-
-    @Column({ nullable: true })
-    cardNumber: string;
+    flaskId: number;
 
     @Column({ nullable: true })
     creditAmount: number;
 
     @Column({ nullable: true })
-    description: string;
-
-    @Column({ nullable: true })
     donationAmount: number;
 
     @Column({ nullable: true })
-    gatewayPaymentId: string;
+    useCredit: boolean;
+    
+    // @Column({ nullable: true })
+    // bankAmount: number;
 
-    @Column({ nullable: true })
-    gatewayTrackId: string;
+    // @Column({ nullable: true })
+    // cardNumber: string;
 
-    @Column({ nullable: true })
-    hashedCardNumber: string;
+    // @Column({ nullable: true })
+    // description: string;
 
-    @Column({ nullable: true })
-    link: string;
+    // @Column({ nullable: true })
+    // gatewayPaymentId: string;
 
-    @Column({ nullable: true })
-    totalAmount: number;
+    // @Column({ nullable: true })
+    // gatewayTrackId: string;
 
-    @Column({ type: 'timestamptz', nullable: true })
-    transactionDate: Date;
+    // @Column({ nullable: true })
+    // hashedCardNumber: string;
 
-    @Column({ type: 'timestamptz', nullable: true })
-    created: Date;
+    // @Column({ nullable: true })
+    // needAmount: number;
 
-    @Column({ type: 'timestamptz', nullable: true })
-    updated: Date;
+    // @Column({ type: 'timestamptz', nullable: true })
+    // transactionDate: Date;
+
+    // @Column({ type: 'timestamptz', nullable: true })
+    // created: Date;
+
+    // @Column({ type: 'timestamptz', nullable: true })
+    // updated: Date;
 
     @Column({ type: 'timestamptz', nullable: true })
     verified: Date;
@@ -62,10 +62,11 @@ export class PaymentEntity extends BaseEntity {
     @Column()
     flaskUserId: number;
 
-    @ManyToOne(() => NeedEntity, (need) => need.payments, { eager: false })
+    @ManyToOne(() => NeedEntity, (need) => need.verifiedPayments, { eager: false, nullable: true  })
     need: NeedEntity;
 
-    @ManyToOne(() => FamilyEntity, (user) => user.payments, { eager: false })
-    user: FamilyEntity;
+    @ManyToOne(() => FamilyEntity, (family) => family.payments, { eager: true })
+    familyMember: FamilyEntity;
 
 }
+

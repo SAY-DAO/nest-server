@@ -3,24 +3,21 @@ import {
   Column,
   Index,
   OneToMany,
-  JoinColumn,
-  OneToOne,
   ManyToOne,
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
 import { EducationEnum, HousingEnum } from '../types/interface';
 import { NgoEntity } from './ngo.entity';
-import { SocialWorkerEntity } from './user.entity';
+import { ContributorEntity } from './user.entity';
 
 @Entity()
 export class ChildrenEntity extends BaseEntity {
-  @Index({ unique: true })
   @Column()
-  flaskChildId: number;
+  flaskId: number;
 
   @Column({ nullable: true })
-  flaskSupervisorId?: number; //confirmUser from flask
+  flaskConfirmUser?: number; //confirmUser from flask
 
   @Column({ nullable: true })
   address: string;
@@ -98,7 +95,7 @@ export class ChildrenEntity extends BaseEntity {
   migratedId: number;
 
   @Column({ nullable: true })
-  nationality: string;
+  nationality: number;
 
   @Column({ nullable: true })
   sayFamilyCount: number;
@@ -124,13 +121,13 @@ export class ChildrenEntity extends BaseEntity {
   @OneToMany(() => NeedEntity, (need) => need.child)
   needs?: NeedEntity[]
 
-  @ManyToOne(() => NgoEntity, (n) => n.children, { eager: false })
+  @ManyToOne(() => NgoEntity, (n) => n.children, { eager: true })
   ngo: NgoEntity;
 
-  @ManyToOne(() => SocialWorkerEntity, (s) => s.children, { eager: false })
-  socialWorker: SocialWorkerEntity;
+  @ManyToOne(() => ContributorEntity, (s) => s.children, { eager: true })
+  socialWorker: ContributorEntity;
 
-  @ManyToOne(() => SocialWorkerEntity, (s) => s.children, { eager: false })
-  supervisor: SocialWorkerEntity;
+  @ManyToOne(() => ContributorEntity, (s) => s.children, { eager: false })
+  supervisor: ContributorEntity;
 }
 

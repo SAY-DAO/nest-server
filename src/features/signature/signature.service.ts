@@ -18,12 +18,10 @@ import { ChildrenService } from '../children/children.service';
 import VerifyVoucher from '../../contracts/tokens/ERC721/VerifyVoucher.sol/VerifyVoucher.json';
 import { verifyContractAddress } from '../../contracts/network-settings.json';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { NeedEntity } from '../../entities/need.entity';
-import { SwCreateSwSignatureDto } from '../../types/dtos/CreateSignature.dto';
 import { UrlJsonRpcProvider, Contract, EthersContract, InjectEthersProvider, InjectSignerProvider, EthersSigner } from 'nestjs-ethers';
-import { VoidSigner } from 'ethers';
-import { ChildParams } from 'src/types/parameters/ChildParameters';
-import { SwmypageInnerNeeds } from 'src/generated-sources/openapi';
+import { SwmypageNeeds } from 'src/generated-sources/openapi';
+import { NeedEntity } from 'src/entities/need.entity';
+
 
 @Injectable()
 export class SignatureService {
@@ -78,7 +76,7 @@ export class SignatureService {
     };
   }
 
-  async swSignTransaction(signerAddress: string, need: SwmypageInnerNeeds, child: ChildrenEntity
+  async swSignTransaction(signerAddress: string, need: NeedEntity, child: ChildrenEntity
   ): Promise<SwSignatureResult> {
     const impacts = 4;
     let productVoucher: SwProductVoucher

@@ -416,10 +416,10 @@ export interface ChildModel {
     voiceUrl?: string;
     /**
      * the child's birth place, the international city codes
-     * @type {number}
+     * @type {string}
      * @memberof ChildModel
      */
-    birthPlace?: number;
+    birthPlace?: string;
     /**
      * the child's birth date
      * @type {string}
@@ -473,13 +473,13 @@ export interface ChildModel {
      * @type {number}
      * @memberof ChildModel
      */
-    ngoId?: number;
+    idNgo?: number;
     /**
      * the social worker who covers the child's needs
      * @type {number}
      * @memberof ChildModel
      */
-    socialWorkerId?: number;
+    id_social_worker?: number;
     /**
      * total credit spent on child
      * @type {number}
@@ -536,16 +536,16 @@ export interface ChildModel {
     isMigrated?: boolean;
     /**
      * the social worker whom the child is migrated to
-     * @type {boolean}
+     * @type {number}
      * @memberof ChildModel
      */
-    migratedId?: boolean;
+    migratedId?: number;
     /**
      * the date that the child has been migrated
-     * @type {boolean}
+     * @type {string}
      * @memberof ChildModel
      */
-    migrateDate?: boolean;
+    migrateDate?: string;
 }
 
 /**
@@ -553,8 +553,7 @@ export interface ChildModel {
  * @export
  * @interface ChildrenWithFamilyMembers
  */
-export interface ChildrenWithFamilyMembers extends Array<ChildrenWithFamilyMembersInner> {
-}
+export type ChildrenWithFamilyMembers = Array<ChildrenWithFamilyMembersInner>
 
 /**
  * 
@@ -657,7 +656,7 @@ export interface CityModel {
      * @type {number}
      * @memberof CityModel
      */
-    stateId?: number;
+    stateId?: string;
     /**
      * 
      * @type {string}
@@ -681,7 +680,7 @@ export interface CityModel {
      * @type {number}
      * @memberof CityModel
      */
-    countryId?: number;
+    countryId?: string;
     /**
      * 
      * @type {string}
@@ -829,8 +828,7 @@ export interface CountryModel {
  * @export
  * @interface FamilyMembers
  */
-export interface FamilyMembers extends Array<FamilyMembersInner> {
-}
+export type FamilyMembers = Array<FamilyMembersInner>
 
 /**
  * 
@@ -1121,6 +1119,68 @@ export interface NeedModel {
 /**
  * 
  * @export
+ * @interface NeedReceipt
+ */
+export interface NeedReceipt {
+    /**
+     * 
+     * @type {number}
+     * @memberof NeedReceipt
+     */
+    id?: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof NeedReceipt
+     */
+    deleted?: Date;
+    /**
+     * 
+     * @type {string}
+     * @memberof NeedReceipt
+     */
+    attachment?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof NeedReceipt
+     */
+    code?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof NeedReceipt
+     */
+    description?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof NeedReceipt
+     */
+    title?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof NeedReceipt
+     */
+    isPublic?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof NeedReceipt
+     */
+    ownerId?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof NeedReceipt
+     */
+    needStatus?: number;
+}
+
+/**
+ * 
+ * @export
  * @interface NeedStatusUpdateModel
  */
 export interface NeedStatusUpdateModel {
@@ -1174,6 +1234,7 @@ export interface NeedStatusUpdateModel {
  * @interface NgoModel
  */
 export interface NgoModel {
+    city:any
     /**
      * the ngo id
      * @type {number}
@@ -1186,6 +1247,7 @@ export interface NgoModel {
      * @memberof NgoModel
      */
     cityId?: number;
+    city_id?:number
     /**
      * name of the ngo
      * @type {string}
@@ -1276,6 +1338,8 @@ export interface NgoModel {
      * @memberof NgoModel
      */
     isDeleted?: boolean;
+
+    socialWorkers:any
 }
 
 /**
@@ -1491,7 +1555,7 @@ export interface SocialWorkerModel {
      * @type {number}
      * @memberof SocialWorkerModel
      */
-    cityId?: number;
+    cityId?: string;
     /**
      * 
      * @type {CityModel}
@@ -1795,404 +1859,285 @@ export interface StateModel {
  * @export
  * @interface SwMyPage
  */
-export interface SwMyPage extends Array<SwmypageInner> {
+export interface SwMyPage {
+    /**
+     * 
+     * @type {number}
+     * @memberof SwMyPage
+     */
+    count?: number;
+    /**
+     * 
+     * @type {Array<SwmypageResult>}
+     * @memberof SwMyPage
+     */
+    result?: Array<SwmypageResult>;
 }
 
 /**
  * 
  * @export
- * @interface SwmypageInner
+ * @interface SwmypageNeeds
  */
-export interface SwmypageInner {
+export interface SwmypageNeeds {
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInner
-     */
-    id?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof SwmypageInner
-     */
-    sayName?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SwmypageInner
-     */
-    firstName?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SwmypageInner
-     */
-    lastName?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SwmypageInner
-     */
-    birthDate?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SwmypageInner
-     */
-    awakeAvatarUrl?: string;
-    /**
-     * 
-     * @type {Array<SwmypageInnerNeeds>}
-     * @memberof SwmypageInner
-     */
-    needs?: Array<SwmypageInnerNeeds>;
-}
-
-/**
- * 
- * @export
- * @interface SwmypageInnerNeeds
- */
-export interface SwmypageInnerNeeds {
-    status: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     id?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     createdById?: number;
     /**
      * 
-     * @type {any}
-     * @memberof SwmypageInnerNeeds
-     */
-    nameTranslations?: any;
-    /**
-     * 
      * @type {string}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     name?: string;
     /**
      * 
      * @type {string}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     title?: string;
     /**
      * 
-     * @type {any}
-     * @memberof SwmypageInnerNeeds
-     */
-    descriptionTranslations?: any;
-    /**
-     * 
      * @type {string}
-     * @memberof SwmypageInnerNeeds
-     */
-    description?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SwmypageInnerNeeds
-     */
-    details?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     imageUrl?: string;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     category?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     type?: number;
     /**
      * 
      * @type {boolean}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     isUrgent?: boolean;
     /**
      * 
      * @type {string}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     link?: string;
     /**
      * 
      * @type {string}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     affiliateLinkUrl?: string;
     /**
      * 
      * @type {string}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     bankTrackId?: string;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     doingDuration?: number;
     /**
      * 
+     * @type {number}
+     * @memberof SwmypageNeeds
+     */
+    status?: number;
+    /**
+     * 
      * @type {string}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     img?: string;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     paid?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     purchaseCost?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     cost?: number;
     /**
      * 
      * @type {boolean}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     unpayable?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     isDone?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof SwmypageInnerNeeds
-     */
-    isDeleted?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     isConfirmed?: boolean;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     unpayableFrom?: Date;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     created?: Date;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     updated?: Date;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     confirmDate?: Date;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     confirmedBy?: number;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerNeeds
-     */
-    deletedAt?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     doneAt?: Date;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     ngoDeliveryDate?: Date;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     childDeliveryDate?: Date;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerNeeds
+     * @memberof SwmypageNeeds
      */
     purchaseDate?: Date;
     /**
      * 
-     * @type {SwmypageInnerStatusUpdates}
-     * @memberof SwmypageInnerNeeds
+     * @type {Date}
+     * @memberof SwmypageNeeds
      */
-    statusUpdates?: SwmypageInnerStatusUpdates[];
+    expectedDeliveryDate?: Date;
     /**
      * 
-     * @type {SwmypageInnerReceipts_}
-     * @memberof SwmypageInnerNeeds
+     * @type {Array<SwmypageStatusUpdates>}
+     * @memberof SwmypageNeeds
      */
-    receipts_?: SwmypageInnerReceipts_[];
+    statusUpdates?: Array<SwmypageStatusUpdates>;
     /**
      * 
-     * @type {SwmypageInnerVerifiedPayments}
-     * @memberof SwmypageInnerNeeds
+     * @type {Array<SwmypageReceipts_>}
+     * @memberof SwmypageNeeds
      */
-    verifiedPayments?: SwmypageInnerVerifiedPayments[];
+    receipts_?: Array<SwmypageReceipts_>;
     /**
      * 
-     * @type {SwmypageInnerParticipants}
-     * @memberof SwmypageInnerNeeds
+     * @type {Array<SwmypageVerifiedPayments>}
+     * @memberof SwmypageNeeds
      */
-    participants?: SwmypageInnerParticipants[];
+    verifiedPayments?: Array<SwmypageVerifiedPayments>;
 }
 
 /**
  * 
  * @export
- * @interface SwmypageInnerParticipants
+ * @interface SwmypageReceipts_
  */
-export interface SwmypageInnerParticipants {
-    /**
-     * 
-     * @type {number}
-     * @memberof SwmypageInnerParticipants
-     */
-    id?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SwmypageInnerParticipants
-     */
-    idFamily?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SwmypageInnerParticipants
-     */
-    idUser?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SwmypageInnerParticipants
-     */
-    idNeed?: number;
+export interface SwmypageReceipts_ {
     /**
      * 
      * @type {string}
-     * @memberof SwmypageInnerParticipants
-     */
-    type?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof SwmypageInnerParticipants
-     */
-    userRole?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SwmypageInnerParticipants
-     */
-    paid?: number;
-}
-
-/**
- * 
- * @export
- * @interface SwmypageInnerReceipts_
- */
-export interface SwmypageInnerReceipts_ {
-    /**
-     * 
-     * @type {string}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     attachment?: string;
     /**
      * 
      * @type {string}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     description?: string;
     /**
      * 
      * @type {string}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     title?: string;
     /**
      * 
      * @type {boolean}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     isPublic?: boolean;
     /**
      * 
      * @type {string}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     code?: string;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     ownerId?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     needStatus?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     id?: number;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerReceipts_
+     * @memberof SwmypageReceipts_
      */
     deleted?: Date;
 }
@@ -2200,49 +2145,99 @@ export interface SwmypageInnerReceipts_ {
 /**
  * 
  * @export
- * @interface SwmypageInnerStatusUpdates
+ * @interface SwmypageResult
  */
-export interface SwmypageInnerStatusUpdates {
+export interface SwmypageResult {
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerStatusUpdates
+     * @memberof SwmypageResult
+     */
+    id?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageResult
+     */
+    sayName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageResult
+     */
+    firstName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageResult
+     */
+    lastName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageResult
+     */
+    birthDate?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SwmypageResult
+     */
+    awakeAvatarUrl?: string;
+    /**
+     * 
+     * @type {Array<SwmypageNeeds>}
+     * @memberof SwmypageResult
+     */
+    needs?: Array<SwmypageNeeds>;
+}
+
+/**
+ * 
+ * @export
+ * @interface SwmypageStatusUpdates
+ */
+export interface SwmypageStatusUpdates {
+    /**
+     * 
+     * @type {number}
+     * @memberof SwmypageStatusUpdates
      */
     id?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerStatusUpdates
+     * @memberof SwmypageStatusUpdates
      */
     swId?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerStatusUpdates
+     * @memberof SwmypageStatusUpdates
      */
     needId?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerStatusUpdates
+     * @memberof SwmypageStatusUpdates
      */
     newStatus?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerStatusUpdates
+     * @memberof SwmypageStatusUpdates
      */
     oldStatus?: number;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerStatusUpdates
+     * @memberof SwmypageStatusUpdates
      */
     created?: Date;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerStatusUpdates
+     * @memberof SwmypageStatusUpdates
      */
     updated?: Date;
 }
@@ -2250,55 +2245,55 @@ export interface SwmypageInnerStatusUpdates {
 /**
  * 
  * @export
- * @interface SwmypageInnerVerifiedPayments
+ * @interface SwmypageVerifiedPayments
  */
-export interface SwmypageInnerVerifiedPayments {
+export interface SwmypageVerifiedPayments {
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerVerifiedPayments
+     * @memberof SwmypageVerifiedPayments
      */
     id?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerVerifiedPayments
+     * @memberof SwmypageVerifiedPayments
      */
     idNeed?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerVerifiedPayments
+     * @memberof SwmypageVerifiedPayments
      */
     idUser?: number;
     /**
      * 
      * @type {Date}
-     * @memberof SwmypageInnerVerifiedPayments
+     * @memberof SwmypageVerifiedPayments
      */
     verified?: Date;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerVerifiedPayments
+     * @memberof SwmypageVerifiedPayments
      */
     needAmount?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerVerifiedPayments
+     * @memberof SwmypageVerifiedPayments
      */
     donationAmount?: number;
     /**
      * 
      * @type {number}
-     * @memberof SwmypageInnerVerifiedPayments
+     * @memberof SwmypageVerifiedPayments
      */
     creditAmount?: number;
     /**
      * 
      * @type {boolean}
-     * @memberof SwmypageInnerVerifiedPayments
+     * @memberof SwmypageVerifiedPayments
      */
     useCredit?: boolean;
 }
@@ -2479,6 +2474,12 @@ export interface UserModel {
      * @memberof UserModel
      */
     emailAddress?: string;
+    /**
+     * the user's birth place international code
+     * @type {number}
+     * @memberof UserModel
+     */
+    birthPlace?: number;
     /**
      * the user's birth date
      * @type {string}
@@ -2764,12 +2765,12 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
          * @param {string} verifyCode 
          * @param {number} isInstalled 
          * @param {string} lang 
-         * @param {number} [cityId] 
+         * @param {string} [countryCode] 
          * @param {string} [email] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, cityId?: number, email?: string, options: any = {}): FetchArgs {
+        apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, countryCode?: string, email?: string, options: any = {}): FetchArgs {
             // verify required parameter 'username' is not null or undefined
             if (username === null || username === undefined) {
                 throw new RequiredError('username','Required parameter username was null or undefined when calling apiV2AuthRegisterPost.');
@@ -2817,8 +2818,8 @@ export const AuthAPIApiFetchParamCreator = function (configuration?: Configurati
                 localVarFormParams.set('phoneNumber', phoneNumber as any);
             }
 
-            if (cityId !== undefined) {
-                localVarFormParams.set('cityId', cityId as any);
+            if (countryCode !== undefined) {
+                localVarFormParams.set('countryCode', countryCode as any);
             }
 
             if (username2 !== undefined) {
@@ -2973,13 +2974,13 @@ export const AuthAPIApiFp = function(configuration?: Configuration) {
          * @param {string} verifyCode 
          * @param {number} isInstalled 
          * @param {string} lang 
-         * @param {number} [cityId] 
+         * @param {string} [countryCode] 
          * @param {string} [email] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, cityId?: number, email?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<any> {
-            const localVarFetchArgs = AuthAPIApiFetchParamCreator(configuration).apiV2AuthRegisterPost(username, phoneNumber, username2, password, verifyCode, isInstalled, lang, cityId, email, options);
+        apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, countryCode?: string, email?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<any> {
+            const localVarFetchArgs = AuthAPIApiFetchParamCreator(configuration).apiV2AuthRegisterPost(username, phoneNumber, username2, password, verifyCode, isInstalled, lang, countryCode, email, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -3064,13 +3065,13 @@ export const AuthAPIApiFactory = function (configuration?: Configuration, fetch?
          * @param {string} verifyCode 
          * @param {number} isInstalled 
          * @param {string} lang 
-         * @param {number} [cityId] 
+         * @param {string} [countryCode] 
          * @param {string} [email] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, cityId?: number, email?: string, options?: any) {
-            return AuthAPIApiFp(configuration).apiV2AuthRegisterPost(username, phoneNumber, username2, password, verifyCode, isInstalled, lang, cityId, email, options)(fetch, basePath);
+        apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, countryCode?: string, email?: string, options?: any) {
+            return AuthAPIApiFp(configuration).apiV2AuthRegisterPost(username, phoneNumber, username2, password, verifyCode, isInstalled, lang, countryCode, email, options)(fetch, basePath);
         },
     };
 };
@@ -3157,14 +3158,14 @@ export class AuthAPIApi extends BaseAPI {
      * @param {string} verifyCode 
      * @param {number} isInstalled 
      * @param {string} lang 
-     * @param {number} [cityId] 
+     * @param {string} [countryCode] 
      * @param {string} [email] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AuthAPIApi
      */
-    public apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, cityId?: number, email?: string, options?: any) {
-        return AuthAPIApiFp(this.configuration).apiV2AuthRegisterPost(username, phoneNumber, username2, password, verifyCode, isInstalled, lang, cityId, email, options)(this.fetch, this.basePath);
+    public apiV2AuthRegisterPost(username: string, phoneNumber: string, username2: string, password: string, verifyCode: string, isInstalled: number, lang: string, countryCode?: string, email?: string, options?: any) {
+        return AuthAPIApiFp(this.configuration).apiV2AuthRegisterPost(username, phoneNumber, username2, password, verifyCode, isInstalled, lang, countryCode, email, options)(this.fetch, this.basePath);
     }
 
 }
@@ -4683,10 +4684,12 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
          * @summary get child needs summary
          * @param {string} authorization Access Token
          * @param {number} childId 
+         * @param {boolean} [isDone] 
+         * @param {number} [status] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, options: any = {}): FetchArgs {
+        apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, isDone?: boolean, status?: number, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
                 throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2ChildChildIdNeedsSummaryGet.');
@@ -4701,6 +4704,14 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            if (isDone !== undefined) {
+                localVarQueryParameter['isDone'] = isDone;
+            }
+
+            if (status !== undefined) {
+                localVarQueryParameter['status'] = status;
+            }
 
             if (authorization !== undefined && authorization !== null) {
                 localVarHeaderParameter['Authorization'] = String(authorization);
@@ -4755,7 +4766,7 @@ export const ChildAPIApiFetchParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Returns information of a child with given id as a json object.<br/>Calling this API affects on child, need, child_need and need_family and user tables.<br/>It contains child info, its needs and participants of those needs.<br/>Confirm parameter determines how do you want the result:<br/>[0]not onfirmed, [1] confirmed, [2]both<br/>
+         * Returns information of a child with given id as a json object.<br/>Calling this API affects on child, need, child_need and need_family and user tables.<br/>It contains child info, its needs and participants of those needs.<br/>Confirm parameter determines how do you want the result:<br/>[0]not confirmed, [1] confirmed, [2]both<br/>
          * @summary get child by id
          * @param {string} authorization Access Token
          * @param {number} childId 
@@ -5210,11 +5221,13 @@ export const ChildAPIApiFp = function(configuration?: Configuration) {
          * @summary get child needs summary
          * @param {string} authorization Access Token
          * @param {number} childId 
+         * @param {boolean} [isDone] 
+         * @param {number} [status] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<NeedModel> {
-            const localVarFetchArgs = ChildAPIApiFetchParamCreator(configuration).apiV2ChildChildIdNeedsSummaryGet(authorization, childId, options);
+        apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, isDone?: boolean, status?: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<NeedModel> {
+            const localVarFetchArgs = ChildAPIApiFetchParamCreator(configuration).apiV2ChildChildIdNeedsSummaryGet(authorization, childId, isDone, status, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -5246,7 +5259,7 @@ export const ChildAPIApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Returns information of a child with given id as a json object.<br/>Calling this API affects on child, need, child_need and need_family and user tables.<br/>It contains child info, its needs and participants of those needs.<br/>Confirm parameter determines how do you want the result:<br/>[0]not onfirmed, [1] confirmed, [2]both<br/>
+         * Returns information of a child with given id as a json object.<br/>Calling this API affects on child, need, child_need and need_family and user tables.<br/>It contains child info, its needs and participants of those needs.<br/>Confirm parameter determines how do you want the result:<br/>[0]not confirmed, [1] confirmed, [2]both<br/>
          * @summary get child by id
          * @param {string} authorization Access Token
          * @param {number} childId 
@@ -5461,11 +5474,13 @@ export const ChildAPIApiFactory = function (configuration?: Configuration, fetch
          * @summary get child needs summary
          * @param {string} authorization Access Token
          * @param {number} childId 
+         * @param {boolean} [isDone] 
+         * @param {number} [status] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, options?: any) {
-            return ChildAPIApiFp(configuration).apiV2ChildChildIdNeedsSummaryGet(authorization, childId, options)(fetch, basePath);
+        apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, isDone?: boolean, status?: number, options?: any) {
+            return ChildAPIApiFp(configuration).apiV2ChildChildIdNeedsSummaryGet(authorization, childId, isDone, status, options)(fetch, basePath);
         },
         /**
          * 
@@ -5479,7 +5494,7 @@ export const ChildAPIApiFactory = function (configuration?: Configuration, fetch
             return ChildAPIApiFp(configuration).apiV2ChildChildIdchildIdNeedsGet(authorization, childId, options)(fetch, basePath);
         },
         /**
-         * Returns information of a child with given id as a json object.<br/>Calling this API affects on child, need, child_need and need_family and user tables.<br/>It contains child info, its needs and participants of those needs.<br/>Confirm parameter determines how do you want the result:<br/>[0]not onfirmed, [1] confirmed, [2]both<br/>
+         * Returns information of a child with given id as a json object.<br/>Calling this API affects on child, need, child_need and need_family and user tables.<br/>It contains child info, its needs and participants of those needs.<br/>Confirm parameter determines how do you want the result:<br/>[0]not confirmed, [1] confirmed, [2]both<br/>
          * @summary get child by id
          * @param {string} authorization Access Token
          * @param {number} childId 
@@ -5647,12 +5662,14 @@ export class ChildAPIApi extends BaseAPI {
      * @summary get child needs summary
      * @param {string} authorization Access Token
      * @param {number} childId 
+     * @param {boolean} [isDone] 
+     * @param {number} [status] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ChildAPIApi
      */
-    public apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, options?: any) {
-        return ChildAPIApiFp(this.configuration).apiV2ChildChildIdNeedsSummaryGet(authorization, childId, options)(this.fetch, this.basePath);
+    public apiV2ChildChildIdNeedsSummaryGet(authorization: string, childId: number, isDone?: boolean, status?: number, options?: any) {
+        return ChildAPIApiFp(this.configuration).apiV2ChildChildIdNeedsSummaryGet(authorization, childId, isDone, status, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -5669,7 +5686,7 @@ export class ChildAPIApi extends BaseAPI {
     }
 
     /**
-     * Returns information of a child with given id as a json object.<br/>Calling this API affects on child, need, child_need and need_family and user tables.<br/>It contains child info, its needs and participants of those needs.<br/>Confirm parameter determines how do you want the result:<br/>[0]not onfirmed, [1] confirmed, [2]both<br/>
+     * Returns information of a child with given id as a json object.<br/>Calling this API affects on child, need, child_need and need_family and user tables.<br/>It contains child info, its needs and participants of those needs.<br/>Confirm parameter determines how do you want the result:<br/>[0]not confirmed, [1] confirmed, [2]both<br/>
      * @summary get child by id
      * @param {string} authorization Access Token
      * @param {number} childId 
@@ -6349,70 +6366,12 @@ export const GeoAPIApiFetchParamCreator = function (configuration?: Configuratio
     return {
         /**
          * 
-         * @summary Get a City
-         * @param {number} id ID of city
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2CitiesIdGet(id: number, options: any = {}): FetchArgs {
-            // verify required parameter 'id' is not null or undefined
-            if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2CitiesIdGet.');
-            }
-            const localVarPath = `/api/v2/cities/{id}`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary List countries
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         apiV2CountriesGet(options: any = {}): FetchArgs {
             const localVarPath = `/api/v2/countries`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get Country
-         * @param {number} id ID of Country
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2CountriesIdGet(id: number, options: any = {}): FetchArgs {
-            // verify required parameter 'id' is not null or undefined
-            if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2CountriesIdGet.');
-            }
-            const localVarPath = `/api/v2/countries/{id}`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
@@ -6486,35 +6445,6 @@ export const GeoAPIApiFetchParamCreator = function (configuration?: Configuratio
                 options: localVarRequestOptions,
             };
         },
-        /**
-         * 
-         * @summary Get State by id
-         * @param {number} id ID of State
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2StatesIdGet(id: number, options: any = {}): FetchArgs {
-            // verify required parameter 'id' is not null or undefined
-            if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling apiV2StatesIdGet.');
-            }
-            const localVarPath = `/api/v2/states/{id}`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
     }
 };
 
@@ -6526,50 +6456,12 @@ export const GeoAPIApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
-         * @summary Get a City
-         * @param {number} id ID of city
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2CitiesIdGet(id: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CityModel> {
-            const localVarFetchArgs = GeoAPIApiFetchParamCreator(configuration).apiV2CitiesIdGet(id, options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * 
          * @summary List countries
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         apiV2CountriesGet(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<CountryModel>> {
             const localVarFetchArgs = GeoAPIApiFetchParamCreator(configuration).apiV2CountriesGet(options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * 
-         * @summary Get Country
-         * @param {number} id ID of Country
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2CountriesIdGet(id: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CountryModel> {
-            const localVarFetchArgs = GeoAPIApiFetchParamCreator(configuration).apiV2CountriesIdGet(id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6618,25 +6510,6 @@ export const GeoAPIApiFp = function(configuration?: Configuration) {
                 });
             };
         },
-        /**
-         * 
-         * @summary Get State by id
-         * @param {number} id ID of State
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2StatesIdGet(id: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<StateModel> {
-            const localVarFetchArgs = GeoAPIApiFetchParamCreator(configuration).apiV2StatesIdGet(id, options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
     }
 };
 
@@ -6648,32 +6521,12 @@ export const GeoAPIApiFactory = function (configuration?: Configuration, fetch?:
     return {
         /**
          * 
-         * @summary Get a City
-         * @param {number} id ID of city
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2CitiesIdGet(id: number, options?: any) {
-            return GeoAPIApiFp(configuration).apiV2CitiesIdGet(id, options)(fetch, basePath);
-        },
-        /**
-         * 
          * @summary List countries
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         apiV2CountriesGet(options?: any) {
             return GeoAPIApiFp(configuration).apiV2CountriesGet(options)(fetch, basePath);
-        },
-        /**
-         * 
-         * @summary Get Country
-         * @param {number} id ID of Country
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2CountriesIdGet(id: number, options?: any) {
-            return GeoAPIApiFp(configuration).apiV2CountriesIdGet(id, options)(fetch, basePath);
         },
         /**
          * 
@@ -6695,16 +6548,6 @@ export const GeoAPIApiFactory = function (configuration?: Configuration, fetch?:
         apiV2StatesIdCitiesGet(id: number, options?: any) {
             return GeoAPIApiFp(configuration).apiV2StatesIdCitiesGet(id, options)(fetch, basePath);
         },
-        /**
-         * 
-         * @summary Get State by id
-         * @param {number} id ID of State
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiV2StatesIdGet(id: number, options?: any) {
-            return GeoAPIApiFp(configuration).apiV2StatesIdGet(id, options)(fetch, basePath);
-        },
     };
 };
 
@@ -6717,18 +6560,6 @@ export const GeoAPIApiFactory = function (configuration?: Configuration, fetch?:
 export class GeoAPIApi extends BaseAPI {
     /**
      * 
-     * @summary Get a City
-     * @param {number} id ID of city
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof GeoAPIApi
-     */
-    public apiV2CitiesIdGet(id: number, options?: any) {
-        return GeoAPIApiFp(this.configuration).apiV2CitiesIdGet(id, options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * 
      * @summary List countries
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6736,18 +6567,6 @@ export class GeoAPIApi extends BaseAPI {
      */
     public apiV2CountriesGet(options?: any) {
         return GeoAPIApiFp(this.configuration).apiV2CountriesGet(options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * 
-     * @summary Get Country
-     * @param {number} id ID of Country
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof GeoAPIApi
-     */
-    public apiV2CountriesIdGet(id: number, options?: any) {
-        return GeoAPIApiFp(this.configuration).apiV2CountriesIdGet(id, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -6772,18 +6591,6 @@ export class GeoAPIApi extends BaseAPI {
      */
     public apiV2StatesIdCitiesGet(id: number, options?: any) {
         return GeoAPIApiFp(this.configuration).apiV2StatesIdCitiesGet(id, options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * 
-     * @summary Get State by id
-     * @param {number} id ID of State
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof GeoAPIApi
-     */
-    public apiV2StatesIdGet(id: number, options?: any) {
-        return GeoAPIApiFp(this.configuration).apiV2StatesIdGet(id, options)(this.fetch, this.basePath);
     }
 
 }
@@ -8871,12 +8678,12 @@ export const NeedAPIApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2NeedsIdReceiptsGet(id: any, authorization?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+        apiV2NeedsIdReceiptsGet(id: any, authorization?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<NeedReceipt>> {
             const localVarFetchArgs = NeedAPIApiFetchParamCreator(configuration).apiV2NeedsIdReceiptsGet(id, authorization, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
-                        return response;
+                        return response.json();
                     } else {
                         throw response;
                     }
@@ -8897,12 +8704,12 @@ export const NeedAPIApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2NeedsIdReceiptsPost(authorization: string, id: any, attachment: any, title: string, code?: string, description?: string, isPublic?: boolean, needStatus?: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+        apiV2NeedsIdReceiptsPost(authorization: string, id: any, attachment: any, title: string, code?: string, description?: string, isPublic?: boolean, needStatus?: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<NeedReceipt> {
             const localVarFetchArgs = NeedAPIApiFetchParamCreator(configuration).apiV2NeedsIdReceiptsPost(authorization, id, attachment, title, code, description, isPublic, needStatus, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
-                        return response;
+                        return response.json();
                     } else {
                         throw response;
                     }
@@ -10935,7 +10742,7 @@ export const ReceiptAPIApiFetchParamCreator = function (configuration?: Configur
             };
         },
         /**
-         * <br/>
+         * 
          * @summary Get a receipt
          * @param {any} id 
          * @param {string} [authorization] Access Token
@@ -11054,12 +10861,12 @@ export const ReceiptAPIApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2ReceiptsGet(authorization?: string, search?: any, take?: any, skip?: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+        apiV2ReceiptsGet(authorization?: string, search?: any, take?: any, skip?: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<NeedReceipt>> {
             const localVarFetchArgs = ReceiptAPIApiFetchParamCreator(configuration).apiV2ReceiptsGet(authorization, search, take, skip, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
-                        return response;
+                        return response.json();
                     } else {
                         throw response;
                     }
@@ -11087,19 +10894,19 @@ export const ReceiptAPIApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * <br/>
+         * 
          * @summary Get a receipt
          * @param {any} id 
          * @param {string} [authorization] Access Token
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2ReceiptsIdGet(id: any, authorization?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+        apiV2ReceiptsIdGet(id: any, authorization?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<NeedReceipt> {
             const localVarFetchArgs = ReceiptAPIApiFetchParamCreator(configuration).apiV2ReceiptsIdGet(id, authorization, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
-                        return response;
+                        return response.json();
                     } else {
                         throw response;
                     }
@@ -11119,12 +10926,12 @@ export const ReceiptAPIApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2ReceiptsIdPatch(authorization: string, id: any, attachment?: any, description?: string, title?: string, needStatus?: number, isPublic?: boolean, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+        apiV2ReceiptsIdPatch(authorization: string, id: any, attachment?: any, description?: string, title?: string, needStatus?: number, isPublic?: boolean, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<NeedReceipt>> {
             const localVarFetchArgs = ReceiptAPIApiFetchParamCreator(configuration).apiV2ReceiptsIdPatch(authorization, id, attachment, description, title, needStatus, isPublic, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
-                        return response;
+                        return response.json();
                     } else {
                         throw response;
                     }
@@ -11165,7 +10972,7 @@ export const ReceiptAPIApiFactory = function (configuration?: Configuration, fet
             return ReceiptAPIApiFp(configuration).apiV2ReceiptsIdDelete(authorization, id, options)(fetch, basePath);
         },
         /**
-         * <br/>
+         * 
          * @summary Get a receipt
          * @param {any} id 
          * @param {string} [authorization] Access Token
@@ -11230,7 +11037,7 @@ export class ReceiptAPIApi extends BaseAPI {
     }
 
     /**
-     * <br/>
+     * 
      * @summary Get a receipt
      * @param {any} id 
      * @param {string} [authorization] Access Token
@@ -13195,23 +13002,25 @@ export class SocialWorkerAPIApi extends BaseAPI {
 export const UserAPIApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
+         * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate and birthPlace are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities and the same rule is applied for birthPlace.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
          * @summary add a user
          * @param {string} authorization Access Token
          * @param {string} firstName 
          * @param {string} lastName 
+         * @param {string} countryCode 
+         * @param {number} city 
          * @param {string} userName 
          * @param {string} password 
          * @param {any} [avatarUrl] 
          * @param {string} [phoneNumber] 
          * @param {string} [emailAddress] 
          * @param {'female' | 'male' | 'other'} [gender] 
-         * @param {number} [cityId] 
+         * @param {number} [birthPlace] 
          * @param {string} [birthDate] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2UserAddPost(authorization: string, firstName: string, lastName: string, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, options: any = {}): FetchArgs {
+        apiV2UserAddPost(authorization: string, firstName: string, lastName: string, countryCode: string, city: number, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', birthPlace?: number, birthDate?: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
                 throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserAddPost.');
@@ -13223,6 +13032,14 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
             // verify required parameter 'lastName' is not null or undefined
             if (lastName === null || lastName === undefined) {
                 throw new RequiredError('lastName','Required parameter lastName was null or undefined when calling apiV2UserAddPost.');
+            }
+            // verify required parameter 'countryCode' is not null or undefined
+            if (countryCode === null || countryCode === undefined) {
+                throw new RequiredError('countryCode','Required parameter countryCode was null or undefined when calling apiV2UserAddPost.');
+            }
+            // verify required parameter 'city' is not null or undefined
+            if (city === null || city === undefined) {
+                throw new RequiredError('city','Required parameter city was null or undefined when calling apiV2UserAddPost.');
             }
             // verify required parameter 'userName' is not null or undefined
             if (userName === null || userName === undefined) {
@@ -13267,8 +13084,16 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
                 localVarFormParams.set('gender', gender as any);
             }
 
-            if (cityId !== undefined) {
-                localVarFormParams.set('cityId', cityId as any);
+            if (countryCode !== undefined) {
+                localVarFormParams.set('countryCode', countryCode as any);
+            }
+
+            if (city !== undefined) {
+                localVarFormParams.set('city', city as any);
+            }
+
+            if (birthPlace !== undefined) {
+                localVarFormParams.set('birthPlace', birthPlace as any);
             }
 
             if (birthDate !== undefined) {
@@ -13458,7 +13283,7 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Updates a user information.<br/>All the fields are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
+         * Updates a user information.<br/>All the fields are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities and the same rule is applied for birthPlace.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
          * @summary update a user
          * @param {string} authorization Access Token
          * @param {string} userId me or user_id
@@ -13470,7 +13295,9 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
          * @param {string} [postalAddress] 
          * @param {string} [postalCode] 
          * @param {'female' | 'male' | 'other'} [gender] 
-         * @param {number} [cityId] 
+         * @param {string} [countryCode] 
+         * @param {number} [city] 
+         * @param {number} [birthPlace] 
          * @param {string} [birthDate] 
          * @param {string} [userName] 
          * @param {string} [password] 
@@ -13479,7 +13306,7 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options: any = {}): FetchArgs {
+        apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', countryCode?: string, city?: number, birthPlace?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
                 throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling apiV2UserUpdateUserIduserIdPatch.');
@@ -13532,8 +13359,16 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
                 localVarFormParams.set('gender', gender as any);
             }
 
-            if (cityId !== undefined) {
-                localVarFormParams.set('cityId', cityId as any);
+            if (countryCode !== undefined) {
+                localVarFormParams.set('countryCode', countryCode as any);
+            }
+
+            if (city !== undefined) {
+                localVarFormParams.set('city', city as any);
+            }
+
+            if (birthPlace !== undefined) {
+                localVarFormParams.set('birthPlace', birthPlace as any);
             }
 
             if (birthDate !== undefined) {
@@ -13617,24 +13452,26 @@ export const UserAPIApiFetchParamCreator = function (configuration?: Configurati
 export const UserAPIApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
+         * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate and birthPlace are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities and the same rule is applied for birthPlace.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
          * @summary add a user
          * @param {string} authorization Access Token
          * @param {string} firstName 
          * @param {string} lastName 
+         * @param {string} countryCode 
+         * @param {number} city 
          * @param {string} userName 
          * @param {string} password 
          * @param {any} [avatarUrl] 
          * @param {string} [phoneNumber] 
          * @param {string} [emailAddress] 
          * @param {'female' | 'male' | 'other'} [gender] 
-         * @param {number} [cityId] 
+         * @param {number} [birthPlace] 
          * @param {string} [birthDate] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2UserAddPost(authorization: string, firstName: string, lastName: string, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-            const localVarFetchArgs = UserAPIApiFetchParamCreator(configuration).apiV2UserAddPost(authorization, firstName, lastName, userName, password, avatarUrl, phoneNumber, emailAddress, gender, cityId, birthDate, options);
+        apiV2UserAddPost(authorization: string, firstName: string, lastName: string, countryCode: string, city: number, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', birthPlace?: number, birthDate?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = UserAPIApiFetchParamCreator(configuration).apiV2UserAddPost(authorization, firstName, lastName, countryCode, city, userName, password, avatarUrl, phoneNumber, emailAddress, gender, birthPlace, birthDate, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -13727,7 +13564,7 @@ export const UserAPIApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Updates a user information.<br/>All the fields are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
+         * Updates a user information.<br/>All the fields are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities and the same rule is applied for birthPlace.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
          * @summary update a user
          * @param {string} authorization Access Token
          * @param {string} userId me or user_id
@@ -13739,7 +13576,9 @@ export const UserAPIApiFp = function(configuration?: Configuration) {
          * @param {string} [postalAddress] 
          * @param {string} [postalCode] 
          * @param {'female' | 'male' | 'other'} [gender] 
-         * @param {number} [cityId] 
+         * @param {string} [countryCode] 
+         * @param {number} [city] 
+         * @param {number} [birthPlace] 
          * @param {string} [birthDate] 
          * @param {string} [userName] 
          * @param {string} [password] 
@@ -13748,8 +13587,8 @@ export const UserAPIApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserModel> {
-            const localVarFetchArgs = UserAPIApiFetchParamCreator(configuration).apiV2UserUpdateUserIduserIdPatch(authorization, userId, firstName, lastName, avatarUrl, phoneNumber, emailAddress, postalAddress, postalCode, gender, cityId, birthDate, userName, password, locale, receiveEmail, options);
+        apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', countryCode?: string, city?: number, birthPlace?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserModel> {
+            const localVarFetchArgs = UserAPIApiFetchParamCreator(configuration).apiV2UserUpdateUserIduserIdPatch(authorization, userId, firstName, lastName, avatarUrl, phoneNumber, emailAddress, postalAddress, postalCode, gender, countryCode, city, birthPlace, birthDate, userName, password, locale, receiveEmail, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -13790,24 +13629,26 @@ export const UserAPIApiFp = function(configuration?: Configuration) {
 export const UserAPIApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
     return {
         /**
-         * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
+         * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate and birthPlace are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities and the same rule is applied for birthPlace.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
          * @summary add a user
          * @param {string} authorization Access Token
          * @param {string} firstName 
          * @param {string} lastName 
+         * @param {string} countryCode 
+         * @param {number} city 
          * @param {string} userName 
          * @param {string} password 
          * @param {any} [avatarUrl] 
          * @param {string} [phoneNumber] 
          * @param {string} [emailAddress] 
          * @param {'female' | 'male' | 'other'} [gender] 
-         * @param {number} [cityId] 
+         * @param {number} [birthPlace] 
          * @param {string} [birthDate] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2UserAddPost(authorization: string, firstName: string, lastName: string, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, options?: any) {
-            return UserAPIApiFp(configuration).apiV2UserAddPost(authorization, firstName, lastName, userName, password, avatarUrl, phoneNumber, emailAddress, gender, cityId, birthDate, options)(fetch, basePath);
+        apiV2UserAddPost(authorization: string, firstName: string, lastName: string, countryCode: string, city: number, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', birthPlace?: number, birthDate?: string, options?: any) {
+            return UserAPIApiFp(configuration).apiV2UserAddPost(authorization, firstName, lastName, countryCode, city, userName, password, avatarUrl, phoneNumber, emailAddress, gender, birthPlace, birthDate, options)(fetch, basePath);
         },
         /**
          * Returns all children this user has.<br/>Calling this API affects family, user_family, user, child_need, need and need_family tables.<br/>
@@ -13855,7 +13696,7 @@ export const UserAPIApiFactory = function (configuration?: Configuration, fetch?
             return UserAPIApiFp(configuration).apiV2UserSearchGet(authorization, q, options)(fetch, basePath);
         },
         /**
-         * Updates a user information.<br/>All the fields are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
+         * Updates a user information.<br/>All the fields are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities and the same rule is applied for birthPlace.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
          * @summary update a user
          * @param {string} authorization Access Token
          * @param {string} userId me or user_id
@@ -13867,7 +13708,9 @@ export const UserAPIApiFactory = function (configuration?: Configuration, fetch?
          * @param {string} [postalAddress] 
          * @param {string} [postalCode] 
          * @param {'female' | 'male' | 'other'} [gender] 
-         * @param {number} [cityId] 
+         * @param {string} [countryCode] 
+         * @param {number} [city] 
+         * @param {number} [birthPlace] 
          * @param {string} [birthDate] 
          * @param {string} [userName] 
          * @param {string} [password] 
@@ -13876,8 +13719,8 @@ export const UserAPIApiFactory = function (configuration?: Configuration, fetch?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options?: any) {
-            return UserAPIApiFp(configuration).apiV2UserUpdateUserIduserIdPatch(authorization, userId, firstName, lastName, avatarUrl, phoneNumber, emailAddress, postalAddress, postalCode, gender, cityId, birthDate, userName, password, locale, receiveEmail, options)(fetch, basePath);
+        apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', countryCode?: string, city?: number, birthPlace?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options?: any) {
+            return UserAPIApiFp(configuration).apiV2UserUpdateUserIduserIdPatch(authorization, userId, firstName, lastName, avatarUrl, phoneNumber, emailAddress, postalAddress, postalCode, gender, countryCode, city, birthPlace, birthDate, userName, password, locale, receiveEmail, options)(fetch, basePath);
         },
         /**
          * Returns information of a user with given id as a json object.<br/>Calling this API affects child, need, child_need and need_family and user tables.<br/>It contains user info, its children and those children's needs.<br/>
@@ -13901,25 +13744,27 @@ export const UserAPIApiFactory = function (configuration?: Configuration, fetch?
  */
 export class UserAPIApi extends BaseAPI {
     /**
-     * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
+     * Adds a user. Adding avatarUrl, emailAddress, gender, birthDate and birthPlace are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city is integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities and the same rule is applied for birthPlace.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
      * @summary add a user
      * @param {string} authorization Access Token
      * @param {string} firstName 
      * @param {string} lastName 
+     * @param {string} countryCode 
+     * @param {number} city 
      * @param {string} userName 
      * @param {string} password 
      * @param {any} [avatarUrl] 
      * @param {string} [phoneNumber] 
      * @param {string} [emailAddress] 
      * @param {'female' | 'male' | 'other'} [gender] 
-     * @param {number} [cityId] 
+     * @param {number} [birthPlace] 
      * @param {string} [birthDate] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UserAPIApi
      */
-    public apiV2UserAddPost(authorization: string, firstName: string, lastName: string, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, options?: any) {
-        return UserAPIApiFp(this.configuration).apiV2UserAddPost(authorization, firstName, lastName, userName, password, avatarUrl, phoneNumber, emailAddress, gender, cityId, birthDate, options)(this.fetch, this.basePath);
+    public apiV2UserAddPost(authorization: string, firstName: string, lastName: string, countryCode: string, city: number, userName: string, password: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, gender?: 'female' | 'male' | 'other', birthPlace?: number, birthDate?: string, options?: any) {
+        return UserAPIApiFp(this.configuration).apiV2UserAddPost(authorization, firstName, lastName, countryCode, city, userName, password, avatarUrl, phoneNumber, emailAddress, gender, birthPlace, birthDate, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -13976,7 +13821,7 @@ export class UserAPIApi extends BaseAPI {
     }
 
     /**
-     * Updates a user information.<br/>All the fields are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
+     * Updates a user information.<br/>All the fields are optional.<br/>For avatarUrl you have to upload a file in png, jpg or jpeg.<br/>Be aware that city and country are integer fields, so you cannot insert their names in those fields.<br/>You have to insert the international codes for countries and cities and the same rule is applied for birthPlace.<br/>Calling this API only affects on user table.<br/>For gender, [true] is male and [false] is female.<br/>
      * @summary update a user
      * @param {string} authorization Access Token
      * @param {string} userId me or user_id
@@ -13988,7 +13833,9 @@ export class UserAPIApi extends BaseAPI {
      * @param {string} [postalAddress] 
      * @param {string} [postalCode] 
      * @param {'female' | 'male' | 'other'} [gender] 
-     * @param {number} [cityId] 
+     * @param {string} [countryCode] 
+     * @param {number} [city] 
+     * @param {number} [birthPlace] 
      * @param {string} [birthDate] 
      * @param {string} [userName] 
      * @param {string} [password] 
@@ -13998,8 +13845,8 @@ export class UserAPIApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof UserAPIApi
      */
-    public apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', cityId?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options?: any) {
-        return UserAPIApiFp(this.configuration).apiV2UserUpdateUserIduserIdPatch(authorization, userId, firstName, lastName, avatarUrl, phoneNumber, emailAddress, postalAddress, postalCode, gender, cityId, birthDate, userName, password, locale, receiveEmail, options)(this.fetch, this.basePath);
+    public apiV2UserUpdateUserIduserIdPatch(authorization: string, userId: string, firstName?: string, lastName?: string, avatarUrl?: any, phoneNumber?: string, emailAddress?: string, postalAddress?: string, postalCode?: string, gender?: 'female' | 'male' | 'other', countryCode?: string, city?: number, birthPlace?: number, birthDate?: string, userName?: string, password?: string, locale?: string, receiveEmail?: boolean, options?: any) {
+        return UserAPIApiFp(this.configuration).apiV2UserUpdateUserIduserIdPatch(authorization, userId, firstName, lastName, avatarUrl, phoneNumber, emailAddress, postalAddress, postalCode, gender, countryCode, city, birthPlace, birthDate, userName, password, locale, receiveEmail, options)(this.fetch, this.basePath);
     }
 
     /**

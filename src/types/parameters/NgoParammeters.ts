@@ -1,13 +1,14 @@
-import { SocialWorkerEntity } from "src/entities/user.entity";
+import { CityEntity } from "src/entities/city.entity";
+import { ContributorEntity } from "src/entities/user.entity";
 
 export type NgoParams = {
     flaskNgoId?: number;
-    socialWorker?: SocialWorkerEntity;
+    socialWorkers?: ContributorEntity[];
     name?: string;
     website?: string;
     cityId?: number
-    state?: number
-    country?: number;
+    stateId?: number
+    countryId?: number;
     logoUrl?: string;
     isActive?: boolean
     isDeleted?: boolean

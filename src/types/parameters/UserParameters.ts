@@ -1,65 +1,67 @@
 import { NgoEntity } from "../../entities/ngo.entity";
 import { NeedEntity } from "../../entities/need.entity";
 import { PaymentEntity } from "../../entities/payment.entity";
-import { ContributorsEnum, RolesEnum } from "../interface";
 import { NgoParams } from "./NgoParammeters";
+import { SAYPlatformRoles } from "../interface";
 
 
 export type FamilyParams = {
     createdAt?: Date;
+    flaskId: number;
     updatedAt?: Date;
     flaskUserId?: number;
     avatarUrl?: string;
     isActive?: boolean;
     doneNeeds?: NeedEntity[]
     payments?: PaymentEntity[]
+    role: SAYPlatformRoles
 }
 
-export type SocialWorkerParams = {
-    cityId?: number;
-    stateId?: number
-    countryId?: number
+export type ContributorParams = {
+    cityId?: string;
+    stateId?: string
+    countryId?: string
     cityName?: string
     stateName?: string
     countryName?: string
     firstName?: string;
     lastName?: string;
     birthCertificateNumber?: string;
-    passportNumber?: number;
-    postalAddress?: string;
-    bankAccountNumber?: number;
-    bankAccountShebaNumber?: number;
-    bankAccountCardNumber?: number;
-    birthDate?: Date | null;
-    telegramId?: string;
     idNumber?: string;
-    isCoordinator?: true;
+    passportNumber?: string;
+    postalAddress?: string;
+    bankAccountNumber?: string;
+    bankAccountShebaNumber?: string;
+    bankAccountCardNumber?: string;
+    birthDate?: Date;
+    telegramId?: string;
+    isCoordinator?: boolean;
     flaskNgoId?: number;
-    ngo?: NgoParams;
-    gender?: false;
+    ngo?: NgoEntity;
+    gender?: boolean
     phoneNumber?: string;
     emergencyPhoneNumber?: string;
     email?: string;
     avatarUrl?: string;
     idCardUrl?: string;
     passportUrl?: string;
-    flaskSwId: number;
+    flaskId: number;
     username?: string;
     generatedCode?: string;
     childCount?: number;
     currentChildCount?: number;
-    created?: Date | null;
-    updated?: Date | null;
+    created?: Date;
+    updated: Date;
     needCount?: number;
     currentNeedCount?: number;
-    lastLoginDate?: Date | null;
-    isActive?: true;
-    isDeleted?: false;
+    lastLoginDate?: Date;
+    isActive?: boolean;
+    isDeleted?: boolean;
     locale?: string;
     typeId?: number; // user type
     typeName?: string;
     ngoName?: string;
-    role: ContributorsEnum
+    role: SAYPlatformRoles
 }
 
 export class CreateParticipantDto {

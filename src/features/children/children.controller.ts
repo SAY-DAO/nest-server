@@ -12,29 +12,19 @@ import { ChildrenService } from './children.service';
 @Controller('children')
 export class ChildrenController {
     constructor(private childrenService: ChildrenService,
-        @InjectRepository(ChildrenEntity)
-        private childrenRepository: Repository<ChildrenEntity>,
     ) { }
+
+    @Get(`all`)
+    @ApiOperation({ description: 'Get all children from db' })
+    async getChildren() {
+        return await this.childrenService.getChildren()
+    }
 
     @Get(`flask/child/needs-summary/:childId`)
     @ApiOperation({ description: 'Get a single child needs summary by ID' })
     async getChildNeedsSummary(@Req() req: Request, @Param('childId') childId: number) {
         const accessToken = req.headers["authorization"]
-        return await this.childrenService.getChildNeedsSummeay(accessToken, childId);
+        return await this.childrenService.getChildNeedsSummery(accessToken, childId);
     }
-
-    getChildren(): Promise<ChildrenEntity[]> {
-        return this.childrenRepository.find();
-    }
-
-    getChildById(flaskChildId: number): Promise<ChildrenEntity> {
-        const child = this.childrenRepository.findOne({
-            where: {
-                flaskChildId: flaskChildId,
-            },
-        });
-        return child;
-    }
-
 }
 

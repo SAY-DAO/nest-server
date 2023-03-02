@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { NGOAPIApi, NgoModel } from 'src/generated-sources/openapi';
+import { CityParams } from 'src/types/parameters/CityParameters';
 import { NgoParams } from 'src/types/parameters/NgoParammeters';
-import { Repository } from 'typeorm';
-import { FamilyEntity } from '../../entities/user.entity';
+import { Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class NgoService {
@@ -13,7 +13,11 @@ export class NgoService {
     private ngoRepository: Repository<NgoEntity>,
   ) {}
 
-  getNgos(accessToken: any): Promise<NgoModel> {
+  getNgos(): Promise<NgoEntity[]> {
+    return this.ngoRepository.find();
+  }
+
+  getFlaskNgos(accessToken: any): Promise<NgoModel> {
     const ngoApi = new NGOAPIApi();
     const ngos = ngoApi.apiV2NgoAllGet(accessToken);
     return ngos;
@@ -34,10 +38,22 @@ export class NgoService {
     return ngo;
   }
 
-  createNgo(ngoDetails: NgoParams): Promise<NgoEntity> {
+  createNgo(ngoDetails: NgoParams, city: CityParams): Promise<NgoEntity> {
     const newNgo = this.ngoRepository.create({
       ...ngoDetails,
+      city: city,
     });
-    return this.ngoRepository.save(newNgo);
+    return this.ngoRepository.save({id: newNgo.id,...newNgo});
+  }
+
+  async updateNgo(
+    ngoId: string,
+    ngoDetails: NgoParams,
+    city: CityParams
+  ): Promise<UpdateResult> {
+    return this.ngoRepository.update(ngoId, {
+      ...ngoDetails,
+      city: city,
+    });
   }
 }

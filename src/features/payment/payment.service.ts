@@ -1,37 +1,60 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentParams } from '../../types/parameters/PaymentParameters';
-import { FamilyEntity } from '../../entities/user.entity';
+import { AllUserEntity, ContributorEntity, FamilyEntity } from '../../entities/user.entity';
+import { HeaderOptions } from 'src/types/interface';
+import { NeedAPIApi, PaymentAPIApi } from 'src/generated-sources/openapi';
 
 @Injectable()
 export class PaymentService {
     constructor(
         @InjectRepository(PaymentEntity)
         private paymentRepository: Repository<PaymentEntity>,
-
     ) { }
 
     getPayments(): Promise<PaymentEntity[]> {
-        return this.paymentRepository.find({
-        });
+        return this.paymentRepository.find({});
     }
 
-
-    getPayment(payment_id: number): Promise<PaymentEntity> {
+    getPaymentById(flaskId: number): Promise<PaymentEntity> {
         const user = this.paymentRepository.findOne({
             where: {
-                flaskPaymentId: payment_id,
+                flaskId: flaskId,
             },
         });
         return user;
     }
 
-    createPayment(paymentDetails: PaymentParams): Promise<PaymentEntity> {
+    createPayment(
+        paymentDetails: PaymentParams,
+        familyMember: AllUserEntity,
+    ): Promise<PaymentEntity> {
         const newPayment = this.paymentRepository.create({
             ...paymentDetails,
+            familyMember: familyMember,
         });
-        return this.paymentRepository.save(newPayment);
+        return this.paymentRepository.save({ id: newPayment.id, ...newPayment });
+    }
+
+    updatePayment(
+        paymentId: string,
+        paymentDetails: PaymentParams,
+        familyMember: AllUserEntity,
+    ): Promise<UpdateResult> {
+        return this.paymentRepository.update(paymentId, {
+            ...paymentDetails,
+            familyMember: familyMember,
+        });
+    }
+
+    async getFlaskPayments(options: HeaderOptions, needId: number): Promise<any> {
+        const publicApi = new PaymentAPIApi();
+        const needPayments: Promise<any> = publicApi.apiV2PaymentAllGet(
+            options.accessToken,
+            needId,
+        );
+        return needPayments;
     }
 }

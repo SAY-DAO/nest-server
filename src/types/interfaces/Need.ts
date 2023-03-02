@@ -1,9 +1,5 @@
-import {
-  SwmypageInnerParticipants,
-  SwmypageInnerReceipts_,
-  SwmypageInnerStatusUpdates,
-  SwmypageInnerVerifiedPayments,
-} from 'src/generated-sources/openapi';;
+import { TicketEntity } from "src/entities/ticket.entity";
+import { SwmypageReceipts_, SwmypageStatusUpdates, SwmypageVerifiedPayments } from "src/generated-sources/openapi";
 
 export interface NeedsData {
   all_needs_count: number;
@@ -41,10 +37,9 @@ export interface ChildNeed {
   updated?: Date;
   confirmDate?: Date;
   deletedAt?: Date;
-  statusUpdates?: SwmypageInnerStatusUpdates[];
-  receipts_?: SwmypageInnerReceipts_[];
-  verifiedPayments?: SwmypageInnerVerifiedPayments[];
-  participants?: SwmypageInnerParticipants[];
+  statusUpdates?: SwmypageStatusUpdates[];
+  receipts_?: SwmypageReceipts_[];
+  verifiedPayments?: SwmypageVerifiedPayments[];
   confirmedBy?: number;
   doneAt?: Date;
   ngoDeliveryDate?: Date;
@@ -58,6 +53,7 @@ export interface ChildNeed {
     birthDate: string;
     awakeAvatarUrl: string;
   };
+  ticket: TicketEntity
 };
 
 export interface Need {

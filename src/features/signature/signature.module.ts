@@ -8,13 +8,20 @@ import { UserService } from '../user/user.service';
 import { ChildrenService } from '../children/children.service';
 import { NeedEntity } from '../../entities/need.entity';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { FamilyEntity, SocialWorkerEntity } from '../../entities/user.entity';
+import { FamilyEntity, ContributorEntity, AllUserEntity } from '../../entities/user.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { SignatureMiddleware } from './middlewares/signature.middleware';
 import { EthersModule, GOERLI_NETWORK } from 'nestjs-ethers';
 import { NgoService } from '../ngo/ngo.service';
 import { NgoEntity } from 'src/entities/ngo.entity';
+import { SyncService } from '../sync/sync.service';
+import { ReceiptService } from '../receipt/receipt.service';
+import { ReceiptEntity } from 'src/entities/receipt.entity';
+import { StatusEntity } from 'src/entities/status.entity';
+import { StatusService } from '../status/status.service';
+import { CityService } from '../city/city.service';
+import { CityEntity } from 'src/entities/city.entity';
 
 @Module({
   imports: [
@@ -26,12 +33,36 @@ import { NgoEntity } from 'src/entities/ngo.entity';
       quorum: 1,
       useDefaultProvider: true,
     }),
-    TypeOrmModule.forFeature([PaymentEntity, SignatureEntity, NeedEntity, ChildrenEntity, FamilyEntity, SocialWorkerEntity, NgoEntity])],
+    TypeOrmModule.forFeature([
+      PaymentEntity,
+      SignatureEntity,
+      NeedEntity,
+      ChildrenEntity,
+      FamilyEntity,
+      ContributorEntity,
+      AllUserEntity,
+      NgoEntity,
+      ReceiptEntity,
+      StatusEntity,
+      CityEntity
+    ]),
+  ],
   controllers: [SignatureController],
-  providers: [SignatureService, NeedService, PaymentService, UserService, ChildrenService, NgoService],
+  providers: [
+    CityService,
+    SignatureService,
+    NeedService,
+    PaymentService,
+    UserService,
+    ChildrenService,
+    NgoService,
+    SyncService,
+    ReceiptService,
+    StatusService
+  ],
 })
 export class SignatureModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(SignatureMiddleware).forRoutes('signatures')
+    consumer.apply(SignatureMiddleware).forRoutes('signatures');
   }
 }

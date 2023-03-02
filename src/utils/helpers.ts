@@ -1,10 +1,33 @@
+import { SwmypageNeeds } from 'src/generated-sources/openapi';
 import {
     NeedTypeEnum,
     PaymentStatusEnum,
     ProductStatusEnum,
+    RolesEnum,
+    SAYPlatformRoles,
     ServiceStatusEnum,
 } from 'src/types/interface';
-import { SwmypageInnerNeeds } from '../generated-sources/openapi';
+
+export function convertFlaskToSayRoles(flakUserType: number) {
+    let role: SAYPlatformRoles;
+    if (flakUserType === RolesEnum.SAY_SUPERVISOR) {
+        role = SAYPlatformRoles.AUDITOR;
+    } else if (flakUserType === RolesEnum.ADMIN) {
+        role = SAYPlatformRoles.AUDITOR;
+    } else if (flakUserType === RolesEnum.SUPER_ADMIN) {
+        role = SAYPlatformRoles.AUDITOR;
+    } else if (flakUserType === RolesEnum.SOCIAL_WORKER) {
+        role = SAYPlatformRoles.SOCIAL_WORKER;
+    } else if (flakUserType === RolesEnum.COORDINATOR) {
+        role = SAYPlatformRoles.PURCHASER;
+    } else if (flakUserType === RolesEnum.NGO_SUPERVISOR) {
+        role = SAYPlatformRoles.NGO_SUPERVISOR;
+    } else if (!flakUserType) {
+        role = SAYPlatformRoles.FAMILY;
+    }
+    return role
+}
+
 
 export function dateConvertor(value: string) {
     const d = new Date(value)
@@ -25,6 +48,13 @@ export function persianYear(value: Date) {
 }
 
 
+export function daysDifference(time1: Date, time2: Date) {
+    const date1 = new Date(time1);
+    const date2 = new Date(time2);
+    //calculate days difference by dividing total milliseconds in a day
+    return (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
+
+}
 export function timeDifference(time1: number, time2: number, comment: string) {
     const diff = time2 - time1;
     let msec = diff;
@@ -34,10 +64,11 @@ export function timeDifference(time1: number, time2: number, comment: string) {
     msec -= mm * 1000 * 60;
     const ss = Math.floor(msec / 1000);
     msec -= ss * 1000;
+
     console.log(comment + hh + ":" + mm + ":" + ss);
 }
 
-export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
+export function getNeedsTimeLine(needs: SwmypageNeeds[], who: string) {
     let summary: { inTwoDays: number; inWeek: number; inThirtyDays: number; };
     const farvardin = { 'created': 0, 'confirmed': 0 }
     const ordibehesht = { 'created': 0, 'confirmed': 0 }
@@ -105,7 +136,7 @@ export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
             else if (thePersianMonthCreated === 11) {
                 bahman.created += 1
             }
-
+            
             // esfand
             else if (thePersianMonthCreated === 12) {
                 esfand.created += 1
@@ -204,7 +235,7 @@ export function getNeedsTimeLine(needs: SwmypageInnerNeeds[], who: string) {
 }
 
 // faster than the dictionary one below
-export function getOrganizedNeeds(needsData: SwmypageInnerNeeds[]) {
+export function getOrganizedNeeds(needsData: SwmypageNeeds[]) {
     const organizedNeeds = [[], [], [], []]; // [[not paid], [payment], [purchased/delivered Ngo], [Done]]
     if (needsData) {
         needsData = sortNeeds(needsData, "created")
@@ -299,7 +330,7 @@ export function getOrganizedNeeds(needsData: SwmypageInnerNeeds[]) {
 
 // }
 
-export function sortNeeds(theNeeds: SwmypageInnerNeeds[], sortBy: string) {
+export function sortNeeds(theNeeds: SwmypageNeeds[], sortBy: string) {
     return theNeeds.sort((a, b) => {
         // Sort needs by create date Ascending
         return new Date(b[sortBy]).getTime() - new Date(a[sortBy]).getTime()
