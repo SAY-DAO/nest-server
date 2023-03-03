@@ -1,4 +1,4 @@
-FROM node:18.13.0-alpine as builder
+FROM node:18.14-alpine as builder
 
 ENV NODE_ENV build
 
@@ -11,7 +11,7 @@ RUN yarn install --frozen-lockfile \
 
 # ---
 
-FROM node:18.13.0-alpine as production
+FROM node:18.14-alpine as production
 
 WORKDIR /usr/src/app
 
