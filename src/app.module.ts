@@ -41,7 +41,7 @@ const imports = [
   LoggerModule.forRoot(),
   ConfigModule.forRoot({ isGlobal: true }),
   TypeOrmModule.forRoot({
-    ...config().db,
+    ...config().db1,
     dropSchema: false,
     entities: [
       CityEntity,

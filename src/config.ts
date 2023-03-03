@@ -30,7 +30,7 @@ function loadConfig() {
           : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_HOST_STAGING : process.env.AUTHORIZED_HOST_PRODUCTION,
     logLevel: 'debug',
     documentUrl: '',
-    db: {
+    db1: {
       type: 'postgres' as const,
       port: 5432,
       host: NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,

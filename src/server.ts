@@ -10,8 +10,8 @@ async function startServer() {
   console.log('Started server');
   console.log('Host:' + config().host);
   console.log('Port:' + config().serverPort);
-  console.log('db Host:' + config().db.host);
-  console.log('db Port:' + config().db.port);
+  console.log('db Host:' + config().db1.host);
+  console.log('db Port:' + config().db1.port);
 
   const app = await ApplicationContext();
   app.enableShutdownHooks();
