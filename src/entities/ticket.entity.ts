@@ -11,7 +11,7 @@ export class TicketEntity extends BaseEntity {
     @Column({ nullable: true })
     role: SAYPlatformRoles
 
-    @Column({ nullable: true })
+    @Column({ nullable: false })
     color: Colors
 
     @Column({ nullable: true })
