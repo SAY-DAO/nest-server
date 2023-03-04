@@ -51,11 +51,11 @@ export class ProviderController {
             name: request.name,
             description: request?.description,
             type:
-                request.type === 0
+                parseInt(request.type) === 0
                     ? NeedTypeEnum.SERVICE
                     : NeedTypeEnum.PRODUCT,
             typeName:
-                request.type === 0
+                parseInt(request.type) === 0
                     ? NeedTypeDefinitionEnum.SERVICE
                     : NeedTypeDefinitionEnum.PRODUCT,
             website: request.website,
@@ -82,11 +82,11 @@ export class ProviderController {
             name: request?.name,
             description: request?.description,
             type:
-                request.type === 0
+                parseInt(request.type) === 0
                     ? NeedTypeEnum.SERVICE
                     : NeedTypeEnum.PRODUCT,
             typeName:
-                request.type === 0
+                parseInt(request.type) === 0
                     ? NeedTypeDefinitionEnum.SERVICE
                     : NeedTypeDefinitionEnum.PRODUCT,
             website: request?.website,
@@ -96,8 +96,7 @@ export class ProviderController {
             logoUrl: file?.filename,
             isActive: Boolean(request.isActive)
         };
-        console.log(request)
-        console.log(newProvider)
+
         return this.providerService.updateProvider(id, newProvider)
     }
 

@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignatureEntity } from '../../entities/signature.entity';
@@ -19,8 +18,10 @@ import { ChildrenService } from '../children/children.service';
 import VerifyVoucher from '../../contracts/tokens/ERC721/VerifyVoucher.sol/VerifyVoucher.json';
 import { verifyContractAddress } from '../../contracts/network-settings.json';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { NeedEntity } from '../../entities/need.entity';
-import { SwCreateSwSignatureDto } from '../../types/dtos/CreateSignature.dto';
+import { UrlJsonRpcProvider, Contract, EthersContract, InjectEthersProvider, InjectSignerProvider, EthersSigner } from 'nestjs-ethers';
+import { SwmypageNeeds } from 'src/generated-sources/openapi';
+import { NeedEntity } from 'src/entities/need.entity';
+
 
 @Injectable()
 export class SignatureService {
@@ -30,6 +31,11 @@ export class SignatureService {
     private needService: NeedService,
     private userService: UserService,
     private childService: ChildrenService,
+    @InjectEthersProvider()
+    private readonly ethersProvider: UrlJsonRpcProvider,
+    @InjectSignerProvider()
+    private readonly ethersSigner: EthersSigner,
+    private readonly ethersContract: EthersContract,
   ) { }
 
   async getSignatures(): Promise<SignatureEntity[]> {
@@ -43,40 +49,40 @@ export class SignatureService {
     return saved;
   }
 
-  async designDomain(verifyContractAddress: string): Promise<Domain> {
+  async designDomain(verifyContractAddress: string, signerAddress: string): Promise<Domain> {
     const SIGNING_DOMAIN_NAME = 'SAY-DAO';
     const SIGNING_DOMAIN_VERSION = '1';
 
-    const url = process.env.ALCHEMY_GOERLI;
-    const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
-
-    const verifyingContract = new ethers.Contract(
+    const wallet = this.ethersSigner.createVoidSigner(
+      signerAddress
+    );
+    const verifyingContract: Contract = this.ethersContract.create(
       verifyContractAddress,
       VerifyVoucher.abi,
-      customHttpProvider,
+      wallet
     );
+    console.log(await wallet.getAddress());
 
-    const chainId = await verifyingContract.getChainID();
-    console.log(`chainId from signature service: ${chainId.toString()}`);
+    const tx = await verifyingContract.deployed()
+    const chainId = await tx.getChainID();
+    console.log(chainId)
+    console.log(`chainId from signature service: ${chainId}`);
 
     return {
       name: SIGNING_DOMAIN_NAME,
       version: SIGNING_DOMAIN_VERSION,
       verifyingContract: verifyingContract.address,
-      chainId,
+      chainId: chainId,
     };
   }
 
-  async swSignTransaction(
-    request: SwCreateSwSignatureDto,
-    need: NeedEntity,
-    child: ChildrenEntity,
-    receiptsTitles: string
+  async swSignTransaction(signerAddress: string, need: NeedEntity, child: ChildrenEntity
   ): Promise<SwSignatureResult> {
     const impacts = 4;
     let productVoucher: SwProductVoucher
     let serviceVoucher: SwServiceVoucher
     let types: VoucherTypes
+
 
     // define your data types
     if (need.type === NeedTypeEnum.SERVICE) {
@@ -90,17 +96,17 @@ export class SignatureService {
               : need.category === CategoryEnum.JOY
                 ? CategoryDefinitionEnum.JOY
                 : CategoryDefinitionEnum.SURROUNDING,
-        child: child.sayName || String(child.flaskChildId),
-        receipts: receiptsTitles,
+        childSayName: child.sayName,
+        receipts: 'hi',
         bankTrackId: need.bankTrackId,
-        signerAddress: request.signerAddress,
+        signerAddress: signerAddress,
         content: `Your ${impacts} impacts will be ready for a friend to mint!`,
       };
       types = {
         Voucher: [
           { name: 'title', type: 'string' },
           { name: 'category', type: 'string' },
-          { name: 'child', type: 'string' },
+          { name: 'childSayName', type: 'string' },
           { name: 'receipts', type: 'string' },
           { name: 'bankTrackId', type: 'string' },
           { name: 'signerAddress', type: 'address' },
@@ -119,9 +125,9 @@ export class SignatureService {
               : need.category === CategoryEnum.JOY
                 ? CategoryDefinitionEnum.JOY
                 : CategoryDefinitionEnum.SURROUNDING,
-        child: child.sayName || String(child.flaskChildId),
-        receipts: receiptsTitles,
-        signerAddress: request.signerAddress,
+        childSayName: child.sayName,
+        receipts: 'hi',
+        signerAddress: signerAddress,
         content: `Your ${impacts} impacts will be ready for a friend to mint!`,
       };
 
@@ -129,7 +135,7 @@ export class SignatureService {
         Voucher: [
           { name: 'title', type: 'string' },
           { name: 'category', type: 'string' },
-          { name: 'child', type: 'string' },
+          { name: 'childSayName', type: 'string' },
           { name: 'receipts', type: 'string' },
           { name: 'signerAddress', type: 'address' },
           { name: 'content', type: 'string' },
@@ -137,7 +143,8 @@ export class SignatureService {
       };
     }
 
-    const domain = await this.designDomain(verifyContractAddress);
+    const domain = await this.designDomain(verifyContractAddress, signerAddress);
+    console.log(productVoucher || serviceVoucher,)
     return {
       SocialWorkerVoucher: productVoucher || serviceVoucher,
       types,

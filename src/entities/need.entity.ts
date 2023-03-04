@@ -7,8 +7,10 @@ import {
   OneToMany,
   ManyToOne,
   DeleteDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
-import { SocialWorkerEntity, FamilyEntity } from './user.entity';
+import { ContributorEntity, FamilyEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
 import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
@@ -17,6 +19,8 @@ import { BaseEntity } from './BaseEntity';
 import { CategoryEnum, NeedTypeEnum } from '../types/interface';
 import { ReceiptEntity } from './receipt.entity';
 import { NgoEntity } from './ngo.entity';
+import { TicketEntity } from './ticket.entity';
+import { StatusEntity } from './status.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
@@ -24,14 +28,14 @@ export class NeedEntity extends BaseEntity {
   deletedAt?: Date;
 
   @Index({ unique: true })
-  @Column()
-  flaskNeedId: number;
-
   @Column({ nullable: true })
-  flaskSupervisorId?: number; //confirmUser from flask
+  flaskId: number;
 
   @Column({ nullable: true })
   title: string;
+
+  @Column({ nullable: true })
+  name: string;
 
   @Column({ nullable: true })
   doingDuration: number;
@@ -44,12 +48,6 @@ export class NeedEntity extends BaseEntity {
 
   @Column({ type: 'enum', enum: CategoryEnum, nullable: true })
   category: number;
-
-  @Column({ nullable: true })
-  childGeneratedCode: string;
-
-  @Column({ nullable: true })
-  childSayName: string;
 
   @Column({ type: 'timestamptz', nullable: true })
   childDeliveryDate?: Date;
@@ -72,9 +70,6 @@ export class NeedEntity extends BaseEntity {
   @Column({ nullable: true })
   details: string;
 
-  @Column({ nullable: true })
-  donated: number;
-
   @Column({ type: 'timestamptz', nullable: true })
   doneAt: Date;
 
@@ -88,9 +83,6 @@ export class NeedEntity extends BaseEntity {
   needRetailerImg: string;
 
   @Column({ nullable: true })
-  information: string;
-
-  @Column({ nullable: true })
   isConfirmed: boolean;
 
   @Column({ nullable: true })
@@ -98,9 +90,6 @@ export class NeedEntity extends BaseEntity {
 
   @Column({ nullable: true })
   isDone: boolean;
-
-  @Column({ nullable: true })
-  isReported: boolean;
 
   @Column({ nullable: true })
   isUrgent: boolean;
@@ -111,23 +100,11 @@ export class NeedEntity extends BaseEntity {
   @Column('simple-json', { nullable: true })
   titleTranslations: { en: string; fa: string };
 
-  @Column({ nullable: true })
-  ngoAddress: string;
-
-  @Column({ nullable: true })
-  ngoName: string;
-
   @Column({ type: 'timestamptz', nullable: true })
   ngoDeliveryDate: Date;
 
   @Column({ nullable: true })
-  oncePurchased: boolean;
-
-  @Column({ nullable: true })
   paid: number;
-
-  @Column({ nullable: true })
-  progress: string;
 
   @Column({ nullable: true })
   purchaseCost: number;
@@ -136,31 +113,10 @@ export class NeedEntity extends BaseEntity {
   purchaseDate: Date;
 
   @Column({ nullable: true })
-  receiptCount?: number;
-
-  @Column({ nullable: true })
   status: number;
-
-  @Column({ nullable: true })
-  statusDescription?: string;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  statusUpdatedAt?: Date;
 
   @Column({ type: 'enum', enum: NeedTypeEnum, nullable: true })
   type: NeedTypeEnum;
-
-  @Column({ nullable: true })
-  typeName?: string;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  unavailableFrom?: Date;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  unconfirmedAt?: Date;
-
-  @Column({ nullable: true })
-  unpaidCost?: number;
 
   @Column({ nullable: true })
   unpayable?: boolean;
@@ -171,29 +127,16 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
-  @ManyToMany(() => FamilyEntity, (user) => user.doneNeeds, { eager: false })
-  @JoinTable()
-  participants?: FamilyEntity[];
-
-  @OneToMany(() => SignatureEntity, (signature) => signature.need, { eager: true })
-  signatures?: SignatureEntity[];
-
-  @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: false })
-  payments?: PaymentEntity[];
-
-  @OneToMany(() => ReceiptEntity, (receipt) => receipt.need, { eager: true })
-  receipts?: ReceiptEntity[];
+  // @ManyToMany(() => FamilyEntity, (user) => user.doneNeeds, { eager: false })
+  // participants?: FamilyEntity[];
 
   @Column()
   flaskChildId: number;
 
-  @Column()
-  flaskSwId: number;
-
   @Column({ nullable: true })
   flaskNgoId: number;
 
-  @ManyToOne(() => ChildrenEntity, (child) => child.needs, { eager: false })
+  @ManyToOne(() => ChildrenEntity, (child) => child.needs, { eager: true })
   child: ChildrenEntity;
 
   @ManyToOne(() => ProviderEntity, (p) => p.needs, { eager: true })
@@ -202,10 +145,28 @@ export class NeedEntity extends BaseEntity {
   @ManyToOne(() => NgoEntity, (n) => n.needs, { eager: false })
   ngo: NgoEntity;
 
-  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.createdNeeds, { eager: false })
-  socialWorker: SocialWorkerEntity;
+  @ManyToOne(() => ContributorEntity, (n) => n.createdNeeds, { eager: false })
+  socialWorker: ContributorEntity;
 
-  @ManyToOne(() => SocialWorkerEntity, (sw) => sw.confirmedNeeds, { eager: false })
-  supervisor: SocialWorkerEntity;
+  @ManyToOne(() => ContributorEntity, (n) => n.auditedNeeds, { eager: false })
+  auditor: ContributorEntity;
+
+  @ManyToOne(() => ContributorEntity, (n) => n.purchasedNeeds, { eager: false })
+  purchaser: ContributorEntity;
+
+  @OneToMany(() => TicketEntity, (t) => t.need)
+  tickets?: TicketEntity[]
+
+  @OneToMany(() => SignatureEntity, (signature) => signature.need, { eager: false })
+  signatures?: SignatureEntity[];
+
+  @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: false })
+  verifiedPayments?: PaymentEntity[];
+
+  @OneToMany(() => ReceiptEntity, (receipt) => receipt.need, { eager: true })
+  receipts?: ReceiptEntity[];
+
+  @OneToMany(() => StatusEntity, (status) => status.need, { eager: true })
+  statusUpdates?: StatusEntity[];
 }
 

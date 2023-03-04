@@ -1,52 +1,82 @@
-import { Entity, Column, OneToMany, Index } from 'typeorm'
-import { BaseEntity } from './BaseEntity'
-import { NeedEntity } from './need.entity'
-import { ChildrenEntity } from './children.entity'
-import { SocialWorkerEntity } from './user.entity'
+import { Entity, Column, OneToMany, Index, ManyToOne } from 'typeorm';
+import { BaseEntity } from './BaseEntity';
+import { NeedEntity } from './need.entity';
+import { ChildrenEntity } from './children.entity';
+import { ContributorEntity } from './user.entity';
+import { CityEntity } from './city.entity';
 
 @Entity()
 export class NgoEntity extends BaseEntity {
+    @Index({unique: true})
     @Column({ nullable: true })
-    name: string
+    flaskNgoId: number;
 
     @Column({ nullable: true })
-    website: string
-
-    @Index({ unique: true })
-    @Column()
-    flaskNgoId: number
+    name: string;
 
     @Column({ nullable: true })
-    city: number
+    website: string;
 
     @Column({ nullable: true })
-    state: number
+    balance: number;
 
     @Column({ nullable: true })
-    country: number
+    cityId: number;
 
     @Column({ nullable: true })
-    postalAddress: string
+    stateId: number;
 
     @Column({ nullable: true })
-    emailAddress: string
+    countryId: number;
+  
+    @Column({ nullable: true })
+    postalAddress: string;
 
     @Column({ nullable: true })
-    phoneNumber: string
+    emailAddress: string;
 
     @Column({ nullable: true })
-    logoUrl: string
+    phoneNumber: string;
+
+    @Column({ nullable: true })
+    logoUrl: string;
 
     @Column({ default: false })
-    isActive: boolean
+    isActive: boolean;
+
+    @Column({ type: 'timestamptz', nullable: true })
+    registerDate?: Date;
+
+    @Column({ nullable: true })
+    currentSocialWorkerCount?: number
+
+    @Column({ nullable: true })
+    childrenCount?: number
+
+    @Column({ nullable: true })
+    currentChildrenCount?: number
+    
+    @Column({ nullable: true })
+    socialWorkerCount?: number
+
+    @Column({ type: 'timestamptz', nullable: true })
+    created?: Date;
+
+    @Column({ type: 'timestamptz', nullable: true })
+    updated?: Date;
+
+    @Column({ nullable: true })
+    isDeleted?: boolean;
 
     @OneToMany(() => NeedEntity, (need) => need.ngo)
     needs: NeedEntity[];
 
     @OneToMany(() => ChildrenEntity, (c) => c.ngo)
-    children?: ChildrenEntity[]
+    children?: ChildrenEntity[];
 
-    @OneToMany(() => SocialWorkerEntity, (sw) => sw.ngo)
-    socialWorkers?: SocialWorkerEntity[]
+    @OneToMany(() => ContributorEntity, (sw) => sw.ngo)
+    socialWorkers?: ContributorEntity[];
+
+    @ManyToOne(() => CityEntity, (n) => n.ngos, { eager: true })
+    city : CityEntity
 }
-

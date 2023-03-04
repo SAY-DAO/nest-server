@@ -1,20 +1,27 @@
-import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ServerError } from '../../filters/server-exception.filter';
-import { SwSignatureResult } from '../../types/interface';
+import {  SwSignatureResult } from '../../types/interface';
 import { SwCreateSwSignatureDto } from '../../types/dtos/CreateSignature.dto';
 import { ValidateSignaturePipe } from './pipes/validate-signature.pipe';
 import { SignatureService } from './signature.service';
-import { NeedService } from '../need/need.service';
-import { ChildrenService } from '../children/children.service';
+import { SyncService } from '../sync/sync.service';
 
-@ApiTags('Signature')
-@Controller('signature')
+@ApiTags('Signatures')
+@Controller('signatures')
 export class SignatureController {
-  constructor(private signatureService: SignatureService,
-    private needService: NeedService,
-    private childrenService: ChildrenService,
-  ) { }
+  constructor(
+    private signatureService: SignatureService,
+    private syncService: SyncService,
+  ) {}
 
   @Get(`all`)
   @ApiOperation({ description: 'Get a single transaction by ID' })
@@ -24,24 +31,29 @@ export class SignatureController {
 
   @Post(`sw/generate`)
   @UsePipes(new ValidationPipe()) // validation for dto files
-  async swSignTransaction(@Body(ValidateSignaturePipe) request: SwCreateSwSignatureDto) {
+  async swSignTransaction(
+    @Req() req: Request,
+    @Body(ValidateSignaturePipe) request: SwCreateSwSignatureDto,
+  ) {
     let transaction: SwSignatureResult;
     try {
-      const need = await this.needService.getNeedById(request.flaskNeedId);
-      const child = await this.childrenService.getChildById(need.flaskChildId);
-      const isCreator = need.socialWorker.flaskSwId === request.flaskSwId; // request.userId
-      if (isCreator) {
-        const list = [];
-        for (let i = 0; i < need.receipts.length; i++) {
-          list.push(need.receipts[i].title);
-        }
-        const receiptsTitles = list[0]
-          ? list.join(', ')
-          : 'No receipts is provided!';
-        transaction = await this.signatureService.swSignTransaction(request, need, child, receiptsTitles);
-      }
+      const accessToken = req.headers['authorization'];
+      const { need, child } = await this.syncService.syncNeed(
+        accessToken,
+        request.callerId,
+        request.panelData.need,
+        request.childId,
+        request.ngoId,
+        request.roles,
+      );
+      transaction = await this.signatureService.swSignTransaction(
+        request.signerAddress,
+        need,
+        child,
+      );
+      console.log(transaction);
     } catch (e) {
-      console.log(e)
+      console.log(e);
       throw new ServerError(e);
     }
     return transaction;

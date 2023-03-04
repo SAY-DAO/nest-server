@@ -1,13 +1,10 @@
-import { ArgumentMetadata, HttpException, HttpStatus, Injectable, PipeTransform } from '@nestjs/common';
-import { CreateChildDto } from '../../types/dtos/CreateChildren.dto';
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
+import { Children } from 'src/types/interfaces/Children';
 
 @Injectable()
 export class ValidateChildrenPipe implements PipeTransform {
-  transform(value: CreateChildDto, metadata: ArgumentMetadata) {
+  transform(value: Children, metadata: ArgumentMetadata) {
     console.log("Validating Children data...")
-    if (!value.childId) {
-      console.log(`passing from a child with no Id in Flask!`)
-    }
     return value
   }
 }

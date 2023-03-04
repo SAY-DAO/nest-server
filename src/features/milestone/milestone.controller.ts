@@ -28,15 +28,15 @@ export class MilestoneController {
     let theChild: ChildrenEntity;
     const steps = [];
     for (let i = 0; i < data.epics.length; i++) {
-      const theNeed = await this.needService.getNeedById(
-        data.epics[i].needId,
-      );
+      // const theNeed = await this.needService.getNeedById(
+      //   data.epics[i].needId,
+      // );
       if (!theChild) {
-        theChild = await this.childrenService.getChildById(theNeed.child.flaskChildId);
+        // theChild = await this.childrenService.getChildById(theNeed.child.flaskChildId);
       }
 
-      const step = this.stepService.createStep(theNeed, data.epics[i]);
-      steps.push(step);
+      // const step = this.stepService.createStep(theNeed, data.epics[i]);
+      // steps.push(step);
     }
     const mileStone = await this.mileStoneService.createMileStone(steps, theChild);
     const result = { mileStone: mileStone };

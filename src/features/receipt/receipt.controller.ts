@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ReceiptService } from './receipt.service';
 
@@ -12,5 +12,21 @@ export class ReceiptController {
     @ApiOperation({ description: 'Get all needs from flask' })
     async getReceipts() {
         return await this.receiptService.getReceipts()
+    }
+
+    @Get(`flask/need/:needId`)
+    @ApiOperation({ description: 'Get all needs from flask' })
+    async getFlaskNeeds(
+        @Req() req: Request,
+        @Param('needId') needId: number
+    ) {
+        const accessToken = req.headers['authorization'];
+        return await this.receiptService.getFlaskReceipts(
+            {
+                accessToken: accessToken,
+            },
+            needId,
+
+        );
     }
 }

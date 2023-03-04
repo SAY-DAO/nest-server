@@ -1,24 +1,87 @@
 
+export enum Colors {
+    WHITE = 0,
+    BLUE = 1,
+    YELLOW = 2,
+    RED = 3,
+}
+
 export enum RolesEnum {
     NO_ROLE = 0,
     SUPER_ADMIN = 1,
     SOCIAL_WORKER = 2,
-    COORDINATOR = 3, // contributor
+    COORDINATOR = 3,
     NGO_SUPERVISOR = 4,
     SAY_SUPERVISOR = 5,
-    ADMIN = 6, // team lead
-    FAMILY = 7,
-    FRIEND = 8,
-};
+    ADMIN = 6,
+}
 
-export interface HeaderOptions { accessToken: string, X_SKIP?: number, X_TAKE?: number }
-export interface NeedApiParams { isConfirmed?: boolean, isDone?: boolean, isReported?: boolean, status?: string, type?: number, ngoId?: number, isChildConfirmed?: boolean, unpayable?: boolean, options?: any }
+export enum PanelContributors {
+    AUDITOR = 1,
+    SOCIAL_WORKER = 2,
+    PURCHASER = 3,
+    NGO_SUPERVISOR = 4,
+}
+export enum AppContributors {
+    FAMILY = 5,
+    FRIEND = 6,
+}
+export enum SAYPlatformRoles {
+    NO_ROLE = 0,
+    SOCIAL_WORKER = PanelContributors.SOCIAL_WORKER,
+    NGO_SUPERVISOR = PanelContributors.NGO_SUPERVISOR,
+    PURCHASER = PanelContributors.PURCHASER,
+    AUDITOR = PanelContributors.AUDITOR,
+    FAMILY = AppContributors.FAMILY,
+    FRIEND = AppContributors.FRIEND,
+}
+
+export enum childExistence {
+    DEAD = 0,
+    AlivePresent = 1,
+    AliveGone = 2,
+    TempGone = 3,
+}
+
+export enum childConfirmation {
+    NOT_CONFIRMED = 0,
+    CONFIRMED = 1,
+    BOTH = 2,
+}
+
+export interface HeaderOptions {
+    accessToken: string;
+    X_SKIP?: number;
+    X_TAKE?: number;
+}
+export interface NeedApiParams {
+    createdBy?: number;
+    confirmedBy?: number;
+    purchasedBy?: number;
+    isConfirmed?: boolean;
+    isDone?: boolean;
+    isReported?: boolean;
+    status?: string;
+    type?: number;
+    ngoId?: number;
+    isChildConfirmed?: boolean;
+    unpayable?: boolean;
+    options?: any;
+}
+
+export interface ChildApiParams {
+    confirm: number;
+    ngoId?: any;
+    swId?: any;
+    existenceStatus?: any;
+    options?: any;
+}
 
 export interface Domain {
     name: string;
     version: string;
     verifyingContract: string;
-    chainId: string;
+    chainId: number;
 }
 
 export interface SwSignatureResult {
@@ -26,16 +89,17 @@ export interface SwSignatureResult {
     types: VoucherTypes;
     domain: Domain;
 }
-export interface VoucherTypes {
-    Voucher: { name: string; type: string; }[];
-}
 
+export interface VoucherTypes {
+    Voucher: { name: string; type: string }[];
+}
 
 export interface SwServiceVoucher {
     title: string;
     category: CategoryDefinitionEnum;
-    child: string;
-    receipts: string; // title1, title2, ...
+    childSayName: string;
+    receipts: string;
+    // receipts: SwmypageInnerReceipts_[];
     bankTrackId: string,
     signerAddress: string;
     content: string;
@@ -44,17 +108,18 @@ export interface SwServiceVoucher {
 export interface SwProductVoucher {
     title: string;
     category: CategoryDefinitionEnum;
-    child: string;
-    receipts: string; // title1, title2, ...
+    childSayName: string;
+    receipts: string;
+    // receipts: SwmypageInnerReceipts_[];
     signerAddress: string;
     content: string;
 }
 
 export interface FamilyVoucher {
-    flaskNeedId: number;
-    flaskUserId: number;
-    child: number;
-    wallet: string;
+    needId: number;
+    userId: number;
+    childId: number;
+    signerAddress: string;
     content: string;
 }
 
@@ -78,7 +143,6 @@ complete delivery to child status = 5
 complete money transfer to NGO for service status = 3
 complete delivery to child for service status = 4
 */
-
 
 export enum PaymentStatusEnum {
     PARTIAL_PAY = 1,
@@ -136,20 +200,18 @@ export enum HousingEnum {
 }
 
 export enum CategoryDefinitionEnum {
-    GROWTH = "Growth",
-    JOY = "Joy",
-    HEALTH = "Health",
-    SURROUNDING = "Surrounding",
+    GROWTH = 'Growth',
+    JOY = 'Joy',
+    HEALTH = 'Health',
+    SURROUNDING = 'Surrounding',
 }
-
 
 export enum NeedTypeEnum {
     SERVICE = 0,
     PRODUCT = 1,
 }
 
-
 export enum NeedTypeDefinitionEnum {
-    SERVICE = "Service",
-    PRODUCT = "Product",
+    SERVICE = 'Service',
+    PRODUCT = 'Product',
 }

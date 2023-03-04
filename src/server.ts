@@ -10,15 +10,15 @@ async function startServer() {
   console.log('Started server');
   console.log('Host:' + config().host);
   console.log('Port:' + config().serverPort);
-  console.log('db Host:' + config().db.host);
-  console.log('db Port:' + config().db.port);
+  console.log('db Host:' + config().db1.host);
+  console.log('db Port:' + config().db1.port);
 
   const app = await ApplicationContext();
   app.enableShutdownHooks();
   app.setGlobalPrefix('api/dao');
   // For large transactions
   app.use(bodyParser.json({ limit: '50mb' }));
-  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+  // app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
     //     origin: [
     //       'localhost',

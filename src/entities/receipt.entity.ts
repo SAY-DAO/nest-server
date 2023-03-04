@@ -1,12 +1,13 @@
 import { Entity, Column, Index, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
+import { ChildrenEntity } from './children.entity';
 import { NeedEntity } from './need.entity';
-import { SocialWorkerEntity } from './user.entity';
+import { ContributorEntity } from './user.entity';
 
 @Entity()
 export class ReceiptEntity extends BaseEntity {
     @Index({ unique: true })
-    @Column()
+    @Column({ nullable: true })
     flaskReceiptId: number;
 
     @Column()
@@ -34,11 +35,8 @@ export class ReceiptEntity extends BaseEntity {
     isPublic: boolean;
 
     @Column({ nullable: true })
-    deleted: boolean;
+    deleted: Date;
 
     @ManyToOne(() => NeedEntity, (need) => need.receipts, { eager: false })
     need: NeedEntity;
-
-    @ManyToOne(() => SocialWorkerEntity, (s) => s.receipts, { eager: true })
-    socialWorker: SocialWorkerEntity;
 }

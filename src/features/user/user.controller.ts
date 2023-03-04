@@ -1,218 +1,199 @@
-import { Controller, Get, Param, ParseIntPipe, Query, Req } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Param,
+    ParseIntPipe,
+    Query,
+    Req,
+    UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { NeedEntity } from '../../entities/need.entity';
-import { FamilyEntity } from '../../entities/user.entity';
 import { UserService } from './user.service';
-import { NEEDS_URL } from '../need/need.controller';
 import { NeedService } from '../need/need.service';
-import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { ChildrenService } from '../children/children.service';
-import { ChildrenEntity } from '../../entities/children.entity';
-import { NeedTypeEnum, PaymentStatusEnum, ProductStatusEnum, RolesEnum, ServiceStatusEnum } from 'src/types/interface';
-import { NeedAPIApi, NeedModel, SocialWorkerAPIApi } from 'src/generated-sources/openapi';
-import { NeedDto, NeedsDataDto } from 'src/types/dtos/CreateNeed.dto';
+import { RolesEnum, ProductStatusEnum } from 'src/types/interface';
+import {
+    SwMyPage, SwmypageNeeds,
+} from 'src/generated-sources/openapi';
+import { getNeedsTimeLine, getOrganizedNeeds, timeDifference } from 'src/utils/helpers';
+import { ChildNeed } from 'src/types/interfaces/Need';
+import { MyPageInterceptor } from './interceptors/mypage.interceptors';
+import { TicketService } from '../ticket/ticket.service';
+import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
     constructor(
         private userService: UserService,
+        private ticketService: TicketService,
         private needService: NeedService,
         private childrenService: ChildrenService,
     ) { }
 
     @Get(`all`)
-    @ApiOperation({ description: 'Get a single transaction by ID' })
-    async getFamilies() {
-        const families = await this.userService.getFamilies();
-        const socialWorkers = await this.userService.getSocialWorkers();
-        return { 'families': families, 'socialWorkers': socialWorkers }
+    @ApiOperation({ description: 'Get all users' })
+    async getUsers() {
+        return await this.userService.getUsers()
     }
 
-    @Get(`done`)
-    @ApiOperation({ description: 'Get all done needs' })
-    async getUserChildDoneNeeds(
-        @Query('childId', ParseIntPipe) childId: number,
-        @Query('userId', ParseIntPipe) userId: number,
+    @Get(`all/family`)
+    @ApiOperation({ description: 'Get all families' })
+    async getFamilies() {
+        return await this.userService.getFamilies()
+    }
+
+    @Get(`all/contributor`)
+    @ApiOperation({ description: 'Get all contributors' })
+    async getContributors() {
+        return await this.userService.getContributors()
+    }
+
+
+    @UseInterceptors(MyPageInterceptor)
+    @Get('myPage/:ngoId/:userId/:typeId')
+    @ApiOperation({ description: 'Get user My page' })
+    async fetchMyPage(
+        @Req() req: Request,
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('typeId', ParseIntPipe) typeId: number,
+        @Param('ngoId') ngoId: number,
+        @Query('isUser') isUser: "0" | "1",
     ) {
-        let user: FamilyEntity
-        user = await this.userService.getUserDoneNeeds(userId);
-        if (!user) {
-            user = await this.userService.createFamilyMember({ flaskUserId: userId });
-        }
-        let filteredNeeds = [];
-        function isMatched(doneNeed: NeedEntity) {
-            return doneNeed.flaskChildId === childId;
+        const time1 = new Date().getTime();
+        const accessToken = req.headers['authorization'];
+        const X_SKIP = req.headers['x-skip'];
+        const X_TAKE = req.headers['x-take'];
+        let pageData: SwMyPage
+        try {
+            pageData = await this.userService.getMyPage(
+                accessToken,
+                X_SKIP,
+                X_TAKE,
+                userId,
+                parseInt(isUser) // when 0 displays all children when 1 shows children/needs created by them
+            );
+
+        } catch (e) {
+            throw new AllExceptionsFilter(e);
+
         }
 
-        // user is not found when there is no done needs
-        if (user && user.doneNeeds) {
-            filteredNeeds = user.doneNeeds.filter(isMatched);
-        }
+        let child: {
+            id: number;
+            sayName: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            awakeAvatarUrl: string;
+        };
 
-        // urgent ==> index 0
-        // growth 0 ==> index 1
-        // joy 1 ==> index 2
-        // health 2 ==> index 3
-        // surroundings 3 ==> index 4
-        // all ==> index 5
+        let role = '';
+        let childNeed: ChildNeed;
+        let swNeedsList: SwmypageNeeds[] = [];
+        // extract contributors related needs
+        const time2 = new Date().getTime();
+        timeDifference(time1, time2, "Fetched Flask In ")
 
-        const needData = [[], [], [], [], [], []];
-        for (let i = 0; i < filteredNeeds.length; i += 1) {
-            if (filteredNeeds[i].isUrgent) {
-                needData[0].push(filteredNeeds[i]);
-            } else {
-                needData[filteredNeeds[i].category + 1].push(filteredNeeds[i]);
+        const time3 = new Date().getTime();
+        try {
+            if (pageData) {
+                for (let i = 0; i < pageData.result.length; i++) {
+                    const childNeedsList = [];
+                    child = {
+                        id: pageData.result[i].id,
+                        sayName: pageData.result[i].sayName,
+                        firstName: pageData.result[i].firstName,
+                        lastName: pageData.result[i].lastName,
+                        birthDate: pageData.result[i].birthDate,
+                        awakeAvatarUrl: pageData.result[i].awakeAvatarUrl,
+                    };
+
+                    // add child + tickets for every need
+                    const tickets = await this.ticketService.getUserTickets(userId)
+                    for (let k = 0; k < pageData.result[i].needs.length; k++) {
+                        const ticket = tickets.find((t) => pageData.result[i].needs[k].id === t.flaskNeedId)
+                        childNeed = { child, ticket, ...pageData.result[i].needs[k] };
+                        childNeedsList.push(childNeed);
+                    }
+
+                    // SW
+                    if (typeId === RolesEnum.SOCIAL_WORKER) {
+                        role = 'createdById';
+                        const swNeeds = childNeedsList.filter(
+                            (need) => need[role] === userId,
+                        );
+                        const newList = swNeedsList.concat(swNeeds); // Merging
+                        swNeedsList = newList;
+                    }
+                    // NGO supervisor
+                    else if (typeId === RolesEnum.NGO_SUPERVISOR) {
+                        role = 'ngo';
+                        const swNeeds = childNeedsList;
+                        const newList = swNeedsList.concat(swNeeds); // Merging
+                        swNeedsList = newList;
+                    }
+                    // Auditor
+                    else if (
+                        typeId === RolesEnum.ADMIN ||
+                        typeId === RolesEnum.SUPER_ADMIN ||
+                        RolesEnum.SAY_SUPERVISOR
+                    ) {
+                        role = 'confirmedBy';
+                        const swNeeds = childNeedsList;
+                        const newList = swNeedsList.concat(swNeeds); // Merging
+                        swNeedsList = newList;
+                    }
+                    // Purchaser
+                    else if (typeId === RolesEnum.COORDINATOR) {
+                        role = 'purchasedBy';
+                        const swNeeds = childNeedsList;
+                        for (let k = 0; k < pageData.result[i].needs.length; k++) {
+                            const statusUpdates = pageData.result[i].needs[k].statusUpdates.filter(
+                                (need) => need[role] === userId,
+                            );
+                            for (let j = 0; j < statusUpdates.length; j++) {
+                                if (
+                                    statusUpdates[j].oldStatus === ProductStatusEnum.COMPLETE_PAY &&
+                                    statusUpdates[j].newStatus ===
+                                    ProductStatusEnum.PURCHASED_PRODUCT &&
+                                    statusUpdates[j].swId === userId
+                                ) {
+                                    const newList = swNeedsList.concat(swNeeds); // Merging
+                                    swNeedsList = newList;
+                                }
+                            }
+                        }
+                    }
+                }
             }
+
+        } catch (e) {
+            throw new ServerError(e);
         }
-        needData[5].push(...filteredNeeds);
-        console.log(filteredNeeds);
+        const time4 = new Date().getTime();
+        timeDifference(time3, time4, "First organize In ")
+
+        const time5 = new Date().getTime();
+        const organizedNeeds = getOrganizedNeeds(swNeedsList);
+        const time6 = new Date().getTime();
+        timeDifference(time5, time6, "Second organize In ")
+
+
+        const time7 = new Date().getTime();
+        const { summary, inMonth } = getNeedsTimeLine(swNeedsList, role);
+        const time8 = new Date().getTime();
+        timeDifference(time7, time8, "TimeLine In ")
 
         return {
-            flaskUserId: userId,
-            id: user.id,
-            flaskChildId: childId,
-            doneNeeds: needData,
-            total: filteredNeeds.length,
+            ngoId,
+            userId,
+            role,
+            typeId,
+            needs: organizedNeeds,
+            childrenCount: pageData ? pageData.count : 0,
+            timeLine: { summary, inMonth },
         };
     }
-
-
-    @Get(`myPage/:ngoId/:swId`)
-    @ApiOperation({ description: 'Get social worker created needs' })
-    async fetchMyPage(@Req() req: Request, @Param('ngoId') ngoId: number, @Param('swId') swId: number) {
-        const accessToken = req.headers["authorization"]
-        const X_SKIP = req.headers["x-skip"]
-        const X_TAKE = req.headers["x-take"]
-        let needsData: NeedsDataDto
-        try {
-
-            needsData = await this.needService.getNeeds({ accessToken, X_SKIP, X_TAKE }, { ngoId:1 })
-        } catch (e) {
-            throw new ObjectNotFound();
-        }
-        console.log(needsData.needs.length)
-
-        const filteredNeeds = needsData.needs.filter((n) => n.created_by_id === 27)
-
-        console.log(filteredNeeds.length)
-
-        const organizedNeeds = [[], [], [], []]; // [[not paid], [payment], [purchased/delivered Ngo], [Done]]
-        if (filteredNeeds) {
-            for (let i = 0; i < filteredNeeds.length; i++) {
-                // not Paid
-                if (filteredNeeds[i].status === 0) {
-                    organizedNeeds[0].push(filteredNeeds[i]);
-                }
-                // Payment Received
-                else if (
-                    filteredNeeds[i].status === PaymentStatusEnum.PARTIAL_PAY ||
-                    filteredNeeds[i].status === PaymentStatusEnum.COMPLETE_PAY
-                ) {
-                    organizedNeeds[1].push(filteredNeeds[i]);
-                }
-
-                if (filteredNeeds[i].type === NeedTypeEnum.SERVICE) {
-                    // Payment sent to NGO
-                    if (filteredNeeds[i].status === ServiceStatusEnum.MONEY_TO_NGO) {
-                        organizedNeeds[2].push(filteredNeeds[i]);
-                    }
-                    // Delivered to child
-                    if (filteredNeeds[i].status === ServiceStatusEnum.DELIVERED) {
-                        organizedNeeds[3].push(filteredNeeds[i]);
-                    }
-                } else if (filteredNeeds[i].type === NeedTypeEnum.PRODUCT) {
-                    // Purchased
-                    if (filteredNeeds[i].status === ProductStatusEnum.PURCHASED_PRODUCT) {
-                        organizedNeeds[2].push(filteredNeeds[i]);
-                    }
-                    // Delivered to Ngo
-                    if (filteredNeeds[i].status === ProductStatusEnum.DELIVERED_TO_NGO) {
-                        organizedNeeds[2].push(filteredNeeds[i]);
-                    }
-                    // Delivered to child
-                    if (filteredNeeds[i].status === ProductStatusEnum.DELIVERED) {
-                        organizedNeeds[3].push(filteredNeeds[i]);
-                    }
-                }
-            }
-            return organizedNeeds
-        }
-    }
-
-    @Get(`social-worker/:flaskId/confirmedNeeds`)
-    @ApiOperation({ description: 'Get supervisor confirmed needs' })
-    async getSwConfirmedNeeds(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
-        let needs: any
-        limit = limit > 100 ? 100 : limit;
-        const supervisor = await this.userService.getSocialWorker(flaskId);
-
-        if (supervisor && supervisor.role === RolesEnum.SAY_SUPERVISOR) {
-            try {
-                needs = await this.needService.getSupervisorConfirmedNeeds(supervisor.flaskSwId, {
-                    limit: Number(limit),
-                    page: Number(page),
-                    route: NEEDS_URL
-                })
-            } catch (e) {
-                throw new ObjectNotFound();
-            }
-        }
-        return needs;
-    }
-
-    @Get(`social-worker/:flaskId/confirmedChildren`)
-    @ApiOperation({ description: 'Get supervisor confirmed children' })
-    async getSwConfirmedChildren(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
-        let needs: any
-        limit = limit > 100 ? 100 : limit;
-        const supervisor = await this.userService.getSocialWorker(flaskId);
-
-        if (supervisor && supervisor.role === RolesEnum.SAY_SUPERVISOR) {
-            try {
-                needs = await this.childrenService.getSupervisorConfirmedChildren(supervisor.flaskSwId, {
-                    limit: Number(limit),
-                    page: Number(page),
-                    route: NEEDS_URL
-                })
-            } catch (e) {
-                throw new ObjectNotFound();
-            }
-        }
-
-        return needs;
-    }
-    // Nyaz -purchasing,...
-    // @Get(`social-worker/:flaskId/confirmedNeeds`)
-    // @ApiOperation({ description: 'Get social worker created needs' })
-    // async getContributorContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
-    //     let needs: any
-    //     limit = limit > 100 ? 100 : limit;
-    //     const socialWorker = await this.userService.getSocialWorker(flaskId);
-    //     if (socialWorker && socialWorker.role === RolesEnum.SUPER_ADMIN) {
-    //         try {
-    //             needs = await this.needService.getSocialWorkerConfirmedNeeds(socialWorker.flaskSwId, {
-    //                 limit: Number(limit),
-    //                 page: Number(page),
-    //                 route: NEEDS_URL
-    //             })
-    //         } catch (e) {
-    //             throw new ObjectNotFound();
-    //         }
-    //     }
-    //     return needs;
-    // }
 }
-
-
-// export enum RolesEnum {
-//     NO_ROLE = 0,
-//     SUPER_ADMIN = 1,
-//     SOCIAL_WORKER = 2,
-//     COORDINATOR = 3, // contributor
-//     NGO_SUPERVISOR = 4,
-//     SAY_SUPERVISOR = 5,
-//     ADMIN = 6, // team lead
-//     FAMILY = 7,
-//     FRIEND = 8,
-// };
