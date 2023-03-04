@@ -26,8 +26,8 @@ import { StatusEntity } from './status.entity';
 export class NeedEntity extends BaseEntity {
   @DeleteDateColumn({ type: 'timestamptz', nullable: true })
   deletedAt?: Date;
-  
-  @Index({unique: true})
+
+  @Index({ unique: true })
   @Column({ nullable: true })
   flaskId: number;
 

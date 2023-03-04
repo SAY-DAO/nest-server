@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
-import { AllUserEntity, ContributorEntity } from 'src/entities/user.entity';
+import { TicketViewEntity } from 'src/entities/ticketView.entity';
+import {  ContributorEntity } from 'src/entities/user.entity';
+import { Colors } from 'src/types/interface';
 import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
-import { UpdateTicketParams } from 'src/types/parameters/UpdateTicketParameters';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class TicketService {
@@ -15,18 +16,43 @@ export class TicketService {
     private ticketRepository: Repository<TicketEntity>,
     @InjectRepository(TicketContentEntity)
     private ticketContentRepository: Repository<TicketContentEntity>,
+    @InjectRepository(TicketViewEntity)
+    private ticketViewRepository: Repository<TicketViewEntity>,
   ) { }
 
-  createTicket(
+  async createTicket(
     ticketDetails: CreateTicketParams,
     participants: ContributorEntity[],
   ): Promise<TicketEntity> {
+    const view = await this.createTicketView(ticketDetails.flaskUserId)
     const newTicket = this.ticketRepository.create({
       ...ticketDetails,
+      color: Colors.YELLOW, // start with Warning,
     });
     newTicket.contributors = participants
+    newTicket.views = [view]
     return this.ticketRepository.save(newTicket);
   }
+
+  createTicketView(
+    flaskUserId: number,
+  ): Promise<TicketViewEntity> {
+    const newView = this.ticketViewRepository.create({
+      flaskUserId,
+      viewed: new Date()
+    });
+    return this.ticketViewRepository.save(newView);
+  }
+
+  updateTicketColor(
+    ticketId: string,
+    color: Colors,
+  ): Promise<UpdateResult> {
+    return this.ticketRepository.update(ticketId, {
+      color: color,
+    });
+  }
+
 
   createTicketContent(
     contentDetails: CreateTicketContentParams,
@@ -54,7 +80,7 @@ export class TicketService {
         need: true,
       },
       where: {
-        flaskUserId: flaskUserId,
+        contributors: { flaskId: flaskUserId },
       },
     });
   }
@@ -75,10 +101,6 @@ export class TicketService {
       },
     });
     return ticket;
-  }
-
-  update(id: number, updateTicketDto: UpdateTicketParams) {
-    return `This action updates a #${id} ticket`;
   }
 
   remove(id: number) {

@@ -19,11 +19,13 @@ import { TicketEntity } from 'src/entities/ticket.entity';
 import { PaymentEntity } from 'src/entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
+import { TicketViewEntity } from 'src/entities/ticketView.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       TicketEntity,
+      TicketViewEntity,
       TicketContentEntity,
       FamilyEntity,
       ContributorEntity,

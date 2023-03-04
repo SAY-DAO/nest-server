@@ -112,11 +112,11 @@ export class UserService {
     });
   }
 
-  getFlaskContributor(accessToken: any, flaskSwId: number): Promise<SocialWorkerModel> {
+  async getFlaskContributor(accessToken: any, flaskSwId: number): Promise<SocialWorkerModel> {
     const swApi = new SocialWorkerAPIApi();
-    return swApi.apiV2SocialworkersIdGet(accessToken, flaskSwId);
+    return await swApi.apiV2SocialworkersIdGet(accessToken, flaskSwId);
   }
-
+  
   getContributorByFlaskId(flaskSwId: number): Promise<ContributorEntity> {
     const contributor = this.contributorRepository.findOne({
       where: {

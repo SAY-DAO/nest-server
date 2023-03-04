@@ -34,6 +34,9 @@ import { PaymentService } from '../payment/payment.service';
 import { ReceiptService } from '../receipt/receipt.service';
 import { StatusService } from '../status/status.service';
 import { UserService } from '../user/user.service';
+import { SocialWorkerModel } from 'src/generated-sources/openapi';
+import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @Injectable()
 export class SyncService {
@@ -51,57 +54,60 @@ export class SyncService {
 
   async syncUserNgo(
     accessToken: string,
-    flaskUserId: number
+    flaskUser: SocialWorkerModel
   ) {
-    const currentTime = new Date();
-    ///--------------------------------------------NGO-------------------------------------
-    const flaskUser = await this.userService.getFlaskContributor(accessToken, flaskUserId);
+    try {
+      const currentTime = new Date();
+      ///--------------------------------------------NGO-------------------------------------
+      let nestNgo = await this.ngoService.getNgo(flaskUser.ngoId);
+      let nestCallerNgoCity: CityEntity;
+      let callerNgoDetails: NgoParams;
+      // Do no update NGOs frequently
+      if (!nestNgo) {
+        const flaskNgo = await this.ngoService.getFlaskNgo(accessToken, flaskUser.ngoId);
+        const {
+          socialWorkers,
+          city_id,
+          city,
+          id: FlaskNgoId,
+          ...ngoOtherParams
+        } = flaskNgo;
 
-    let nestNgo = await this.ngoService.getNgo(flaskUser.ngoId);
-    let nestCallerNgoCity: CityEntity;
-    let callerNgoDetails: NgoParams;
-    // Do no update NGOs frequently
-    if (!nestNgo) {
-      const flaskNgo = await this.ngoService.getFlaskNgo(accessToken, flaskUser.ngoId);
-      const {
-        socialWorkers,
-        city_id,
-        city,
-        id: FlaskNgoId,
-        ...ngoOtherParams
-      } = flaskNgo;
-
-      const { id: flaskId, ...cityOtherParams } = city;
-      nestCallerNgoCity = await this.cityService.getCityById(flaskId);
-      if (!nestCallerNgoCity) {
-        console.log('\x1b[36m%s\x1b[0m', 'Creating a city ...');
-        nestCallerNgoCity = await this.cityService.createCity({
-          flaskId,
-          ...cityOtherParams,
-        });
-        console.log('\x1b[36m%s\x1b[0m', 'Created a city ...');
+        const { id: flaskId, ...cityOtherParams } = city;
+        nestCallerNgoCity = await this.cityService.getCityById(flaskId);
+        if (!nestCallerNgoCity) {
+          console.log('\x1b[36m%s\x1b[0m', 'Creating a city ...');
+          nestCallerNgoCity = await this.cityService.createCity({
+            flaskId,
+            ...cityOtherParams,
+          });
+          console.log('\x1b[36m%s\x1b[0m', 'Created a city ...');
+        }
+        callerNgoDetails = {
+          ...ngoOtherParams,
+          registerDate: new Date(ngoOtherParams.registerDate),
+          updated: new Date(ngoOtherParams.updated),
+          cityId: ngoOtherParams.cityId,
+          countryId: flaskNgo.city.countryId,
+          stateId: flaskNgo.city.stateId,
+          flaskNgoId: FlaskNgoId,
+        };
+        console.log('\x1b[36m%s\x1b[0m', 'Creating an NGO ...\n');
+        nestNgo = await this.ngoService.createNgo(callerNgoDetails, nestCallerNgoCity);
+        console.log('\x1b[36m%s\x1b[0m', 'Created an NGO ...\n');
+      } else if (nestNgo && daysDifference(currentTime, nestNgo.updatedAt) > 7) {
+        nestNgo = await this.ngoService
+          .updateNgo(nestNgo.id, callerNgoDetails, nestCallerNgoCity)
+          .then();
+        console.log('\x1b[36m%s\x1b[0m', 'NGO updated ...\n');
+      } else {
+        console.log('\x1b[36m%s\x1b[0m', 'Skipped NGO ...\n');
       }
-      callerNgoDetails = {
-        ...ngoOtherParams,
-        registerDate: new Date(ngoOtherParams.registerDate),
-        updated: new Date(ngoOtherParams.updated),
-        cityId: ngoOtherParams.cityId,
-        countryId: flaskNgo.city.countryId,
-        stateId: flaskNgo.city.stateId,
-        flaskNgoId: FlaskNgoId,
-      };
-      console.log('\x1b[36m%s\x1b[0m', 'Creating an NGO ...\n');
-      nestNgo = await this.ngoService.createNgo(callerNgoDetails, nestCallerNgoCity);
-      console.log('\x1b[36m%s\x1b[0m', 'Created an NGO ...\n');
-    } else if (nestNgo && daysDifference(currentTime, nestNgo.updatedAt) > 7) {
-      nestNgo = await this.ngoService
-        .updateNgo(nestNgo.id, callerNgoDetails, nestCallerNgoCity)
-        .then();
-      console.log('\x1b[36m%s\x1b[0m', 'NGO updated ...\n');
-    } else {
-      console.log('\x1b[36m%s\x1b[0m', 'Skipped NGO ...\n');
+      return nestNgo
+    } catch (e) {
+      throw new AllExceptionsFilter(e)
     }
-    return nestNgo
+
   }
 
   async syncNeed(
@@ -113,16 +119,18 @@ export class SyncService {
     selectedRoles: string[],
   ) {
     const currentTime = new Date();
-
     //-------------------------------------------- Controller Caller-------------------------------------
     let callerDetails: ContributorParams;
     let nestCaller = await this.userService.getContributorByFlaskId(callerId);
-    const CallerNgo = await this.syncUserNgo(accessToken, callerId)
+
     if (!nestCaller) {
       const flaskCaller = await this.userService.getFlaskContributor(
         accessToken,
         callerId,
       );
+      console.log('\x1b[36m%s\x1b[0m', 'Syncing NGO and Caller ...\n' + flaskCaller.id);
+      const CallerNgo = await this.syncUserNgo(accessToken, flaskCaller)
+      console.log('\x1b[36m%s\x1b[0m', 'Synced NGO and Caller ...\n' + flaskCaller.id);
 
       const {
         id: callerFlaskId,
@@ -161,12 +169,13 @@ export class SyncService {
     let nestSocialWorker = await this.userService.getContributorByFlaskId(
       flaskNeedData.createdById,
     );
+    let swNgo: NgoEntity
     if (!nestSocialWorker) {
       const flaskSocialWorker = await this.userService.getFlaskContributor(
         accessToken,
         flaskNeedData.createdById,
       );
-      const swNgo = await this.syncUserNgo(accessToken, flaskNeedData.createdById)
+      swNgo = await this.syncUserNgo(accessToken, flaskSocialWorker)
 
       const {
         id: swFlaskId,
@@ -203,51 +212,57 @@ export class SyncService {
     //--------------------------------------------Auditor-------------------------------------
     let nestAuditor: ContributorEntity;
     let auditorDetails: ContributorParams;
-    if (flaskNeedData.isConfirmed) {
-      nestAuditor = await this.userService.getContributorByFlaskId(
-        flaskNeedData.confirmedBy,
-      );
-      if (!nestAuditor) {
-        const flaskAuditor = await this.userService.getFlaskContributor(
-          accessToken,
+    try {
+      if (flaskNeedData.isConfirmed) {
+        nestAuditor = await this.userService.getContributorByFlaskId(
           flaskNeedData.confirmedBy,
         );
-        const auditorNgo = await this.syncUserNgo(accessToken, flaskNeedData.confirmedBy)
+        if (!nestAuditor) {
+          const flaskAuditor = await this.userService.getFlaskContributor(
+            accessToken,
+            21,
+          );
+          const auditorNgo = await this.syncUserNgo(accessToken, flaskAuditor)
 
-        const {
-          id: auditorFlaskId,
-          ngoId: auditorFlaskNgoId,
-          ...auditorOtherParams
-        } = flaskAuditor;
+          const {
+            id: auditorFlaskId,
+            ngoId: auditorFlaskNgoId,
+            ...auditorOtherParams
+          } = flaskAuditor;
 
-        auditorDetails = {
-          ...auditorOtherParams,
-          flaskId: auditorFlaskId,
-          flaskNgoId: auditorFlaskNgoId,
-          birthDate: flaskAuditor.birthDate && new Date(flaskAuditor.birthDate),
-          role: SAYPlatformRoles.AUDITOR,
-        };
-        // if (!nestAuditor && flaskNeedData.isConfirmed) {
-        console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
-        nestAuditor = await this.userService.createContributor(
-          auditorDetails,
-          auditorNgo,
-        );
-        console.log('\x1b[36m%s\x1b[0m', 'Created an auditor ...\n');
+          auditorDetails = {
+            ...auditorOtherParams,
+            flaskId: auditorFlaskId,
+            flaskNgoId: auditorFlaskNgoId,
+            birthDate: flaskAuditor.birthDate && new Date(flaskAuditor.birthDate),
+            role: SAYPlatformRoles.AUDITOR,
+          };
+          // if (!nestAuditor && flaskNeedData.isConfirmed) {
+          console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
+          nestAuditor = await this.userService.createContributor(
+            auditorDetails,
+            auditorNgo,
+          );
+          console.log('\x1b[36m%s\x1b[0m', 'Created an auditor ...\n');
+        } else {
+          console.log('\x1b[36m%s\x1b[0m', 'Skipped auditor updating ...\n');
+        }
+      } else if (
+        nestAuditor &&
+        daysDifference(currentTime, nestAuditor.updatedAt) > 7
+      ) {
+        nestAuditor = await this.userService
+          .updateContributor(nestAuditor.id, auditorDetails)
+          .then();
+        console.log('\x1b[36m%s\x1b[0m', 'Auditor updated ...\n');
       } else {
-        console.log('\x1b[36m%s\x1b[0m', 'Skipped auditor updating ...\n');
+        console.log('\x1b[36m%s\x1b[0m', 'Not Confirmed, skipping auditor ...\n');
       }
-    } else if (
-      nestAuditor &&
-      daysDifference(currentTime, nestAuditor.updatedAt) > 7
-    ) {
-      nestAuditor = await this.userService
-        .updateContributor(nestAuditor.id, auditorDetails)
-        .then();
-      console.log('\x1b[36m%s\x1b[0m', 'Auditor updated ...\n');
-    } else {
-      console.log('\x1b[36m%s\x1b[0m', 'Not Confirmed, skipping auditor ...\n');
+    } catch (e) {
+      console.log(e)
+      throw new ServerError(e.statusText,e.status)
     }
+
 
     //--------------------------------------------Purchaser-------------------------------------
     let nestPurchaser: ContributorEntity;
@@ -276,7 +291,7 @@ export class SyncService {
           accessToken,
           purchaserId,
         );
-        const purchaserNgo = await this.syncUserNgo(accessToken, purchaserId)
+        const purchaserNgo = await this.syncUserNgo(accessToken, flaskPurchaser)
 
         const {
           id: purchaserFlaskId,
@@ -316,7 +331,6 @@ export class SyncService {
 
     //--------------------------------------------Child-------------------------------------
     let childDetails: ChildParams;
-    let childFlaskNgo: NgoEntity
     let nestChild = await this.childrenService.getChildById(childId);
     if (!nestChild) {
       const flaskChild = await this.childrenService.getFlaskChild(
@@ -324,8 +338,6 @@ export class SyncService {
         childId,
       );
       console.log(flaskChild)
-
-      childFlaskNgo = await this.syncUserNgo(accessToken, flaskChild.id_social_worker);
 
       const {
         id: childFlaskId,
@@ -345,7 +357,7 @@ export class SyncService {
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
       nestChild = await this.childrenService.createChild(
         childDetails,
-        childFlaskNgo,
+        swNgo,
         nestSocialWorker,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Created a Child ...\n');
@@ -509,7 +521,7 @@ export class SyncService {
 
       nestNeed = await this.needService.createNeed(
         nestChild,
-        childFlaskNgo,
+        swNgo,
         nestSocialWorker,
         nestAuditor,
         nestPurchaser,
@@ -525,7 +537,7 @@ export class SyncService {
         .updateNeed(
           nestNeed.id,
           nestChild,
-          childFlaskNgo,
+          swNgo,
           nestSocialWorker,
           nestAuditor,
           nestPurchaser,
@@ -537,9 +549,13 @@ export class SyncService {
     } else {
       console.log('\x1b[36m%s\x1b[0m', 'Skipped  The Need updating ...\n');
     }
+    if(!nestNeed){
+      throw new console.error('no need...');
+      
+    }
     return {
       nestCaller,
-      childFlaskNgo,
+      swNgo,
       nestSocialWorker,
       nestAuditor,
       nestPurchaser,

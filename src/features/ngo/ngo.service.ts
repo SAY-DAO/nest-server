@@ -11,7 +11,7 @@ export class NgoService {
   constructor(
     @InjectRepository(NgoEntity)
     private ngoRepository: Repository<NgoEntity>,
-  ) {}
+  ) { }
 
   getNgos(): Promise<NgoEntity[]> {
     return this.ngoRepository.find();
@@ -43,7 +43,7 @@ export class NgoService {
       ...ngoDetails,
       city: city,
     });
-    return this.ngoRepository.save({id: newNgo.id,...newNgo});
+    return this.ngoRepository.save({ id: newNgo.id, ...newNgo });
   }
 
   async updateNgo(

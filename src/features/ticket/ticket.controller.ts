@@ -10,12 +10,14 @@ import {
   HttpStatus,
   Req,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from '../../types/dtos/ticket/CreateTicketDto.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateTicketDto } from '../../types/dtos/ticket/UpdateTicketDto.dto';
 import {
+  Colors,
   NeedTypeEnum,
   PaymentStatusEnum,
   ProductStatusEnum,
@@ -54,7 +56,7 @@ export class TicketController {
 
   @Get('ticket/:id')
   async findOne(@Param('id') id: string) {
-    return  await this.ticketService.getTicketById(id);
+    return await this.ticketService.getTicketById(id);
   }
 
   @Post('messages/add')
@@ -76,6 +78,7 @@ export class TicketController {
   async createTicket(@Req() req: Request, @Body() request: CreateTicketDto) {
     const accessToken = req.headers['authorization'];
 
+    console.log('\x1b[36m%s\x1b[0m', 'Syncing ...\n');
     const {
       nestCaller,
       nestSocialWorker,
@@ -89,7 +92,6 @@ export class TicketController {
       request.childId,
       request.ngoId,
       request.roles
-
     );
 
     const createTicketDetails: CreateTicketParams = {
@@ -122,9 +124,6 @@ export class TicketController {
     participants = [nestCaller, ...participants]
     const uniqueParticipants = [...new Map(participants.map((p) => [p.id, p])).values()];
 
-    uniqueParticipants.forEach(element => {
-      console.log(element.flaskId)
-    });
     console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
     return this.ticketService.createTicket(createTicketDetails, uniqueParticipants);
   }
@@ -145,8 +144,12 @@ export class TicketController {
     }
   }
   @Patch('ticket/:id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-    return this.ticketService.update(+id, updateTicketDto);
+  async updateTicketColor(
+    @Param('id') id: string,
+    @Query('color') color: Colors
+  ) {
+    await this.ticketService.updateTicketColor(id, color)
+    return {id, color};
   }
 
   @Delete(':id')

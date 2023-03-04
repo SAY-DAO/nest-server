@@ -44,6 +44,20 @@ function loadConfig() {
       autoLoadEntities: true,
       entities: [`${__dirname}/entity/*.js`],
     },
+    db2: {
+      type: 'postgres' as const,
+      // port: 35432,
+      // host: process.env.DB_FLASK_HOST,
+      // username: process.env.DB_FLASK_USER,
+      // password: dbPassword ?? process.env.DB_PASs,
+      // database: process.env.DB_FLASK_NAME,
+      // enabled: true,
+      // synchronize: true,
+      // logging: true,
+      // dropSchema: false,
+      // autoLoadEntities: true,
+      // entities: [`${__dirname}/entity/*.js`],
+    },
     logPretty: 'LOG_PRETTY_PRINT',
   };
 

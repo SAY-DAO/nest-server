@@ -36,17 +36,20 @@ import { StatusEntity } from './entities/status.entity';
 import { CityEntity } from './entities/city.entity';
 import { CityModule } from './features/city/city.module';
 import { GatewayModule } from './features/gateway/gateway.module';
+import { TicketViewEntity } from './entities/ticketView.entity';
 
 const imports = [
   LoggerModule.forRoot(),
   ConfigModule.forRoot({ isGlobal: true }),
   TypeOrmModule.forRoot({
     ...config().db1,
+    ...config().db2,
     dropSchema: false,
     entities: [
       CityEntity,
       StatusEntity,
       TicketEntity,
+      TicketViewEntity,
       TicketContentEntity,
       FamilyEntity,
       ContributorEntity,

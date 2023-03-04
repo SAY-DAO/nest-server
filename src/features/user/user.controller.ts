@@ -20,6 +20,7 @@ import { getNeedsTimeLine, getOrganizedNeeds, timeDifference } from 'src/utils/h
 import { ChildNeed } from 'src/types/interfaces/Need';
 import { MyPageInterceptor } from './interceptors/mypage.interceptors';
 import { TicketService } from '../ticket/ticket.service';
+import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 
 @ApiTags('Users')
 @Controller('users')
@@ -75,7 +76,7 @@ export class UserController {
             );
 
         } catch (e) {
-            console.log(e)
+            throw new AllExceptionsFilter(e);
 
         }
 
@@ -169,7 +170,6 @@ export class UserController {
             }
 
         } catch (e) {
-            console.log(e)
             throw new ServerError(e);
         }
         const time4 = new Date().getTime();

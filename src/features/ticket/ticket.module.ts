@@ -26,6 +26,7 @@ import { StatusService } from '../status/status.service';
 import { StatusEntity } from 'src/entities/status.entity';
 import { CityService } from '../city/city.service';
 import { CityEntity } from 'src/entities/city.entity';
+import { TicketViewEntity } from 'src/entities/ticketView.entity';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CityEntity } from 'src/entities/city.entity';
       CityEntity,
       AllUserEntity,
       TicketEntity,
+      TicketViewEntity,
       TicketContentEntity,
       NeedEntity,
       NgoEntity,

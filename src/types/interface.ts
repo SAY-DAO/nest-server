@@ -1,4 +1,11 @@
 
+export enum Colors {
+    WHITE = 0,
+    BLUE = 1,
+    YELLOW = 2,
+    RED = 3,
+}
+
 export enum RolesEnum {
     NO_ROLE = 0,
     SUPER_ADMIN = 1,
