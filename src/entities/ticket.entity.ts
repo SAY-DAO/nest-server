@@ -28,14 +28,14 @@ export class TicketEntity extends BaseEntity {
     @JoinTable()
     contributors?: ContributorEntity[];
 
-    @ManyToOne(() => NeedEntity, (n) => n.tickets, { eager: false })
-    need?: NeedEntity
+    @ManyToOne(() => NeedEntity, (n) => n.tickets, { eager: false, nullable: false })
+    need: NeedEntity
 
     @OneToMany(() => TicketContentEntity, (c) => c.ticket, { eager: true, nullable: true })
     ticketHistory?: TicketContentEntity[]
 
     @OneToMany(() => TicketViewEntity, (v) => v.ticket, { eager: true })
-    views?: TicketViewEntity[]
+    views: TicketViewEntity[]
 
 }
 

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
-import {  ContributorEntity } from 'src/entities/user.entity';
+import { ContributorEntity } from 'src/entities/user.entity';
 import { Colors } from 'src/types/interface';
 import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
@@ -24,20 +24,21 @@ export class TicketService {
     ticketDetails: CreateTicketParams,
     participants: ContributorEntity[],
   ): Promise<TicketEntity> {
-    const view = await this.createTicketView(ticketDetails.flaskUserId)
     const newTicket = this.ticketRepository.create({
       ...ticketDetails,
       color: Colors.YELLOW, // start with Warning,
     });
+
     newTicket.contributors = participants
-    newTicket.views = [view]
     return this.ticketRepository.save(newTicket);
   }
 
   createTicketView(
     flaskUserId: number,
+    ticketId: string,
   ): Promise<TicketViewEntity> {
     const newView = this.ticketViewRepository.create({
+      ticketId,
       flaskUserId,
       viewed: new Date()
     });
@@ -52,6 +53,25 @@ export class TicketService {
       color: color,
     });
   }
+
+  updateTicket(
+    ticketId: string,
+  ): Promise<UpdateResult> {
+    return this.ticketRepository.update(ticketId, {
+      updatedAt: new Date(),
+    });
+  }
+
+
+
+  updateTicketView(
+    viewId: string,
+  ): Promise<UpdateResult> {
+    return this.ticketViewRepository.update(viewId, {
+      viewed: new Date()
+    });
+  }
+
 
 
   createTicketContent(
@@ -74,7 +94,6 @@ export class TicketService {
   }
 
   getUserTickets(flaskUserId: number): Promise<TicketEntity[]> {
-    console.log()
     return this.ticketRepository.find({
       relations: {
         need: true,

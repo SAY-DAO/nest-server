@@ -7,6 +7,9 @@ export class TicketViewEntity extends BaseEntity {
     @Column({ nullable: false })
     flaskUserId: number
 
+    @Column({ nullable: false })
+    ticketId: string
+
     @ManyToOne(() => TicketEntity, (t) => t.views, { eager: false })
     ticket: TicketEntity;
 

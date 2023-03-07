@@ -13,9 +13,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
-import { CreateTicketDto } from '../../types/dtos/ticket/CreateTicketDto.dto';
+import { CreateTicketDto } from '../../types/dtos/ticket/CreateTicket.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UpdateTicketDto } from '../../types/dtos/ticket/UpdateTicketDto.dto';
+import { UpdateTicketDto } from '../../types/dtos/ticket/UpdateTicket.dto';
 import {
   Colors,
   NeedTypeEnum,
@@ -29,7 +29,7 @@ import { ServerError } from '../../filters/server-exception.filter';
 import { SyncService } from '../sync/sync.service';
 import { AddTicketInterceptor } from './interceptors/addTicket.interceptors';
 import { AllUserEntity } from '../../entities/user.entity';
-import { CreateTicketContentDto } from '../../types/dtos/ticket/CreateTicketContentDto.dto';
+import { CreateTicketContentDto } from '../../types/dtos/ticket/CreateTicketContent.dto';
 import { UserService } from '../user/user.service';
 import { convertFlaskToSayRoles } from 'src/utils/helpers';
 import { CreateTicketParams } from '../../types/parameters/CreateTicketParameters';
@@ -69,7 +69,10 @@ export class TicketController {
       message: msg,
       from,
     };
-    return this.ticketService.createTicketContent(contentDetails, ticket);
+    const ticketContent = await this.ticketService.createTicketContent(contentDetails, ticket);
+    // await this.ticketService.updateTicket(request.ticketId)
+    return ticketContent
+
 
   }
 
@@ -125,7 +128,11 @@ export class TicketController {
     const uniqueParticipants = [...new Map(participants.map((p) => [p.id, p])).values()];
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
-    return this.ticketService.createTicket(createTicketDetails, uniqueParticipants);
+
+    const ticket = await this.ticketService.createTicket(createTicketDetails, uniqueParticipants)
+    await this.ticketService.createTicketView(createTicketDetails.flaskUserId, ticket.id)
+
+    return ticket;
   }
 
   @Get(`ticket/:id`)
@@ -148,8 +155,7 @@ export class TicketController {
     @Param('id') id: string,
     @Query('color') color: Colors
   ) {
-    await this.ticketService.updateTicketColor(id, color)
-    return {id, color};
+    return await this.ticketService.updateTicketColor(id, color)
   }
 
   @Delete(':id')
