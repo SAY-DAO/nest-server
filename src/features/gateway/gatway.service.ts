@@ -9,7 +9,7 @@ import { TicketService } from '../ticket/ticket.service';
 
 @WebSocketGateway({
     cors: {
-        origin: ['http://localhost:3000', 'https://panel.saydao.org']
+        origin: ['http://localhost:3000', 'https://panel.saydao.org','https://nest.saydao.org']
     }
 })
 
