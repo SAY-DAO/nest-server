@@ -24,7 +24,7 @@ export class TicketEntity extends BaseEntity {
     @Column()
     flaskNeedId: number
 
-    @ManyToMany(() => ContributorEntity, (user) => user.tickets, { eager: true })
+    @ManyToMany(() => ContributorEntity, (user) => user.tickets, { eager: true, onDelete: 'CASCADE' })
     @JoinTable()
     contributors?: ContributorEntity[];
 
@@ -34,7 +34,7 @@ export class TicketEntity extends BaseEntity {
     @OneToMany(() => TicketContentEntity, (c) => c.ticket, { eager: true, nullable: true })
     ticketHistory?: TicketContentEntity[]
 
-    @OneToMany(() => TicketViewEntity, (v) => v.ticket, { eager: true })
+    @OneToMany(() => TicketViewEntity, (v) => v.ticket, { eager: true, onDelete: 'CASCADE' })
     views: TicketViewEntity[]
 
 }

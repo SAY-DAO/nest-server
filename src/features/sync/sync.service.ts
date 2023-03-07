@@ -96,9 +96,10 @@ export class SyncService {
         nestNgo = await this.ngoService.createNgo(callerNgoDetails, nestCallerNgoCity);
         console.log('\x1b[36m%s\x1b[0m', 'Created an NGO ...\n');
       } else if (nestNgo && daysDifference(currentTime, nestNgo.updatedAt) > 7) {
-        nestNgo = await this.ngoService
+        await this.ngoService
           .updateNgo(nestNgo.id, callerNgoDetails, nestCallerNgoCity)
           .then();
+        nestNgo = await this.ngoService.getNgo(nestNgo.flaskNgoId)
         console.log('\x1b[36m%s\x1b[0m', 'NGO updated ...\n');
       } else {
         console.log('\x1b[36m%s\x1b[0m', 'Skipped NGO ...\n');
@@ -156,9 +157,10 @@ export class SyncService {
       daysDifference(currentTime, nestCaller.updatedAt) > 7
     ) {
 
-      nestCaller = await this.userService
+      await this.userService
         .updateContributor(nestCaller.id, callerDetails)
         .then();
+      nestCaller = await this.userService.getContributorByFlaskId(callerId);
       console.log('\x1b[36m%s\x1b[0m', 'Caller updated ...\n');
     } else {
       console.log('\x1b[36m%s\x1b[0m', 'Skipped Caller updating ...\n');
@@ -201,9 +203,12 @@ export class SyncService {
       nestSocialWorker &&
       daysDifference(currentTime, nestSocialWorker.updatedAt) > 7
     ) {
-      nestSocialWorker = await this.userService
+      await this.userService
         .updateContributor(nestSocialWorker.id, swDetails)
         .then();
+      nestSocialWorker = await this.userService.getContributorByFlaskId(
+        flaskNeedData.createdById,
+      );
       console.log('\x1b[36m%s\x1b[0m', 'Social Worker updated ...\n');
     } else {
       console.log('\x1b[36m%s\x1b[0m', 'Skipped Social Worker updating ...\n');
@@ -251,16 +256,20 @@ export class SyncService {
         nestAuditor &&
         daysDifference(currentTime, nestAuditor.updatedAt) > 7
       ) {
-        nestAuditor = await this.userService
+        await this.userService
           .updateContributor(nestAuditor.id, auditorDetails)
           .then();
+
+        nestAuditor = await this.userService.getContributorByFlaskId(
+          flaskNeedData.confirmedBy,
+        );
         console.log('\x1b[36m%s\x1b[0m', 'Auditor updated ...\n');
       } else {
         console.log('\x1b[36m%s\x1b[0m', 'Not Confirmed, skipping auditor ...\n');
       }
     } catch (e) {
       console.log(e)
-      throw new ServerError(e.statusText,e.status)
+      throw new ServerError(e.statusText, e.status)
     }
 
 
@@ -318,9 +327,12 @@ export class SyncService {
         nestPurchaser &&
         daysDifference(currentTime, nestPurchaser.updatedAt) > 7
       ) {
-        nestPurchaser = await this.userService
+        await this.userService
           .updateContributor(nestPurchaser.id, purchaserDetails)
           .then();
+        nestPurchaser = await this.userService.getContributorByFlaskId(
+          purchaserId,
+        );
         console.log('\x1b[36m%s\x1b[0m', 'Purchaser updated ...\n');
       } else {
         console.log('\x1b[36m%s\x1b[0m', 'Skipped Purchaser updating ...\n');
@@ -362,9 +374,11 @@ export class SyncService {
       );
       console.log('\x1b[36m%s\x1b[0m', 'Created a Child ...\n');
     } else if (nestChild && nestChild.updated === flaskNeedData.updated) {
-      nestChild = await this.childrenService
+      await this.childrenService
         .updateChild(childDetails, nestChild)
         .then();
+      nestChild = await this.childrenService.getChildById(childId);
+
       console.log('\x1b[36m%s\x1b[0m', 'Child updated ...\n');
     } else {
       console.log('\x1b[36m%s\x1b[0m', 'Skipped Child updating ...\n');
@@ -420,12 +434,15 @@ export class SyncService {
           nestFamilyMember &&
           daysDifference(currentTime, nestFamilyMember.updatedAt) > 7
         ) {
-          nestFamilyMember = await this.userService
+          await this.userService
             .updateFamily(nestFamilyMember.id, {
               flaskId: flaskNeedData.verifiedPayments[p].idUser,
               role: SAYPlatformRoles.FAMILY,
             })
             .then();
+          nestFamilyMember = await this.userService.getFamilyByFlaskId(
+            flaskNeedData.verifiedPayments[p].idUser,
+          );
           console.log('\x1b[36m%s\x1b[0m', 'Family updated ...\n');
         } else {
           console.log('\x1b[36m%s\x1b[0m', 'Skipped Family updating ...\n');
@@ -455,9 +472,12 @@ export class SyncService {
         nestPayment &&
         daysDifference(currentTime, nestPayment.updatedAt) > 7
       ) {
-        nestPayment = await this.paymentService
+        await this.paymentService
           .updatePayment(nestPayment.id, PaymentDetails, nestFamilyMember)
           .then();
+        nestPayment = await this.paymentService.getPaymentById(
+          flaskNeedData.verifiedPayments[p].id,
+        );
       } else {
         console.log('\x1b[36m%s\x1b[0m', 'Skipped Payment updating ...\n');
       }
@@ -488,9 +508,12 @@ export class SyncService {
         nestStatuses.push(nestStatus);
         console.log('\x1b[36m%s\x1b[0m', 'Created a Status ...\n');
       } else if (nestStatus.newStatus !== flaskNeedData.status) {
-        nestStatus = await this.statusService
+        await this.statusService
           .updateStatus(nestStatus.id, StatusDetails)
           .then();
+        nestStatus = await this.statusService.getStatusById(
+          flaskNeedData.statusUpdates[s].id,
+        );
         console.log('\x1b[36m%s\x1b[0m', 'Status updated ...\n');
 
       } else {
@@ -501,6 +524,7 @@ export class SyncService {
     //--------------------------------------------Need-------------------------------------
     let needDetails: NeedParams;
     let nestNeed = await this.needService.getNeedById(flaskNeedData.id);
+    console.log(nestNeed)
     if (!nestNeed) {
       const {
         id: needFlaskId,
@@ -533,7 +557,7 @@ export class SyncService {
       console.log('\x1b[36m%s\x1b[0m', 'Created The Need  ...\n');
 
     } else if (nestNeed && nestNeed.updated !== flaskNeedData.updated) {
-      nestNeed = await this.needService
+      await this.needService
         .updateNeed(
           nestNeed.id,
           nestChild,
@@ -544,18 +568,18 @@ export class SyncService {
           needDetails,
         )
         .then();
+      nestNeed = await this.needService.getNeedById(nestNeed.flaskId)
       console.log('\x1b[36m%s\x1b[0m', ' The Need updated ...\n');
-
     } else {
       console.log('\x1b[36m%s\x1b[0m', 'Skipped  The Need updating ...\n');
     }
-    if(!nestNeed){
+    if (!nestNeed) {
       throw new console.error('no need...');
-      
+
     }
     return {
       nestCaller,
-      swNgo,
+      swNgo: nestSocialWorker.ngo,
       nestSocialWorker,
       nestAuditor,
       nestPurchaser,

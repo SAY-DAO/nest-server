@@ -28,7 +28,7 @@ export class MilestoneController {
     let theChild: ChildrenEntity;
     const steps = [];
     for (let i = 0; i < data.epics.length; i++) {
-      // const theNeed = await this.needService.getNeedById(
+      // const theNeed = await this.needService.getNeedByFlaskId(
       //   data.epics[i].needId,
       // );
       if (!theChild) {

@@ -54,9 +54,9 @@ export class NeedService {
     needId: string,
     theChild: ChildrenEntity,
     theNgo: NgoEntity,
-    theSw: AllUserEntity,
-    theAuditor: AllUserEntity,
-    thePurchaser: AllUserEntity,
+    theSw: ContributorEntity,
+    theAuditor: ContributorEntity,
+    thePurchaser: ContributorEntity,
     needDetails: NeedParams,
   ): Promise<UpdateResult> {
     return this.needRepository.update(needId, {

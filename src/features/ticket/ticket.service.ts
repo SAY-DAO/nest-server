@@ -122,7 +122,8 @@ export class TicketService {
     return ticket;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ticket`;
+  delete(id: string) {
+    this.ticketRepository.delete({ id });
+    return
   }
 }

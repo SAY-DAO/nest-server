@@ -47,7 +47,7 @@ export class GateWayService implements OnModuleInit {
     }
 
 
-    @SubscribeMessage('ticketNotifications')
+    @SubscribeMessage('ticketNotifications2')
     async onTicketNotifications(@MessageBody() body: CreateTicketNotificationDto) {
         const myTickets = await this.ticketService.getUserTickets(body.flaskUserId)
         const unReads = ticketNotifications(myTickets, body.flaskUserId)

@@ -104,10 +104,11 @@ export class TicketController {
       flaskUserId: request.userId,
       role: convertFlaskToSayRoles(request.userType),
     };
+    console.log('\x1b[36m%s\x1b[0m', 'Creating Participants ...\n');
 
     let participants: any[]
-    if (!need.isConfirmed) {
-      participants = [nestSocialWorker];
+    if (!need.isConfirmed || need.status <= PaymentStatusEnum.NOT_PAID) {
+    participants = [nestSocialWorker];
     } else if (need.isConfirmed) {
       if (NeedTypeEnum.SERVICE) {
         if (need.status <= PaymentStatusEnum.COMPLETE_PAY) {
@@ -125,10 +126,11 @@ export class TicketController {
       }
     }
     participants = [nestCaller, ...participants]
+    // console.log(participants)
     const uniqueParticipants = [...new Map(participants.map((p) => [p.id, p])).values()];
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
-
+    console.log(createTicketDetails.need)
     const ticket = await this.ticketService.createTicket(createTicketDetails, uniqueParticipants)
     await this.ticketService.createTicketView(createTicketDetails.flaskUserId, ticket.id)
 
@@ -159,7 +161,7 @@ export class TicketController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ticketService.remove(+id);
+  async delete(@Param('id') id: string) {
+    return await this.ticketService.delete(id);
   }
 }

@@ -10,7 +10,7 @@ export class TicketViewEntity extends BaseEntity {
     @Column({ nullable: false })
     ticketId: string
 
-    @ManyToOne(() => TicketEntity, (t) => t.views, { eager: false })
+    @ManyToOne(() => TicketEntity, (t) => t.views, { eager: false, onDelete: 'CASCADE' })
     ticket: TicketEntity;
 
     @Column({ type: 'timestamptz', nullable: false })

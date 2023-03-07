@@ -145,6 +145,7 @@ complete delivery to child for service status = 4
 */
 
 export enum PaymentStatusEnum {
+    NOT_PAID = 0,
     PARTIAL_PAY = 1,
     COMPLETE_PAY = 2,
 }
