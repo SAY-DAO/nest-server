@@ -54,7 +54,7 @@ function loadConfig() {
       database: process.env.DB_FLASK_NAME,
       enabled: true,
       synchronize: false,
-      logging: false,
+      logging: true,
       dropSchema: false,
       autoLoadEntities: true,
       // entities: [`${__dirname}/entities/flaskEntities/*.js`],

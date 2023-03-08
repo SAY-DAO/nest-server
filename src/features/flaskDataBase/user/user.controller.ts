@@ -15,7 +15,6 @@ export class UserController {
     @Get(`all`)
     @ApiOperation({ description: 'Get all users' })
     async getUsers() {
-        console.log('here')
         return await this.userService.getUsers()
     }
 

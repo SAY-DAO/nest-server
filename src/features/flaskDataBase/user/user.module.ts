@@ -1,17 +1,16 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {  Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HttpModule } from '@nestjs/axios';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
-import { UserMiddleware } from './middlewares/user.middleware';
 import { user } from 'src/entities/flaskEntities/user.entity';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       user
-    ]),
+    ], 'flaskPostgres'),
     ScheduleModule.forRoot(),
     HttpModule,
   ],
@@ -21,8 +20,5 @@ import { user } from 'src/entities/flaskEntities/user.entity';
 
   ],
 })
-export class FlaskUserModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UserMiddleware).forRoutes('users');
-  }
+export class FlaskUserModule {
 }

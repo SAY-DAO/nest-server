@@ -68,7 +68,7 @@ const imports = [
   }),
   TypeOrmModule.forRoot({
     ...config().db2,
-    entities: [user],
+    entities: [user], 
   }),
   FlaskUserModule,
   GatewayModule,
