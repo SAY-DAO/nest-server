@@ -64,7 +64,20 @@ export function daysDifference(time1: Date, time2: Date) {
   //calculate days difference by dividing total milliseconds in a day
   return (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
 }
-export function timeDifference(time1: number, time2: number, comment: string) {
+
+export function timeDifference(time1: Date, time2: Date) {
+  const diff = time2.getTime() - time1.getTime();
+  let msec = diff;
+  const hh = Math.floor(msec / 1000 / 60 / 60);
+  msec -= hh * 1000 * 60 * 60;
+  const mm = Math.floor(msec / 1000 / 60);
+  msec -= mm * 1000 * 60;
+  const ss = Math.floor(msec / 1000);
+  msec -= ss * 1000;
+  return { hh, mm, ss }
+}
+
+export function timeDifferenceWithComment(time1: number, time2: number, comment: string) {
   const diff = time2 - time1;
   let msec = diff;
   const hh = Math.floor(msec / 1000 / 60 / 60);
@@ -332,16 +345,33 @@ export function ticketNotifications(
   tickets: TicketEntity[],
   flaskUserId: number,
 ) {
+
+  console.log((new Date(tickets[0].updatedAt)))
+  console.log(
+    new Date(
+      tickets[0].views.find((v) => v.flaskUserId === flaskUserId) &&
+      tickets[0].views.find((v) => v.flaskUserId === flaskUserId).viewed,
+
+    ))
+  const result = timeDifference(
+    new Date(
+      tickets[0].views.find((v) => v.flaskUserId === flaskUserId) &&
+      tickets[0].views.find((v) => v.flaskUserId === flaskUserId).viewed,
+    ), new Date(tickets[0].updatedAt))
+  console.log(result)
+
   const unReads = tickets.filter(
-    (t) =>
-      Math.floor(
+    (t) => {
+      const { hh, mm, ss } = timeDifference(
         new Date(
           t.views.find((v) => v.flaskUserId === flaskUserId) &&
-            t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
-        ).getTime() /
-          1000 /
-          60,
-      ) !== Math.floor(new Date(t.updatedAt).getTime() / 1000 / 60),
+          t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
+        ), new Date(tickets[0].updatedAt))
+      const hourDiff = hh
+      const minatuteDiff = mm
+      const secondDiff = ss
+      return hourDiff >= 0 && mm >= 0 && ss >= 5
+    }
   );
   return unReads;
 }

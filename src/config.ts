@@ -42,21 +42,22 @@ function loadConfig() {
       logging: true,
       dropSchema: false,
       autoLoadEntities: true,
-      entities: [`${__dirname}/entity/*.js`],
+      // entities: [`${__dirname}/entities/*.js`],
     },
     db2: {
+      name: 'flaskPostgres',
       type: 'postgres' as const,
-      // port: 35432,
-      // host: process.env.DB_FLASK_HOST,
-      // username: process.env.DB_FLASK_USER,
-      // password: dbPassword ?? process.env.DB_PASs,
-      // database: process.env.DB_FLASK_NAME,
-      // enabled: true,
-      // synchronize: true,
-      // logging: true,
-      // dropSchema: false,
-      // autoLoadEntities: true,
-      // entities: [`${__dirname}/entity/*.js`],
+      port: 35432,
+      host: process.env.DB_FLASK_HOST,
+      username: process.env.DB_FLASK_USER,
+      password: dbPassword ?? process.env.DB_FLASK_PASS,
+      database: process.env.DB_FLASK_NAME,
+      enabled: true,
+      synchronize: false,
+      logging: false,
+      dropSchema: false,
+      autoLoadEntities: true,
+      // entities: [`${__dirname}/entities/flaskEntities/*.js`],
     },
     logPretty: 'LOG_PRETTY_PRINT',
   };
@@ -66,9 +67,9 @@ function loadConfig() {
       ? `https://${configs.host}/api/dao`
       : `http://${configs.host}:${configs.serverPort}/api/dao`;
 
+
   return configs;
 }
-
 export type ConfigType = ReturnType<typeof loadConfig>;
 
 export default function config(): ConfigType {

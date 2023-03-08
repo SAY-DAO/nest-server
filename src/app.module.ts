@@ -37,14 +37,14 @@ import { CityEntity } from './entities/city.entity';
 import { CityModule } from './features/city/city.module';
 import { GatewayModule } from './features/gateway/gateway.module';
 import { TicketViewEntity } from './entities/ticketView.entity';
+import { FlaskUserModule } from './features/flaskDataBase/user/user.module';
+import { user } from './entities/flaskEntities/user.entity';
 
 const imports = [
   LoggerModule.forRoot(),
   ConfigModule.forRoot({ isGlobal: true }),
   TypeOrmModule.forRoot({
     ...config().db1,
-    ...config().db2,
-    dropSchema: false,
     entities: [
       CityEntity,
       StatusEntity,
@@ -63,9 +63,14 @@ const imports = [
       SignatureEntity,
       ChildrenEntity,
       EthereumAccount,
-      EthereumTransaction
+      EthereumTransaction,
     ],
   }),
+  TypeOrmModule.forRoot({
+    ...config().db2,
+    entities: [user],
+  }),
+  FlaskUserModule,
   GatewayModule,
   CityModule,
   StatusModule,
@@ -89,4 +94,4 @@ const imports = [
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

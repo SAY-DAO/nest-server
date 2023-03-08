@@ -70,7 +70,7 @@ export class TicketController {
       from,
     };
     const ticketContent = await this.ticketService.createTicketContent(contentDetails, ticket);
-    // await this.ticketService.updateTicket(request.ticketId)
+    await this.ticketService.updateTicketTime(request.ticketId)
     return ticketContent
 
 
@@ -130,7 +130,6 @@ export class TicketController {
     const uniqueParticipants = [...new Map(participants.map((p) => [p.id, p])).values()];
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
-    console.log(createTicketDetails.need)
     const ticket = await this.ticketService.createTicket(createTicketDetails, uniqueParticipants)
     await this.ticketService.createTicketView(createTicketDetails.flaskUserId, ticket.id)
 

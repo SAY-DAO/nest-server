@@ -16,7 +16,7 @@ import { RolesEnum, ProductStatusEnum } from 'src/types/interface';
 import {
     SwMyPage, SwmypageNeeds,
 } from 'src/generated-sources/openapi';
-import { getNeedsTimeLine, getOrganizedNeeds, timeDifference } from 'src/utils/helpers';
+import { getNeedsTimeLine, getOrganizedNeeds, timeDifferenceWithComment } from 'src/utils/helpers';
 import { ChildNeed } from 'src/types/interfaces/Need';
 import { MyPageInterceptor } from './interceptors/mypage.interceptors';
 import { TicketService } from '../ticket/ticket.service';
@@ -94,7 +94,7 @@ export class UserController {
         let swNeedsList: SwmypageNeeds[] = [];
         // extract contributors related needs
         const time2 = new Date().getTime();
-        timeDifference(time1, time2, "Fetched Flask In ")
+        timeDifferenceWithComment(time1, time2, "Fetched Flask In ")
 
         const time3 = new Date().getTime();
         try {
@@ -173,18 +173,18 @@ export class UserController {
             throw new ServerError(e);
         }
         const time4 = new Date().getTime();
-        timeDifference(time3, time4, "First organize In ")
+        timeDifferenceWithComment(time3, time4, "First organize In ")
 
         const time5 = new Date().getTime();
         const organizedNeeds = getOrganizedNeeds(swNeedsList);
         const time6 = new Date().getTime();
-        timeDifference(time5, time6, "Second organize In ")
+        timeDifferenceWithComment(time5, time6, "Second organize In ")
 
 
         const time7 = new Date().getTime();
         const { summary, inMonth } = getNeedsTimeLine(swNeedsList, role);
         const time8 = new Date().getTime();
-        timeDifference(time7, time8, "TimeLine In ")
+        timeDifferenceWithComment(time7, time8, "TimeLine In ")
 
         return {
             ngoId,

@@ -54,7 +54,7 @@ export class TicketService {
     });
   }
 
-  updateTicket(
+  updateTicketTime(
     ticketId: string,
   ): Promise<UpdateResult> {
     return this.ticketRepository.update(ticketId, {
@@ -65,14 +65,11 @@ export class TicketService {
 
 
   updateTicketView(
-    viewId: string,
-  ): Promise<UpdateResult> {
-    return this.ticketViewRepository.update(viewId, {
-      viewed: new Date()
-    });
+    view: TicketViewEntity,
+  ): Promise<TicketViewEntity> {
+    view.viewed = new Date()
+    return this.ticketViewRepository.save(view);
   }
-
-
 
   createTicketContent(
     contentDetails: CreateTicketContentParams,
