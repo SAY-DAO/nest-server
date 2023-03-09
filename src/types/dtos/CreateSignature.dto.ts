@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 import { SwmypageNeeds } from 'src/generated-sources/openapi';
-import { CreateSocialWorkerDto } from './CreateUser.dto';
+import { CreateSocialWorkerDto } from './CreateSocialWorker.dto';
 
 
 export class customNeed {

@@ -1,8 +1,9 @@
 import { NgoEntity } from "../../entities/ngo.entity";
 import { NeedEntity } from "../../entities/need.entity";
 import { PaymentEntity } from "../../entities/payment.entity";
-import { NgoParams } from "./NgoParammeters";
 import { SAYPlatformRoles } from "../interface";
+import { EthereumAccount } from "src/entities/ethereum.account.entity";
+import { ChildrenEntity } from "src/entities/children.entity";
 
 
 export type FamilyParams = {
@@ -17,50 +18,23 @@ export type FamilyParams = {
     role: SAYPlatformRoles
 }
 
+
 export type ContributorParams = {
-    cityId?: string;
-    stateId?: string
-    countryId?: string
-    cityName?: string
-    stateName?: string
-    countryName?: string
+    birthDate: Date
+    flaskId: number
+    flaskNgoId?: number;
+    typeId?: number;
+    children?: ChildrenEntity[];
+    createdNeeds?: NeedEntity[];
+    auditedNeeds?: NeedEntity[];
+    purchasedNeeds?: NeedEntity[];
+    ngo?: NgoEntity;
+    wallet?: EthereumAccount;
     firstName?: string;
     lastName?: string;
-    birthCertificateNumber?: string;
-    idNumber?: string;
-    passportNumber?: string;
-    postalAddress?: string;
-    bankAccountNumber?: string;
-    bankAccountShebaNumber?: string;
-    bankAccountCardNumber?: string;
-    birthDate?: Date;
-    telegramId?: string;
-    isCoordinator?: boolean;
-    flaskNgoId?: number;
-    ngo?: NgoEntity;
-    gender?: boolean
-    phoneNumber?: string;
-    emergencyPhoneNumber?: string;
-    email?: string;
     avatarUrl?: string;
-    idCardUrl?: string;
-    passportUrl?: string;
-    flaskId: number;
-    username?: string;
-    generatedCode?: string;
-    childCount?: number;
-    currentChildCount?: number;
     created?: Date;
-    updated: Date;
-    needCount?: number;
-    currentNeedCount?: number;
-    lastLoginDate?: Date;
-    isActive?: boolean;
-    isDeleted?: boolean;
-    locale?: string;
-    typeId?: number; // user type
-    typeName?: string;
-    ngoName?: string;
+    updated?: Date;
     role: SAYPlatformRoles
 }
 

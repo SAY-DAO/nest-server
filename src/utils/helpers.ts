@@ -74,7 +74,7 @@ export function timeDifference(time1: Date, time2: Date) {
   msec -= mm * 1000 * 60;
   const ss = Math.floor(msec / 1000);
   msec -= ss * 1000;
-  return { hh, mm, ss }
+  return { hh, mm, ss, diff }
 }
 
 export function timeDifferenceWithComment(time1: number, time2: number, comment: string) {
@@ -342,36 +342,38 @@ export function sortNeeds(theNeeds: SwmypageNeeds[], sortBy: string) {
 }
 
 export function ticketNotifications(
-  tickets: TicketEntity[],
+  myTickets: TicketEntity[],
   flaskUserId: number,
 ) {
+  let diffMilSeconds: number
 
-  console.log((new Date(tickets[0].updatedAt)))
-  console.log(
-    new Date(
-      tickets[0].views.find((v) => v.flaskUserId === flaskUserId) &&
-      tickets[0].views.find((v) => v.flaskUserId === flaskUserId).viewed,
-
-    ))
-  const result = timeDifference(
-    new Date(
-      tickets[0].views.find((v) => v.flaskUserId === flaskUserId) &&
-      tickets[0].views.find((v) => v.flaskUserId === flaskUserId).viewed,
-    ), new Date(tickets[0].updatedAt))
-  console.log(result)
-
-  const unReads = tickets.filter(
+  const unReads = myTickets.filter(
     (t) => {
-      const { hh, mm, ss } = timeDifference(
+      console.log((new Date(t.updatedAt)))
+      console.log(
         new Date(
           t.views.find((v) => v.flaskUserId === flaskUserId) &&
           t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
-        ), new Date(tickets[0].updatedAt))
-      const hourDiff = hh
-      const minatuteDiff = mm
-      const secondDiff = ss
-      return hourDiff >= 0 && mm >= 0 && ss >= 5
+
+        ))
+      // when a user creates a ticket, the participants won't have a view assigned to them
+      const myView = t.views.find((v) => v.flaskUserId === flaskUserId)
+      if (myView) {
+        const { diff } = timeDifference(
+          new Date(
+            t.views.find((v) => v.flaskUserId === flaskUserId) &&
+            t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
+          ), new Date(t.updatedAt))
+        diffMilSeconds = diff
+
+      } else {
+        diffMilSeconds = 1
+
+      }
+      console.log(diffMilSeconds)
+      return diffMilSeconds > 0
     }
   );
+
   return unReads;
 }
