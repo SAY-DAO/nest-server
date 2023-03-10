@@ -11,6 +11,8 @@ import {
   Req,
   UseInterceptors,
   Query,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from '../../../types/dtos/ticket/CreateTicket.dto';
@@ -82,6 +84,7 @@ export class TicketController {
 
   @UseInterceptors(AddTicketInterceptor)
   @Post('add')
+  @UsePipes(new ValidationPipe()) // validation for dto files
   async createTicket(@Req() req: Request, @Body() request: CreateTicketDto) {
     const accessToken = req.headers['authorization'];
 
@@ -97,7 +100,6 @@ export class TicketController {
       request.userId,
       request.need,
       request.childId,
-      request.ngoId,
       request.roles
     );
 
@@ -110,27 +112,26 @@ export class TicketController {
     };
     console.log('\x1b[36m%s\x1b[0m', 'Creating Participants ...\n');
 
-    let participants: any[]
-    if (!need.isConfirmed || need.status <= PaymentStatusEnum.NOT_PAID) {
-      participants = [nestSocialWorker];
-    } else if (need.isConfirmed) {
-      if (NeedTypeEnum.SERVICE) {
-        if (need.status <= PaymentStatusEnum.COMPLETE_PAY) {
-          participants = [nestSocialWorker];
-        }
-        participants = [nestSocialWorker, nestAuditor];
-      }
-      if (NeedTypeEnum.PRODUCT) {
-        if (need.status <= PaymentStatusEnum.COMPLETE_PAY) {
-          participants = [nestSocialWorker, nestAuditor];
-        }
-        if (need.status >= ProductStatusEnum.PURCHASED_PRODUCT) {
-          participants = [nestSocialWorker, nestAuditor, nestPurchaser];
-        }
-      }
-    }
-    participants = [nestCaller, ...participants]
-    // console.log(participants)
+    // if (!need.isConfirmed || need.status <= PaymentStatusEnum.NOT_PAID) {
+    //   participants = [nestSocialWorker];
+    // } else if (need.isConfirmed) {
+    //   if (NeedTypeEnum.SERVICE) {
+    //     if (need.status <= PaymentStatusEnum.COMPLETE_PAY) {
+    //       participants = [nestSocialWorker];
+    //     }
+    //     participants = [nestSocialWorker, nestAuditor];
+    //   }
+    //   if (NeedTypeEnum.PRODUCT) {
+    //     if (need.status <= PaymentStatusEnum.COMPLETE_PAY) {
+    //       participants = [nestSocialWorker, nestAuditor];
+    //     }
+    //     if (need.status >= ProductStatusEnum.PURCHASED_PRODUCT) {
+    //       participants = [nestSocialWorker, nestAuditor, nestPurchaser];
+    //     }
+    //   }
+    // }
+    const participants = [nestCaller, nestSocialWorker, nestAuditor, nestPurchaser].filter(p => p)
+    console.log(participants)
     const uniqueParticipants = [...new Map(participants.map((p) => [p.id, p])).values()];
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');

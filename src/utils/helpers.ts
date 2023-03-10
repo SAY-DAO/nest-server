@@ -9,6 +9,26 @@ import {
   ServiceStatusEnum,
 } from 'src/types/interface';
 
+export function getSAYRoleInteger(sayRole: string) {
+  let roleInteger: SAYPlatformRoles;
+  if (sayRole === "AUDITOR") {
+    roleInteger = SAYPlatformRoles.AUDITOR;
+  } else if (sayRole === "SOCIAL_WORKER") {
+    roleInteger = SAYPlatformRoles.SOCIAL_WORKER;
+  } else if (sayRole === "PURCHASER") {
+    roleInteger = SAYPlatformRoles.PURCHASER;
+  } else if (sayRole === "NGO_SUPERVISOR") {
+    roleInteger = SAYPlatformRoles.NGO_SUPERVISOR;
+  } else if (sayRole === "FAMILY") {
+    roleInteger = SAYPlatformRoles.FAMILY;
+  } else if (sayRole === "FRIEND") {
+    roleInteger = SAYPlatformRoles.FRIEND;
+  } else if (sayRole === "NO_ROLE") {
+    roleInteger = SAYPlatformRoles.NO_ROLE;
+  }
+  return roleInteger;
+}
+
 export function convertFlaskToSayRoles(flakUserType: number) {
   let role: SAYPlatformRoles;
   if (flakUserType === RolesEnum.SAY_SUPERVISOR) {

@@ -43,7 +43,6 @@ export class SignatureController {
         request.callerId,
         request.panelData.need,
         request.childId,
-        request.ngoId,
         request.roles,
       );
       transaction = await this.signatureService.swSignTransaction(

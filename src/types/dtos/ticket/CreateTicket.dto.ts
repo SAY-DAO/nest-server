@@ -16,8 +16,11 @@ export class customNeed {
 
 export class CreateTicketDto {
   title: string;
+  @IsNotEmpty()
   userId: number;
+  @IsNotEmpty()
   needId: number;
+  @IsNotEmpty()
   userType: number;
   @IsNotEmpty()
   roles: string[];
@@ -25,8 +28,4 @@ export class CreateTicketDto {
   need: SwmypageNeeds;
   @IsNotEmpty()
   childId: number;
-  @IsNotEmpty()
-  ngoId: number;
-  @IsNotEmpty()
-  socialWorker: CreateSocialWorkerDto;
 }
