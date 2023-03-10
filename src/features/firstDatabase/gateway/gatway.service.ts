@@ -9,7 +9,6 @@ import { CreateTicketContentDto } from "src/types/dtos/ticket/CreateTicketConten
 import { CreateTicketNotificationDto } from "src/types/dtos/ticket/CreateTicketNotif.dto";
 import { CreateTicketViewDto } from "src/types/dtos/ticket/CreateTicketView.dto";
 import { ticketNotifications } from "src/utils/helpers";
-import { UpdateResult } from "typeorm";
 import { TicketService } from '../ticket/ticket.service';
 
 @WebSocketGateway({
@@ -89,14 +88,16 @@ export class GateWayService implements OnModuleInit {
         const view = ticket.views.find((v) => (v.flaskUserId === body.from && v.ticketId === body.ticketId))
         if (view) {
             this.ticketService.updateTicketView(view)
+            console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
         } else {
             this.ticketService.createTicketView(body.from, ticket.id)
+            console.log('\x1b[36m%s\x1b[0m', 'created my view ...\n');
         }
-        console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
 
         if (this.socket.connected) {
             console.log('\x1b[36m%s\x1b[0m', `Sending back the content for ticket: ${body.ticketId}...`);
-            client.emit(`onTicketMessage${body.ticketId}`, {
+            // send message to the room
+            this.server.to(`room:${ticket.id}`).emit(`onTicketMessage${body.ticketId}`, {
                 socketId: this.socket.id,
                 content: content
             })
@@ -163,4 +164,27 @@ export class GateWayService implements OnModuleInit {
         }
     }
 
+    @SubscribeMessage('join:room')
+    async onJoinRoom(@MessageBody() body: { ticketId: string },
+        @ConnectedSocket() client: Socket,
+    ) {
+        if (this.socket.connected) {
+            const ticket = await this.ticketService.getTicketById(body.ticketId)
+            console.log('\x1b[36m%s\x1b[0m', `joining room:${ticket.id}...\n`);
+            client.join(`room:${ticket.id}`)
+
+        }
+    }
+
+    @SubscribeMessage('leave:room')
+    async onLeaveRoom(@MessageBody() body: { ticketId: string },
+        @ConnectedSocket() client: Socket,
+    ) {
+        if (this.socket.connected) {
+            const ticket = await this.ticketService.getTicketById(body.ticketId)
+            console.log('\x1b[36m%s\x1b[0m', `leaving room:${ticket.id}...\n`);
+            client.leave(`room:${ticket.id}`)
+
+        }
+    }
 }
