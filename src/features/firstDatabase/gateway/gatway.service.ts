@@ -95,8 +95,8 @@ export class GateWayService implements OnModuleInit {
         console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
 
         if (this.socket.connected) {
-            console.log('\x1b[36m%s\x1b[0m', 'Sending back the content ...');
-            client.emit('onTicketMessage', {
+            console.log('\x1b[36m%s\x1b[0m', `Sending back the content for ticket: ${body.ticketId}...`);
+            client.emit(`onTicketMessage${body.ticketId}`, {
                 socketId: this.socket.id,
                 content: content
             })
