@@ -1,9 +1,10 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
-import { SubscribeMessage, WebSocketGateway, MessageBody, WebSocketServer } from "@nestjs/websockets";
+import { SubscribeMessage, WebSocketGateway, MessageBody, WebSocketServer, ConnectedSocket } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io'
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { TicketEntity } from "src/entities/ticket.entity";
 import { TicketViewEntity } from "src/entities/ticketView.entity";
+import { CreateTicketColorDto } from "src/types/dtos/ticket/CreateTicketColor.dto";
 import { CreateTicketContentDto } from "src/types/dtos/ticket/CreateTicketContent.dto";
 import { CreateTicketNotificationDto } from "src/types/dtos/ticket/CreateTicketNotif.dto";
 import { CreateTicketViewDto } from "src/types/dtos/ticket/CreateTicketView.dto";
@@ -37,7 +38,6 @@ export class GateWayService implements OnModuleInit {
                 console.log('\x1b[33m%s\x1b[0m', `Connected to Socket ${this.socket.id}...\n`);
             })
         }
-
     }
     checkConnection() {
         const count = this.server.engine.getMaxListeners();
@@ -50,15 +50,17 @@ export class GateWayService implements OnModuleInit {
 
 
 
-    @SubscribeMessage('ticketNotifications')
-    async onTicketNotifications(@MessageBody() body: CreateTicketNotificationDto) {
+    @SubscribeMessage('check:ticket:notifications')
+    async onTicketNotifications(@MessageBody() body: CreateTicketNotificationDto,
+        @ConnectedSocket() client: Socket,
+    ) {
         this.checkConnection()
         console.log('\x1b[36m%s\x1b[0m', `Checking Unread Tickets...`);
         const myTickets = await this.ticketService.getUserTickets(body.flaskUserId)
         const unReads = ticketNotifications(myTickets, body.flaskUserId)
         if (unReads && unReads.length > 0) {
             console.log('\x1b[36m%s\x1b[0m', `Sending back ${unReads.length} Unread Tickets...\n`);
-            this.server.emit(`onUnReadTickets${body.flaskUserId}`, {
+            client.emit(`onUnReadTickets${body.flaskUserId}`, {
                 newTickets: unReads.map(t => {
                     const { id, title, ...others } = t
                     return { id, title }
@@ -67,7 +69,7 @@ export class GateWayService implements OnModuleInit {
             return unReads
         } else {
             console.log('\x1b[36m%s\x1b[0m', `No new Ticket notifications for userId: ${body.flaskUserId} :(...\n`);
-            this.server.emit(`onUnReadTickets${body.flaskUserId}`, {
+            client.emit(`onUnReadTickets${body.flaskUserId}`, {
                 newTickets: []
             })
 
@@ -75,8 +77,10 @@ export class GateWayService implements OnModuleInit {
 
     }
 
-    @SubscribeMessage('newTicketMessage')
-    async onNewTicketContent(@MessageBody() body: CreateTicketContentDto) {
+    @SubscribeMessage('new:ticket:message')
+    async onNewTicketContent(@MessageBody() body: CreateTicketContentDto,
+        @ConnectedSocket() client: Socket,
+    ) {
         this.checkConnection()
         const ticket = await this.ticketService.getTicketById(body.ticketId)
         console.log('\x1b[36m%s\x1b[0m', 'Socket Creating Ticket Content ...\n');
@@ -92,7 +96,7 @@ export class GateWayService implements OnModuleInit {
 
         if (this.socket.connected) {
             console.log('\x1b[36m%s\x1b[0m', 'Sending back the content ...');
-            this.server.emit('onTicketMessage', {
+            client.emit('onTicketMessage', {
                 socketId: this.socket.id,
                 content: content
             })
@@ -101,8 +105,10 @@ export class GateWayService implements OnModuleInit {
 
     }
 
-    @SubscribeMessage('newViewMessage')
-    async onNewTicketView(@MessageBody() body: CreateTicketViewDto) {
+    @SubscribeMessage('new:ticket:view')
+    async onNewTicketView(@MessageBody() body: CreateTicketViewDto,
+        @ConnectedSocket() client: Socket,
+    ) {
         const ticket = await this.ticketService.getTicketById(body.ticketId)
         console.log('\x1b[36m%s\x1b[0m', 'Socket Updating Views...\n');
         console.log(body)
@@ -117,13 +123,43 @@ export class GateWayService implements OnModuleInit {
 
         if (this.socket.connected) {
             console.log('\x1b[36m%s\x1b[0m', 'Sending back view details ...\n');
-            this.server.emit(`onViewMessage${newView.flaskUserId}`, {
+            client.emit(`onViewMessage${newView.flaskUserId}`, {
                 ticketId: ticket.id,
                 viewId: newView.id,
                 flaskUserId: newView.flaskUserId,
                 lastView: newView.viewed,
                 socketId: this.socket.id,
             })
+        }
+    }
+
+    @SubscribeMessage('change:ticket:color')
+    async onTicketColorChange(@MessageBody() body: CreateTicketColorDto,
+        @ConnectedSocket() client: Socket,
+    ) {
+        this.ticketService.updateTicketColor(body.ticketId, body.color)
+        console.log('\x1b[36m%s\x1b[0m', 'Socket changing ticket color...\n');
+        console.log(body)
+        const ticket = await this.ticketService.getTicketById(body.ticketId)
+        const view = ticket.views.find((v) => (v.flaskUserId === body.color && v.ticketId === body.ticketId))
+        let newView: TicketViewEntity
+        if (view) {
+            newView = await this.ticketService.updateTicketView(view)
+        } else {
+            newView = await this.ticketService.createTicketView(body.flaskUserId, ticket.id)
+        }
+        console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
+
+        if (this.socket.connected) {
+            for (let i = 0; i < ticket.contributors.length; i++) {
+                if (ticket.contributors[i].flaskId !== body.flaskUserId)
+                    console.log('\x1b[36m%s\x1b[0m', `Sending back color details use:${ticket.contributors[i].flaskId}...\n`);
+                client.emit(`onColorChange${ticket.contributors[i].flaskId}`, {
+                    ticketId: ticket.id,
+                    color: ticket.color,
+                })
+            }
+
         }
     }
 

@@ -50,7 +50,7 @@ function loadConfig() {
       port: 35432,
       host: process.env.DB_FLASK_HOST,
       username: process.env.DB_FLASK_USER,
-      password: dbPassword ?? process.env.DB_FLASK_PASS,
+      password: process.env.DB_FLASK_PASS,
       database: process.env.DB_FLASK_NAME,
       enabled: true,
       synchronize: false,
