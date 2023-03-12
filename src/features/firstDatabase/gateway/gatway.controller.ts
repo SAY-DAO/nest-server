@@ -1,15 +1,18 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnModuleInit, UseFilters, UsePipes, ValidationPipe } from "@nestjs/common";
 import { SubscribeMessage, WebSocketGateway, MessageBody, WebSocketServer, ConnectedSocket } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io'
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { TicketEntity } from "src/entities/ticket.entity";
 import { TicketViewEntity } from "src/entities/ticketView.entity";
+import { BadRequestTransformationFilter } from "src/filters/socket-exception.filter";
+import { CreateJoinRoomDto } from "src/types/dtos/ticket/CreateJoinRoom.dto";
 import { CreateTicketColorDto } from "src/types/dtos/ticket/CreateTicketColor.dto";
 import { CreateTicketContentDto } from "src/types/dtos/ticket/CreateTicketContent.dto";
 import { CreateTicketNotificationDto } from "src/types/dtos/ticket/CreateTicketNotif.dto";
 import { CreateTicketViewDto } from "src/types/dtos/ticket/CreateTicketView.dto";
 import { ticketNotifications } from "src/utils/helpers";
 import { TicketService } from '../ticket/ticket.service';
+import { ValidateGatewayPipe } from "./pipes/validate-gateway.pipe";
 
 @WebSocketGateway({
     cors: {
@@ -18,7 +21,7 @@ import { TicketService } from '../ticket/ticket.service';
 })
 
 @Injectable()
-export class GateWayService implements OnModuleInit {
+export class GateWayController implements OnModuleInit {
     constructor(
         private ticketService: TicketService,
     ) { }
@@ -49,8 +52,10 @@ export class GateWayService implements OnModuleInit {
 
 
 
+    @UseFilters(new BadRequestTransformationFilter()) // https://github.com/nestjs/nest/issues/5267
+    @UsePipes(new ValidationPipe())
     @SubscribeMessage('check:ticket:notifications')
-    async onTicketNotifications(@MessageBody() body: CreateTicketNotificationDto,
+    async onTicketNotifications(@MessageBody(ValidateGatewayPipe) body: CreateTicketNotificationDto,
         @ConnectedSocket() client: Socket,
     ) {
         this.checkConnection()
@@ -76,23 +81,16 @@ export class GateWayService implements OnModuleInit {
 
     }
 
+    @UseFilters(new BadRequestTransformationFilter())
+    @UsePipes(new ValidationPipe())
     @SubscribeMessage('new:ticket:message')
-    async onNewTicketContent(@MessageBody() body: CreateTicketContentDto,
-        @ConnectedSocket() client: Socket,
+    async onNewTicketContent(@MessageBody(ValidateGatewayPipe) body: CreateTicketContentDto,
     ) {
         this.checkConnection()
-        const ticket = await this.ticketService.getTicketById(body.ticketId)
+        const { ticket } = await this.ticketService.getTicketById(body.ticketId, body.from)
         console.log('\x1b[36m%s\x1b[0m', 'Socket Creating Ticket Content ...\n');
         const content = await this.ticketService.createTicketContent({ message: body.message, from: body.from }, ticket)
-        await this.ticketService.updateTicketTime(body.ticketId)
-        const view = ticket.views.find((v) => (v.flaskUserId === body.from && v.ticketId === body.ticketId))
-        if (view) {
-            this.ticketService.updateTicketView(view)
-            console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
-        } else {
-            this.ticketService.createTicketView(body.from, ticket.id)
-            console.log('\x1b[36m%s\x1b[0m', 'created my view ...\n');
-        }
+        await this.ticketService.updateTicketTime(ticket, body.from)
 
         if (this.socket.connected) {
             console.log('\x1b[36m%s\x1b[0m', `Sending back the content for ticket: ${body.ticketId}...`);
@@ -106,51 +104,36 @@ export class GateWayService implements OnModuleInit {
 
     }
 
+    @UseFilters(new BadRequestTransformationFilter())
+    @UsePipes(new ValidationPipe())
     @SubscribeMessage('new:ticket:view')
-    async onNewTicketView(@MessageBody() body: CreateTicketViewDto,
+    async onNewTicketView(@MessageBody(ValidateGatewayPipe) body: CreateTicketViewDto,
         @ConnectedSocket() client: Socket,
     ) {
-        const ticket = await this.ticketService.getTicketById(body.ticketId)
         console.log('\x1b[36m%s\x1b[0m', 'Socket Updating Views...\n');
-        console.log(body)
-        const view = ticket.views.find((v) => (v.flaskUserId === body.flaskUserId && v.ticketId === body.ticketId))
-        let newView: TicketViewEntity
-        if (view) {
-            newView = await this.ticketService.updateTicketView(view)
-        } else {
-            newView = await this.ticketService.createTicketView(body.flaskUserId, ticket.id)
-        }
+        const { ticket, view } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
         console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
-
         if (this.socket.connected) {
             console.log('\x1b[36m%s\x1b[0m', 'Sending back view details ...\n');
-            client.emit(`onViewMessage${newView.flaskUserId}`, {
+            client.emit(`onViewMessage${view.flaskUserId}`, {
                 ticketId: ticket.id,
-                viewId: newView.id,
-                flaskUserId: newView.flaskUserId,
-                lastView: newView.viewed,
+                viewId: view.id,
+                flaskUserId: view.flaskUserId,
+                lastView: view.viewed,
                 socketId: this.socket.id,
             })
         }
     }
 
+    @UseFilters(new BadRequestTransformationFilter())
+    @UsePipes(new ValidationPipe())
     @SubscribeMessage('change:ticket:color')
-    async onTicketColorChange(@MessageBody() body: CreateTicketColorDto,
+    async onTicketColorChange(@MessageBody(ValidateGatewayPipe) body: CreateTicketColorDto,
         @ConnectedSocket() client: Socket,
     ) {
-        this.ticketService.updateTicketColor(body.ticketId, body.color)
+        await this.ticketService.updateTicketColor(body.ticketId, body.color)
         console.log('\x1b[36m%s\x1b[0m', 'Socket changing ticket color...\n');
-        console.log(body)
-        const ticket = await this.ticketService.getTicketById(body.ticketId)
-        const view = ticket.views.find((v) => (v.flaskUserId === body.color && v.ticketId === body.ticketId))
-        let newView: TicketViewEntity
-        if (view) {
-            newView = await this.ticketService.updateTicketView(view)
-        } else {
-            newView = await this.ticketService.createTicketView(body.flaskUserId, ticket.id)
-        }
-        console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
-
+        const { ticket } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
         if (this.socket.connected) {
             for (let i = 0; i < ticket.contributors.length; i++) {
                 if (ticket.contributors[i].flaskId !== body.flaskUserId)
@@ -158,30 +141,38 @@ export class GateWayService implements OnModuleInit {
                 client.emit(`onColorChange${ticket.contributors[i].flaskId}`, {
                     ticketId: ticket.id,
                     color: ticket.color,
+                    needFlaskId: ticket.flaskNeedId,
+                    needType: ticket.need.type,
+                    needStatus: ticket.need.status
                 })
             }
 
         }
     }
 
+    @UseFilters(new BadRequestTransformationFilter())
+    @UsePipes(new ValidationPipe())
     @SubscribeMessage('join:room')
-    async onJoinRoom(@MessageBody() body: { ticketId: string },
+    async onJoinRoom(@MessageBody(ValidateGatewayPipe) body: CreateJoinRoomDto,
         @ConnectedSocket() client: Socket,
     ) {
         if (this.socket.connected) {
-            const ticket = await this.ticketService.getTicketById(body.ticketId)
+            const { ticket } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
             console.log('\x1b[36m%s\x1b[0m', `joining room:${ticket.id}...\n`);
             client.join(`room:${ticket.id}`)
 
         }
     }
 
+    @UseFilters(new BadRequestTransformationFilter())
+    @UsePipes(new ValidationPipe())
     @SubscribeMessage('leave:room')
-    async onLeaveRoom(@MessageBody() body: { ticketId: string },
+    async onLeaveRoom(@MessageBody(ValidateGatewayPipe) body: CreateJoinRoomDto,
         @ConnectedSocket() client: Socket,
     ) {
+
         if (this.socket.connected) {
-            const ticket = await this.ticketService.getTicketById(body.ticketId)
+            const { ticket } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
             console.log('\x1b[36m%s\x1b[0m', `leaving room:${ticket.id}...\n`);
             client.leave(`room:${ticket.id}`)
 

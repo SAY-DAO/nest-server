@@ -1,5 +1,7 @@
+import { IsNotEmpty } from "class-validator"
+
 export class CreateTicketNotificationDto {
-    myNotifications: string[] // ticket ids
+    @IsNotEmpty()
     flaskUserId: number
 }
 

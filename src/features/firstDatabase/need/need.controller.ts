@@ -1,9 +1,7 @@
 import { Controller, Get, Query, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ChildrenService } from '../children/children.service';
 import { NeedService } from './need.service';
-import { UserService } from '../user/user.service';
-import { NgoService } from '../ngo/ngo.service';
+
 
 export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
 
@@ -12,9 +10,7 @@ export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
 export class NeedController {
   constructor(
     private needService: NeedService,
-    private childrenService: ChildrenService,
-    private userService: UserService,
-    private ngoService: NgoService,
+
   ) { }
 
   @Get(`all`)

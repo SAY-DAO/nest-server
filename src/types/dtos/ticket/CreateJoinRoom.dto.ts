@@ -1,6 +1,6 @@
 import { IsNotEmpty } from "class-validator"
 
-export class CreateTicketViewDto {
+export class CreateJoinRoomDto {
     @IsNotEmpty()
     ticketId: string
     @IsNotEmpty()

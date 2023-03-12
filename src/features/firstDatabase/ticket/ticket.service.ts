@@ -33,6 +33,40 @@ export class TicketService {
     return this.ticketRepository.save(newTicket);
   }
 
+
+  async getTicketById(id: string, flaskUserId: number) {
+    const ticket = await this.ticketRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: {
+        need: true
+      }
+    });
+    // create or update view
+    const view = ticket.views.find((v) => (v.flaskUserId === flaskUserId && v.ticketId === ticket.id))
+    if (view) {
+      await this.updateTicketView(new Date(), view)
+      console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
+    } else {
+
+      await this.createTicketView(flaskUserId, ticket.id)
+      console.log('\x1b[36m%s\x1b[0m', 'created my view ...\n');
+    }
+
+    return { ticket, view };
+  }
+
+
+  getTicketViewById(id: string): Promise<TicketViewEntity> {
+    const view = this.ticketViewRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+    return view;
+  }
+
   createTicketView(
     flaskUserId: number,
     ticketId: string,
@@ -45,6 +79,15 @@ export class TicketService {
     return this.ticketViewRepository.save(newView);
   }
 
+
+  async updateTicketView(
+    currentTime: Date,
+    view: TicketViewEntity,
+  ): Promise<UpdateResult> {
+    return this.ticketViewRepository.update(view.id, { viewed: currentTime });
+  }
+
+
   updateTicketColor(
     ticketId: string,
     color: Colors,
@@ -54,22 +97,31 @@ export class TicketService {
     });
   }
 
-  updateTicketTime(
-    ticketId: string,
-  ): Promise<UpdateResult> {
-    return this.ticketRepository.update(ticketId, {
-      updatedAt: new Date(),
+  async updateTicketTime(
+    ticket: TicketEntity,
+    flaskUserId: number
+  ): Promise<Date> {
+    const currentTime = new Date()
+    await this.ticketRepository.update(ticket.id, {
+      updatedAt: currentTime,
     });
-  }
+    if (flaskUserId) {
+      // create or update view
+      const view = ticket.views.find((v) => (v.flaskUserId === flaskUserId && v.ticketId === ticket.id))
+      if (view) {
+        await this.updateTicketView(currentTime, view)
+        console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
+      } else {
+        await this.createTicketView(flaskUserId, ticket.id)
+        console.log('\x1b[36m%s\x1b[0m', 'created my view ...\n');
+      }
+
+      return view.updatedAt;
+    }
 
 
-  async updateTicketView(
-    view: TicketViewEntity,
-  ): Promise<TicketViewEntity> {
-    const ticket = await this.getTicketById(view.ticketId)
-    view.viewed = ticket.updatedAt
-    return this.ticketViewRepository.save(view);
   }
+
 
   createTicketContent(
     contentDetails: CreateTicketContentParams,
@@ -105,15 +157,6 @@ export class TicketService {
     const ticket = this.ticketRepository.findOne({
       where: {
         flaskNeedId: flaskNeedId,
-      },
-    });
-    return ticket;
-  }
-
-  getTicketById(id: string): Promise<TicketEntity> {
-    const ticket = this.ticketRepository.findOne({
-      where: {
-        id: id,
       },
     });
     return ticket;

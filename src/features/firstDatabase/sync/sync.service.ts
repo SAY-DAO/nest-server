@@ -370,7 +370,6 @@ export class SyncService {
         accessToken,
         childId,
       );
-      console.log(flaskChild)
 
       const {
         id: childFlaskId,

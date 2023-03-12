@@ -7,7 +7,7 @@ import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { TicketService } from '../ticket/ticket.service';
-import { GateWayService } from './gatway.service';
+import { GateWayController } from './gatway.controller';
 
 @Module({
     imports: [
@@ -18,5 +18,5 @@ import { GateWayService } from './gatway.service';
         ScheduleModule.forRoot(),
         HttpModule],
     controllers: [],
-    providers: [GateWayService, TicketService],
+    providers: [GateWayController, TicketService],
 }) export class GatewayModule { }
