@@ -1,4 +1,4 @@
-import { NeedTypeDefinitionEnum } from '../interface';
+import { NeedTypeDefinitionEnum } from '../interfaces/interface';
 
 export class CreateProviderDto {
     name: string;

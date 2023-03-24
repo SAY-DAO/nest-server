@@ -1,4 +1,4 @@
-import { EducationEnum, HousingEnum } from '../interface';
+import { EducationEnum, HousingEnum } from './interface';
 export class CreateChildrenDto {
     childData: Children[];
 }
@@ -23,11 +23,11 @@ export class Children {
     nationality: string;
     country: number;
     city: number;
-    awakeAvatarUrl:string;
+    awakeAvatarUrl: string;
     sleptAvatarUrl: string;
     gender: boolean;
     bio_translations: { en: string; fa: string };
-    bio:string;
+    bio: string;
     bio_summary_translations: { en: string; fa: string };
     bioSummary: string;
     sayFamilyCount: number;

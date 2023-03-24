@@ -1,4 +1,4 @@
-import { NeedTypeDefinitionEnum, NeedTypeEnum } from '../types/interface'
+import { NeedTypeDefinitionEnum, NeedTypeEnum } from '../types/interfaces/interface'
 import { Entity, Column, OneToMany } from 'typeorm'
 import { BaseEntity } from './BaseEntity'
 import { NeedEntity } from './need.entity'

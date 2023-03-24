@@ -1,5 +1,5 @@
 export type CityParams = {
-    flaskId:number
+    flaskCityId:number
     name: string
     stateId: number,
     stateCode:string

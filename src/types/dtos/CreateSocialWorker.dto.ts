@@ -1,5 +1,5 @@
 import { NgoEntity } from 'src/entities/ngo.entity';
-import { SAYPlatformRoles } from '../interface';
+import { SAYPlatformRoles } from '../interfaces/interface';
 
 export class CreateSocialWorkerDto {
   flaskId: number;

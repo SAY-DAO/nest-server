@@ -1,36 +1,60 @@
 import { IsNotEmpty } from 'class-validator';
 import { SwmypageNeeds } from 'src/generated-sources/openapi';
-import { CreateSocialWorkerDto } from './CreateSocialWorker.dto';
+import { SAYPlatformRoles } from '../interfaces/interface';
 
+export class NeedSignatureMessage {
+  @IsNotEmpty()
+  domain: string;
+  @IsNotEmpty()
+  address: string;
+  @IsNotEmpty()
+  statement: string;
+  @IsNotEmpty()
+  uri: string;
+  @IsNotEmpty()
+  version: string;
+  @IsNotEmpty()
+  chainId: number;
+  @IsNotEmpty()
+  nonce: string;
+}
+export class VerifyWalletDto {
+  message: NeedSignatureMessage
+  signature: string
 
-export class customNeed {
-  need: SwmypageNeeds;
-  child: {
-    id: number;
-    sayName: string;
-    firstName: string;
-    lastName: string;
-    birthDate: string;
-    awakeAvatarUrl: string;
-  };
 }
 
-export class SwCreateSwSignatureDto {
+export class VerifySignatureDto {
   @IsNotEmpty()
-  panelData: customNeed;
+  signature: string;
+  @IsNotEmpty()
+  message: string;
+}
+
+export class SwGenerateSignatureDto {
   @IsNotEmpty()
   childId: number;
   @IsNotEmpty()
-  roles: string[];
+  panelData: SwmypageNeeds;
   @IsNotEmpty()
-  callerId: number;
+  flaskUserId: number;
   @IsNotEmpty()
-  ngoId: number;
+  signerAddress: string;
   @IsNotEmpty()
-  socialWorker: CreateSocialWorkerDto;
+  userTypeId: number;
+}
+
+export class CreateSignatureDto {
+  @IsNotEmpty()
+  flaskNeedId: number;
+  @IsNotEmpty()
+  role: SAYPlatformRoles;
+  @IsNotEmpty()
+  flaskUserId: number;
   @IsNotEmpty()
   signerAddress: string;
 }
+
 
 export class FamilyCreateSwSignatureDto {
   userId: number;

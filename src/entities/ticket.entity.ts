@@ -1,10 +1,10 @@
-import { Colors, SAYPlatformRoles } from "src/types/interface";
+import { Colors, SAYPlatformRoles } from "src/types/interfaces/interface";
 import { Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "./BaseEntity";
 import { NeedEntity } from "./need.entity";
 import { TicketContentEntity } from "./ticketContent.entity";
 import { TicketViewEntity } from "./ticketView.entity";
-import { ContributorEntity } from "./user.entity";
+import { AllUserEntity } from "./user.entity";
 
 @Entity()
 export class TicketEntity extends BaseEntity {
@@ -24,9 +24,9 @@ export class TicketEntity extends BaseEntity {
     @Column()
     flaskNeedId: number
 
-    @ManyToMany(() => ContributorEntity, (user) => user.tickets, { eager: true, onDelete: 'CASCADE' })
+    @ManyToMany(() => AllUserEntity, (user) => user.tickets, { eager: true, onDelete: 'CASCADE' })
     @JoinTable()
-    contributors?: ContributorEntity[];
+    contributors?: AllUserEntity[];
 
     @ManyToOne(() => NeedEntity, (n) => n.tickets, { eager: false, nullable: false })
     need: NeedEntity

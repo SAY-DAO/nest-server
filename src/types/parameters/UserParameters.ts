@@ -1,35 +1,22 @@
 import { NgoEntity } from "../../entities/ngo.entity";
 import { NeedEntity } from "../../entities/need.entity";
 import { PaymentEntity } from "../../entities/payment.entity";
-import { SAYPlatformRoles } from "../interface";
-import { EthereumAccount } from "src/entities/ethereum.account.entity";
+import { SAYPlatformRoles } from "../interfaces/interface";
+import { EthereumAccountEntity } from "src/entities/ethereum.account.entity";
 import { ChildrenEntity } from "src/entities/children.entity";
 
 
-export type FamilyParams = {
+export type UserParams = {
     createdAt?: Date;
     flaskId: number;
+    typeId?: number,
     updatedAt?: Date;
+    birthDate?: Date
     flaskUserId?: number;
-    avatarUrl?: string;
     isActive?: boolean;
     doneNeeds?: NeedEntity[]
     payments?: PaymentEntity[]
-    role: SAYPlatformRoles
-}
-
-
-export type ContributorParams = {
-    birthDate: Date
-    flaskId: number
-    flaskNgoId?: number;
-    typeId?: number;
-    children?: ChildrenEntity[];
-    createdNeeds?: NeedEntity[];
-    auditedNeeds?: NeedEntity[];
-    purchasedNeeds?: NeedEntity[];
-    ngo?: NgoEntity;
-    wallet?: EthereumAccount;
+    wallet?: EthereumAccountEntity;
     firstName?: string;
     lastName?: string;
     avatarUrl?: string;

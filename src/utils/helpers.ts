@@ -4,10 +4,10 @@ import {
   NeedTypeEnum,
   PaymentStatusEnum,
   ProductStatusEnum,
-  RolesEnum,
+  FlaskRolesEnum,
   SAYPlatformRoles,
   ServiceStatusEnum,
-} from 'src/types/interface';
+} from 'src/types/interfaces/interface';
 
 export function getSAYRoleInteger(sayRole: string) {
   let roleInteger: SAYPlatformRoles;
@@ -31,22 +31,60 @@ export function getSAYRoleInteger(sayRole: string) {
 
 export function convertFlaskToSayRoles(flakUserType: number) {
   let role: SAYPlatformRoles;
-  if (flakUserType === RolesEnum.SAY_SUPERVISOR) {
+  if (flakUserType === FlaskRolesEnum.SAY_SUPERVISOR) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === RolesEnum.ADMIN) {
+  } else if (flakUserType === FlaskRolesEnum.ADMIN) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === RolesEnum.SUPER_ADMIN) {
+  } else if (flakUserType === FlaskRolesEnum.SUPER_ADMIN) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === RolesEnum.SOCIAL_WORKER) {
+  } else if (flakUserType === FlaskRolesEnum.SOCIAL_WORKER) {
     role = SAYPlatformRoles.SOCIAL_WORKER;
-  } else if (flakUserType === RolesEnum.COORDINATOR) {
+  } else if (flakUserType === FlaskRolesEnum.COORDINATOR) {
     role = SAYPlatformRoles.PURCHASER;
-  } else if (flakUserType === RolesEnum.NGO_SUPERVISOR) {
+  } else if (flakUserType === FlaskRolesEnum.NGO_SUPERVISOR) {
     role = SAYPlatformRoles.NGO_SUPERVISOR;
   } else if (!flakUserType) {
     role = SAYPlatformRoles.FAMILY;
   }
   return role;
+}
+
+export function getSAYRoleString(sayRole: number) {
+  let roleString: string;
+  if (sayRole === SAYPlatformRoles.AUDITOR) {
+    roleString = 'auditor';
+  } else if (sayRole === SAYPlatformRoles.SOCIAL_WORKER) {
+    roleString = 'socialWorker';
+  } else if (sayRole === SAYPlatformRoles.PURCHASER) {
+    roleString = 'purchaser';
+  } else if (sayRole === SAYPlatformRoles.NGO_SUPERVISOR) {
+    roleString = 'ngoSupervisor';
+  } else if (sayRole === SAYPlatformRoles.FAMILY) {
+    roleString = 'familyMember';
+  } else if (sayRole === SAYPlatformRoles.FRIEND) {
+    roleString = 'friend';
+  } else if (sayRole === SAYPlatformRoles.NO_ROLE) {
+    roleString = 'noRole';
+  }
+  return roleString;
+}
+
+
+export function getUserSAYRoleString(userTypeId: number) {
+  if (userTypeId === FlaskRolesEnum.SOCIAL_WORKER) {
+    return 'socialWorker';
+  }
+  if (userTypeId === FlaskRolesEnum.NGO_SUPERVISOR) {
+    return 'ngoSupervisor';
+  }
+  if (
+    userTypeId === FlaskRolesEnum.ADMIN ||
+    userTypeId === FlaskRolesEnum.SUPER_ADMIN ||
+    userTypeId === FlaskRolesEnum.SAY_SUPERVISOR
+  ) {
+    return 'auditor';
+  }
+  return 'noRole';
 }
 
 export function dateConvertor(value: string) {
@@ -399,3 +437,4 @@ export function ticketNotifications(
 
   return unReads;
 }
+

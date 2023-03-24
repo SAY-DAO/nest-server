@@ -6,7 +6,7 @@ import {
 } from 'typeorm';
 import { BaseEntity } from './BaseEntity'
 import { NeedEntity } from './need.entity';
-import { FamilyEntity } from './user.entity';
+import { AllUserEntity } from './user.entity';
 
 @Entity()
 export class PaymentEntity extends BaseEntity {
@@ -65,8 +65,8 @@ export class PaymentEntity extends BaseEntity {
     @ManyToOne(() => NeedEntity, (need) => need.verifiedPayments, { eager: false, nullable: true  })
     need: NeedEntity;
 
-    @ManyToOne(() => FamilyEntity, (family) => family.payments, { eager: true })
-    familyMember: FamilyEntity;
+    @ManyToOne(() => AllUserEntity, (family) => family.payments, { eager: true })
+    familyMember: AllUserEntity;
 
 }
 

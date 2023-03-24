@@ -2,12 +2,12 @@ import { Entity, Column, OneToMany, Index, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { NeedEntity } from './need.entity';
 import { ChildrenEntity } from './children.entity';
-import { ContributorEntity } from './user.entity';
 import { CityEntity } from './city.entity';
+import { ContributorEntity } from './contributor.entity';
 
 @Entity()
 export class NgoEntity extends BaseEntity {
-    @Index({unique: true})
+    @Index({ unique: true })
     @Column({ nullable: true })
     flaskNgoId: number;
 
@@ -28,7 +28,7 @@ export class NgoEntity extends BaseEntity {
 
     @Column({ nullable: true })
     countryId: number;
-  
+
     @Column({ nullable: true })
     postalAddress: string;
 
@@ -55,7 +55,7 @@ export class NgoEntity extends BaseEntity {
 
     @Column({ nullable: true })
     currentChildrenCount?: number
-    
+
     @Column({ nullable: true })
     socialWorkerCount?: number
 
@@ -78,5 +78,5 @@ export class NgoEntity extends BaseEntity {
     socialWorkers?: ContributorEntity[];
 
     @ManyToOne(() => CityEntity, (n) => n.ngos, { eager: true })
-    city : CityEntity
+    city: CityEntity
 }

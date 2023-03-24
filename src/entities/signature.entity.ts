@@ -1,35 +1,32 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   Column,
   ManyToOne,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
 import { NeedEntity } from './need.entity';
-import { SignatureEnum } from '../types/interface';
+import { SAYPlatformRoles } from '../types/interfaces/interface';
+import { BaseEntity } from './BaseEntity';
+import { AllUserEntity } from './user.entity';
 
 @Entity()
-export class SignatureEntity {
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt: Date;
+export class SignatureEntity extends BaseEntity {
+  @OneToOne(() => AllUserEntity, { eager: true })
+  @JoinColumn()
+  signer: AllUserEntity;
 
   @Column()
-  signer: string;
+  flaskUserId: number;
 
   @Column()
+  flaskNeedId: number;
+
+  @Column({ unique: true })
   hash: string;
 
-  @Column({ type: 'enum', enum: SignatureEnum, nullable: true })
-  role: SignatureEnum;
+  @Column({ type: 'enum', enum: SAYPlatformRoles, nullable: true })
+  role: SAYPlatformRoles;
 
   @ManyToOne(() => NeedEntity, (need) => need.signatures, { eager: false })
   need: NeedEntity;

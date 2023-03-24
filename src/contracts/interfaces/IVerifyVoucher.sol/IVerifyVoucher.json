@@ -1,0 +1,306 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IVerifyVoucher",
+  "sourceName": "contracts/interfaces/IVerifyVoucher.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "needId",
+                  "type": "uint256"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "ngoId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "url",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct NeedStorage.NGO",
+                  "name": "ngo",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "id",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum NeedStorage.ContributorType",
+                      "name": "role",
+                      "type": "uint8"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "ngoId",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "name",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "url",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct NeedStorage.NGO",
+                      "name": "ngo",
+                      "type": "tuple"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "wallet",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct NeedStorage.Contributor",
+                  "name": "socialWorker",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "id",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum NeedStorage.ContributorType",
+                      "name": "role",
+                      "type": "uint8"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "ngoId",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "name",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "url",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct NeedStorage.NGO",
+                      "name": "ngo",
+                      "type": "tuple"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "wallet",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct NeedStorage.Contributor",
+                  "name": "auditor",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "id",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum NeedStorage.ContributorType",
+                      "name": "role",
+                      "type": "uint8"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "ngoId",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "name",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "url",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct NeedStorage.NGO",
+                      "name": "ngo",
+                      "type": "tuple"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "wallet",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct NeedStorage.Contributor",
+                  "name": "purchaser",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "wallet",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct NeedStorage.Miner",
+                  "name": "minter",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "SayName",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "voiceIpfsHash",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "avatarIpfsHash",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct NeedStorage.TheChild",
+                  "name": "child",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "url",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct NeedStorage.ServiceProvider",
+                  "name": "serviceProvider",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "enum NeedStorage.NeedType",
+                      "name": "needType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "enum NeedStorage.NeedDifficulty",
+                      "name": "difficulty",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "transparency",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "socialWorkerShare",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "auditorShare",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "purchaserShare",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "string[]",
+                      "name": "IpfsReceipts",
+                      "type": "string[]"
+                    }
+                  ],
+                  "internalType": "struct NeedStorage.NeedDetails",
+                  "name": "details",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct NeedStorage.Need",
+              "name": "need",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "mintAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "content",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct NeedStorage.SocialWorkerVoucher",
+          "name": "voucher",
+          "type": "tuple"
+        }
+      ],
+      "name": "_verify",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

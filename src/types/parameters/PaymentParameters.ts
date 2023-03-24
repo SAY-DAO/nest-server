@@ -1,12 +1,12 @@
 import { NeedEntity } from "src/entities/need.entity";
-import { FamilyEntity } from "src/entities/user.entity";
+import { AllUserEntity } from "src/entities/user.entity";
 
 export type PaymentParams = {
-    flaskId:number
-    flaskNeedId:number
-    flaskUserId:number
+    flaskId: number
+    flaskNeedId: number
+    flaskUserId: number
     need?: NeedEntity;
-    user?: FamilyEntity;
+    user?: AllUserEntity;
     verified?: Date;
     needAmount?: number;
     donationAmount?: number;

@@ -1,5 +1,4 @@
-import { CityEntity } from "src/entities/city.entity";
-import { ContributorEntity } from "src/entities/user.entity";
+import { ContributorEntity } from "src/entities/contributor.entity";
 
 export type NgoParams = {
     flaskNgoId?: number;

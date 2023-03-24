@@ -6,7 +6,7 @@ import { NgoEntity } from './ngo.entity';
 @Entity()
 export class CityEntity extends BaseEntity {
     @Column()
-    flaskId: number
+    flaskCityId: number
 
     @Column({ nullable: true })
     name: string

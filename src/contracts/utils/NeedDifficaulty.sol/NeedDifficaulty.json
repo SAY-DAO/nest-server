@@ -1,0 +1,92 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "NeedDifficaulty",
+  "sourceName": "contracts/utils/NeedDifficaulty.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "discovery",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "rightItem",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "creation",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "confirmNeccessity_0",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "confirmRelevance_1",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "confirmAlternative_2",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "confirmReplacemet_3",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "creation_",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint16",
+              "name": "swDifficaulty",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "auditorDifficaulty",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "purchaserDifficaulty",
+              "type": "uint16"
+            },
+            {
+              "internalType": "enum NeedDifficaulty.NeedDifficaultyType",
+              "name": "diffType",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct NeedDifficaulty.Need",
+          "name": "need",
+          "type": "tuple"
+        }
+      ],
+      "name": "getDifficaulty",
+      "outputs": [],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5060405161018238038061018283398101604081905261002f91610053565b50505050505050506100ea565b805161ffff8116811461004e57600080fd5b919050565b600080600080600080600080610100898b03121561007057600080fd5b6100798961003c565b975061008760208a0161003c565b965061009560408a0161003c565b95506100a360608a0161003c565b94506100b160808a0161003c565b93506100bf60a08a0161003c565b92506100cd60c08a0161003c565b91506100db60e08a0161003c565b90509295985092959890939650565b608a806100f86000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c806306e3b45414602d575b600080fd5b603b6038366004603d565b50565b005b600060808284031215604e57600080fd5b5091905056fea2646970667358221220c51143b00a561214e350c245567788857c59a95dc6fc6df5766ed0c9094330cd64736f6c63430008090033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c806306e3b45414602d575b600080fd5b603b6038366004603d565b50565b005b600060808284031215604e57600080fd5b5091905056fea2646970667358221220c51143b00a561214e350c245567788857c59a95dc6fc6df5766ed0c9094330cd64736f6c63430008090033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

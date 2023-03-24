@@ -7,9 +7,9 @@ import {
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
-import { EducationEnum, HousingEnum } from '../types/interface';
+import { EducationEnum, HousingEnum } from '../types/interfaces/interface';
 import { NgoEntity } from './ngo.entity';
-import { ContributorEntity } from './user.entity';
+import { ContributorEntity } from './contributor.entity';
 
 @Entity()
 export class ChildrenEntity extends BaseEntity {
@@ -26,16 +26,13 @@ export class ChildrenEntity extends BaseEntity {
   awakeAvatarUrl: string;
 
   @Column({ nullable: true })
-  bio: string;
+  adultAvatarUrl: string;
 
-  @Column({ nullable: true })
-  bioSummary: string;
+  @Column({ type: "hstore", hstoreType: "object" })
+  bioSummaryTranslations: Record<string, string>;
 
-  @Column("simple-json", { nullable: true })
-  bioSummaryTranslations: { en: string; fa: string };
-
-  @Column("simple-json", { nullable: true })
-  bioTranslations: { en: string; fa: string };
+  @Column({ type: "hstore", hstoreType: "object" })
+  bioTranslations: Record<string, string>;
 
   @Column({ type: 'timestamptz', nullable: true })
   birthDate: Date;
@@ -103,14 +100,17 @@ export class ChildrenEntity extends BaseEntity {
   @Column({ nullable: true })
   sayName: string;
 
-  @Column("simple-json", { nullable: true })
-  sayNameTranslations: { en: string; fa: string };
+  @Column({ type: "hstore", hstoreType: "object" })
+  sayNameTranslations: Record<string, string>;
 
   @Column({ nullable: true })
   sleptAvatarUrl: string;
 
   @Column({ nullable: true })
   status: number;
+
+  @Column({ nullable: true })
+  ngoId: number;
 
   @Column({ type: 'timestamptz', nullable: true })
   updated: Date;

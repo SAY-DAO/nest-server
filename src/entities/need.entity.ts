@@ -2,31 +2,25 @@ import {
   Entity,
   Column,
   Index,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   ManyToOne,
-  DeleteDateColumn,
   OneToOne,
-  JoinColumn,
 } from 'typeorm';
-import { ContributorEntity, FamilyEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
 import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
 import { PaymentEntity } from './payment.entity';
 import { BaseEntity } from './BaseEntity';
-import { CategoryEnum, NeedTypeEnum } from '../types/interface';
+import { CategoryEnum, NeedTypeEnum } from '../types/interfaces/interface';
 import { ReceiptEntity } from './receipt.entity';
 import { NgoEntity } from './ngo.entity';
 import { TicketEntity } from './ticket.entity';
 import { StatusEntity } from './status.entity';
+import { IpfsEntity } from './ipfs.entity';
+import { ContributorEntity } from './contributor.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
-  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
-  deletedAt?: Date;
-
   @Index({ unique: true })
   @Column({ nullable: true })
   flaskId: number;
@@ -159,6 +153,9 @@ export class NeedEntity extends BaseEntity {
 
   @OneToMany(() => SignatureEntity, (signature) => signature.need, { eager: false })
   signatures?: SignatureEntity[];
+
+  @OneToOne(() => IpfsEntity, (ipfs) => ipfs.need, { eager: true }) // specify inverse side as a second parameter
+  ipfs: IpfsEntity
 
   @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: false })
   verifiedPayments?: PaymentEntity[];

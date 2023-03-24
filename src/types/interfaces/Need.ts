@@ -1,3 +1,4 @@
+import { SignatureEntity } from "src/entities/signature.entity";
 import { TicketEntity } from "src/entities/ticket.entity";
 import { SwmypageReceipts_, SwmypageStatusUpdates, SwmypageVerifiedPayments } from "src/generated-sources/openapi";
 
@@ -9,6 +10,8 @@ export interface NeedsData {
 
 export interface ChildNeed {
   id?: number;
+  ipfsHash?: string;
+  ipfsUrl?: string;
   createdById?: number;
   nameTranslations?: any;
   name?: string;
@@ -53,7 +56,8 @@ export interface ChildNeed {
     birthDate: string;
     awakeAvatarUrl: string;
   };
-  ticket: TicketEntity
+  ticket: TicketEntity,
+  signature?: SignatureEntity
 };
 
 export interface Need {

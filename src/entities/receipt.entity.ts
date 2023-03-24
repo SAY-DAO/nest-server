@@ -1,8 +1,6 @@
 import { Entity, Column, Index, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
-import { ChildrenEntity } from './children.entity';
 import { NeedEntity } from './need.entity';
-import { ContributorEntity } from './user.entity';
 
 @Entity()
 export class ReceiptEntity extends BaseEntity {
