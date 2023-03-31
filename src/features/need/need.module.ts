@@ -14,9 +14,7 @@ import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildrenService } from '../children/children.service';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
-import {
-  AllUserEntity,
-} from '../../entities/user.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
 import { GetNeedMiddleware } from './middlewares/get-need.middleware';
 import { PostNeedMiddleware } from './middlewares/post-need.middleware';
@@ -29,10 +27,14 @@ import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Need, SocialWorker, NGO,Child], 'flaskPostgres'),
+    TypeOrmModule.forFeature(
+      [Need, SocialWorker, NGO, Child, Payment],
+      'flaskPostgres',
+    ),
     TypeOrmModule.forFeature([
       NeedEntity,
       StatusEntity,
@@ -41,7 +43,7 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
       ContributorEntity,
       AllUserEntity,
       NgoEntity,
-      EthereumAccountEntity
+      EthereumAccountEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,

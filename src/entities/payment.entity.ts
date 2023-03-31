@@ -23,35 +23,35 @@ export class PaymentEntity extends BaseEntity {
     @Column({ nullable: true })
     useCredit: boolean;
     
-    // @Column({ nullable: true })
-    // bankAmount: number;
+    @Column({ nullable: true })
+    bankAmount: number;
 
-    // @Column({ nullable: true })
-    // cardNumber: string;
+    @Column({ nullable: true })
+    cardNumber: string;
 
-    // @Column({ nullable: true })
-    // description: string;
+    @Column({ nullable: true })
+    description: string;
 
-    // @Column({ nullable: true })
-    // gatewayPaymentId: string;
+    @Column({ nullable: true })
+    gatewayPaymentId: string;
 
-    // @Column({ nullable: true })
-    // gatewayTrackId: string;
+    @Column({ nullable: true })
+    gatewayTrackId: string;
 
-    // @Column({ nullable: true })
-    // hashedCardNumber: string;
+    @Column({ nullable: true })
+    hashedCardNumber: string;
 
-    // @Column({ nullable: true })
-    // needAmount: number;
+    @Column({ nullable: true })
+    needAmount: number;
 
-    // @Column({ type: 'timestamptz', nullable: true })
-    // transactionDate: Date;
+    @Column({ type: 'timestamptz', nullable: true })
+    transactionDate: Date;
 
-    // @Column({ type: 'timestamptz', nullable: true })
-    // created: Date;
+    @Column({ type: 'timestamptz', nullable: true })
+    created: Date;
 
-    // @Column({ type: 'timestamptz', nullable: true })
-    // updated: Date;
+    @Column({ type: 'timestamptz', nullable: true })
+    updated: Date;
 
     @Column({ type: 'timestamptz', nullable: true })
     verified: Date;
@@ -67,6 +67,20 @@ export class PaymentEntity extends BaseEntity {
 
     @ManyToOne(() => AllUserEntity, (family) => family.payments, { eager: true })
     familyMember: AllUserEntity;
+
+
+
+    @Column({ nullable: true })
+    id_need: number;
+
+    @Column({ nullable: true })
+    id_user: number;
+
+    @Column({ nullable: true })
+    credit_amount: number;
+
+    @Column({ nullable: true })
+    donation_amount: number;
 
 }
 

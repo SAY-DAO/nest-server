@@ -100,4 +100,3 @@ export class Child extends BaseEntity {
   voiceUrl: string;
 
 }
-

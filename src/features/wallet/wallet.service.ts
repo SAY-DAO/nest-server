@@ -14,15 +14,12 @@ import {
   SAYPlatformRoles,
 } from '../../types/interfaces/interface';
 import { NeedService } from '../need/need.service';
-import { ChildrenService } from '../children/children.service';
 import VerifyVoucher from '../../contracts/governance/VerifyVoucher.sol/VerifyVoucher.json';
 import { verifyVoucher } from '../../contracts/network-settings.json';
 import { ChildrenEntity } from '../../entities/children.entity';
 import {
-  UrlJsonRpcProvider,
   Contract,
   EthersContract,
-  InjectEthersProvider,
   InjectSignerProvider,
   EthersSigner,
 } from 'nestjs-ethers';
@@ -31,6 +28,9 @@ import {
   getUserSAYRoleString,
   convertFlaskToSayRoles
 } from 'src/utils/helpers';
+import { UserService } from '../user/user.service';
+import { from, Observable } from 'rxjs';
+import { IpfsEntity } from 'src/entities/ipfs.entity';
 
 @Injectable()
 export class SignatureService {
@@ -38,32 +38,33 @@ export class SignatureService {
     @InjectRepository(SignatureEntity)
     private signatureRepository: Repository<SignatureEntity>,
     private needService: NeedService,
-    private childService: ChildrenService,
-    @InjectEthersProvider()
-    private readonly ethersProvider: UrlJsonRpcProvider,
+    private userService: UserService,
     @InjectSignerProvider()
     private readonly ethersSigner: EthersSigner,
     private readonly ethersContract: EthersContract,
   ) { }
+
 
   async getSignature(signature: string): Promise<SignatureEntity> {
     return await this.signatureRepository.findOne({
       where: {
         hash: signature
       },
-      relations: {
-        need: true
-      }
     });
   }
 
   async getUserSignatures(flaskUserId: number): Promise<SignatureEntity[]> {
     return await this.signatureRepository.find({
-      relations: {
-        need: true,
-      },
       where: {
-        flaskUserId
+        flaskUserId,
+      },
+    });
+  }
+
+  async getNeedSignatures(flaskNeedId: number): Promise<SignatureEntity[]> {
+    return await this.signatureRepository.find({
+       where: {
+        flaskNeedId
       },
     });
   }
@@ -75,22 +76,25 @@ export class SignatureService {
 
   async createSignature(
     signature: string,
+    ipfs: IpfsEntity,
     flaskNeedId: number,
     role: SAYPlatformRoles,
-    signer: string,
     flaskUserId: number,
   ): Promise<SignatureEntity> {
+    const user = await this.userService.getUserByFlaskId(flaskUserId)
     const need = await this.needService.getNeedByFlaskId(flaskNeedId)
-    const saved = await this.signatureRepository.save({
-      // hash: signature,
-      need,
-      // signer: user,
+
+    const theSignature = this.signatureRepository.create({
+      hash: signature,
       role,
-      // signer,
       flaskUserId,
       flaskNeedId
     });
-    return saved;
+    theSignature.ipfs = ipfs
+    theSignature.user = user
+    theSignature.ipfs.need = need
+
+    return await this.signatureRepository.save(theSignature);
   }
 
   async designDomain(
@@ -107,6 +111,7 @@ export class SignatureService {
       VerifyVoucher.abi,
       wallet,
     );
+    console.log(`Getting chain id...`);
 
     // const tx = await verifyingContract.deployed()
     const chainId = await verifyingContract.getChainID();
@@ -192,8 +197,10 @@ export class SignatureService {
         ],
       };
     }
+    console.log('\x1b[36m%s\x1b[0m', 'Preparing domain for signature ...\n');
 
     const domain = await this.designDomain(verifyVoucher, signerAddress);
+    console.log('\x1b[36m%s\x1b[0m', 'Prepared the domain! ...\n');
     const sayRole = convertFlaskToSayRoles(userTypeId)
 
     return {
@@ -204,59 +211,7 @@ export class SignatureService {
     };
   }
 
-  // async familySignTransaction(request: SwGenerateSignatureDto): Promise<SwSignatureResult> {
-  //   let SocialWorkerVoucher: SocialWorkerVoucher;
-  //   let FamilyVoucher: FamilyVoucher;
-  //   let types: { Voucher: { name: string; type: string; }[]; };
-  //   const need = await this.needService.getNeedByFlaskId(request.flaskNeedId);
-  //   const user = await this.userService.getFamily(request.flaskSwId);
-  //   const child = await this.childService.getChildById(need.child.childId);
-
-  //   const isCreator = need.createdById === 13; // request.userId
-  //   const IsParticipant = need.payments.filter(
-  //     (p) => (p.user.userId = request.flaskSwId),
-  //   );
-
-  //   const impacts = 4
-
-  //   if (isCreator) {
-  //     SocialWorkerVoucher = {
-  //       flaskNeedId: need.flaskNeedId,
-  //       userId: user && user.userId || request.flaskSwId, // we do not have any users available at begining
-  //       child: child.sayName,
-  //       provider: need.provider && need.provider.name || 'digikala',
-  //       wallet: request.signerAddress,
-  //       content: `Your ${impacts} impacts will be ready for a friend to mint!`,
-  //     };
-  //     // define your data types
-  //     types = {
-  //       Voucher: [
-  //         { name: 'flaskNeedId', type: 'uint256' },
-  //         { name: 'userId', type: 'uint256' },
-  //         { name: 'child', type: 'string' },
-  //         { name: 'provider', type: 'string' },
-  //         { name: 'wallet', type: 'address' },
-  //         { name: 'content', type: 'string' },
-  //       ],
-  //     };
-  //   } else if (IsParticipant) {
-  //     FamilyVoucher = {
-  //       flaskNeedId: need.flaskNeedId,
-  //       userId: user && user.userId || request.flaskSwId, // we do not have any users available at begining
-  //       child: need.child.childId,
-  //       wallet: request.signerAddress,
-  //       content: `Your ${impacts} impacts will be ready for a friend to mint!`,
-  //     };
-  //   }
-
-  //   const domain = await this.designDomain(
-  //     verifyContractAddress
-  //   );
-
-  //   return {
-  //     SocialWorkerVoucher,
-  //     types,
-  //     domain,
-  //   };
-  // }
+  async deleteOne(signature: SignatureEntity): Promise<Observable<any>> {
+    return from(this.signatureRepository.delete(signature.id));
+  }
 }

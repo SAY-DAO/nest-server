@@ -110,7 +110,7 @@ export class ChildrenEntity extends BaseEntity {
   status: number;
 
   @Column({ nullable: true })
-  ngoId: number;
+  flaskNgoId: number;
 
   @Column({ type: 'timestamptz', nullable: true })
   updated: Date;
@@ -121,7 +121,7 @@ export class ChildrenEntity extends BaseEntity {
   @OneToMany(() => NeedEntity, (need) => need.child)
   needs?: NeedEntity[]
 
-  @ManyToOne(() => NgoEntity, (n) => n.children, { eager: true })
+  @ManyToOne(() => NgoEntity, (n) => n.children, { eager: true, nullable: false  })
   ngo: NgoEntity;
 
   @ManyToOne(() => ContributorEntity, (s) => s.children, { eager: true })

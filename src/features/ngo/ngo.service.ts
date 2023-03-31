@@ -30,7 +30,7 @@ export class NgoService {
   }
 
 
-  getNgo(flaskNgoId: number): Promise<NgoEntity> {
+  getNgoById(flaskNgoId: number): Promise<NgoEntity> {
     const ngo = this.ngoRepository.findOne({
       where: {
         flaskNgoId: flaskNgoId,

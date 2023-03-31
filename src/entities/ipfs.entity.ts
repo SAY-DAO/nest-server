@@ -3,42 +3,31 @@ import {
     Column,
     OneToOne,
     JoinColumn,
+    OneToMany,
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
+import { SignatureEntity } from './signature.entity';
 
-@Entity()
-export class IpfsNeedEntity extends BaseEntity {
-    @Column('text', { array: true })
-    receiptHashes: string[];
-
-    @Column()
-    iconHash: string;
-}
-
-@Entity()
-export class IpfsChildEntity extends BaseEntity {
-    @Column()
-    awakeAvatarHash: string;
-
-    @Column()
-    sleptAvatarHash: string;
-
-    @Column()
-    adultAvatarHash: string;
-}
 
 @Entity()
 export class IpfsEntity extends BaseEntity {
-    @OneToOne(() => IpfsChildEntity, { eager: true })
-    @JoinColumn()
-    childImages: IpfsChildEntity;
+    @Column()
+    flaskNeedId: number;
 
-    @OneToOne(() => IpfsNeedEntity, { eager: true })
-    @JoinColumn()
-    needImages: IpfsNeedEntity;
+    @Column({ nullable: false })
+    needDetailsHash: string;
 
-    @OneToOne(() => NeedEntity, (need) => need.ipfs)
+    @Column({ nullable: true })
+    receiptsHash: string;
+
+    @Column({ nullable: true })
+    paymentsHash: string;
+
+    @OneToMany(() => SignatureEntity, (signature) => signature.ipfs, { eager: true })
+    signatures?: SignatureEntity[];
+
+    @OneToOne(() => NeedEntity, (need) => need.ipfs, { eager: false })
     @JoinColumn()
     need: NeedEntity;
 }

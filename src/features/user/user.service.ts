@@ -95,9 +95,10 @@ export class UserService {
 
   async createContributor(
     userDetails: UserParams,
-    ngo: NgoEntity | null,
+    ngo: NgoEntity,
   ): Promise<AllUserEntity> {
     const newContributor = this.contributorRepository.create({
+      flaskId: userDetails.flaskId,
       flaskNgoId: ngo.flaskNgoId,
       ngo: ngo,
     });
@@ -109,9 +110,9 @@ export class UserService {
       roleName: getSAYRoleString(userDetails.role),
       isContributor: true,
       contributor
-      
-    });
 
+    });
+    console.log(newUser)
     return await this.allUserRepository.save(newUser);
   }
 

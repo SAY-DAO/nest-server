@@ -4,9 +4,7 @@ import { TicketController } from './ticket.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
-import {
-  AllUserEntity,
-} from 'src/entities/user.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
 import { TicketMiddleware } from './middlewares/ticket.middleware';
 import { NeedService } from '../need/need.service';
 import { NeedEntity } from 'src/entities/need.entity';
@@ -32,16 +30,17 @@ import { Cities } from 'src/entities/flaskEntities/cities.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { ProviderEntity } from 'src/entities/provider.entity';
+import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { ProviderService } from '../provider/provider.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Need,
-      SocialWorker,
-      NGO,
-      Cities,
-      Child
-    ], 'flaskPostgres'),
+    TypeOrmModule.forFeature(
+      [Need, SocialWorker, NGO, Cities, Child, Payment],
+      'flaskPostgres',
+    ),
     TypeOrmModule.forFeature([
       CityEntity,
       AllUserEntity,
@@ -55,7 +54,9 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
       ReceiptEntity,
       PaymentEntity,
       StatusEntity,
-      EthereumAccountEntity
+      EthereumAccountEntity,
+      ProviderJoinNeedEntity,
+      ProviderEntity,
     ]),
   ],
   controllers: [TicketController],
@@ -70,6 +71,7 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
     UserService,
     ChildrenService,
     StatusService,
+    ProviderService
   ],
 })
 export class TicketModule implements NestModule {

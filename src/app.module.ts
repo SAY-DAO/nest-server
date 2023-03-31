@@ -40,16 +40,16 @@ import { WalletModule } from './features/wallet/wallet.module';
 import { Session } from './entities/session.entity';
 import { Need } from './entities/flaskEntities/need.entity';
 import { IpfsModule } from './features/ipfs/ipfs.module';
-import {
-  IpfsChildEntity,
-  IpfsEntity,
-  IpfsNeedEntity,
-} from 'src/entities/ipfs.entity';
+import { IpfsEntity } from 'src/entities/ipfs.entity';
 import { NGO } from './entities/flaskEntities/ngo.entity';
 import { Cities } from './entities/flaskEntities/cities.entity';
 import { ContributorEntity } from './entities/contributor.entity';
 import { Child } from './entities/flaskEntities/child.entity';
 import { HttpModule } from '@nestjs/axios';
+import { Payment } from './entities/flaskEntities/payment.entity';
+import { ProviderJoinNeedEntity } from './entities/provider.Join.need..entity';
+import { AnalyticModule } from './features/analytic/analytic.module';
+import { Family } from './entities/flaskEntities/family.entity';
 
 const imports = [
   HttpModule,
@@ -70,6 +70,7 @@ const imports = [
       PaymentEntity,
       ReceiptEntity,
       NeedEntity,
+      ProviderJoinNeedEntity,
       ProviderEntity,
       MileStoneEntity,
       StepEntity,
@@ -77,14 +78,12 @@ const imports = [
       ChildrenEntity,
       EthereumAccountEntity,
       EthereumTransaction,
-      IpfsChildEntity,
       IpfsEntity,
-      IpfsNeedEntity,
     ],
   }),
   TypeOrmModule.forRoot({
     ...config().db2,
-    entities: [Need, SocialWorker, NGO, Cities, Child],
+    entities: [Need, SocialWorker, NGO, Cities, Child, Payment, Family],
   }),
   GatewayModule,
   LocationModule,
@@ -102,7 +101,7 @@ const imports = [
   StepModule,
   WalletModule,
   IpfsModule,
-
+  AnalyticModule
 ];
 
 @Module({

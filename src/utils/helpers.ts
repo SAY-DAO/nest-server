@@ -4,7 +4,7 @@ import {
   NeedTypeEnum,
   PaymentStatusEnum,
   ProductStatusEnum,
-  FlaskRolesEnum,
+  FlaskUserTypesEnum,
   SAYPlatformRoles,
   ServiceStatusEnum,
 } from 'src/types/interfaces/interface';
@@ -31,17 +31,17 @@ export function getSAYRoleInteger(sayRole: string) {
 
 export function convertFlaskToSayRoles(flakUserType: number) {
   let role: SAYPlatformRoles;
-  if (flakUserType === FlaskRolesEnum.SAY_SUPERVISOR) {
+  if (flakUserType === FlaskUserTypesEnum.SAY_SUPERVISOR) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === FlaskRolesEnum.ADMIN) {
+  } else if (flakUserType === FlaskUserTypesEnum.ADMIN) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === FlaskRolesEnum.SUPER_ADMIN) {
+  } else if (flakUserType === FlaskUserTypesEnum.SUPER_ADMIN) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === FlaskRolesEnum.SOCIAL_WORKER) {
+  } else if (flakUserType === FlaskUserTypesEnum.SOCIAL_WORKER) {
     role = SAYPlatformRoles.SOCIAL_WORKER;
-  } else if (flakUserType === FlaskRolesEnum.COORDINATOR) {
+  } else if (flakUserType === FlaskUserTypesEnum.COORDINATOR) {
     role = SAYPlatformRoles.PURCHASER;
-  } else if (flakUserType === FlaskRolesEnum.NGO_SUPERVISOR) {
+  } else if (flakUserType === FlaskUserTypesEnum.NGO_SUPERVISOR) {
     role = SAYPlatformRoles.NGO_SUPERVISOR;
   } else if (!flakUserType) {
     role = SAYPlatformRoles.FAMILY;
@@ -71,16 +71,16 @@ export function getSAYRoleString(sayRole: number) {
 
 
 export function getUserSAYRoleString(userTypeId: number) {
-  if (userTypeId === FlaskRolesEnum.SOCIAL_WORKER) {
+  if (userTypeId === FlaskUserTypesEnum.SOCIAL_WORKER) {
     return 'socialWorker';
   }
-  if (userTypeId === FlaskRolesEnum.NGO_SUPERVISOR) {
+  if (userTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR) {
     return 'ngoSupervisor';
   }
   if (
-    userTypeId === FlaskRolesEnum.ADMIN ||
-    userTypeId === FlaskRolesEnum.SUPER_ADMIN ||
-    userTypeId === FlaskRolesEnum.SAY_SUPERVISOR
+    userTypeId === FlaskUserTypesEnum.ADMIN ||
+    userTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+    userTypeId === FlaskUserTypesEnum.SAY_SUPERVISOR
   ) {
     return 'auditor';
   }

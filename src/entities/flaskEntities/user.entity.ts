@@ -9,23 +9,36 @@ import { BaseEntity } from './BaseEntity';
 @Entity()
 export class User extends BaseEntity {
   @Column({ nullable: true })
-  first_name?: string;
+  firstName?: string;
 
   @Column({ nullable: true })
-  last_name?: string;
+  lastName?: string;
 
   @Column({ nullable: true })
-  avatar_url?: string;
+  avatarUrl?: string;
 
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  birth_date?: Date;
+  birthDate?: Date;
+
+  @Column()
+  isDeleted: boolean
 }
 
 @Entity() // panel admin, sw, auditor, ...
-export class SocialWorker extends User {
+export class SocialWorker  extends BaseEntity {
+  @Column({ nullable: true, name: 'first_name' })
+  firstName?: string;
+
+  @Column({ nullable: true,  name: 'last_name'  })
+  lastName?: string;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  updated?: Date;
+
+
   @Column({ nullable: true })
   birth_certificate_number?: string;
 
@@ -88,9 +101,6 @@ export class SocialWorker extends User {
 
   @Column({ nullable: true })
   created?: Date;
-
-  @Column({ nullable: true })
-  updated?: Date;
 
   @Column({ nullable: true })
   last_login_date?: Date;

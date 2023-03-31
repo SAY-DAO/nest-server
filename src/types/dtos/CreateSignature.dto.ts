@@ -1,6 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 import { SwmypageNeeds } from 'src/generated-sources/openapi';
 import { SAYPlatformRoles } from '../interfaces/interface';
+import { CreatePaymentDto } from './CreatePayment.dto';
+import { CreateReceiptDto } from './CreateReceipt.dto';
+import { CreateStatusDto } from './CreateStatus.dto';
 
 export class NeedSignatureMessage {
   @IsNotEmpty()
@@ -33,15 +36,16 @@ export class VerifySignatureDto {
 
 export class SwGenerateSignatureDto {
   @IsNotEmpty()
-  childId: number;
-  @IsNotEmpty()
-  panelData: SwmypageNeeds;
-  @IsNotEmpty()
-  flaskUserId: number;
-  @IsNotEmpty()
-  signerAddress: string;
+  flaskNeedId: number;
   @IsNotEmpty()
   userTypeId: number;
+  statuses?: CreateStatusDto[]
+  receipts?: CreateReceiptDto[]
+  payments?: CreatePaymentDto[]
+  isDone: boolean
+  paid: number
+  unpayable: boolean
+  unpayableFrom: Date
 }
 
 export class CreateSignatureDto {
@@ -49,10 +53,6 @@ export class CreateSignatureDto {
   flaskNeedId: number;
   @IsNotEmpty()
   role: SAYPlatformRoles;
-  @IsNotEmpty()
-  flaskUserId: number;
-  @IsNotEmpty()
-  signerAddress: string;
 }
 
 
@@ -60,5 +60,4 @@ export class FamilyCreateSwSignatureDto {
   userId: number;
   needId: number;
   childId: number;
-  signerAddress: string;
 }

@@ -1,233 +1,285 @@
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { NFTStorage, File } from 'nft.storage';
 import fs, { createWriteStream } from 'fs';
 import mime from 'mime';
 import { HttpService } from '@nestjs/axios';
-import { NeedService } from '../need/need.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-    IpfsChildEntity,
     IpfsEntity,
-    IpfsNeedEntity,
 } from 'src/entities/ipfs.entity';
 import { NeedEntity } from 'src/entities/need.entity';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 import { Token } from 'nft.storage/dist/src/lib/interface';
 import { catchError, lastValueFrom, map } from 'rxjs';
+import { SAYPlatformRoles } from 'src/types/interfaces/interface';
+import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
+import { ChildrenService } from '../children/children.service';
+import { PaymentService } from '../payment/payment.service';
+import { SignatureEntity } from 'src/entities/signature.entity';
 
 @Injectable()
 export class IpfsService {
     constructor(
         private httpService: HttpService,
-        private readonly needService: NeedService,
+        private childrenService: ChildrenService,
+        private paymentService: PaymentService,
         @InjectRepository(IpfsEntity)
         private ipfsRepository: Repository<IpfsEntity>,
-        @InjectRepository(IpfsNeedEntity)
-        private ipfsNeedRepository: Repository<IpfsNeedEntity>,
-        @InjectRepository(IpfsChildEntity)
-        private ipfsChildRepository: Repository<IpfsChildEntity>,
+
     ) { }
 
     private readonly logger = new Logger(IpfsService.name);
 
     async createIpfs(
         need: NeedEntity,
-        awakeAvatarHash: string,
-        sleptAvatarHash: string,
-        adultAvatarHash: string,
-        iconHash: string,
-        receiptHashes: string[],
+        needDetailsHash: string,
     ): Promise<IpfsEntity> {
-        const newChildIpfs = this.ipfsChildRepository.create({
-            awakeAvatarHash,
-            sleptAvatarHash,
-            adultAvatarHash,
-        });
-        const newNeedIpfs = this.ipfsNeedRepository.create({
-            receiptHashes,
-            iconHash,
-        });
-        const childImages = await this.ipfsChildRepository.save(newChildIpfs);
-        const needImages = await this.ipfsNeedRepository.save(newNeedIpfs);
-
         const newIpfs = this.ipfsRepository.create({
-            childImages,
-            needImages,
-            need
+            flaskNeedId: need.flaskId,
+            needDetailsHash,
+            need,
         });
-
         return this.ipfsRepository.save(newIpfs);
     }
 
-    async storeImagesIpfs(needId: string) {
+    getNeedIpfs(flaskNeedId: number) {
+        return this.ipfsRepository.findOne({
+            where: {
+                flaskNeedId
+            },
+            relations: {
+                signatures: true
+            }
+        })
+    }
+
+    async handleIpfs(
+        signature: string,
+        role: SAYPlatformRoles,
+        callerFlaskId: number,
+        need: NeedEntity,
+    ) {
         const client = new NFTStorage({ token: process.env.NFT_STORAGE_KEY });
-        const need = await this.needService.getNeedById(needId);
         if (!need) {
-            throw new ObjectNotFound()
+            throw new ObjectNotFound();
         }
         if (need.ipfs) {
-            console.log(need)
-            return need.ipfs
+            return need.ipfs;
         }
 
-        console.log('\x1b[36m%s\x1b[0m', '1- Creating a files from Urls ...');
-        // Receipts
-        const receiptsHashList = [];
-        for (let i = 0; i < need.receipts.length; i++) {
-            const receiptImage = await this.fileFromPath(
-                need.receipts[i].attachment,
-                need.receipts[i].title,
+
+        let dataNeed: Token<{ image: any; name: string; description: string }>;
+        console.log(need)
+        console.log(need.socialWorker)
+        // Need
+        if (need.socialWorker.flaskId === Number(callerFlaskId)) {
+            console.log('\x1b[36m%s\x1b[0m', `1- Storing child to IPFS...`);
+            const child = await this.childrenService.getChildById(need.child.flaskId)
+            if (!child) {
+                throw new WalletExceptionFilter(403, "Child could not be found!")
+            }
+
+            let awakeImage: any
+            let sleptImage: any
+            if (child.awakeAvatarUrl) {
+                // Awake avatar
+                awakeImage = await this.fileFromPath(
+                    child.awakeAvatarUrl,
+                    `${child.sayName}Awake`,
+                );
+                console.log('\x1b[36m%s\x1b[0m', ' Cleaning local storage ...');
+                fs.unlinkSync(`./${child.sayName}Awake.jpg`);
+
+            }
+            if (child && child.sleptAvatarUrl) {
+                // Slept avatar
+                sleptImage = await this.fileFromPath(
+                    child.sleptAvatarUrl,
+                    `${child.sayName}Slept`,
+                );
+                console.log('\x1b[36m%s\x1b[0m', ' Cleaning local storage ...');
+                fs.unlinkSync(`./${child.sayName}Slept.jpg`);
+            }
+
+
+            const iconImage = await this.fileFromPath(need.imageUrl, `${need.name}`);
+            fs.unlinkSync(`./${need.name}.jpg`);
+            console.log('\x1b[36m%s\x1b[0m', ' Cleaned last file from local storage!');
+            // dates
+            const needDates = {
+                estimationDays: need.doingDuration,
+                updated: String(need.updated),
+                created: String(need.created),
+                confirmDate: String(need.confirmDate),
+                paidDate: String(need.doneAt),
+                purchaseDate: String(need.purchaseDate),
+                ngoDeliveryDate: String(need.ngoDeliveryDate),
+                expectedDeliveryDate: String(need.expectedDeliveryDate),
+                childDeliveryDate: String(need.childDeliveryDate),
+            };
+
+            // details
+            const needDetails = {
+                needId: need.id, // nest id
+                childId: need.child.id, // nest id
+                ngoId: child.ngo.id, // nest id
+                providerId: need.provider.id, // nest id
+                socialWorkerNotes: need.details ? need.details : 'N/A',
+                information: need.information ? need.information : 'N/A',
+                description: need.descriptionTranslations ? {
+                    en: need.descriptionTranslations.en,
+                    fa: need.descriptionTranslations.fa
+                } : 'N/A',
+                titles: need.nameTranslations ? {
+                    en: need.nameTranslations.en,
+                    fa: need.nameTranslations.fa
+                } : 'N/A',
+                title: need.title,
+                isUrgent: need.isUrgent,
+                type: need.type,
+                category: need.category,
+                name: need.name,
+                status: need.status,
+                link: need.link,
+                cost: need.cost,
+                paid: need.paid,
+                purchaseCost: need.purchaseCost,
+            };
+            console.log('\x1b[36m%s\x1b[0m', `2- Storing Need to IPFS...`);
+            // Main need IPFS
+            dataNeed = await client.store({
+                image: iconImage,
+                name: need.name,
+                description: need.descriptionTranslations ? need.descriptionTranslations.fa : 'N/A',
+                properties: {
+                    needDetails,
+                    needDates,
+                    initialSignature: signature,
+                },
+                child: {
+                    awakeImage: awakeImage,
+                    sleptImage: sleptImage,
+                    name: {
+                        en: child.sayNameTranslations.en,
+                        fa: child.sayNameTranslations.fa
+                    },
+                    story: {
+                        en: child.bioTranslations.en,
+                        fa: child.bioTranslations.fa
+                    },
+                    joined: String(child.created),
+                    cityId: child.city,
+                    countryId: child.country,
+                    nationality: child.nationality,
+                    birthDate: String(child.birthDate)
+                },
+                ngo: {
+                    name: child.ngo.name,
+                    website: child.ngo.website,
+                    cityId: child.ngo.city.flaskCityId,
+                    stateId: child.ngo.city.stateId,
+                    countryId: child.ngo.city.countryId,
+                    countryName: child.ngo.city.countryName,
+                    cityName: child.ngo.city.name,
+                },
+                provider: need.provider && {
+                    providerId: need.provider.id,
+                    name: need.provider.name,
+                    website: need.provider.website,
+                }
+
+            });
+            console.log('\x1b[36m%s\x1b[0m', `Stored Need to IPFS...`);
+
+
+            const needIpfs = await this.createIpfs(
+                need,
+                dataNeed.ipnft,
             );
+
             console.log(
                 '\x1b[36m%s\x1b[0m',
-                `2- Storing receipts to IPFS ${i}/${need.receipts.length}...`,
+                '4- Updated DataBase with IPFS details ...',
             );
-            const data = await client.store({
-                image: receiptImage,
-                name: need.receipts[i].title || 'noTitle',
-                description: need.receipts[i].description,
-            });
-            receiptsHashList.push(data.ipnft);
+            this.logger.log('Stored on IPFS');
+            console.log(needIpfs);
+            return needIpfs;
+        }
+        if (role === SAYPlatformRoles.AUDITOR) {
+        }
+        if (role === SAYPlatformRoles.PURCHASER) {
+        }
+        const receiptsHashList = [];
+        if (role === SAYPlatformRoles.FAMILY) {
+            const needContributors = {
+                // contributors
+                auditor: need.auditor,
+                auditorSignature: need.auditor,
+                socialWorker: need.socialWorker,
+                socialWorkerSignature: need.auditor,
+                purchaser: need.purchaser,
+                purchaserSignature: need.auditor,
+            };
+
+            // Receipts
+            await this.paymentService.getFlaskNeedPayments(need.flaskId)
+            for (let i = 0; i < need.receipts.length; i++) {
+                console.log(
+                    '\x1b[36m%s\x1b[0m',
+                    `1- Storing receipts to IPFS ${i}/${need.receipts.length}...`,
+                );
+                const receiptImage = await this.fileFromPath(
+                    need.receipts[i].attachment,
+                    need.receipts[i].title,
+                );
+                const data = await client.store({
+                    image: receiptImage,
+                    name: need.receipts[i].title || 'noTitle',
+                    description: need.receipts[i].description,
+                    properties: {
+                        contributors: needContributors,
+                    },
+                });
+                receiptsHashList.push(data.ipnft);
+            }
+        }
+        else {
+            throw new WalletExceptionFilter(403, "could not find your role in this need !")
         }
 
-        let dataIcon: Token<{ image: any; name: string; description: string; }>
-        let dataSlept: Token<{ image: any; name: string; description: string; }>
-        let dataAwake: Token<{ image: any; name: string; description: string; }>
-        let dataAdult: Token<{ image: any; name: string; description: string; }>
-
-        if (need.imageUrl) {
-            console.log('\x1b[36m%s\x1b[0m', `2- Storing Icon to IPFS...`);
-            // Icon
-            const iconImage = await this.fileFromPath(
-                need.imageUrl,
-                `${need.name}`,
-            );
-            dataIcon = await client.store({
-                image: iconImage,
-                name: need.name || 'noName',
-                description: 'Need Icon',
-            });
-        }
-
-        if (need.child && need.child.sleptAvatarUrl) {
-            console.log('\x1b[36m%s\x1b[0m', `2- Storing avatars to IPFS...`);
-            // Slept avatar
-            const sleptImage = await this.fileFromPath(
-                need.child.sleptAvatarUrl,
-                `${need.child.sayName}Slept`,
-            );
-            dataSlept = await client.store({
-                image: sleptImage,
-                name: `${need.child.sayName}Slept` || 'noName',
-                description: 'Slept Avatar',
-            });
-        }
-
-        if (need.child && need.child.awakeAvatarUrl) {
-
-            // Awake avatar
-            const awakeImage = await this.fileFromPath(
-                need.child.awakeAvatarUrl,
-                `${need.child.sayName}Awake`,
-            );
-            dataAwake = await client.store({
-                image: awakeImage,
-                name: `${need.child.sayName}Awake` || 'noName',
-                description: 'Awake Avatar',
-            });
-        }
-
-        if (need.child && need.child.adultAvatarUrl) {
-
-            // Adult avatar
-            const adultImage = await this.fileFromPath(
-                need.child.adultAvatarUrl,
-                `${need.child.sayName}Adult`,
-            );
-            dataAdult = await client.store({
-                image: adultImage,
-                name: `${need.child.sayName}Adult` || 'noName',
-                description: 'Adult Avatar',
-            });
-        }
-
-        const needIpfs = await this.createIpfs(
-            need,
-            dataAwake ? dataAwake.ipnft : 'no hash',
-            dataSlept ? dataSlept.ipnft : 'no hash',
-            dataAdult ? dataAdult.ipnft : 'no hash',
-            dataIcon ? dataIcon.ipnft : 'no hash',
-            receiptsHashList,
-        );
-
-        console.log(
-            '\x1b[36m%s\x1b[0m',
-            '4- Updated DataBase with IPFS details ...',
-        );
-
-        this.logger.log('Stored on IPFS');
-        console.log(needIpfs);
-        return needIpfs;
     }
 
     async fileFromPath(url: string, name = 'noTitle'): Promise<any> {
         try {
-            const result = this.downloadFile(url, `${name}.jpg`);
-            const fact = await lastValueFrom(result);
+            const result = await this.downloadFile(url, `${name}.jpg`);
+            await lastValueFrom(result);
             const content = await fs.promises.readFile(`./${name}.jpg`);
             const type = mime.getType(`./${name}.jpg`);
             const file = new File([content], `${name}`, { type });
-            console.log('\x1b[36m%s\x1b[0m', ' Cleaning local storage ...');
-            fs.unlinkSync(`./${name}.jpg`);
             return file;
         } catch (e) {
             console.log(e);
         }
     }
 
-    downloadFile(fileUrl: string, outputLocationPath: string) {
-        console.log(fileUrl)
-        console.log(outputLocationPath)
+    async downloadFile(fileUrl: string, outputLocationPath: string) {
+        console.log(fileUrl);
+        console.log(outputLocationPath);
         const writer = createWriteStream(outputLocationPath);
-        return this.httpService.get(fileUrl).pipe(
-            map((res) => res.data.pipe(writer)),
-        ).pipe(
-            catchError((e) => {
-                console.log(e)
-                throw new ForbiddenException('API not available');
-            }),
-        );
-        // return this.httpService
-        //     .axiosRef({
-        //         url: fileUrl,
-        //         method: 'GET',
-        //         responseType: 'stream',
-        //         timeout: 8000,
-        //         headers: {
-        //             "Content-Type": 'app'
-        //         }
-        //     })
-        //     .then((response) => {
-        //         // ensure that the user can call `then()` only when the file has
-        //         // been downloaded entirely.
-        //         return new Promise((resolve, reject) => {
-        //             response.data.pipe(writer);
-        // let error = null;
-        // writer.on('error', (err) => {
-        //     console.log('err1');
-        //     error = err;
-        //     writer.close();
-        //     reject(err);
-        // });
-        //             writer.on('close', () => {
-        //                 if (!error) {
-        //                     resolve(console.log('downloading image is completed!'));
-        //                 }
-        //                 //no need to call the reject here, as it will have been called in the
-        //                 //'error' stream;
-        //             });
-        //         });
-        //     });
+        if (fileUrl.startsWith('/')) {
+            fileUrl = fileUrl.slice(1);
+        }
+        return this.httpService
+            .get(`https://api.sayapp.company/${fileUrl}`, {
+                responseType: 'stream',
+                timeout: 10000,
+            })
+            .pipe(map((res) => res.data?.pipe(writer)))
+            .pipe(
+                catchError((e) => {
+                    throw new WalletExceptionFilter(e.status, e.message);
+                }),
+            );
     }
 }

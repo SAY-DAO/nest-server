@@ -3,9 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HttpModule } from '@nestjs/axios';
 import { UserService } from './user.service';
-import {
-  AllUserEntity,
-} from '../../entities/user.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import { UserController } from './user.controller';
 import { UserMiddleware } from './middlewares/user.middleware';
 import { NeedEntity } from '../../entities/need.entity';
@@ -25,10 +23,16 @@ import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { IpfsService } from '../ipfs/ipfs.service';
+import { IpfsEntity } from 'src/entities/ipfs.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Need, SocialWorker, Child], 'flaskPostgres'),
+    TypeOrmModule.forFeature(
+      [Need, SocialWorker, Child, Payment],
+      'flaskPostgres',
+    ),
     TypeOrmModule.forFeature([
       TicketEntity,
       TicketViewEntity,
@@ -39,7 +43,8 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
       PaymentEntity,
       AllUserEntity,
       SignatureEntity,
-      EthereumAccountEntity
+      EthereumAccountEntity,
+      IpfsEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -52,6 +57,7 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
     ChildrenService,
     PaymentService,
     SignatureService,
+    IpfsService
   ],
 })
 export class UserModule implements NestModule {

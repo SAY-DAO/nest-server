@@ -1,15 +1,16 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Query, Res, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Res, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProviderService } from './provider.service';
 import { ProviderEntity } from '../../entities/provider.entity';
 import { ServerError } from '../../filters/server-exception.filter';
-import { CreateProviderDto } from '../../types/dtos/CreateProvider.dto';
+import { CreateProviderDto, CreateProviderJoinNeedDto } from '../../types/dtos/CreateProvider.dto';
 import { Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storage } from '../../storage';
 import { UpdateResult } from 'typeorm';
 import { NeedTypeDefinitionEnum, NeedTypeEnum } from '../../types/interfaces/interface';
 import { ValidateProviderPipe } from './pipes/validate-provider.pipe';
+import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 
 @ApiTags('Provider')
 @Controller('providers')
@@ -38,7 +39,19 @@ export class ProviderController {
             throw new HttpException('you need to provide id', HttpStatus.BAD_REQUEST)
 
         }
+    }
 
+
+    @Post('join')
+    @ApiOperation({ description: 'Create one provider' })
+    async createRelation(@Body() body: CreateProviderJoinNeedDto): Promise<ProviderJoinNeedEntity> {
+        let relation: ProviderJoinNeedEntity
+        try {
+            relation = await this.providerService.createRelation(body.flaskNeedId, body.nestProviderId)
+        } catch (e) {body
+            throw new ServerError(e.message, e.status);
+        }
+        return relation;
     }
 
     @Post('add')

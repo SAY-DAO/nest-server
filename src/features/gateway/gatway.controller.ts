@@ -1,9 +1,7 @@
 import { Injectable, OnModuleInit, UseFilters, UsePipes, ValidationPipe } from "@nestjs/common";
 import { SubscribeMessage, WebSocketGateway, MessageBody, WebSocketServer, ConnectedSocket } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io'
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { TicketEntity } from "src/entities/ticket.entity";
-import { TicketViewEntity } from "src/entities/ticketView.entity";
 import { BadRequestTransformationFilter } from "src/filters/socket-exception.filter";
 import { CreateJoinRoomDto } from "src/types/dtos/ticket/CreateJoinRoom.dto";
 import { CreateTicketColorDto } from "src/types/dtos/ticket/CreateTicketColor.dto";
@@ -33,6 +31,7 @@ export class GateWayController implements OnModuleInit {
     onModuleInit() {
         if (!this.socket || !this.socket.connected) {
             // server-side Initialization
+            console.log('Here')
             this.server.on('connection', (socket) => {
                 this.socket = socket
                 console.log('check connection', socket.connected);

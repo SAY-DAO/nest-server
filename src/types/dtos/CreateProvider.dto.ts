@@ -12,3 +12,9 @@ export class CreateProviderDto {
     logoUrl: ImageData;
     isActive: boolean
 }
+
+export class CreateProviderJoinNeedDto {
+    nestProviderId: string;
+    flaskNeedId: number;
+   
+}

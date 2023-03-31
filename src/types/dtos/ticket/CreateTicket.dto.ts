@@ -1,6 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 import { SwmypageNeeds } from 'src/generated-sources/openapi';
+import { CreatePaymentDto } from '../CreatePayment.dto';
+import { CreateReceiptDto } from '../CreateReceipt.dto';
 import { CreateSocialWorkerDto } from '../CreateSocialWorker.dto';
+import { CreateStatusDto } from '../CreateStatus.dto';
 
 export class customNeed {
   need: SwmypageNeeds;
@@ -17,15 +20,18 @@ export class customNeed {
 export class CreateTicketDto {
   title: string;
   @IsNotEmpty()
-  userId: number;
+  flaskNeedId: number;
   @IsNotEmpty()
-  needId: number;
+  flaskUserId: number;
   @IsNotEmpty()
-  userType: number;
+  userTypeId: number;
+  statuses?: CreateStatusDto[]
+  receipts?: CreateReceiptDto[]
+  payments?: CreatePaymentDto[]
   @IsNotEmpty()
   roles: string[];
-  @IsNotEmpty()
-  need: SwmypageNeeds;
-  @IsNotEmpty()
-  childId: number;
+  isDone: boolean
+  paid: number
+  unpayable: boolean
+  unpayableFrom: Date
 }

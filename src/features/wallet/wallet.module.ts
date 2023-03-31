@@ -28,9 +28,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { IpfsService } from '../ipfs/ipfs.service';
 import {
-  IpfsChildEntity,
   IpfsEntity,
-  IpfsNeedEntity,
 } from 'src/entities/ipfs.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { LocationService } from '../location/location.service';
@@ -38,6 +36,10 @@ import { Cities } from 'src/entities/flaskEntities/cities.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { ProviderService } from '../provider/provider.service';
+import { ProviderEntity } from 'src/entities/provider.entity';
+import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 
 @Module({
   imports: [
@@ -53,7 +55,7 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
       quorum: 1,
       useDefaultProvider: true,
     }),
-    TypeOrmModule.forFeature([SocialWorker, Need, NGO, Cities, Child], 'flaskPostgres'),
+    TypeOrmModule.forFeature([SocialWorker, Need, NGO, Cities, Child, Payment], 'flaskPostgres'),
     TypeOrmModule.forFeature([
       PaymentEntity,
       SignatureEntity,
@@ -66,9 +68,9 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
       StatusEntity,
       CityEntity,
       IpfsEntity,
-      IpfsChildEntity,
-      IpfsNeedEntity,
-      EthereumAccountEntity
+      EthereumAccountEntity,
+      ProviderJoinNeedEntity,
+      ProviderEntity,
     ]),
   ],
   controllers: [SignatureController],
@@ -84,6 +86,7 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
     ReceiptService,
     StatusService,
     IpfsService,
+    ProviderService
   ],
 })
 export class WalletModule {

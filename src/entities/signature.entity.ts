@@ -9,12 +9,12 @@ import { NeedEntity } from './need.entity';
 import { SAYPlatformRoles } from '../types/interfaces/interface';
 import { BaseEntity } from './BaseEntity';
 import { AllUserEntity } from './user.entity';
+import { IpfsEntity } from './ipfs.entity';
 
 @Entity()
 export class SignatureEntity extends BaseEntity {
-  @OneToOne(() => AllUserEntity, { eager: true })
-  @JoinColumn()
-  signer: AllUserEntity;
+  @ManyToOne(() => AllUserEntity, (user) => user.signatures, { eager: false })
+  user: AllUserEntity;
 
   @Column()
   flaskUserId: number;
@@ -28,7 +28,6 @@ export class SignatureEntity extends BaseEntity {
   @Column({ type: 'enum', enum: SAYPlatformRoles, nullable: true })
   role: SAYPlatformRoles;
 
-  @ManyToOne(() => NeedEntity, (need) => need.signatures, { eager: false })
-  need: NeedEntity;
-
+  @ManyToOne(() => IpfsEntity, (ipfs) => ipfs.signatures, { eager: false })
+  ipfs: IpfsEntity;
 }

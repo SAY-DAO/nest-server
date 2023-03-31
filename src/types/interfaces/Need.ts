@@ -1,3 +1,4 @@
+import { IpfsEntity } from "src/entities/ipfs.entity";
 import { SignatureEntity } from "src/entities/signature.entity";
 import { TicketEntity } from "src/entities/ticket.entity";
 import { SwmypageReceipts_, SwmypageStatusUpdates, SwmypageVerifiedPayments } from "src/generated-sources/openapi";
@@ -57,7 +58,8 @@ export interface ChildNeed {
     awakeAvatarUrl: string;
   };
   ticket: TicketEntity,
-  signature?: SignatureEntity
+  signatures?: SignatureEntity[];
+  ipfs?: IpfsEntity
 };
 
 export interface Need {
@@ -75,7 +77,7 @@ export interface Need {
   informations: string;
   purchase_cost: number;
   link: string;
-  affiliateLinkUrl: null;
+  affiliateLinkUrl: string;
   isDeleted: boolean;
   receipts: null;
   isConfirmed: boolean;

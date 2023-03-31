@@ -19,8 +19,6 @@ export type ChildParams = {
     sayFamilyCount?: number;
     education?: number;
     status?: number;
-    ngoId?: number;
-    socialWorkerId?: number;
     spentCredit?: number;
     created?: Date;
     updated?: Date;

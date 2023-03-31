@@ -9,9 +9,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { NeedService } from '../need/need.service';
 import { ServerError } from '../../filters/server-exception.filter';
-import { FlaskRolesEnum, ProductStatusEnum } from 'src/types/interfaces/interface';
+import { FlaskUserTypesEnum, ProductStatusEnum } from 'src/types/interfaces/interface';
 import {
     SwMyPage, SwmypageNeeds,
 } from 'src/generated-sources/openapi';
@@ -21,6 +20,7 @@ import { MyPageInterceptor } from './interceptors/mypage.interceptors';
 import { TicketService } from '../ticket/ticket.service';
 import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 import { SignatureService } from '../wallet/wallet.service';
+import { IpfsService } from '../ipfs/ipfs.service';
 
 @ApiTags('Users')
 @Controller('users')
@@ -29,7 +29,7 @@ export class UserController {
         private userService: UserService,
         private ticketService: TicketService,
         private signatureService: SignatureService,
-        private needService: NeedService,
+        private ipfsService: IpfsService,
     ) { }
 
     @Get(`all`)
@@ -53,7 +53,7 @@ export class UserController {
         @Param('userId', ParseIntPipe) userId: number,
         @Param('typeId', ParseIntPipe) typeId: number,
         @Param('ngoId') ngoId: number,
-        @Query('isUser') isUser: "0" | "1",
+        @Query('isUser') isUser: "0" | "1", // when 0 displays all children when 1 shows children/needs created by them
     ) {
         const time1 = new Date().getTime();
         const accessToken = req.headers['authorization'];
@@ -66,7 +66,7 @@ export class UserController {
                 X_SKIP,
                 X_TAKE,
                 userId,
-                parseInt(isUser) // when 0 displays all children when 1 shows children/needs created by them
+                parseInt(isUser)
             );
 
         } catch (e) {
@@ -104,28 +104,18 @@ export class UserController {
                         awakeAvatarUrl: pageData.result[i].awakeAvatarUrl,
                     };
 
-                    // add child + signatures + tickets for every need
+                    // add child + IPFS + tickets for every need
                     const tickets = await this.ticketService.getUserTickets(userId)
-                    const signatures = await this.signatureService.getUserSignatures(userId)
-
                     for (let k = 0; k < pageData.result[i].needs.length; k++) {
                         const fetchedNeed = pageData.result[i].needs[k]
                         const ticket = tickets.find((t) => pageData.result[i].needs[k].id === t.flaskNeedId)
-                        const signature = signatures.find((s) => pageData.result[i].needs[k].id === s.flaskNeedId)
-                        if (signature) {
-                            const need = await this.needService.getNeedByFlaskId(signature.flaskNeedId)
-                            const modifiedNeed: any = fetchedNeed
-                            modifiedNeed.ipfs = need.ipfs
-                            childNeed = { child, ticket, signature, ...modifiedNeed };
-                        } else {
-                            childNeed = { child, ticket, ...fetchedNeed };
+                        const ipfs = await this.ipfsService.getNeedIpfs(pageData.result[i].needs[k].id)
 
-                        }
+                        childNeed = { child, ticket, ipfs, ...fetchedNeed };
                         childNeedsList.push(childNeed);
                     }
-
                     // SW
-                    if (typeId === FlaskRolesEnum.SOCIAL_WORKER) {
+                    if (typeId === FlaskUserTypesEnum.SOCIAL_WORKER) {
                         role = 'createdById';
                         const swNeeds = childNeedsList.filter(
                             (need) => need[role] === userId,
@@ -134,7 +124,7 @@ export class UserController {
                         swNeedsList = newList;
                     }
                     // NGO supervisor
-                    else if (typeId === FlaskRolesEnum.NGO_SUPERVISOR) {
+                    else if (typeId === FlaskUserTypesEnum.NGO_SUPERVISOR) {
                         role = 'ngo';
                         const swNeeds = childNeedsList;
                         const newList = swNeedsList.concat(swNeeds); // Merging
@@ -142,9 +132,9 @@ export class UserController {
                     }
                     // Auditor
                     else if (
-                        typeId === FlaskRolesEnum.ADMIN ||
-                        typeId === FlaskRolesEnum.SUPER_ADMIN ||
-                        FlaskRolesEnum.SAY_SUPERVISOR
+                        typeId === FlaskUserTypesEnum.ADMIN ||
+                        typeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+                        FlaskUserTypesEnum.SAY_SUPERVISOR
                     ) {
                         role = 'confirmedBy';
                         const swNeeds = childNeedsList;
@@ -152,7 +142,7 @@ export class UserController {
                         swNeedsList = newList;
                     }
                     // Purchaser
-                    else if (typeId === FlaskRolesEnum.COORDINATOR) {
+                    else if (typeId === FlaskUserTypesEnum.COORDINATOR) {
                         role = 'purchasedBy';
                         const swNeeds = childNeedsList;
                         for (let k = 0; k < pageData.result[i].needs.length; k++) {
@@ -192,6 +182,8 @@ export class UserController {
         const time8 = new Date().getTime();
         timeDifferenceWithComment(time7, time8, "TimeLine In ")
 
+        const signatures = await this.signatureService.getUserSignatures(userId)
+
         return {
             ngoId,
             userId,
@@ -200,6 +192,7 @@ export class UserController {
             needs: organizedNeeds,
             childrenCount: pageData ? pageData.count : 0,
             timeLine: { summary, inMonth },
+            signatures,
         };
     }
 }

@@ -13,7 +13,11 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SwSignatureResult } from '../../types/interfaces/interface';
-import { CreateSignatureDto, SwGenerateSignatureDto, VerifyWalletDto } from '../../types/dtos/CreateSignature.dto';
+import {
+  CreateSignatureDto,
+  SwGenerateSignatureDto,
+  VerifyWalletDto,
+} from '../../types/dtos/CreateSignature.dto';
 import { ValidateSignaturePipe } from './pipes/validate-wallet.pipe';
 import { SignatureService } from './wallet.service';
 import { SyncService } from '../sync/sync.service';
@@ -24,7 +28,7 @@ import { IpfsService } from '../ipfs/ipfs.service';
 import { WalletInterceptor } from './interceptors/wallet.interceptors';
 import { UserService } from '../user/user.service';
 import { convertFlaskToSayRoles } from 'src/utils/helpers';
-
+import { NeedService } from '../need/need.service';
 
 @ApiTags('Wallet')
 @Controller('wallet')
@@ -34,10 +38,11 @@ export class SignatureController {
     private syncService: SyncService,
     private ipfsService: IpfsService,
     private userService: UserService,
+    private needService: NeedService,
   ) { }
 
   @Get(`nonce`)
-  @ApiOperation({ description: 'Get Siwe nonce' })
+  @ApiOperation({ description: 'Get SIWE nonce' })
   async getNonce(@Res() res, @Session() session: Record<string, any>) {
     if (!session.nonce) {
       session.nonce = generateNonce();
@@ -53,9 +58,8 @@ export class SignatureController {
   }
 
   @Post(`verify/:flaskUserId`)
-  @ApiOperation({ description: 'Verify a signature' })
+  @ApiOperation({ description: 'Verify SIWE' })
   async verifySiwe(
-    @Req() req: Request,
     @Param('flaskUserId') flaskUserId: number,
     @Session() session,
     @Body(ValidateSignaturePipe) body: VerifyWalletDto,
@@ -71,26 +75,34 @@ export class SignatureController {
       const message = new SiweMessage(body.message);
 
       const fields = await message.validate(body.signature);
-      console.log(session)
 
       if (fields.nonce !== session.nonce) {
         throw new WalletExceptionFilter(422, `Invalid nonce.`);
       }
       session.siwe = fields;
-      console.log(body)
+      session.siwe.flaskUserId = flaskUserId
       // session.cookie._expires = new Date(fields.expirationTime);
       session.save();
 
-      let nestContributor = await this.userService.getContributorByFlaskId(flaskUserId);
-      console.log(fields)
+      let nestContributor = await this.userService.getContributorByFlaskId(
+        flaskUserId,
+      );
 
       if (!nestContributor) {
         const flaskCaller = await this.userService.getFlaskSocialWorker(
           flaskUserId,
         );
-        console.log('\x1b[36m%s\x1b[0m', 'Syncing NGO and Caller ...\n' + flaskCaller.id);
-        const CallerNgo = await this.syncService.syncContributorNgo(flaskCaller)
-        console.log('\x1b[36m%s\x1b[0m', 'Synced NGO and Caller ...\n' + flaskCaller.id);
+        console.log(
+          '\x1b[36m%s\x1b[0m',
+          'Syncing NGO and Caller ...\n' + flaskCaller.id,
+        );
+        const CallerNgo = await this.syncService.syncContributorNgo(
+          flaskCaller,
+        );
+        console.log(
+          '\x1b[36m%s\x1b[0m',
+          'Synced NGO and Caller ...\n' + flaskCaller.id,
+        );
 
         const {
           id: callerFlaskId,
@@ -101,8 +113,8 @@ export class SignatureController {
         const callerDetails = {
           ...callerOtherParams,
           typeId: flaskCaller.type_id,
-          firstName: flaskCaller.first_name,
-          lastName: flaskCaller.last_name,
+          firstName: flaskCaller.firstName,
+          lastName: flaskCaller.lastName,
           avatarUrl: flaskCaller.avatar_url,
           flaskId: callerFlaskId,
           flaskNgoId: callerFlaskNgoId,
@@ -117,10 +129,13 @@ export class SignatureController {
         console.log('\x1b[36m%s\x1b[0m', 'Created a user ...\n');
       }
       if (nestContributor && !nestContributor.wallet) {
-        await this.userService.createUserWallet(body.message.address, body.message.chainId, nestContributor)
+        await this.userService.createUserWallet(
+          body.message.address,
+          body.message.chainId,
+          nestContributor,
+        );
       }
       return session.nonce;
-
     } catch (e) {
       session.siwe = null;
       session.nonce = null;
@@ -135,9 +150,9 @@ export class SignatureController {
         }
         default: {
           session.save();
-          console.error("e");
+          console.error('e');
           console.error(e);
-          console.error("e");
+          console.error('e');
           throw new WalletExceptionFilter(e.status, e.message);
         }
       }
@@ -145,7 +160,7 @@ export class SignatureController {
   }
 
   @Get(`personal_information`)
-  @ApiOperation({ description: 'Get all signatures' })
+  @ApiOperation({ description: 'Get SIWE personal data' })
   async getPersonalInformation(@Session() session: Record<string, any>) {
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
@@ -155,7 +170,10 @@ export class SignatureController {
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all signatures' })
-  async getTransaction() {
+  async getTransaction(@Session() session: Record<string, any>) {
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
     return await this.signatureService.getSignatures();
   }
 
@@ -163,54 +181,91 @@ export class SignatureController {
   @Post(`sw/generate`)
   @UsePipes(new ValidationPipe()) // validation for dto files
   async swSignTransaction(
-    @Req() req: Request,
     @Body(ValidateSignaturePipe) body: SwGenerateSignatureDto,
+    @Session() session: Record<string, any>,
   ) {
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
     let transaction: SwSignatureResult;
     try {
+      const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
       const { need, child } = await this.syncService.syncNeed(
-        body.flaskUserId,
-        body.panelData,
-        body.childId,
-        ['AUDITOR', 'SOCIAL_WORKER', 'PURCHASER', 'NGO_SUPERVISOR', 'FAMILY'],
+        flaskNeed,
+        flaskNeed.child_id,
+        session.siwe.flaskUserId,
+        body.receipts,
+        body.payments,
+        body.statuses,
+        body.isDone,
+        body.paid,
+        body.unpayable,
+        body.unpayableFrom,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
 
       transaction = await this.signatureService.swSignTransaction(
-        body.signerAddress,
+        session.siwe.address,
         need,
         child,
-        body.userTypeId
+        body.userTypeId,
       );
-      console.log('\x1b[36m%s\x1b[0m', 'Uploading to IPFS ...');
-      const ipfs = await this.ipfsService.storeImagesIpfs(need.id)
-      return { transaction, ipfs };
-
+      return transaction;
     } catch (e) {
-      console.log(e)
+      console.log(e);
       throw new AllExceptionsFilter(e);
     }
   }
-
 
   @Post(`create/:signature`)
   @ApiOperation({ description: 'Get all signatures' })
   async createSignature(
     @Param('signature') signature: string,
     @Body(ValidateSignaturePipe) body: CreateSignatureDto,
+    @Session() session: Record<string, any>,
   ) {
-    return await this.signatureService.createSignature(signature, body.flaskNeedId, body.role, body.signerAddress, body.flaskUserId);
+
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
+    const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
+    try {
+      if (
+        !need.ipfs ||
+        !need.ipfs.signatures.find((s) => s.flaskUserId === session.siwe.flaskUserId)
+      ) {
+        console.log('\x1b[36m%s\x1b[0m', 'Uploading to IPFS ...');
+        const ipfs = await this.ipfsService.handleIpfs(
+          signature,
+          body.role,
+          session.siwe.flaskUserId,
+          need,
+        );
+
+        console.log('\x1b[36m%s\x1b[0m', 'Finalizing IPFS and Signature ...');
+        const userSignature = await this.signatureService.createSignature(
+          signature,
+          ipfs,
+          body.flaskNeedId,
+          body.role,
+          session.siwe.flaskUserId,
+        );
+        return { ipfs, signature: userSignature };
+      } else {
+        throw new WalletExceptionFilter(403, 'already signed!');
+      }
+    } catch (e) {
+      const theSignature = await this.getSignature(signature);
+      if (theSignature) {
+        await this.signatureService.deleteOne(theSignature);
+      }
+      throw new WalletExceptionFilter(e.status, e.message);
+    }
   }
 
   @Get(`signature/:signature`)
   @ApiOperation({ description: 'Get all signatures' })
-  async getSignature(
-    @Param('signature') signature: string,
-
-  ) {
+  async getSignature(@Param('signature') signature: string) {
     return await this.signatureService.getSignature(signature);
   }
-
-
 }
-

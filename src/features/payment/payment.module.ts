@@ -14,10 +14,14 @@ import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Need, SocialWorker, Child], 'flaskPostgres'),
+    TypeOrmModule.forFeature(
+      [Need, SocialWorker, Child, Payment],
+      'flaskPostgres',
+    ),
     TypeOrmModule.forFeature([
       PaymentEntity,
       NeedEntity,

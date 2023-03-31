@@ -4,12 +4,13 @@ import { Repository, UpdateResult } from 'typeorm';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentParams } from '../../types/parameters/PaymentParameters';
 import { AllUserEntity, } from '../../entities/user.entity';
-import { HeaderOptions } from 'src/types/interfaces/interface';
-import {  PaymentAPIApi } from 'src/generated-sources/openapi';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
 
 @Injectable()
 export class PaymentService {
     constructor(
+        @InjectRepository(Payment, 'flaskPostgres')
+        private flaskPaymentRepository: Repository<Payment>,
         @InjectRepository(PaymentEntity)
         private paymentRepository: Repository<PaymentEntity>,
     ) { }
@@ -22,6 +23,15 @@ export class PaymentService {
         const user = this.paymentRepository.findOne({
             where: {
                 flaskId: flaskId,
+            },
+        });
+        return user;
+    }
+
+    getFlaskNeedPayments(flaskNeedId:number): Promise<Payment> {
+        const user = this.flaskPaymentRepository.findOne({
+            where: {
+                id_need: flaskNeedId,
             },
         });
         return user;
@@ -49,12 +59,12 @@ export class PaymentService {
         });
     }
 
-    async getFlaskPayments(options: HeaderOptions, needId: number): Promise<any> {
-        const publicApi = new PaymentAPIApi();
-        const needPayments: Promise<any> = publicApi.apiV2PaymentAllGet(
-            options.accessToken,
-            needId,
-        );
-        return needPayments;
-    }
+    // async getFlaskPayments(options: HeaderOptions, needId: number): Promise<any> {
+    //     const publicApi = new PaymentAPIApi();
+    //     const needPayments: Promise<any> = publicApi.apiV2PaymentAllGet(
+    //         options.accessToken,
+    //         needId,
+    //     );
+    //     return needPayments;
+    // }
 }

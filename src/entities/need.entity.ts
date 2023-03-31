@@ -6,7 +6,6 @@ import {
   ManyToOne,
   OneToOne,
 } from 'typeorm';
-import { SignatureEntity } from './signature.entity';
 import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
 import { PaymentEntity } from './payment.entity';
@@ -17,7 +16,7 @@ import { NgoEntity } from './ngo.entity';
 import { TicketEntity } from './ticket.entity';
 import { StatusEntity } from './status.entity';
 import { IpfsEntity } from './ipfs.entity';
-import { ContributorEntity } from './contributor.entity';
+import { AllUserEntity } from './user.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
@@ -55,14 +54,14 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   created: Date;
 
-  @Column({ nullable: true })
-  description: string;
-
   @Column('simple-json', { nullable: true })
   descriptionTranslations: { en: string; fa: string };
 
   @Column({ nullable: true })
   details: string;
+
+  @Column({ nullable: true })
+  information: string;
 
   @Column({ type: 'timestamptz', nullable: true })
   doneAt: Date;
@@ -92,7 +91,7 @@ export class NeedEntity extends BaseEntity {
   link: string;
 
   @Column('simple-json', { nullable: true })
-  titleTranslations: { en: string; fa: string };
+  nameTranslations: { en: string; fa: string };
 
   @Column({ type: 'timestamptz', nullable: true })
   ngoDeliveryDate: Date;
@@ -121,9 +120,6 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
-  // @ManyToMany(() => FamilyEntity, (user) => user.doneNeeds, { eager: false })
-  // participants?: FamilyEntity[];
-
   @Column()
   flaskChildId: number;
 
@@ -139,20 +135,17 @@ export class NeedEntity extends BaseEntity {
   @ManyToOne(() => NgoEntity, (n) => n.needs, { eager: false })
   ngo: NgoEntity;
 
-  @ManyToOne(() => ContributorEntity, (n) => n.createdNeeds, { eager: false })
-  socialWorker: ContributorEntity;
+  @ManyToOne(() => AllUserEntity, { eager: true })
+  socialWorker: AllUserEntity;
 
-  @ManyToOne(() => ContributorEntity, (n) => n.auditedNeeds, { eager: false })
-  auditor: ContributorEntity;
+  @ManyToOne(() => AllUserEntity, { eager: true })
+  auditor: AllUserEntity;
 
-  @ManyToOne(() => ContributorEntity, (n) => n.purchasedNeeds, { eager: false })
-  purchaser: ContributorEntity;
+  @ManyToOne(() => AllUserEntity, { eager: true })
+  purchaser: AllUserEntity;
 
   @OneToMany(() => TicketEntity, (t) => t.need)
   tickets?: TicketEntity[]
-
-  @OneToMany(() => SignatureEntity, (signature) => signature.need, { eager: false })
-  signatures?: SignatureEntity[];
 
   @OneToOne(() => IpfsEntity, (ipfs) => ipfs.need, { eager: true }) // specify inverse side as a second parameter
   ipfs: IpfsEntity

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NeedService } from './need.service';
 
@@ -9,15 +9,16 @@ export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
 export class NeedController {
   constructor(
     private needService: NeedService,
-
   ) { }
 
 
   @Get(`all`)
-  @ApiOperation({ description: 'Get all needs from db' })
+  @ApiOperation({ description: 'Get all needs from db 1' })
   async getNeeds() {
     return await this.needService.getNeeds()
   }
+
+
 
   @Get(`flask/random`)
   @ApiOperation({ description: 'Get all done needs from flask' })
@@ -33,23 +34,14 @@ export class NeedController {
     return preNeeds;
   }
 
-  @Get(`flask/all`)
-  @ApiOperation({ description: 'Get all needs from flask' })
-  async getFlaskNeeds(
-    @Req() req: Request,
-    @Query('skip') skip = 0,
-    @Query('take') take = 100,
+  @Get(`flask/:id`)
+  @ApiOperation({ description: 'Get a need from db 2' })
+  async getFlaskNeed(
+    @Param('id') id: number
   ) {
-    const accessToken = req.headers['authorization'];
-    take = take > 100 ? 100 : take;
-    return await this.needService.getFlaskNeeds(
-      {
-        accessToken: accessToken,
-        X_TAKE: Number(take),
-        X_SKIP: Number(skip),
-      },
-      {},
-    );
+    return await this.needService.getFlaskNeed(id)
   }
+
+
 
 }

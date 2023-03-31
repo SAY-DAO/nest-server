@@ -5,6 +5,8 @@ export type NeedParams = {
     flaskChildId: number
     createdById?: number
     name?: string,
+    nameTranslations: Record<string, string>;
+    descriptionTranslations: Record<string, string>;
     title?: string;
     status?: number;
     imageUrl?: string;
@@ -18,15 +20,20 @@ export type NeedParams = {
     paid?: number;
     purchaseCost?: any;
     cost?: number;
-    unpayable?: boolean;
-    isDone?: boolean;
+    information?: string;
+    details?: string;
     doneAt?: Date | null;
     isConfirmed?: boolean;
-    unpayableFrom?: Date | null;
+    unavailableFrom?: Date | null;
     created?: Date;
     updated?: Date;
     purchaseDate?: Date
     ngoDeliveryDate?: Date
-    confirmDate?: Date | null;
+    expectedDeliveryDate?: Date
+    childDeliveryDate?: Date
+    confirmDate?: Date;
     bankTrackId?: string | null;
+    unpayable: boolean,
+    unpayableFrom: Date,
+    isDone: boolean,
 }

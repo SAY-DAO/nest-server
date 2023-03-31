@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
-import {
-  ChildAPIApi,
-} from 'src/generated-sources/openapi';
+import { ChildAPIApi } from 'src/generated-sources/openapi';
 import { ChildApiParams, HeaderOptions } from 'src/types/interfaces/interface';
 import { ChildrenData } from 'src/types/interfaces/Children';
 import { NeedSummary } from 'src/types/interfaces/Need';
@@ -19,7 +17,7 @@ export class ChildrenService {
     @InjectRepository(ChildrenEntity)
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
-    private childFlaskRepository: Repository<Child>,
+    private flaskChildRepository: Repository<Child>,
   ) { }
 
   async getAllFlaskChildren(
@@ -53,13 +51,13 @@ export class ChildrenService {
   // }
 
   getFlaskChild(flaskChildId: number) {
-    return this.childFlaskRepository.findOne({
-      where: { id: flaskChildId }
+    return this.flaskChildRepository.findOne({
+      where: { id: flaskChildId },
     });
   }
 
   getFlaskChildren() {
-    return this.childFlaskRepository.find();
+    return this.flaskChildRepository.find();
   }
 
   async getChildNeedsSummery(
@@ -74,18 +72,25 @@ export class ChildrenService {
     return needs;
   }
 
-  createChild(childDetails: ChildParams, ngo: NgoEntity, socialWorker: ContributorEntity): Promise<ChildrenEntity> {
+  createChild(
+    childDetails: ChildParams,
+    ngo: NgoEntity,
+    socialWorker: ContributorEntity,
+  ): Promise<ChildrenEntity> {
     const newChild = this.childrenRepository.create({
       ...childDetails,
       ngo: ngo,
-      socialWorker: socialWorker
+      socialWorker: socialWorker,
+      flaskSwId: socialWorker.flaskId,
+      flaskNgoId: ngo.flaskNgoId
     });
-    return this.childrenRepository.save({ id: newChild.id, ...newChild });
+
+    return this.childrenRepository.save({ ...newChild });
   }
 
   updateChild(
     childDetails: ChildParams,
-    child: ChildrenEntity
+    child: ChildrenEntity,
   ): Promise<UpdateResult> {
     return this.childrenRepository.update(
       { id: child.id },
@@ -99,6 +104,7 @@ export class ChildrenService {
 
   getChildById(flaskId: number): Promise<ChildrenEntity> {
     const child = this.childrenRepository.findOne({
+      relations: { ngo: true },
       where: {
         flaskId: flaskId,
       },

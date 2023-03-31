@@ -13,6 +13,9 @@ import { BaseEntity } from './BaseEntity';
 
 @Entity() // panel admin, sw, auditor, ...
 export class ContributorEntity extends BaseEntity {
+  @Column({ nullable: false })
+  flaskId: number;
+
   @Column({ nullable: true })
   flaskNgoId?: number;
 
@@ -28,7 +31,7 @@ export class ContributorEntity extends BaseEntity {
   @OneToMany(() => NeedEntity, (c) => c.purchaser)
   purchasedNeeds?: NeedEntity[];
 
-  @ManyToOne(() => NgoEntity, (n) => n.socialWorkers, { eager: true })
+  @ManyToOne(() => NgoEntity, (n) => n.socialWorkers, { eager: false })
   ngo?: NgoEntity;
 
 }
