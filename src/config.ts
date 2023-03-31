@@ -11,14 +11,7 @@ const Environments = {
 };
 
 function loadConfig() {
-  let dbPassword = undefined;
   const NODE_ENV = process.env.NODE_ENV ?? Environments.development;
-  try {
-    if (process.env.DB_PASS_FILE)
-      dbPassword = readFileSync(process.env.DB_PASS_FILE, 'utf-8');
-  } catch {
-    console.log(`${process.env.DB_PASS_FILE} DOES NOT EXISTS!`);
-  }
 
   const configs = {
     serverPort: process.env.PORT || 8002,
@@ -35,7 +28,7 @@ function loadConfig() {
       port: 5432,
       host: NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,
       username: process.env.DB_USER ?? 'postgres',
-      password: dbPassword ?? process.env.DB_PASS ?? 'postgres',
+      password: process.env.DB_PASS ?? 'postgres',
       database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
       synchronize: true,
