@@ -19,7 +19,7 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
-  console.log("pgPool1");
+  console.log("pgPool11");
 
   const app = await ApplicationContext();
   app.enableShutdownHooks();
