@@ -19,6 +19,7 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
+  console.log("pgPool");
 
   const app = await ApplicationContext();
   app.enableShutdownHooks();
@@ -51,7 +52,6 @@ async function startServer() {
 
 
   app.use(cookieParser());
-  console.log("pgPool");
   console.log("pgPool");
   console.log("pgPool");
 
