@@ -13,7 +13,6 @@ async function startServer() {
   console.log('Port:' + config().serverPort);
   console.log('db Host:' + config().db1.host);
   console.log('db Port:' + config().db1.port);
-  console.log('db password:' + config().db1.password);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
@@ -63,6 +62,7 @@ async function startServer() {
     password: process.env.DB_PASS ?? 'postgres',
     database: process.env.DB_NAME ?? 'say_dapp',
   });
+  console.log(pgPool);
 
   app.use(
     session({
