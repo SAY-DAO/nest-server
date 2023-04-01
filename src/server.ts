@@ -51,6 +51,9 @@ async function startServer() {
 
 
   app.use(cookieParser());
+  console.log("pgPool");
+  console.log("pgPool");
+  console.log("pgPool");
 
   const pgPool = new pg.Pool({
     port: 5432,
