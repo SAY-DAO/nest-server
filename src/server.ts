@@ -13,6 +13,7 @@ async function startServer() {
   console.log('Port:' + config().serverPort);
   console.log('db Host:' + config().db1.host);
   console.log('db Port:' + config().db1.port);
+  console.log('db password:' + config().db1.password);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
@@ -52,33 +53,33 @@ async function startServer() {
 
   app.use(cookieParser());
 
-  // const pgPool = new pg.Pool({
-  //   port: 5432,
-  //   user: process.env.DB_USER ?? 'postgres',
-  //   host:
-  //     process.env.NODE_ENV === 'development'
-  //       ? 'localhost'
-  //       : process.env.DB_HOST,
-  //   password: process.env.DB_PASS ?? 'postgres',
-  //   database: process.env.DB_NAME ?? 'say_dapp',
-  // });
+  const pgPool = new pg.Pool({
+    port: 5432,
+    user: process.env.DB_USER ?? 'postgres',
+    host:
+      process.env.NODE_ENV === 'development'
+        ? 'localhost'
+        : process.env.DB_HOST,
+    password: process.env.DB_PASS ?? 'postgres',
+    database: process.env.DB_NAME ?? 'say_dapp',
+  });
 
-  // app.use(
-  //   session({
-  //     store: new (connect(session))({
-  //       pool: pgPool, // Connection pool
-  //       // Insert connect-pg-simple options here
-  //     }),
-  //     name: 'SAY-DAO-SESSION',
-  //     secret: 'mySecret',
-  //     resave: true,
-  //     saveUninitialized: true,
-  //     cookie: {
-  //       domain: '127.0.0.1',
-  //       path: '/api/dao', secure: false, sameSite: false, maxAge: 1000 * 60 * 60
-  //     }
-  //   }),
-  // );
+  app.use(
+    session({
+      store: new (connect(session))({
+        pool: pgPool, // Connection pool
+        // Insert connect-pg-simple options here
+      }),
+      name: 'SAY-DAO-SESSION',
+      secret: 'mySecret',
+      resave: true,
+      saveUninitialized: true,
+      cookie: {
+        domain: '127.0.0.1',
+        path: '/api/dao', secure: false, sameSite: false, maxAge: 1000 * 60 * 60
+      }
+    }),
+  );
 
   await app.listen(config().serverPort);
 }
