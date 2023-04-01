@@ -7,6 +7,19 @@ import connect from 'connect-pg-simple';
 import pg from 'pg';
 
 async function startServer() {
+  console.log('Environment:' + process.env.NODE_ENV);
+  console.log('Started server');
+  console.log('Host:' + config().host);
+  console.log('Port:' + config().serverPort);
+  console.log('db Host:' + config().db1.host);
+  console.log('db Port:' + config().db1.port);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
+  console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
+
   const app = await ApplicationContext();
   app.enableShutdownHooks();
   app.setGlobalPrefix('api/dao');
@@ -66,18 +79,6 @@ async function startServer() {
       }
     }),
   );
-  console.log('Environment:' + process.env.NODE_ENV);
-  console.log('Started server');
-  console.log('Host:' + config().host);
-  console.log('Port:' + config().serverPort);
-  console.log('db Host:' + config().db1.host);
-  console.log('db Port:' + config().db1.port);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
 
   await app.listen(config().serverPort);
 }
