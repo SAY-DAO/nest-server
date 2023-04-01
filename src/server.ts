@@ -71,11 +71,11 @@ async function startServer() {
         // Insert connect-pg-simple options here
       }),
       name: 'SAY-DAO-SESSION',
-      secret: 'mySecret',
+      secret: 'mySecret', // add to .env
       resave: true,
       saveUninitialized: true,
       cookie: {
-        domain: '127.0.0.1',
+        domain: '188.229.42.250',
         path: '/api/dao', secure: false, sameSite: false, maxAge: 1000 * 60 * 60
       }
     }),
