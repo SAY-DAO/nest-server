@@ -2,8 +2,6 @@ import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NeedService } from './need.service';
 
-export const NEEDS_URL = 'http://localhost:3000/api/dao/sync/update';
-
 @ApiTags('Needs')
 @Controller('needs')
 export class NeedController {
