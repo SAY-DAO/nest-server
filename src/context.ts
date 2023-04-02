@@ -13,7 +13,6 @@ export const ApplicationContext = async () => {
       .setTitle('SAY DAO')
       .setDescription('DAO API')
       .setVersion('v0.1.0')
-      // .addTag('Needs')
       .addServer(config().documentUrl, 'The Server')
       .build();
     const document = SwaggerModule.createDocument(context, options);

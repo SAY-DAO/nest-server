@@ -11,7 +11,11 @@ import {
   PublicAPIApi,
   PublicNeed,
 } from '../../generated-sources/openapi';
-import { HeaderOptions, NeedApiParams } from 'src/types/interfaces/interface';
+import {
+  HeaderOptions,
+  NeedApiParams,
+  ProductStatusEnum,
+} from 'src/types/interfaces/interface';
 import { NeedsData } from 'src/types/interfaces/Need';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { NeedParams } from 'src/types/parameters/NeedParameters';
@@ -24,7 +28,6 @@ import { ProviderEntity } from 'src/entities/provider.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 
-
 @Injectable()
 export class NeedService {
   constructor(
@@ -34,7 +37,7 @@ export class NeedService {
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
-  ) { }
+  ) {}
 
   getFlaskNeed(flaskNeedId: number): Promise<Need> {
     return this.flaskNeedRepository.findOne({
@@ -120,16 +123,16 @@ export class NeedService {
     receipts: ReceiptEntity[],
     provider: ProviderEntity,
   ): Promise<NeedEntity> {
-    if (!theSw || !theAuditor || !thePurchaser || !theNgo) {
-      console.log("hdfgfg1")
-      console.log(theSw.id)
-      console.log(theAuditor.id)
-      console.log("haram2")
-      console.log(thePurchaser.id)
-      console.log(theNgo.id)
-      console.log("hdfgfg3")
-
-      throw new ForbiddenException('Can not Create need without contributors or NGO')
+    if (
+      !theSw ||
+      (needDetails.status >= ProductStatusEnum.PARTIAL_PAY && !theAuditor) ||
+      (needDetails.status >= ProductStatusEnum.PURCHASED_PRODUCT &&
+        !thePurchaser) ||
+      !theNgo
+    ) {
+      throw new ForbiddenException(
+        'Can not Create need without contributors or NGO',
+      );
     }
     const newNeed = this.needRepository.create({
       child: theChild,

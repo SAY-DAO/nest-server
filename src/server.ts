@@ -19,10 +19,8 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
-  console.log("pgPool101");
 
   const app = await ApplicationContext();
-  console.log("pgPool2");
   app.enableShutdownHooks();
   app.setGlobalPrefix('api/dao');
   // For large transactions
@@ -49,6 +47,7 @@ async function startServer() {
     methods: ['GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'],
     optionsSuccessStatus: 200,
     credentials: true,
+    preflightContinue: true,
   });
 
 
@@ -65,6 +64,7 @@ async function startServer() {
     password:  'postgres',
     database:  'say_dapp',
   });
+
 
   app.use(
     session({
