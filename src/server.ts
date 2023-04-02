@@ -29,6 +29,7 @@ async function startServer() {
   app.enableCors({
     origin: [
       "http://localhost:3000",
+      "https://panel.saydao.org",
       process.env.AUTHORIZED_DAPP_LOCAL,
       process.env.AUTHORIZED_PANEL_LOCAL,
       process.env.AUTHORIZED_PANEL_PRODUCTION,
