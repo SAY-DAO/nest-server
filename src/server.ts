@@ -57,7 +57,7 @@ async function startServer() {
 
   const pgPool = new pg.Pool({
     port: 5432,
-    user: process.env.DB_USER ?? 'postgres',
+    user: 'po2stgres',
     host:
       process.env.NODE_ENV === 'development'
         ? 'localhost'
