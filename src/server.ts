@@ -47,7 +47,7 @@ async function startServer() {
     methods: ['GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'],
     optionsSuccessStatus: 200,
     credentials: true,
-    preflightContinue: false,
+    preflightContinue: true,
   });
 
 
