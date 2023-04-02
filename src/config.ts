@@ -56,10 +56,10 @@ function loadConfig() {
 
   configs.documentUrl =
     NODE_ENV === Environments.staging || NODE_ENV === Environments.production
-      ? `https://${configs.host}/api/dao`
+      ? `${configs.host}/api/dao`
       : `http://${configs.host}:${configs.serverPort}/api/dao`;
 
-
+console.log(configs)
   return configs;
 }
 export type ConfigType = ReturnType<typeof loadConfig>;
