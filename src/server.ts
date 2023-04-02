@@ -52,7 +52,6 @@ async function startServer() {
 
 
   app.use(cookieParser());
-  console.log("pgPool3");
 
   const pgPool = new pg.Pool({
     port: 5432,
@@ -78,7 +77,7 @@ async function startServer() {
       saveUninitialized: true,
       cookie: {
         domain: '188.229.42.250',
-        path: '/api/dao', secure: false, sameSite: false, maxAge: 1000 * 60 * 60
+        path: '/api/dao', secure: true, sameSite: 'none', maxAge: 1000 * 60 * 60
       }
     }),
   );
