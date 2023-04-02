@@ -19,9 +19,10 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
-  console.log("pgPool11");
+  console.log("pgPool101");
 
   const app = await ApplicationContext();
+  console.log("pgPool2");
   app.enableShutdownHooks();
   app.setGlobalPrefix('api/dao');
   // For large transactions
@@ -50,7 +51,6 @@ async function startServer() {
     credentials: true,
   });
 
-  console.log("pgPool2");
 
   // app.use(cookieParser());
   console.log("pgPool3");
