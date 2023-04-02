@@ -48,6 +48,8 @@ export class SignatureController {
       session.nonce = generateNonce();
       session.save();
     }
+    console.log(session)
+
     res.setHeader('Content-Type', 'application/json');
     // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     // res.setHeader('Access-Control-Allow-Credentials', true);
@@ -62,7 +64,6 @@ export class SignatureController {
   async verifySiwe(
     @Param('flaskUserId') flaskUserId: number,
     @Session() session,
-    @Req() req,
     @Body(ValidateSignaturePipe) body: VerifyWalletDto,
   ) {
     try {
@@ -76,7 +77,6 @@ export class SignatureController {
       const message = new SiweMessage(body.message);
 
       const fields = await message.validate(body.signature);
-      console.log(req.session)
       if (fields.nonce !== session.nonce) {
         throw new WalletExceptionFilter(422, `Invalid nonce.`);
       }
