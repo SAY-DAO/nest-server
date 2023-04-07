@@ -97,9 +97,6 @@ export class NeedEntity extends BaseEntity {
   ngoDeliveryDate: Date;
 
   @Column({ nullable: true })
-  paid: number;
-
-  @Column({ nullable: true })
   purchaseCost: number;
 
   @Column({ type: 'timestamptz', nullable: true })
@@ -110,12 +107,6 @@ export class NeedEntity extends BaseEntity {
 
   @Column({ type: 'enum', enum: NeedTypeEnum, nullable: true })
   type: NeedTypeEnum;
-
-  @Column({ nullable: true })
-  unpayable?: boolean;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  unpayableFrom?: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;

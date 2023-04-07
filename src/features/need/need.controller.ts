@@ -24,14 +24,6 @@ export class NeedController {
     return await this.needService.getFlaskRandomNeed();
   }
 
-  @Get(`flask/preneed`)
-  @ApiOperation({ description: 'Get all done needs from flask' })
-  async getPrNeed(@Req() req: Request) {
-    const accessToken = req.headers['authorization'];
-    const preNeeds = await this.needService.getFlaskPreNeed(accessToken);
-    return preNeeds;
-  }
-
   @Get(`flask/:id`)
   @ApiOperation({ description: 'Get a need from db 2' })
   async getFlaskNeed(

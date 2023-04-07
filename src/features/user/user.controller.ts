@@ -10,23 +10,39 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ServerError } from '../../filters/server-exception.filter';
-import { FlaskUserTypesEnum, ProductStatusEnum } from 'src/types/interfaces/interface';
 import {
-    SwMyPage, SwmypageNeeds,
-} from 'src/generated-sources/openapi';
-import { getNeedsTimeLine, getOrganizedNeeds, timeDifferenceWithComment } from 'src/utils/helpers';
+    FlaskUserTypesEnum,
+    PaymentStatusEnum,
+    ProductStatusEnum,
+    SAYPlatformRoles,
+} from 'src/types/interfaces/interface';
+import { SwMyPage, SwmypageNeeds } from 'src/generated-sources/openapi';
+import {
+    convertFlaskToSayRoles,
+    getNeedsTimeLine,
+    getOrganizedNeeds,
+    timeDifferenceWithComment,
+} from 'src/utils/helpers';
 import { ChildNeed } from 'src/types/interfaces/Need';
 import { MyPageInterceptor } from './interceptors/mypage.interceptors';
 import { TicketService } from '../ticket/ticket.service';
 import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 import { SignatureService } from '../wallet/wallet.service';
 import { IpfsService } from '../ipfs/ipfs.service';
+import { NeedService } from '../need/need.service';
+import { ChildrenService } from '../children/children.service';
+import { Child } from 'src/entities/flaskEntities/child.entity';
+import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import { Pagination, IPaginationMeta } from 'nestjs-typeorm-paginate';
+import { Need } from 'src/entities/flaskEntities/need.entity';
 
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
     constructor(
         private userService: UserService,
+        private needService: NeedService,
+        private childrenService: ChildrenService,
         private ticketService: TicketService,
         private signatureService: SignatureService,
         private ipfsService: IpfsService,
@@ -35,163 +51,190 @@ export class UserController {
     @Get(`all`)
     @ApiOperation({ description: 'Get all users' })
     async getUsers() {
-        return await this.userService.getUsers()
+        return await this.userService.getUsers();
     }
 
     @Get(`all/contributor`)
     @ApiOperation({ description: 'Get all contributors' })
     async getContributors() {
-        return await this.userService.getContributors()
+        return await this.userService.getContributors();
     }
 
-
     @UseInterceptors(MyPageInterceptor)
-    @Get('myPage/:ngoId/:userId/:typeId')
+    @Get('myPage/:userId/:typeId')
     @ApiOperation({ description: 'Get user My page' })
     async fetchMyPage(
         @Req() req: Request,
         @Param('userId', ParseIntPipe) userId: number,
         @Param('typeId', ParseIntPipe) typeId: number,
-        @Param('ngoId') ngoId: number,
-        @Query('isUser') isUser: "0" | "1", // when 0 displays all children when 1 shows children/needs created by them
     ) {
         const time1 = new Date().getTime();
-        const accessToken = req.headers['authorization'];
-        const X_SKIP = req.headers['x-skip'];
-        const X_TAKE = req.headers['x-take'];
-        let pageData: SwMyPage
+
+        const X_LIMIT = parseInt(req.headers['x-limit']);
+        const X_TAKE = parseInt(req.headers['x-take']);
+        const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
+        const page = X_TAKE + 1;
+
+        let allNeeds: Need[][];
+        let paid: Pagination<Need, IPaginationMeta>;
+        let unpaid: Pagination<Need, IPaginationMeta>;
+        let purchased: Pagination<Need, IPaginationMeta>
+        let delivered: Pagination<Need, IPaginationMeta>;
+        const roleId = convertFlaskToSayRoles(typeId);
+
         try {
-            pageData = await this.userService.getMyPage(
-                accessToken,
-                X_SKIP,
-                X_TAKE,
-                userId,
-                parseInt(isUser)
-            );
+            let socialWorker: number;
+            let auditor: number;
+            let purchaser: number;
+            let ngoId: number;
 
-        } catch (e) {
-            throw new AllExceptionsFilter(e);
-
-        }
-
-        let child: {
-            id: number;
-            sayName: string;
-            firstName: string;
-            lastName: string;
-            birthDate: string;
-            awakeAvatarUrl: string;
-        };
-
-        let role = '';
-        let childNeed: ChildNeed;
-        let swNeedsList: SwmypageNeeds[] = [];
-        // extract contributors related needs
-        const time2 = new Date().getTime();
-        timeDifferenceWithComment(time1, time2, "Fetched Flask In ")
-
-        const time3 = new Date().getTime();
-        try {
-            if (pageData) {
-                for (let i = 0; i < pageData.result.length; i++) {
-                    const childNeedsList = [];
-                    child = {
-                        id: pageData.result[i].id,
-                        sayName: pageData.result[i].sayName,
-                        firstName: pageData.result[i].firstName,
-                        lastName: pageData.result[i].lastName,
-                        birthDate: pageData.result[i].birthDate,
-                        awakeAvatarUrl: pageData.result[i].awakeAvatarUrl,
-                    };
-
-                    // add child + IPFS + tickets for every need
-                    const tickets = await this.ticketService.getUserTickets(userId)
-                    for (let k = 0; k < pageData.result[i].needs.length; k++) {
-                        const fetchedNeed = pageData.result[i].needs[k]
-                        const ticket = tickets.find((t) => pageData.result[i].needs[k].id === t.flaskNeedId)
-                        const ipfs = await this.ipfsService.getNeedIpfs(pageData.result[i].needs[k].id)
-
-                        childNeed = { child, ticket, ipfs, ...fetchedNeed };
-                        childNeedsList.push(childNeed);
-                    }
-                    // SW
-                    if (typeId === FlaskUserTypesEnum.SOCIAL_WORKER) {
-                        role = 'createdById';
-                        const swNeeds = childNeedsList.filter(
-                            (need) => need[role] === userId,
-                        );
-                        const newList = swNeedsList.concat(swNeeds); // Merging
-                        swNeedsList = newList;
-                    }
-                    // NGO supervisor
-                    else if (typeId === FlaskUserTypesEnum.NGO_SUPERVISOR) {
-                        role = 'ngo';
-                        const swNeeds = childNeedsList;
-                        const newList = swNeedsList.concat(swNeeds); // Merging
-                        swNeedsList = newList;
-                    }
-                    // Auditor
-                    else if (
-                        typeId === FlaskUserTypesEnum.ADMIN ||
-                        typeId === FlaskUserTypesEnum.SUPER_ADMIN ||
-                        FlaskUserTypesEnum.SAY_SUPERVISOR
-                    ) {
-                        role = 'confirmedBy';
-                        const swNeeds = childNeedsList;
-                        const newList = swNeedsList.concat(swNeeds); // Merging
-                        swNeedsList = newList;
-                    }
-                    // Purchaser
-                    else if (typeId === FlaskUserTypesEnum.COORDINATOR) {
-                        role = 'purchasedBy';
-                        const swNeeds = childNeedsList;
-                        for (let k = 0; k < pageData.result[i].needs.length; k++) {
-                            const statusUpdates = pageData.result[i].needs[k].statusUpdates.filter(
-                                (need) => need[role] === userId,
-                            );
-                            for (let j = 0; j < statusUpdates.length; j++) {
-                                if (
-                                    statusUpdates[j].oldStatus === ProductStatusEnum.COMPLETE_PAY &&
-                                    statusUpdates[j].newStatus ===
-                                    ProductStatusEnum.PURCHASED_PRODUCT &&
-                                    statusUpdates[j].swId === userId
-                                ) {
-                                    const newList = swNeedsList.concat(swNeeds); // Merging
-                                    swNeedsList = newList;
-                                }
-                            }
-                        }
-                    }
-                }
+            if (roleId === SAYPlatformRoles.SOCIAL_WORKER) {
+                console.log('\x1b[33m%s\x1b[0m', `Role for my Page is SOCIAL_WORKER...\n`);
+                socialWorker = userId;
+                auditor = null;
+                purchaser = null;
+                ngoId = null;
+            }
+            if (roleId === SAYPlatformRoles.AUDITOR) {
+                console.log('\x1b[33m%s\x1b[0m', `Role for my Page is AUDITOR...\n`);
+                socialWorker = null;
+                auditor = userId;
+                purchaser = null;
+                ngoId = null;
+            }
+            if (roleId === SAYPlatformRoles.NGO_SUPERVISOR) {
+                console.log('\x1b[33m%s\x1b[0m', `Role for my Page is NGO_SUPERVISOR...\n`);
+                socialWorker = null;
+                auditor = null;
+                purchaser = null;
+                const supervisor = await this.userService.getFlaskSocialWorker(userId);
+                ngoId = supervisor.ngo_id;
+            }
+            if (roleId === SAYPlatformRoles.PURCHASER) {
+                console.log('\x1b[33m%s\x1b[0m', `Role for my Page is PURCHASER...\n`);
+                socialWorker = null;
+                auditor = null;
+                purchaser = userId;
+                ngoId = null;
             }
 
+            unpaid = await this.needService.getUnpaidNeeds(
+                {
+                    page,
+                    limit,
+                },
+                socialWorker,
+                auditor,
+                purchaser,
+                ngoId,
+            );
+
+            paid = await this.needService.getPaidNeeds(
+                {
+                    page,
+                    limit,
+                },
+                socialWorker,
+                auditor,
+                purchaser,
+                ngoId,
+            );
+
+            purchased = await this.needService.getPurchasedNeeds(
+                {
+                    page,
+                    limit,
+                },
+                socialWorker,
+                auditor,
+                purchaser,
+                ngoId,
+            );
+
+            delivered = await this.needService.getDeliveredNeeds(
+                {
+                    page,
+                    limit,
+                },
+                socialWorker,
+                auditor,
+                purchaser,
+                ngoId,
+            );
+
+            allNeeds = [
+                [...unpaid.items],
+                [...paid.items],
+                [...purchased.items],
+                [...delivered.items],
+            ];
+
+
+            const time2 = new Date().getTime();
+            timeDifferenceWithComment(time1, time2, 'Fetched Flask In ');
         } catch (e) {
-            throw new ServerError(e);
+            throw new ServerError(e.message, e.status);
         }
+
+        // const modifiedNeedList = [];
+        console.log(paid.meta.totalItems)
+        console.log(unpaid.meta.totalItems)
+        console.log(purchased.meta.totalItems)
+        console.log(delivered.meta.totalItems)
+        const time3 = new Date().getTime();
+        // try {
+        //     // add child + IPFS + tickets for every need
+        //     const tickets = await this.ticketService.getUserTickets(userId);
+        //     for (let k = 0; k < allNeeds.length; k++) {
+        //         const fetchedNeed = allNeeds[k];
+        //         const ticket = tickets.find(
+        //             (t) => allNeeds[k].id === t.flaskNeedId,
+        //         );
+        //         const ipfs = await this.ipfsService.getNeedIpfs(allNeeds[k].id);
+
+        //         const modifiedNeed = { ticket, ipfs, ...fetchedNeed };
+        //         modifiedNeedList.push(modifiedNeed);
+        //     }
+        // } catch (e) {
+        //     throw new ServerError(e.message, e.status);
+        // }
+
         const time4 = new Date().getTime();
-        timeDifferenceWithComment(time3, time4, "First organize In ")
+        timeDifferenceWithComment(time3, time4, 'First organize In ');
 
-        const time5 = new Date().getTime();
-        const organizedNeeds = getOrganizedNeeds(swNeedsList);
-        const time6 = new Date().getTime();
-        timeDifferenceWithComment(time5, time6, "Second organize In ")
+        // const time5 = new Date().getTime();
+        // const organizedNeeds = getOrganizedNeeds(modifiedNeedList);
+        // const time6 = new Date().getTime();
+        // timeDifferenceWithComment(time5, time6, 'Second organize In ');
 
+        // const time7 = new Date().getTime();
+        // const { summary, inMonth } = getNeedsTimeLine(modifiedNeedList, role);
+        // const time8 = new Date().getTime();
 
-        const time7 = new Date().getTime();
-        const { summary, inMonth } = getNeedsTimeLine(swNeedsList, role);
-        const time8 = new Date().getTime();
-        timeDifferenceWithComment(time7, time8, "TimeLine In ")
+        // timeDifferenceWithComment(time7, time8, 'TimeLine In ');
+        const signatures = await this.signatureService.getUserSignatures(userId);
 
-        const signatures = await this.signatureService.getUserSignatures(userId)
-
+        const max = Math.max(
+            paid.meta.totalItems,
+            unpaid.meta.totalItems,
+            purchased.meta.totalItems,
+            delivered.meta.totalItems,
+        );
         return {
-            ngoId,
+            page,
+            limit,
+            meta:
+                paid.meta.totalItems === max
+                    ? paid.meta
+                    : unpaid.meta.totalItems === max
+                        ? unpaid.meta
+                        : purchased.meta.totalItems === max
+                            ? purchased.meta
+                            : delivered.meta,
             userId,
-            role,
             typeId,
-            needs: organizedNeeds,
-            childrenCount: pageData ? pageData.count : 0,
-            timeLine: { summary, inMonth },
+            needs: allNeeds,
+            // timeLine: { summary, inMonth },
             signatures,
         };
     }

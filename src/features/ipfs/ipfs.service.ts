@@ -16,7 +16,6 @@ import { SAYPlatformRoles } from 'src/types/interfaces/interface';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
 import { ChildrenService } from '../children/children.service';
 import { PaymentService } from '../payment/payment.service';
-import { SignatureEntity } from 'src/entities/signature.entity';
 
 @Injectable()
 export class IpfsService {
@@ -70,10 +69,8 @@ export class IpfsService {
 
 
         let dataNeed: Token<{ image: any; name: string; description: string }>;
-        console.log(need)
-        console.log(need.socialWorker)
         // Need
-        if (need.socialWorker.flaskId === Number(callerFlaskId)) {
+        if (need.socialWorker.flaskId !== Number(callerFlaskId)) {
             console.log('\x1b[36m%s\x1b[0m', `1- Storing child to IPFS...`);
             const child = await this.childrenService.getChildById(need.child.flaskId)
             if (!child) {
@@ -143,7 +140,6 @@ export class IpfsService {
                 status: need.status,
                 link: need.link,
                 cost: need.cost,
-                paid: need.paid,
                 purchaseCost: need.purchaseCost,
             };
             console.log('\x1b[36m%s\x1b[0m', `2- Storing Need to IPFS...`);
@@ -253,17 +249,21 @@ export class IpfsService {
     async fileFromPath(url: string, name = 'noTitle'): Promise<any> {
         try {
             const result = await this.downloadFile(url, `${name}.jpg`);
-            await lastValueFrom(result);
+            const final = await lastValueFrom(result);
+            console.log("final")
+            console.log(final)
             const content = await fs.promises.readFile(`./${name}.jpg`);
+            console.log("content")
+            console.log(content)
             const type = mime.getType(`./${name}.jpg`);
             const file = new File([content], `${name}`, { type });
             return file;
         } catch (e) {
-            console.log(e);
+            throw new WalletExceptionFilter(e.status, e.message)
         }
     }
 
-    async downloadFile(fileUrl: string, outputLocationPath: string) {
+    downloadFile(fileUrl: string, outputLocationPath: string) {
         console.log(fileUrl);
         console.log(outputLocationPath);
         const writer = createWriteStream(outputLocationPath);
@@ -273,11 +273,12 @@ export class IpfsService {
         return this.httpService
             .get(`https://api.sayapp.company/${fileUrl}`, {
                 responseType: 'stream',
-                timeout: 10000,
+                timeout: 80000,
             })
             .pipe(map((res) => res.data?.pipe(writer)))
             .pipe(
                 catchError((e) => {
+                    console.log({...e});
                     throw new WalletExceptionFilter(e.status, e.message);
                 }),
             );

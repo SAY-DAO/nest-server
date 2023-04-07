@@ -8,12 +8,14 @@ import { ReceiptService } from './receipt.service';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Need,
-      Child
+      Child,
+      Payment
     ], 'flaskPostgres'),
     TypeOrmModule.forFeature([ReceiptEntity, NeedEntity, ContributorEntity]),
   ],

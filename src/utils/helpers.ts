@@ -346,7 +346,7 @@ export function getNeedsTimeLine(needs: SwmypageNeeds[], who: string) {
 }
 
 // faster than the dictionary one below
-export function getOrganizedNeeds(needsData: SwmypageNeeds[]) {
+export function getOrganizedNeeds(needsData) {
   const organizedNeeds = [[], [], [], []]; // [[not paid], [payment], [purchased/delivered Ngo], [Done]]
   if (needsData) {
     needsData = sortNeeds(needsData, 'created');
@@ -392,7 +392,7 @@ export function getOrganizedNeeds(needsData: SwmypageNeeds[]) {
   }
 }
 
-export function sortNeeds(theNeeds: SwmypageNeeds[], sortBy: string) {
+export function sortNeeds(theNeeds: any[], sortBy: string) {
   return theNeeds.sort((a, b) => {
     // Sort needs by create date Ascending
     return new Date(b[sortBy]).getTime() - new Date(a[sortBy]).getTime();

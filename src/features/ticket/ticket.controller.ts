@@ -88,10 +88,6 @@ export class TicketController {
         body.receipts,
         body.payments,
         body.statuses,
-        body.isDone,
-        body.paid,
-        body.unpayable,
-        body.unpayableFrom
       );
 
     const createTicketDetails: CreateTicketParams = {

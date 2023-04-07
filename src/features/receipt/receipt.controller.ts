@@ -16,7 +16,7 @@ export class ReceiptController {
 
     @Get(`flask/need/:needId`)
     @ApiOperation({ description: 'Get all needs from flask' })
-    async getFlaskNeeds(
+    async getFlaskReceipts(
         @Req() req: Request,
         @Param('needId') needId: number
     ) {

@@ -139,10 +139,6 @@ export class SyncService {
     receipts: CreateReceiptDto[],
     payments: CreatePaymentDto[],
     statuses: CreateStatusDto[],
-    isDone: boolean,
-    paid: number,
-    unpayable: boolean,
-    unpayableFrom: Date,
   ) {
     const currentTime = new Date();
     //-------------------------------------------- Controller Caller-------------------------------------
@@ -441,7 +437,6 @@ export class SyncService {
       
       // Create Child
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
-      console.log(nestSocialWorker)
 
       if (!nestSocialWorker || !nestSocialWorker.contributor) {
         throw new ObjectNotFound('Something went wrong while trying to create a child!')
@@ -636,7 +631,7 @@ export class SyncService {
         });
 
       }
-    } else {
+    } else if(nestProviderNeedRelation && theNeed.type === NeedTypeEnum.PRODUCT){
       theNestProvider = await this.providerService.getProviderById(nestProviderNeedRelation.nestProviderId);
     }
     //--------------------------------------------Need-------------------------------------
@@ -679,10 +674,6 @@ export class SyncService {
         flaskId: theNeed.id,
         details: theNeed.details,
         information: theNeed.informations,
-        isDone,
-        paid,
-        unpayable,
-        unpayableFrom,
       };
       console.log('\x1b[36m%s\x1b[0m', 'Creating The Need ...\n');
       const needNgo = await this.ngoService.getNgoById(nestSocialWorker.contributor.flaskNgoId)

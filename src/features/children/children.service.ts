@@ -3,8 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildAPIApi } from 'src/generated-sources/openapi';
-import { ChildApiParams, HeaderOptions } from 'src/types/interfaces/interface';
-import { ChildrenData } from 'src/types/interfaces/Children';
 import { NeedSummary } from 'src/types/interfaces/Need';
 import { ChildParams } from 'src/types/parameters/ChildParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
@@ -20,22 +18,23 @@ export class ChildrenService {
     private flaskChildRepository: Repository<Child>,
   ) { }
 
-  async getAllFlaskChildren(
-    options: HeaderOptions,
-    params: ChildApiParams,
-  ): Promise<ChildrenData> {
-    const childApi = new ChildAPIApi();
-    const needs = childApi.apiV2ChildAllConfirmconfirmGet(
-      options.accessToken,
-      params.confirm,
-      params.ngoId,
-      params.swId,
-      options.X_TAKE,
-      options.X_SKIP,
-      params.existenceStatus,
-    );
-    return needs;
-  }
+
+  // async getAllFlaskChildren(
+  //   options: HeaderOptions,
+  //   params: ChildApiParams,
+  // ): Promise<ChildrenData> {
+  //   const childApi = new ChildAPIApi();
+  //   const needs = childApi.apiV2ChildAllConfirmconfirmGet(
+  //     options.accessToken,
+  //     params.confirm,
+  //     params.ngoId,
+  //     params.swId,
+  //     options.X_TAKE,
+  //     options.X_SKIP,
+  //     params.existenceStatus,
+  //   );
+  //   return needs;
+  // }
 
   // async getFlaskChild(
   //   accessToken: string,
@@ -56,8 +55,18 @@ export class ChildrenService {
     });
   }
 
-  getFlaskChildren() {
-    return this.flaskChildRepository.find();
+  async getFlaskChildren() {
+    return await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .select([
+        'child.id',
+        'child.id_ngo',
+        'child.sayname_translations',
+        'child.awakeAvatarUrl',
+        'child.sleptAvatarUrl',
+        'child.isConfirmed',
+      ])
+      .getMany();
   }
 
   async getChildNeedsSummery(

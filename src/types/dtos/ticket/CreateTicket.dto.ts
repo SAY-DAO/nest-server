@@ -2,7 +2,6 @@ import { IsNotEmpty } from 'class-validator';
 import { SwmypageNeeds } from 'src/generated-sources/openapi';
 import { CreatePaymentDto } from '../CreatePayment.dto';
 import { CreateReceiptDto } from '../CreateReceipt.dto';
-import { CreateSocialWorkerDto } from '../CreateSocialWorker.dto';
 import { CreateStatusDto } from '../CreateStatus.dto';
 
 export class customNeed {
@@ -30,8 +29,4 @@ export class CreateTicketDto {
   payments?: CreatePaymentDto[]
   @IsNotEmpty()
   roles: string[];
-  isDone: boolean
-  paid: number
-  unpayable: boolean
-  unpayableFrom: Date
 }

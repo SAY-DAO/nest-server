@@ -2,21 +2,20 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
 import { Need } from '../../entities/flaskEntities/need.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Brackets, Repository, UpdateResult } from 'typeorm';
 import {
   Configuration,
-  NeedAPIApi,
   PreneedAPIApi,
   PreneedSummary,
   PublicAPIApi,
   PublicNeed,
 } from '../../generated-sources/openapi';
 import {
-  HeaderOptions,
-  NeedApiParams,
+  NeedTypeEnum,
+  PaymentStatusEnum,
   ProductStatusEnum,
+  ServiceStatusEnum,
 } from 'src/types/interfaces/interface';
-import { NeedsData } from 'src/types/interfaces/Need';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { NeedParams } from 'src/types/parameters/NeedParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
@@ -27,6 +26,16 @@ import { IpfsEntity } from 'src/entities/ipfs.entity';
 import { ProviderEntity } from 'src/entities/provider.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
+import { NeedStatusUpdate } from 'src/entities/flaskEntities/NeedStatusUpdate.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class NeedService {
@@ -37,7 +46,7 @@ export class NeedService {
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
-  ) {}
+  ) { }
 
   getFlaskNeed(flaskNeedId: number): Promise<Need> {
     return this.flaskNeedRepository.findOne({
@@ -173,33 +182,511 @@ export class NeedService {
     return need;
   }
 
-  async getFlaskNeeds(
-    options: HeaderOptions,
-    params: NeedApiParams,
-  ): Promise<NeedsData> {
-    const publicApi = new NeedAPIApi();
-    const needs: Promise<NeedsData> = publicApi.apiV2NeedsGet(
-      options.accessToken,
-      options.X_SKIP,
-      options.X_TAKE,
-      params.isConfirmed,
-      params.isDone,
-      params.isReported,
-      params.status,
-      params.type,
-      params.ngoId,
-      params.isChildConfirmed,
-      params.unpayable,
-      params.createdBy,
-      params.confirmedBy,
-      params.purchasedBy,
-    );
-    return needs;
+  async getContributorFlaskNeeds(
+    options: IPaginationOptions,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoId: number,
+  ): Promise<Pagination<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+      // .leftJoinAndMapOne(
+      //   'need.payments',
+      //   Payment,
+      //   'payment',
+      //   'payment.id_need = need.id',
+      // )
+
+      .leftJoinAndMapMany(
+        'need.receipts_',
+        NeedReceipt,
+        'need_receipt',
+        'need_receipt.need_id = need.id',
+      )
+
+      .leftJoinAndMapMany(
+        'need_receipt.receipt',
+        Receipt,
+        'receipt',
+        'receipt.id = need_receipt.receipt_id',
+      )
+
+      .where('need.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('child.id_ngo != 3')
+      .andWhere('child.id_ngo != 14')
+      .andWhere('need.created_by_id = :created_by_id', {
+        created_by_id: socialWorker,
+      })
+      .orWhere('need.confirmUser = :confirmUser', { confirmUser: auditor })
+      .orWhere('ngo.id = :ngoId', { ngoId: ngoId })
+      .orWhere(
+        new Brackets((qb) => {
+          qb.where('need_status_updates.old_status = 2')
+            .andWhere('need_status_updates.new_status = 3')
+            .andWhere('need_status_updates.sw_id = :purchaser', {
+              purchaser: purchaser,
+            });
+        }),
+      )
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+        'need_status_updates',
+        'need_receipt',
+        'receipt',
+      ])
+      .orderBy('need.created', 'DESC');
+    return paginate<Need>(queryBuilder, options);
   }
 
-  getFlaskPreNeed(accessToken: any): Promise<PreneedSummary> {
-    const preneedApi = new PreneedAPIApi();
-    const preneeds = preneedApi.apiV2PreneedsGet(accessToken);
-    return preneeds;
+  async getAdminFlaskNeeds(
+    options: IPaginationOptions,
+  ): Promise<Pagination<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+
+      .leftJoinAndMapMany(
+        'need.receipts_',
+        NeedReceipt,
+        'need_receipt',
+        'need_receipt.need_id = need.id',
+      )
+
+      .leftJoinAndMapMany(
+        'need_receipt.receipt',
+        Receipt,
+        'receipt',
+        'receipt.id = need_receipt.receipt_id',
+      )
+
+      .where('need.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('child.id_ngo != 3')
+      .andWhere('child.id_ngo != 14')
+
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+        'need_status_updates',
+        // 'payment',
+        'need_receipt',
+        'receipt',
+      ])
+      .orderBy('need.created', 'DESC');
+
+    return paginate<Need>(queryBuilder, options);
+  }
+
+  async getUnpaidNeeds(
+    options: IPaginationOptions,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoId: number,
+  ): Promise<Pagination<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.id_ngo NOT IN (:...ids)', { ids: [3, 14] })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+
+      .andWhere('need.created_by_id = :created_by_id', {
+        created_by_id: socialWorker,
+      })
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+      ])
+      .orderBy('need.created', 'DESC');
+    return paginate<Need>(queryBuilder, options);
+  }
+
+  async getPaidNeeds(
+    options: IPaginationOptions,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoId: number,
+  ): Promise<Pagination<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .andWhere('need.status = :statusComplete', {
+        statusComplete: PaymentStatusEnum.COMPLETE_PAY,
+      })
+      .orWhere('need.status = :statusPartial', {
+        statusPartial: PaymentStatusEnum.PARTIAL_PAY,
+      })
+      .andWhere('payment.verified IS NOT NULL')
+      .andWhere('payment.order_id IS NOT NULL')
+      .andWhere('need.created_by_id = :created_by_id', {
+        created_by_id: socialWorker,
+      })
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+        'payment'
+      ])
+      .orderBy('need.created', 'DESC');
+    return paginate<Need>(queryBuilder, options);
+  }
+
+  async getPurchasedNeeds(
+    options: IPaginationOptions,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoId: number,
+  ): Promise<Pagination<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+     
+      .where(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', { typeProduct: NeedTypeEnum.PRODUCT })
+            .andWhere('need.status = :productStatus', {
+              productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
+            })
+            .orWhere('need.type = :typeService', { typeService: NeedTypeEnum.SERVICE })
+            .andWhere('need.status = :serviceStatus', {
+              serviceStatus: ServiceStatusEnum.MONEY_TO_NGO,
+            });
+        }),
+      )
+      .andWhere('need.created_by_id = :created_by_id', {
+        created_by_id: socialWorker,
+      })
+      // .where(
+      //   new Brackets((qb) => {
+      //     qb.where('need_status_updates.old_status = 2')
+      //       .andWhere('need_status_updates.new_status = 3')
+      //       .orWhere(
+      //         'need_status_updates.sw_id = :purchaser',
+      //         { purchaser: purchaser },
+      //       );
+      //   }),
+      // )
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+        'need_status_updates',
+
+      ])
+      .orderBy('need.created', 'DESC');
+    return paginate<Need>(queryBuilder, options);
+  }
+
+  async getDeliveredNeeds(
+    options: IPaginationOptions,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoId: number,
+  ): Promise<Pagination<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+     
+
+      .leftJoinAndMapMany(
+        'need.receipts_',
+        NeedReceipt,
+        'need_receipt',
+        'need_receipt.need_id = need.id',
+      )
+
+      .leftJoinAndMapMany(
+        'need_receipt.receipt',
+        Receipt,
+        'receipt',
+        'receipt.id = need_receipt.receipt_id',
+      )
+
+      .where(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', { typeProduct: NeedTypeEnum.PRODUCT })
+            .andWhere('need.status = :productStatus', {
+              productStatus: ProductStatusEnum.DELIVERED,
+            })
+            .orWhere('need.type = :typeService', { typeService: NeedTypeEnum.SERVICE })
+            .andWhere('need.status = :serviceStatus', {
+              serviceStatus: ServiceStatusEnum.DELIVERED,
+            });
+        }),
+      )
+      .andWhere('need.created_by_id = :created_by_id', {
+        created_by_id: socialWorker,
+      })
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+        'need_status_updates',
+
+      ])
+      .orderBy('need.created', 'DESC');
+    return paginate<Need>(queryBuilder, options);
   }
 }

@@ -17,7 +17,6 @@ export type NeedParams = {
     link?: string;
     doingDuration?: number;
     needRetailerImg?: string;
-    paid?: number;
     purchaseCost?: any;
     cost?: number;
     information?: string;
@@ -33,7 +32,5 @@ export type NeedParams = {
     childDeliveryDate?: Date
     confirmDate?: Date;
     bankTrackId?: string | null;
-    unpayable: boolean,
-    unpayableFrom: Date,
-    isDone: boolean,
+
 }

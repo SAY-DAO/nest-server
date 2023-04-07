@@ -13,6 +13,9 @@ export class Payment extends BaseEntity {
     id_user: number;
 
     @Column({ nullable: true })
+    order_id: number;
+
+    @Column({ nullable: true })
     credit_amount: number;
 
     @Column({ nullable: true })
@@ -41,6 +44,6 @@ export class Payment extends BaseEntity {
 
     @Column({ type: 'timestamptz', nullable: true })
     verified: Date;
-    
+
 }
 

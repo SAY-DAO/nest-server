@@ -19,10 +19,19 @@ export class Child extends BaseEntity {
   awakeAvatarUrl: string;
 
   @Column({ nullable: true })
+  sleptAvatarUrl: string;
+
+  @Column({ nullable: true })
   adult_avatar_url: string;
 
   @Column({ type: "hstore", hstoreType: "object" })
   bio_summary_translations: Record<string, string>;
+
+  @Column({ type: "hstore", hstoreType: "object" })
+  firstName_translations: Record<string, string>;
+
+  @Column({ type: "hstore", hstoreType: "object" })
+  lastName_translations: Record<string, string>;
 
   @Column({ type: "hstore", hstoreType: "object" })
   bio_translations: Record<string, string>;
@@ -86,9 +95,6 @@ export class Child extends BaseEntity {
 
   @Column({ type: "hstore", hstoreType: "object" })
   sayname_translations: Record<string, string>;
-
-  @Column({ nullable: true })
-  sleptAvatarUrl: string;
 
   @Column({ nullable: true })
   status: number;

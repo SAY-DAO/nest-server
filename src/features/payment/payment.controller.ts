@@ -9,7 +9,7 @@ export class PaymentController {
     ) { }
 
     @Get(`all`)
-    @ApiOperation({ description: 'Get all needs from flask' })
+    @ApiOperation({ description: 'Get all needs payments' })
     async getPayments() {
         return await this.paymentService.getPayments()
     }

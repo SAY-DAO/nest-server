@@ -38,7 +38,7 @@ async function startServer() {
       process.env.AUTHORIZED_DOCS_LOCAL,
     ],
     allowedHeaders: [
-      'Origin,X-Requested-With,Content-Type ,Accept,X-TAKE, X-SKIP, authorization',
+      'Origin,X-Requested-With,Content-Type ,Accept,X-TAKE, X-SKIP, X-LIMIT, authorization',
       'Access-Control-Allow-Headers',
       'Access-Control-Allow-Credentials',
       'Access-Control-Allow-Methods',

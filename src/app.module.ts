@@ -50,6 +50,9 @@ import { Payment } from './entities/flaskEntities/payment.entity';
 import { ProviderJoinNeedEntity } from './entities/provider.Join.need..entity';
 import { AnalyticModule } from './features/analytic/analytic.module';
 import { Family } from './entities/flaskEntities/family.entity';
+import { NeedStatusUpdate } from './entities/flaskEntities/NeedStatusUpdate.entity';
+import { NeedReceipt } from './entities/flaskEntities/needReceipt.entity';
+import { Receipt } from './entities/flaskEntities/receipt.entity';
 
 const imports = [
   HttpModule,
@@ -83,7 +86,7 @@ const imports = [
   }),
   TypeOrmModule.forRoot({
     ...config().db2,
-    entities: [Need, SocialWorker, NGO, Cities, Child, Payment, Family],
+    entities: [Need, SocialWorker, NGO, Cities, Child, Payment, Family, NeedStatusUpdate, Receipt, NeedReceipt],
   }),
   GatewayModule,
   LocationModule,

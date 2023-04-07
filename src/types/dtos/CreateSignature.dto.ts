@@ -42,10 +42,6 @@ export class SwGenerateSignatureDto {
   statuses?: CreateStatusDto[]
   receipts?: CreateReceiptDto[]
   payments?: CreatePaymentDto[]
-  isDone: boolean
-  paid: number
-  unpayable: boolean
-  unpayableFrom: Date
 }
 
 export class CreateSignatureDto {

@@ -4,7 +4,6 @@ import {
   Get,
   Param,
   Post,
-  Req,
   Res,
   Session,
   UseInterceptors,
@@ -199,10 +198,6 @@ export class SignatureController {
         body.receipts,
         body.payments,
         body.statuses,
-        body.isDone,
-        body.paid,
-        body.unpayable,
-        body.unpayableFrom,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
 

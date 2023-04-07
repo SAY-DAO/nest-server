@@ -10,57 +10,52 @@ export interface NeedsData {
 }
 
 export interface ChildNeed {
-  id?: number;
-  ipfsHash?: string;
-  ipfsUrl?: string;
-  createdById?: number;
-  nameTranslations?: any;
-  name?: string;
-  title?: string;
-  descriptionTranslations?: any;
-  description?: string;
-  details?: string;
-  imageUrl?: string;
-  category?: number;
-  type?: number;
-  isUrgent?: boolean;
-  link?: string;
+  title: string;
+  imageUrl: string;
+  img: string;
+  name_translations: Record<string, string>;
+  doing_duration: number;
   affiliateLinkUrl?: string;
-  doingDuration?: number;
-  status?: number;
-  img?: string;
-  paid?: number;
-  purchaseCost?: number;
-  cost?: number;
-  unpayable?: boolean;
-  isDone?: boolean;
-  isDeleted?: boolean;
-  isConfirmed?: boolean;
-  unpayableFrom?: Date;
-  created?: Date;
-  updated?: Date;
+  bank_track_id?: string;
+  category: number;
+  child_delivery_date?: Date;
   confirmDate?: Date;
-  deletedAt?: Date;
-  statusUpdates?: SwmypageStatusUpdates[];
-  receipts_?: SwmypageReceipts_[];
-  verifiedPayments?: SwmypageVerifiedPayments[];
-  confirmedBy?: number;
-  doneAt?: Date;
-  ngoDeliveryDate?: Date;
-  childDeliveryDate?: Date;
-  purchaseDate?: Date;
+  _cost: number;
+  description_translations: Record<string, string>;
+  details: string;
+  informations: string;
+  doneAt: Date;
+  expected_delivery_date: Date;
+  isConfirmed: boolean;
+  isDeleted: boolean;
+  isUrgent: boolean;
+  link: string;
+  ngo_delivery_date: Date;
+  purchase_cost: number;
+  purchase_date: Date;
+  status: number;
+  status_updated_at: Date;
+  type: number;
+  unavailable_from?: Date;
+  unconfirmed_at?: Date;
+  created: Date;
+  updated?: Date;
+  deleted_at?: Date;
+  child_id: number;
+  created_by_id: number;
+  confirmUser: number;
+  id: number;
   child: {
     id: number;
-    sayName: string;
-    firstName: string;
-    lastName: string;
-    birthDate: string;
+    sayName: Record<string, string>;
+    firstName: Record<string, string>;
+    lastName: Record<string, string>;
+    birthDate: Date;
     awakeAvatarUrl: string;
   };
-  ticket: TicketEntity,
-  signatures?: SignatureEntity[];
-  ipfs?: IpfsEntity
-};
+  ticket: TicketEntity;
+  ipfs: IpfsEntity;
+}
 
 export interface Need {
   id: number;
