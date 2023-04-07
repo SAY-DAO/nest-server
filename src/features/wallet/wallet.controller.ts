@@ -74,6 +74,7 @@ export class SignatureController {
       }
 
       const message = new SiweMessage(body.message);
+      console.log(session)
 
       const fields = await message.validate(body.signature);
       if (fields.nonce !== session.nonce) {
