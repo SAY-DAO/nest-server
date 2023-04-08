@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Post,
   Req,
+  Request,
   Res,
   Session,
   UseInterceptors,
@@ -51,15 +52,14 @@ export class SignatureController {
   @ApiOperation({ description: 'Get SIWE nonce' })
   async getNonce(
     @Res() res,
-    @Req() req: Request,
+    @Request() req,
     @Session() session: Record<string, any>,
     @Param('userId', ParseIntPipe) userId: number,
     @Param('typeId', ParseIntPipe) typeId: number,
   ) {
 
     const accessToken = req.headers['authorization'];
-    console.log("mamad3")
-    console.log(req.headers)
+
 
     const flaskApi = new SocialWorkerAPIApi();
     console.log(userId)
@@ -74,7 +74,7 @@ export class SignatureController {
       role === SAYPlatformRoles.NGO_SUPERVISOR
     ) {
       try {
-      const socialWorker = await flaskApi.apiV2SocialworkersIdGet(accessToken, userId);
+        const socialWorker = await flaskApi.apiV2SocialworkersIdGet(accessToken, userId);
 
         if (socialWorker.id === userId) {
           if (!session.nonce) {
@@ -84,15 +84,12 @@ export class SignatureController {
           console.log(session);
 
           res.setHeader('Content-Type', 'application/json');
-          // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-          // res.setHeader('Access-Control-Allow-Credentials', true);
-
           res
             .status(200)
             .send({ nonce: session.nonce, expiry: session.cookie._expires });
         }
       } catch (e) {
-        console.log(e)
+        req.session.destroy();
         throw new WalletExceptionFilter(e.status, e.message)
       }
 
@@ -107,6 +104,7 @@ export class SignatureController {
   async verifySiwe(
     @Param('flaskUserId') flaskUserId: number,
     @Session() session,
+    @Request() req,
     @Body(ValidateSignaturePipe) body: VerifyWalletDto,
   ) {
     try {
@@ -185,6 +183,8 @@ export class SignatureController {
     } catch (e) {
       session.siwe = null;
       session.nonce = null;
+      req.session.destroy();
+
       switch (e) {
         case ErrorTypes.EXPIRED_MESSAGE: {
           session.save();
