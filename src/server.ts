@@ -77,7 +77,7 @@ async function startServer() {
       resave: true,
       saveUninitialized: true,
       cookie: {
-        domain: process.env.NODE_ENV === 'development' ? '127.0.0.1' : 'https://panel.saydao.org',
+        domain: process.env.NODE_ENV === 'development' ? '127.0.0.1' : '185.255.131.249',
         path: '/api/dao',
         secure: process.env.NODE_ENV === 'development' ? false : true,
         sameSite: process.env.NODE_ENV === 'development' ? false : 'none',
