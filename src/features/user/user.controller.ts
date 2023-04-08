@@ -3,7 +3,6 @@ import {
     Get,
     Param,
     ParseIntPipe,
-    Query,
     Req,
     UseInterceptors,
 } from '@nestjs/common';
@@ -11,28 +10,19 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ServerError } from '../../filters/server-exception.filter';
 import {
-    FlaskUserTypesEnum,
-    PaymentStatusEnum,
-    ProductStatusEnum,
+
     SAYPlatformRoles,
 } from 'src/types/interfaces/interface';
-import { SwMyPage, SwmypageNeeds } from 'src/generated-sources/openapi';
 import {
     convertFlaskToSayRoles,
-    getNeedsTimeLine,
-    getOrganizedNeeds,
     timeDifferenceWithComment,
 } from 'src/utils/helpers';
-import { ChildNeed } from 'src/types/interfaces/Need';
 import { MyPageInterceptor } from './interceptors/mypage.interceptors';
 import { TicketService } from '../ticket/ticket.service';
-import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 import { SignatureService } from '../wallet/wallet.service';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
-import { Child } from 'src/entities/flaskEntities/child.entity';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 import { Pagination, IPaginationMeta } from 'nestjs-typeorm-paginate';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 
