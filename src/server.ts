@@ -16,7 +16,6 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
 
@@ -30,12 +29,6 @@ async function startServer() {
     origin: [
       "http://localhost:3000",
       "https://panel.saydao.org",
-      process.env.AUTHORIZED_DAPP_LOCAL,
-      process.env.AUTHORIZED_PANEL_LOCAL,
-      process.env.AUTHORIZED_PANEL_PRODUCTION,
-      process.env.AUTHORIZED_HOST_PRODUCTION,
-      process.env.AUTHORIZED_HOST_STAGING,
-      process.env.AUTHORIZED_DOCS_LOCAL,
     ],
     allowedHeaders: [
       'Origin,X-Requested-With,Content-Type ,Accept,X-TAKE, X-SKIP, X-LIMIT, authorization',

@@ -5,8 +5,6 @@ import { Need } from '../../entities/flaskEntities/need.entity';
 import { Brackets, Repository, UpdateResult } from 'typeorm';
 import {
   Configuration,
-  PreneedAPIApi,
-  PreneedSummary,
   PublicAPIApi,
   PublicNeed,
 } from '../../generated-sources/openapi';

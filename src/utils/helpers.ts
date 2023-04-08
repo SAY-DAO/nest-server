@@ -425,8 +425,6 @@ export function ticketNotifications(
         diffMilSeconds = diff
 
       } else {
-        console.log(flaskUserId)
-        console.log(t.views)
         diffMilSeconds = 1
 
       }

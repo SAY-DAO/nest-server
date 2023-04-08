@@ -3,7 +3,9 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
+  Req,
   Res,
   Session,
   UseInterceptors,
@@ -11,7 +13,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SwSignatureResult } from '../../types/interfaces/interface';
+import {
+  SAYPlatformRoles,
+  SwSignatureResult,
+} from '../../types/interfaces/interface';
 import {
   CreateSignatureDto,
   SwGenerateSignatureDto,
@@ -28,6 +33,7 @@ import { WalletInterceptor } from './interceptors/wallet.interceptors';
 import { UserService } from '../user/user.service';
 import { convertFlaskToSayRoles } from 'src/utils/helpers';
 import { NeedService } from '../need/need.service';
+import { SocialWorkerAPIApi } from 'src/generated-sources/openapi';
 
 @ApiTags('Wallet')
 @Controller('wallet')
@@ -40,22 +46,60 @@ export class SignatureController {
     private needService: NeedService,
   ) { }
 
-  @Get(`nonce`)
+  @UseInterceptors(WalletInterceptor)
+  @Get('nonce/:userId/:typeId')
   @ApiOperation({ description: 'Get SIWE nonce' })
-  async getNonce(@Res() res, @Session() session: Record<string, any>) {
-    if (!session.nonce) {
-      session.nonce = generateNonce();
-      session.save();
+  async getNonce(
+    @Res() res,
+    @Req() req: Request,
+    @Session() session: Record<string, any>,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('typeId', ParseIntPipe) typeId: number,
+  ) {
+
+    const accessToken = req.headers['authorization'];
+    console.log("mamad3")
+    console.log(req.headers)
+
+    const flaskApi = new SocialWorkerAPIApi();
+    console.log(userId)
+    console.log(typeId)
+    const role = convertFlaskToSayRoles(typeId);
+    console.log("role")
+
+    if (
+      role === SAYPlatformRoles.SOCIAL_WORKER ||
+      role === SAYPlatformRoles.AUDITOR ||
+      role === SAYPlatformRoles.PURCHASER ||
+      role === SAYPlatformRoles.NGO_SUPERVISOR
+    ) {
+      try {
+      const socialWorker = await flaskApi.apiV2SocialworkersIdGet(accessToken, userId);
+
+        if (socialWorker.id === userId) {
+          if (!session.nonce) {
+            session.nonce = generateNonce();
+            session.save();
+          }
+          console.log(session);
+
+          res.setHeader('Content-Type', 'application/json');
+          // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+          // res.setHeader('Access-Control-Allow-Credentials', true);
+
+          res
+            .status(200)
+            .send({ nonce: session.nonce, expiry: session.cookie._expires });
+        }
+      } catch (e) {
+        console.log(e)
+        throw new WalletExceptionFilter(e.status, e.message)
+      }
+
+      return session.nonce
     }
-    console.log(session)
 
-    res.setHeader('Content-Type', 'application/json');
-    // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    // res.setHeader('Access-Control-Allow-Credentials', true);
 
-    res
-      .status(200)
-      .send({ nonce: session.nonce, expiry: session.cookie._expires });
   }
 
   @Post(`verify/:flaskUserId`)
@@ -74,16 +118,16 @@ export class SignatureController {
       }
 
       const message = new SiweMessage(body.message);
-      console.log(session)
+      console.log(session);
 
       const fields = await message.validate(body.signature);
       if (fields.nonce !== session.nonce) {
         throw new WalletExceptionFilter(422, `Invalid nonce.`);
       }
       session.siwe = fields;
-      session.siwe.flaskUserId = flaskUserId
+      session.siwe.flaskUserId = flaskUserId;
       // session.cookie._expires = new Date(fields.expirationTime);
-      session.clear
+      session.clear;
       session.save();
 
       let nestContributor = await this.userService.getContributorByFlaskId(
@@ -222,7 +266,6 @@ export class SignatureController {
     @Body(ValidateSignaturePipe) body: CreateSignatureDto,
     @Session() session: Record<string, any>,
   ) {
-
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
@@ -230,7 +273,9 @@ export class SignatureController {
     try {
       if (
         !need.ipfs ||
-        !need.ipfs.signatures.find((s) => s.flaskUserId === session.siwe.flaskUserId)
+        !need.ipfs.signatures.find(
+          (s) => s.flaskUserId === session.siwe.flaskUserId,
+        )
       ) {
         console.log('\x1b[36m%s\x1b[0m', 'Uploading to IPFS ...');
         const ipfs = await this.ipfsService.handleIpfs(

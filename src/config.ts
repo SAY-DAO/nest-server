@@ -19,7 +19,7 @@ function loadConfig() {
         ? 'localHost'
         : process.env.NODE_ENV === 'docker-local'
           ? 'localHost'
-          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_HOST_STAGING : process.env.AUTHORIZED_HOST_PRODUCTION,
+          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_HOST_STAGING : process.env.NEST_SERVER_PROD,
     logLevel: 'debug',
     documentUrl: '',
     db1: {
@@ -56,7 +56,7 @@ function loadConfig() {
 
   configs.documentUrl =
     NODE_ENV === Environments.staging || NODE_ENV === Environments.production
-      ? `${configs.host}/api/dao`
+      ? `https://${configs.host}:${configs.serverPort}/api/dao`
       : `http://${configs.host}:${configs.serverPort}/api/dao`;
 
   return configs;
