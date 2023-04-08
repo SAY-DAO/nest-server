@@ -5,6 +5,8 @@ import { Need } from '../../entities/flaskEntities/need.entity';
 import { Brackets, Repository, UpdateResult } from 'typeorm';
 import {
   Configuration,
+  PreneedAPIApi,
+  PreneedSummary,
   PublicAPIApi,
   PublicNeed,
 } from '../../generated-sources/openapi';
@@ -52,6 +54,12 @@ export class NeedService {
         id: flaskNeedId,
       },
     });
+  }
+
+  getFlaskPreNeed(accessToken: any): Promise<PreneedSummary> {
+    const preneedApi = new PreneedAPIApi();
+    const preneeds = preneedApi.apiV2PreneedsGet(accessToken);
+    return preneeds;
   }
 
   async getNeedIpfs(id: number): Promise<IpfsEntity> {

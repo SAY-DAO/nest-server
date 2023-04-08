@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, Param, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NeedService } from './need.service';
 
@@ -32,6 +32,15 @@ export class NeedController {
     return await this.needService.getFlaskNeed(id)
   }
 
-
+  @Get(`preneeds`)
+  @ApiOperation({ description: 'Get all done needs from flask' })
+  async getPrNeed(@Req() req: Request) {
+    console.log('fdgfgfg')
+    const accessToken = req.headers['authorization'];
+    console.log(req.headers)
+    console.log('fdgfgfg')
+    const preNeeds = await this.needService.getFlaskPreNeed(accessToken);
+    return preNeeds;
+  }
 
 }
