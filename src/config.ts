@@ -59,7 +59,6 @@ function loadConfig() {
       ? `${configs.host}/api/dao`
       : `http://${configs.host}:${configs.serverPort}/api/dao`;
 
-console.log(configs)
   return configs;
 }
 export type ConfigType = ReturnType<typeof loadConfig>;
