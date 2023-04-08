@@ -62,10 +62,7 @@ export class SignatureController {
 
 
     const flaskApi = new SocialWorkerAPIApi();
-    console.log(userId)
-    console.log(typeId)
     const role = convertFlaskToSayRoles(typeId);
-    console.log("role")
 
     if (
       role === SAYPlatformRoles.SOCIAL_WORKER ||
@@ -92,8 +89,11 @@ export class SignatureController {
         req.session.destroy();
         throw new WalletExceptionFilter(e.status, e.message)
       }
-
-      return session.nonce
+      if (
+        role === SAYPlatformRoles.FAMILY
+      ) {
+        // return session.nonce
+      }
     }
 
 
@@ -196,9 +196,6 @@ export class SignatureController {
         }
         default: {
           session.save();
-          console.error('e');
-          console.error(e);
-          console.error('e');
           throw new WalletExceptionFilter(e.status, e.message);
         }
       }

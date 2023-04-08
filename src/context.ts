@@ -1,13 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { INestApplication } from '@nestjs/common';
 import config from './config';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
-let context: INestApplication = null;
+let context: NestExpressApplication
 export const ApplicationContext = async () => {
   if (!context) {
-    context = await NestFactory.create(AppModule);
+    context = await NestFactory.create<NestExpressApplication>(AppModule);
 
     const options = new DocumentBuilder()
       .setTitle('SAY DAO')

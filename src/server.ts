@@ -20,6 +20,7 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
 
   const app = await ApplicationContext();
+
   app.enableShutdownHooks();
   app.setGlobalPrefix('api/dao');
   // For large transactions
@@ -58,6 +59,7 @@ async function startServer() {
     database: 'say_dapp',
   });
 
+  app.set('trust proxy', 1) // trust first proxy
 
   app.use(
     session({
@@ -80,6 +82,7 @@ async function startServer() {
   );
 
   await app.listen(config().serverPort);
+
 }
 
 async function stopServer() {
