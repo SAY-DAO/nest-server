@@ -73,7 +73,7 @@ async function startServer() {
         // Insert connect-pg-simple options here
       }),
       name: 'SAY-DAO-SESSION',
-      secret: 'mySecret', // add to .env
+      secret: process.env.DB_FLASK_PASS,
       resave: true,
       saveUninitialized: true,
       cookie: {

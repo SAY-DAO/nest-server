@@ -14,7 +14,7 @@ import { ValidateGatewayPipe } from "./pipes/validate-gateway.pipe";
 
 @WebSocketGateway({
     cors: {
-        origin: ['http://localhost:3000', 'https://panel.saydao.org', 'https://nest.saydao.org']
+        origin: ['http://localhost:3000', 'https://panel.saydao.org', 'nest.saydao.org']
     }
 })
 
