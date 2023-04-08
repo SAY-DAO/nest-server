@@ -35,10 +35,7 @@ export class NeedController {
   @Get(`preneeds`)
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getPrNeed(@Req() req: Request) {
-    console.log('fdgfgfg')
     const accessToken = req.headers['authorization'];
-    console.log(req.headers)
-    console.log('fdgfgfg')
     const preNeeds = await this.needService.getFlaskPreNeed(accessToken);
     return preNeeds;
   }
