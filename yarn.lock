@@ -5417,11 +5417,6 @@ nestjs-pino@^3.1.1:
   resolved "https://registry.npmjs.org/nestjs-pino/-/nestjs-pino-3.1.2.tgz"
   integrity sha512-Rxt9v/OlHwurE2GPyBlHVjzCLCnxIPxGa+Esligij412zEcqqB6kka5MhKAk3l61u1jyTLx3Mzol+HQrR6/f9w==
 
-nestjs-typeorm-paginate@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/nestjs-typeorm-paginate/-/nestjs-typeorm-paginate-4.0.3.tgz#7dfda6988d424b022d0ca8715d88317d7b89f2b1"
-  integrity sha512-qr/pdSTIWTLRCf0xiAsGa2TV1KuHyramLzxV+n4VQ5RYLs7APusum7WdGWRWb/ByUlz+T9BWC5mKIGHotLtMnQ==
-
 nft.storage@^7.0.3:
   version "7.0.3"
   resolved "https://registry.npmjs.org/nft.storage/-/nft.storage-7.0.3.tgz"

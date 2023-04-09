@@ -31,11 +31,6 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
-import {
-  IPaginationOptions,
-  paginate,
-  Pagination,
-} from 'nestjs-typeorm-paginate';
 import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 import { Paginated, PaginateQuery, paginate as nestPaginate } from 'nestjs-paginate';
 
@@ -194,7 +189,7 @@ export class NeedService {
 
 
   async getNotConfirmedNeeds(
-    options: IPaginationOptions,
+    options: PaginateQuery,
     socialWorker: number,
     auditor: number,
     purchaser: number,

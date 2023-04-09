@@ -24,7 +24,6 @@ import { SignatureService } from '../wallet/wallet.service';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
-import { Pagination, IPaginationMeta } from 'nestjs-typeorm-paginate';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { Paginated } from 'nestjs-paginate';
 import { NgoService } from '../ngo/ngo.service';
@@ -138,9 +137,9 @@ export class UserController {
    
             notConfirmedCount = await this.needService.getNotConfirmedNeeds(
                 {
-                    page,
-                    limit,
-                    countQueries: false //we count using getCount() - it is more accurate
+                    page: page,
+                    limit: limit,
+                    path: '/'
                 },
                 socialWorkerId,
                 auditorId,
