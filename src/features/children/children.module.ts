@@ -11,10 +11,11 @@ import { NgoEntity } from '../../entities/ngo.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Need, Child, Payment], 'flaskPostgres'),
+    TypeOrmModule.forFeature([Need, Child, Payment, SocialWorker], 'flaskPostgres'),
     TypeOrmModule.forFeature([ChildrenEntity, NeedEntity, NgoEntity]),
     ScheduleModule.forRoot(),
     HttpModule,

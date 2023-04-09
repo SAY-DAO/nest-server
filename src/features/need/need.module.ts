@@ -29,11 +29,12 @@ import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { NeedStatusUpdate } from 'src/entities/flaskEntities/NeedStatusUpdate.entity';
+import { TicketEntity } from 'src/entities/ticket.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, SocialWorker, NGO, Child, Payment, NeedStatusUpdate],
+      [Need, SocialWorker, NGO, Child, Payment, NeedStatusUpdate, SocialWorker],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -45,6 +46,7 @@ import { NeedStatusUpdate } from 'src/entities/flaskEntities/NeedStatusUpdate.en
       AllUserEntity,
       NgoEntity,
       EthereumAccountEntity,
+      TicketEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,

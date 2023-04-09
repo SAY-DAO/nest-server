@@ -26,11 +26,14 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { IpfsEntity } from 'src/entities/ipfs.entity';
+import { NgoService } from '../ngo/ngo.service';
+import { NgoEntity } from 'src/entities/ngo.entity';
+import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, SocialWorker, Child, Payment],
+      [Need, SocialWorker, Child, Payment, NGO],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -44,7 +47,8 @@ import { IpfsEntity } from 'src/entities/ipfs.entity';
       AllUserEntity,
       SignatureEntity,
       EthereumAccountEntity,
-      IpfsEntity
+      IpfsEntity,
+      NgoEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -57,7 +61,8 @@ import { IpfsEntity } from 'src/entities/ipfs.entity';
     ChildrenService,
     PaymentService,
     SignatureService,
-    IpfsService
+    IpfsService,
+    NgoService
   ],
 })
 export class UserModule implements NestModule {

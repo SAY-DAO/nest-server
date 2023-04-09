@@ -60,7 +60,6 @@ export class SignatureController {
 
     const accessToken = req.headers['authorization'];
 
-
     const flaskApi = new SocialWorkerAPIApi();
     const role = convertFlaskToSayRoles(typeId);
 

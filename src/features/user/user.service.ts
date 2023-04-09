@@ -25,16 +25,32 @@ export class UserService {
     @InjectRepository(EthereumAccountEntity)
     private ethereumWalletRepository: Repository<EthereumAccountEntity>,
     @InjectRepository(SocialWorker, 'flaskPostgres')
-    private socialWorkerRepository: Repository<SocialWorker>,
+    private flaskSocialWorker: Repository<SocialWorker>,
   ) { }
 
-  getSws(): Promise<SocialWorker[]> {
-    return this.socialWorkerRepository.find();
+  getFlaskSws(): Promise<SocialWorker[]> {
+    return this.flaskSocialWorker.find();
   }
 
+  getFlaskSwIds(): Promise<SocialWorker[]> {
+    return this.flaskSocialWorker.find({
+      select: {
+        id: true
+      }
+    });
+  }
+
+
   getFlaskSocialWorker(id: number): Promise<SocialWorker> {
-    return this.socialWorkerRepository.findOne({
+    return this.flaskSocialWorker.findOne({
       where: { id: id }
+    });
+  }
+
+
+  getFlaskSocialWorkerByNgo(ngoId: number): Promise<SocialWorker[]> {
+    return this.flaskSocialWorker.find({
+      where: { ngo_id: ngoId }
     });
   }
 
@@ -51,32 +67,32 @@ export class UserService {
   }
 
 
-  getMyPage(
-    accessToken: any,
-    X_SKIP: number,
-    X_TAKE: number,
-    swId: number,
-    isUser: number,
-  ): Promise<SwMyPage> {
-    let needs: Promise<SwMyPage>;
-    const socialWorkerApi = new SocialWorkerAPIApi();
-    // when 0 displays all children when 1 shows children/needs  created by them
-    if (isUser === 0) {
-      needs = socialWorkerApi.apiV2SocialworkersMyPageGet(
-        accessToken,
-        X_SKIP,
-        X_TAKE,
-        swId,
-      );
-    } else if (isUser === 1) {
-      needs = socialWorkerApi.apiV2SocialworkersMyPageGet(
-        accessToken,
-        X_SKIP,
-        X_TAKE,
-      );
-    }
-    return needs;
-  }
+  // getMyPage(
+  //   accessToken: any,
+  //   X_SKIP: number,
+  //   X_TAKE: number,
+  //   swId: number,
+  //   isUser: number,
+  // ): Promise<SwMyPage> {
+  //   let needs: Promise<SwMyPage>;
+  //   const socialWorkerApi = new SocialWorkerAPIApi();
+  //   // when 0 displays all children when 1 shows children/needs  created by them
+  //   if (isUser === 0) {
+  //     needs = socialWorkerApi.apiV2SocialworkersMyPageGet(
+  //       accessToken,
+  //       X_SKIP,
+  //       X_TAKE,
+  //       swId,
+  //     );
+  //   } else if (isUser === 1) {
+  //     needs = socialWorkerApi.apiV2SocialworkersMyPageGet(
+  //       accessToken,
+  //       X_SKIP,
+  //       X_TAKE,
+  //     );
+  //   }
+  //   return needs;
+  // }
 
   createUserWallet(
     address: string,
@@ -202,4 +218,5 @@ export class UserService {
     });
     return user;
   }
+  
 }

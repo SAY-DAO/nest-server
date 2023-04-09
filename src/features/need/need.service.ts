@@ -36,6 +36,8 @@ import {
   paginate,
   Pagination,
 } from 'nestjs-typeorm-paginate';
+import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { Paginated, PaginateQuery, paginate as nestPaginate } from 'nestjs-paginate';
 
 @Injectable()
 export class NeedService {
@@ -44,6 +46,8 @@ export class NeedService {
     private flaskChildRepository: Repository<Child>,
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
+    @InjectRepository(SocialWorker, 'flaskPostgres')
+    private flaskSocialWorker: Repository<SocialWorker>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
   ) { }
@@ -188,13 +192,15 @@ export class NeedService {
     return need;
   }
 
-  async getContributorFlaskNeeds(
+
+  async getNotConfirmedNeeds(
     options: IPaginationOptions,
     socialWorker: number,
     auditor: number,
     purchaser: number,
-    ngoId: number,
-  ): Promise<Pagination<Need>> {
+    ngoSupervisor: number,
+    swIds: number[],
+  ): Promise<number> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -204,194 +210,15 @@ export class NeedService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .leftJoinAndMapMany(
-        'need.status_updates',
-        NeedStatusUpdate,
-        'need_status_updates',
-        'need_status_updates.need_id = need.id',
-      )
-      // .leftJoinAndMapOne(
-      //   'need.payments',
-      //   Payment,
-      //   'payment',
-      //   'payment.id_need = need.id',
-      // )
-
-      .leftJoinAndMapMany(
-        'need.receipts_',
-        NeedReceipt,
-        'need_receipt',
-        'need_receipt.need_id = need.id',
-      )
-
-      .leftJoinAndMapMany(
-        'need_receipt.receipt',
-        Receipt,
-        'receipt',
-        'receipt.id = need_receipt.receipt_id',
-      )
-
-      .where('need.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('child.id_ngo != 3')
-      .andWhere('child.id_ngo != 14')
-      .andWhere('need.created_by_id = :created_by_id', {
-        created_by_id: socialWorker,
-      })
-      .orWhere('need.confirmUser = :confirmUser', { confirmUser: auditor })
-      .orWhere('ngo.id = :ngoId', { ngoId: ngoId })
-      .orWhere(
-        new Brackets((qb) => {
-          qb.where('need_status_updates.old_status = 2')
-            .andWhere('need_status_updates.new_status = 3')
-            .andWhere('need_status_updates.sw_id = :purchaser', {
-              purchaser: purchaser,
-            });
-        }),
-      )
-      .select([
-        'child',
-        'ngo.id',
-        'ngo.name',
-        'ngo.logoUrl',
-        'need.id',
-        'need.child_id',
-        'need.created_by_id',
-        'need.name_translations',
-        'need.title',
-        'need.imageUrl',
-        'need.category',
-        'need.type',
-        'need.isUrgent',
-        'need.link',
-        'need.affiliateLinkUrl',
-        'need.bank_track_id',
-        'need.doing_duration',
-        'need.status',
-        'need.img',
-        'need.purchase_cost',
-        'need._cost',
-        'need.isConfirmed',
-        'need.created',
-        'need.updated',
-        'need.confirmDate',
-        'need.confirmUser',
-        'need.doneAt',
-        'need.ngo_delivery_date',
-        'need.child_delivery_date',
-        'need.purchase_date',
-        'need.expected_delivery_date',
-        'need.unavailable_from',
-        'need_status_updates',
-        'need_receipt',
-        'receipt',
-      ])
-      .orderBy('need.created', 'DESC');
-    return paginate<Need>(queryBuilder, options);
-  }
-
-  async getAdminFlaskNeeds(
-    options: IPaginationOptions,
-  ): Promise<Pagination<Need>> {
-    const queryBuilder = this.flaskNeedRepository
-      .createQueryBuilder('need')
-      .leftJoinAndMapOne(
-        'need.child',
-        Child,
-        'child',
-        'child.id = need.child_id',
-      )
-      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .leftJoinAndMapMany(
-        'need.status_updates',
-        NeedStatusUpdate,
-        'need_status_updates',
-        'need_status_updates.need_id = need.id',
-      )
-
-      .leftJoinAndMapMany(
-        'need.receipts_',
-        NeedReceipt,
-        'need_receipt',
-        'need_receipt.need_id = need.id',
-      )
-
-      .leftJoinAndMapMany(
-        'need_receipt.receipt',
-        Receipt,
-        'receipt',
-        'receipt.id = need_receipt.receipt_id',
-      )
-
-      .where('need.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('child.id_ngo != 3')
-      .andWhere('child.id_ngo != 14')
-
-      .select([
-        'child',
-        'ngo.id',
-        'ngo.name',
-        'ngo.logoUrl',
-        'need.id',
-        'need.child_id',
-        'need.created_by_id',
-        'need.name_translations',
-        'need.title',
-        'need.imageUrl',
-        'need.category',
-        'need.type',
-        'need.isUrgent',
-        'need.link',
-        'need.affiliateLinkUrl',
-        'need.bank_track_id',
-        'need.doing_duration',
-        'need.status',
-        'need.img',
-        'need.purchase_cost',
-        'need._cost',
-        'need.isConfirmed',
-        'need.created',
-        'need.updated',
-        'need.confirmDate',
-        'need.confirmUser',
-        'need.doneAt',
-        'need.ngo_delivery_date',
-        'need.child_delivery_date',
-        'need.purchase_date',
-        'need.expected_delivery_date',
-        'need.unavailable_from',
-        'need_status_updates',
-        // 'payment',
-        'need_receipt',
-        'receipt',
-      ])
-      .orderBy('need.created', 'DESC');
-
-    return paginate<Need>(queryBuilder, options);
-  }
-
-  async getUnpaidNeeds(
-    options: IPaginationOptions,
-    socialWorker: number,
-    auditor: number,
-    purchaser: number,
-    ngoId: number,
-  ): Promise<Pagination<Need>> {
-    const queryBuilder = this.flaskNeedRepository
-      .createQueryBuilder('need')
-      .leftJoinAndMapOne(
-        'need.child',
-        Child,
-        'child',
-        'child.id = need.child_id',
-      )
-      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-
       .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
-      .andWhere('child.id_ngo NOT IN (:...ids)', { ids: [3, 14] })
+      .where('need.isConfirmed = :needConfirmed', { needConfirmed: false })
+      .andWhere('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-
-      .andWhere('need.created_by_id = :created_by_id', {
-        created_by_id: socialWorker,
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
+      .andWhere('need.status = :statusNotPaid', {
+        statusNotPaid: PaymentStatusEnum.NOT_PAID,
       })
       .select([
         'child',
@@ -427,17 +254,88 @@ export class NeedService {
         'need.expected_delivery_date',
         'need.unavailable_from',
       ])
-      .orderBy('need.created', 'DESC');
-    return paginate<Need>(queryBuilder, options);
+      .orderBy('need.created', 'ASC');
+    const accurateCount = await queryBuilder.getCount()
+
+    return accurateCount
+  }
+
+  async getNotPaidNeeds(
+    options: PaginateQuery,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoSupervisor: number,
+    swIds: number[],
+  ): Promise<Paginated<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
+      .andWhere('need.status = :statusNotPaid', {
+        statusNotPaid: PaymentStatusEnum.NOT_PAID,
+      })
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+      ])
+    return await nestPaginate<Need>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['isConfirmed', 'ASC']],
+      nullSort: 'last',
+
+    })
   }
 
   async getPaidNeeds(
-    options: IPaginationOptions,
+    options: PaginateQuery,
     socialWorker: number,
     auditor: number,
     purchaser: number,
     ngoId: number,
-  ): Promise<Pagination<Need>> {
+    swIds: number[],
+  ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -453,17 +351,16 @@ export class NeedService {
         'payment',
         'payment.id_need = need.id',
       )
-      .andWhere('need.status = :statusComplete', {
-        statusComplete: PaymentStatusEnum.COMPLETE_PAY,
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.status IN (:...statuses)', {
+        statuses: [PaymentStatusEnum.COMPLETE_PAY, PaymentStatusEnum.PARTIAL_PAY],
       })
-      .orWhere('need.status = :statusPartial', {
-        statusPartial: PaymentStatusEnum.PARTIAL_PAY,
-      })
+      .andWhere('payment.id IS NOT NULL')
       .andWhere('payment.verified IS NOT NULL')
       .andWhere('payment.order_id IS NOT NULL')
-      .andWhere('need.created_by_id = :created_by_id', {
-        created_by_id: socialWorker,
-      })
+      .andWhere('need.created_by_id IN (:...swIds)', { swIds: socialWorker ? [socialWorker] : [...swIds] })
       .select([
         'child',
         'ngo.id',
@@ -499,17 +396,22 @@ export class NeedService {
         'need.unavailable_from',
         'payment'
       ])
-      .orderBy('need.created', 'DESC');
-    return paginate<Need>(queryBuilder, options);
+    return await nestPaginate<Need>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['doneAt', 'DESC']],
+      nullSort: 'last',
+
+    })
   }
 
   async getPurchasedNeeds(
-    options: IPaginationOptions,
+    options: PaginateQuery,
     socialWorker: number,
     auditor: number,
     purchaser: number,
     ngoId: number,
-  ): Promise<Pagination<Need>> {
+    swIds: number[],
+  ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -531,32 +433,26 @@ export class NeedService {
         'need_status_updates',
         'need_status_updates.need_id = need.id',
       )
-     
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .where(
         new Brackets((qb) => {
-          qb.where('need.type = :typeProduct', { typeProduct: NeedTypeEnum.PRODUCT })
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
             .andWhere('need.status = :productStatus', {
               productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
             })
-            .orWhere('need.type = :typeService', { typeService: NeedTypeEnum.SERVICE })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
             .andWhere('need.status = :serviceStatus', {
               serviceStatus: ServiceStatusEnum.MONEY_TO_NGO,
             });
         }),
       )
-      .andWhere('need.created_by_id = :created_by_id', {
-        created_by_id: socialWorker,
-      })
-      // .where(
-      //   new Brackets((qb) => {
-      //     qb.where('need_status_updates.old_status = 2')
-      //       .andWhere('need_status_updates.new_status = 3')
-      //       .orWhere(
-      //         'need_status_updates.sw_id = :purchaser',
-      //         { purchaser: purchaser },
-      //       );
-      //   }),
-      // )
+      .andWhere('need.created_by_id IN (:...swIds)', { swIds: socialWorker ? [socialWorker] : [...swIds] })
       .select([
         'child',
         'ngo.id',
@@ -591,19 +487,25 @@ export class NeedService {
         'need.expected_delivery_date',
         'need.unavailable_from',
         'need_status_updates',
-
       ])
-      .orderBy('need.created', 'DESC');
-    return paginate<Need>(queryBuilder, options);
+    return await nestPaginate<Need>(options, queryBuilder, {
+      sortableColumns: ['id', 'ngo_delivery_date'],
+      defaultSortBy: [['ngo_delivery_date', 'DESC']],
+      nullSort: 'last',
+
+    })
+
   }
 
+
   async getDeliveredNeeds(
-    options: IPaginationOptions,
+    options: PaginateQuery,
     socialWorker: number,
     auditor: number,
     purchaser: number,
     ngoId: number,
-  ): Promise<Pagination<Need>> {
+    swIds: number[],
+  ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -625,7 +527,6 @@ export class NeedService {
         'need_status_updates',
         'need_status_updates.need_id = need.id',
       )
-     
 
       .leftJoinAndMapMany(
         'need.receipts_',
@@ -640,22 +541,26 @@ export class NeedService {
         'receipt',
         'receipt.id = need_receipt.receipt_id',
       )
-
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .where(
         new Brackets((qb) => {
-          qb.where('need.type = :typeProduct', { typeProduct: NeedTypeEnum.PRODUCT })
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
             .andWhere('need.status = :productStatus', {
               productStatus: ProductStatusEnum.DELIVERED,
             })
-            .orWhere('need.type = :typeService', { typeService: NeedTypeEnum.SERVICE })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
             .andWhere('need.status = :serviceStatus', {
               serviceStatus: ServiceStatusEnum.DELIVERED,
             });
         }),
       )
-      .andWhere('need.created_by_id = :created_by_id', {
-        created_by_id: socialWorker,
-      })
+      .andWhere('need.created_by_id IN (:...swIds)', { swIds: socialWorker ? [socialWorker] : [...swIds] })
       .select([
         'child',
         'ngo.id',
@@ -690,9 +595,13 @@ export class NeedService {
         'need.expected_delivery_date',
         'need.unavailable_from',
         'need_status_updates',
-
       ])
-      .orderBy('need.created', 'DESC');
-    return paginate<Need>(queryBuilder, options);
+    return await nestPaginate<Need>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['child_delivery_date', 'DESC']],
+      nullSort: 'last',
+
+    })
   }
+
 }

@@ -16,8 +16,17 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-  ) { }
+  ) {}
 
+  async countChildren(ngoIds: number[]): Promise<number> {
+    return this.flaskChildRepository
+      .createQueryBuilder('child')
+      .select(['child.id'])
+      .andWhere('child.id_ngo IN (:...ngoIds)', {
+        ngoIds: [...ngoIds],
+      })
+      .getCount();
+  }
 
   // async getAllFlaskChildren(
   //   options: HeaderOptions,
@@ -91,7 +100,7 @@ export class ChildrenService {
       ngo: ngo,
       socialWorker: socialWorker,
       flaskSwId: socialWorker.flaskId,
-      flaskNgoId: ngo.flaskNgoId
+      flaskNgoId: ngo.flaskNgoId,
     });
 
     return this.childrenRepository.save({ ...newChild });

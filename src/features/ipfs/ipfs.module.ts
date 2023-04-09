@@ -15,10 +15,11 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PaymentEntity } from 'src/entities/payment.entity';
+import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Need, Child, Payment], 'flaskPostgres'),
+    TypeOrmModule.forFeature([Need, Child, Payment, SocialWorker], 'flaskPostgres'),
     TypeOrmModule.forFeature([
       NeedEntity,
       IpfsEntity,
