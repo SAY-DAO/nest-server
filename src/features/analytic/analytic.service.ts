@@ -7,7 +7,8 @@ import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
-import { NeedTypeEnum } from 'src/types/interfaces/interface';
+import { NeedTypeEnum, SAYPlatformRoles } from 'src/types/interfaces/interface';
+import { getNeedsTimeLine, timeDifferenceWithComment } from 'src/utils/helpers';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -96,7 +97,6 @@ export class AnalyticService {
       ])
       .where('child.id_ngo != :ngoId', { ngoId: 3 })
       .getManyAndCount();
-
 
     const dead = await this.flaskChildRepository.count({
       where: {
@@ -313,18 +313,17 @@ export class AnalyticService {
   }
 
   async getEcosystemAnalytic() {
-
-    let listAll = []
-    let listConfirmed = []
-    let listUnConfirmed = []
-    let listConfirmedNotPaid = []
-    let listCompletePay = []
-    let listPartialPay = []
-    let listPurchased = []
-    let listMoneyToNgo = []
-    let listDeliveredNgo = []
-    let listDeliveredChild = []
-    const childrenList = []
+    let listAll = [];
+    let listConfirmed = [];
+    let listUnConfirmed = [];
+    let listConfirmedNotPaid = [];
+    let listCompletePay = [];
+    let listPartialPay = [];
+    let listPurchased = [];
+    let listMoneyToNgo = [];
+    let listDeliveredNgo = [];
+    let listDeliveredChild = [];
+    const childrenList = [];
     await this.flaskChildRepository
       .createQueryBuilder('child')
       .select(['child.id'])
@@ -347,37 +346,35 @@ export class AnalyticService {
               moneyToNgo,
               deliveredNgo,
               deliveredChild,
-            }
-          } = await this.getChildNeedsAnalytic(c.id)
+            },
+          } = await this.getChildNeedsAnalytic(c.id);
 
-          childrenList.push(
-            {
-              child,
-              childNeedsStats: {
-                all,
-                confirmed,
-                unConfirmed,
-                confirmedNotPaid,
-                completePay,
-                partialPay,
-                purchased,
-                moneyToNgo,
-                deliveredNgo,
-                deliveredChild
-              }
-            }
-          )
+          childrenList.push({
+            child,
+            childNeedsStats: {
+              all,
+              confirmed,
+              unConfirmed,
+              confirmedNotPaid,
+              completePay,
+              partialPay,
+              purchased,
+              moneyToNgo,
+              deliveredNgo,
+              deliveredChild,
+            },
+          });
 
-          listAll = [...listAll, all]
-          listConfirmed = [...listConfirmed, confirmed]
-          listUnConfirmed = [...listUnConfirmed, unConfirmed]
-          listConfirmedNotPaid = [...listConfirmedNotPaid, confirmedNotPaid]
-          listCompletePay = [...listCompletePay, completePay]
-          listPartialPay = [...listPartialPay, partialPay]
-          listPurchased = [...listPurchased, purchased]
-          listMoneyToNgo = [...listMoneyToNgo, moneyToNgo]
-          listDeliveredNgo = [...listDeliveredNgo, deliveredNgo]
-          listDeliveredChild = [...listDeliveredChild, deliveredChild]
+          listAll = [...listAll, all];
+          listConfirmed = [...listConfirmed, confirmed];
+          listUnConfirmed = [...listUnConfirmed, unConfirmed];
+          listConfirmedNotPaid = [...listConfirmedNotPaid, confirmedNotPaid];
+          listCompletePay = [...listCompletePay, completePay];
+          listPartialPay = [...listPartialPay, partialPay];
+          listPurchased = [...listPurchased, purchased];
+          listMoneyToNgo = [...listMoneyToNgo, moneyToNgo];
+          listDeliveredNgo = [...listDeliveredNgo, deliveredNgo];
+          listDeliveredChild = [...listDeliveredChild, deliveredChild];
         }
       });
 
@@ -398,20 +395,104 @@ export class AnalyticService {
       .getCount();
 
     return {
-      meanNeedsPerChild: Math.round(listAll.reduce((partialSum, a) => partialSum + a, 0) / listAll.length),
-      meanConfirmedPerChild: Math.round(listConfirmed.reduce((partialSum, a) => partialSum + a, 0) / listConfirmed.length),
-      meanUnConfirmedPerChild: Math.round(listUnConfirmed.reduce((partialSum, a) => partialSum + a, 0) / listUnConfirmed.length),
-      meanConfirmedNotPaidPerChild: Math.round(listConfirmedNotPaid.reduce((partialSum, a) => partialSum + a, 0) / listConfirmedNotPaid.length),
-      meanCompletePayPerChild: Math.round(listCompletePay.reduce((partialSum, a) => partialSum + a, 0) / listCompletePay.length),
-      meanPartialPayPerChild: Math.round(listPartialPay.reduce((partialSum, a) => partialSum + a, 0) / listPartialPay.length),
-      meanPurchasedPerChild: Math.round(listPurchased.reduce((partialSum, a) => partialSum + a, 0) / listPurchased.length),
-      meanMoneyToNgoPerChild: Math.round(listMoneyToNgo.reduce((partialSum, a) => partialSum + a, 0) / listMoneyToNgo.length),
-      meanDeliveredNgoPerChild: Math.round(listDeliveredNgo.reduce((partialSum, a) => partialSum + a, 0) / listDeliveredNgo.length),
-      meanDeliveredChildPerChild: Math.round(listDeliveredChild.reduce((partialSum, a) => partialSum + a, 0) / listDeliveredChild.length),
+      meanNeedsPerChild: Math.round(
+        listAll.reduce((partialSum, a) => partialSum + a, 0) / listAll.length,
+      ),
+      meanConfirmedPerChild: Math.round(
+        listConfirmed.reduce((partialSum, a) => partialSum + a, 0) /
+        listConfirmed.length,
+      ),
+      meanUnConfirmedPerChild: Math.round(
+        listUnConfirmed.reduce((partialSum, a) => partialSum + a, 0) /
+        listUnConfirmed.length,
+      ),
+      meanConfirmedNotPaidPerChild: Math.round(
+        listConfirmedNotPaid.reduce((partialSum, a) => partialSum + a, 0) /
+        listConfirmedNotPaid.length,
+      ),
+      meanCompletePayPerChild: Math.round(
+        listCompletePay.reduce((partialSum, a) => partialSum + a, 0) /
+        listCompletePay.length,
+      ),
+      meanPartialPayPerChild: Math.round(
+        listPartialPay.reduce((partialSum, a) => partialSum + a, 0) /
+        listPartialPay.length,
+      ),
+      meanPurchasedPerChild: Math.round(
+        listPurchased.reduce((partialSum, a) => partialSum + a, 0) /
+        listPurchased.length,
+      ),
+      meanMoneyToNgoPerChild: Math.round(
+        listMoneyToNgo.reduce((partialSum, a) => partialSum + a, 0) /
+        listMoneyToNgo.length,
+      ),
+      meanDeliveredNgoPerChild: Math.round(
+        listDeliveredNgo.reduce((partialSum, a) => partialSum + a, 0) /
+        listDeliveredNgo.length,
+      ),
+      meanDeliveredChildPerChild: Math.round(
+        listDeliveredChild.reduce((partialSum, a) => partialSum + a, 0) /
+        listDeliveredChild.length,
+      ),
       totalFamilies,
       totalFamilyMembers,
       meanFamilyMembers: Math.round(totalFamilyMembers / totalFamilies),
-      childrenList
+      childrenList,
     };
+  }
+
+  async getUserContribution(
+    swIds: number[],
+    role: SAYPlatformRoles,
+    flaskUserId: number,
+  ) {
+    const today = new Date();
+    const threeMonthsAgo = today.setMonth(today.getMonth() - 3);
+
+    const needs = await this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .where('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
+      .where('need.created > :startDate', { startDate: new Date(threeMonthsAgo) })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds:
+          role === SAYPlatformRoles.SOCIAL_WORKER ? [flaskUserId] : [...swIds],
+      })
+      .select([
+        // 'child.id_ngo',
+        // 'need.id',
+        // 'need.child_id',
+        // 'need.created_by_id',
+        // 'need.bank_track_id',
+        // 'need.doing_duration',
+        'need.created',
+        // 'need.updated',
+        'need.confirmDate',
+        // 'need.confirmUser',
+        // 'need.doneAt',
+        // 'need.ngo_delivery_date',
+        // 'need.child_delivery_date',
+        // 'need.purchase_date',
+        // 'need.expected_delivery_date',
+        // 'need.unavailable_from',
+      ])
+      .getManyAndCount();
+
+    const time7 = new Date().getTime();
+    const { summary, inMonth } = getNeedsTimeLine(needs[0])
+    const time8 = new Date().getTime();
+
+    timeDifferenceWithComment(time7, time8, 'TimeLine User Analytic In');
+
+    return { summary, inMonth, count: needs[1] }
+
   }
 }

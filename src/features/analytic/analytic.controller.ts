@@ -1,12 +1,15 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NeedTypeEnum } from 'src/types/interfaces/interface';
+import { convertFlaskToSayRoles } from 'src/utils/helpers';
+import { UserService } from '../user/user.service';
 import { AnalyticService } from './analytic.service';
 
 @ApiTags('Analytic')
 @Controller('analytic')
 export class AnalyticController {
   constructor(
+    private userService: UserService,
     private readonly analyticService: AnalyticService,
   ) { }
   @Get(`needs/:typeId`)
@@ -43,5 +46,17 @@ export class AnalyticController {
   @ApiOperation({ description: 'get SAY ecosystem analytics' })
   async getEcosystemAnalytic() {
     return await this.analyticService.getEcosystemAnalytic();
+  }
+
+  @Get('contributions/:flaskUserId/:userType')
+  @ApiOperation({ description: 'Users contributions in month' })
+  async getUserContribution(
+    @Param('flaskUserId') flaskUserId: number,
+    @Param('userType') userType: number
+  ) {
+    const role = convertFlaskToSayRoles(Number(userType))
+    const swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
+
+    return await this.analyticService.getUserContribution(swIds, role, flaskUserId)
   }
 }

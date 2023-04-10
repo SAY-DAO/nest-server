@@ -251,11 +251,6 @@ export class UserController {
         const time6 = new Date().getTime();
         timeDifferenceWithComment(time5, time6, 'Second organize In ');
 
-        // const time7 = new Date().getTime();
-        // const { summary, inMonth } = getNeedsTimeLine(modifiedNeedList, role);
-        // const time8 = new Date().getTime();
-
-        // timeDifferenceWithComment(time7, time8, 'TimeLine In ');
         const signatures = await this.signatureService.getUserSignatures(userId);
 
         const paidCount = paid.meta.totalItems

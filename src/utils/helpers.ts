@@ -1,4 +1,6 @@
+import { Need } from 'src/entities/flaskEntities/need.entity';
 import { TicketEntity } from 'src/entities/ticket.entity';
+import { ServerError } from 'src/filters/server-exception.filter';
 import { SwmypageNeeds } from 'src/generated-sources/openapi';
 import {
   NeedTypeEnum,
@@ -29,21 +31,24 @@ export function getSAYRoleInteger(sayRole: string) {
   return roleInteger;
 }
 
-export function convertFlaskToSayRoles(flakUserType: number) {
+export function convertFlaskToSayRoles(flaskUserType: number) {
+  if (typeof flaskUserType != "number") {
+    throw new ServerError('bad role type')
+  }
   let role: SAYPlatformRoles;
-  if (flakUserType === FlaskUserTypesEnum.SAY_SUPERVISOR) {
+  if (flaskUserType === FlaskUserTypesEnum.SAY_SUPERVISOR) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === FlaskUserTypesEnum.ADMIN) {
+  } else if (flaskUserType === FlaskUserTypesEnum.ADMIN) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === FlaskUserTypesEnum.SUPER_ADMIN) {
+  } else if (flaskUserType === FlaskUserTypesEnum.SUPER_ADMIN) {
     role = SAYPlatformRoles.AUDITOR;
-  } else if (flakUserType === FlaskUserTypesEnum.SOCIAL_WORKER) {
+  } else if (flaskUserType === FlaskUserTypesEnum.SOCIAL_WORKER) {
     role = SAYPlatformRoles.SOCIAL_WORKER;
-  } else if (flakUserType === FlaskUserTypesEnum.COORDINATOR) {
+  } else if (flaskUserType === FlaskUserTypesEnum.COORDINATOR) {
     role = SAYPlatformRoles.PURCHASER;
-  } else if (flakUserType === FlaskUserTypesEnum.NGO_SUPERVISOR) {
+  } else if (flaskUserType === FlaskUserTypesEnum.NGO_SUPERVISOR) {
     role = SAYPlatformRoles.NGO_SUPERVISOR;
-  } else if (!flakUserType) {
+  } else if (!flaskUserType) {
     role = SAYPlatformRoles.FAMILY;
   }
   return role;
@@ -87,7 +92,7 @@ export function getUserSAYRoleString(userTypeId: number) {
   return 'noRole';
 }
 
-export function dateConvertor(value: string) {
+export function dateConvertToPersian(value: string) {
   const d = new Date(value);
   return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
     dateStyle: 'full',
@@ -148,8 +153,7 @@ export function timeDifferenceWithComment(time1: number, time2: number, comment:
   console.log(comment + hh + ':' + mm + ':' + ss);
 }
 
-export function getNeedsTimeLine(needs: SwmypageNeeds[], who: string) {
-  let summary: { inTwoDays: number; inWeek: number; inThirtyDays: number };
+export function getNeedsTimeLine(needs: Need[]) {
   const farvardin = { created: 0, confirmed: 0 };
   const ordibehesht = { created: 0, confirmed: 0 };
   const khordad = { created: 0, confirmed: 0 };
@@ -163,129 +167,110 @@ export function getNeedsTimeLine(needs: SwmypageNeeds[], who: string) {
   const bahman = { created: 0, confirmed: 0 };
   const esfand = { created: 0, confirmed: 0 };
 
-  const currentMonth = parseInt(
-    new Intl.DateTimeFormat('en-US-u-ca-persian', { month: 'numeric' }).format(
-      new Date(),
-    ),
-  );
-  const currentYear = parseInt(
-    new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(
-      new Date(),
-    ),
-  );
+
   for (let i = 0; i < needs.length; i++) {
     const thePersianMonthCreated = persianMonth(new Date(needs[i].created));
     const thePersianMonthConfirm = persianMonth(new Date(needs[i].confirmDate));
-    const thePersianYearCreated = persianYear(new Date(needs[i].created));
-    const thePersianYearConfirm = persianYear(new Date(needs[i].confirmDate));
 
-    if (
-      currentMonth - 6 < thePersianMonthCreated &&
-      thePersianYearCreated === currentYear
-    ) {
-      // farvardin
-      if (thePersianMonthCreated === 1) {
-        farvardin.created += 1;
-      }
-      // ordibehesht
-      else if (thePersianMonthCreated === 2) {
-        ordibehesht.created += 1;
-      }
-      // khordad
-      else if (thePersianMonthCreated === 3) {
-        khordad.created += 1;
-      }
-      // tir
-      else if (thePersianMonthCreated === 4) {
-        tir.created += 1;
-      }
-      // mordad
-      else if (thePersianMonthCreated === 5) {
-        mordad.created += 1;
-      }
-      // shahrivar
-      else if (thePersianMonthCreated === 6) {
-        shahrivar.created += 1;
-      }
-      // mehr
-      else if (thePersianMonthCreated === 7) {
-        mehr.created += 1;
-      }
-      // aban
-      else if (thePersianMonthCreated === 8) {
-        aban.created += 1;
-      }
-      // azar
-      else if (thePersianMonthCreated === 9) {
-        azar.created += 1;
-      }
-      // dey
-      else if (thePersianMonthCreated === 10) {
-        dey.created += 1;
-      }
-      // bahman
-      else if (thePersianMonthCreated === 11) {
-        bahman.created += 1;
-      }
+    // farvardin
+    if (thePersianMonthCreated === 1) {
+      farvardin.created += 1;
+    }
+    // ordibehesht
+    else if (thePersianMonthCreated === 2) {
+      ordibehesht.created += 1;
+    }
+    // khordad
+    else if (thePersianMonthCreated === 3) {
+      khordad.created += 1;
+    }
+    // tir
+    else if (thePersianMonthCreated === 4) {
+      tir.created += 1;
+    }
+    // mordad
+    else if (thePersianMonthCreated === 5) {
+      mordad.created += 1;
+    }
+    // shahrivar
+    else if (thePersianMonthCreated === 6) {
+      shahrivar.created += 1;
+    }
+    // mehr
+    else if (thePersianMonthCreated === 7) {
+      mehr.created += 1;
+    }
+    // aban
+    else if (thePersianMonthCreated === 8) {
+      aban.created += 1;
+    }
+    // azar
+    else if (thePersianMonthCreated === 9) {
+      azar.created += 1;
+    }
+    // dey
+    else if (thePersianMonthCreated === 10) {
+      dey.created += 1;
+    }
+    // bahman
+    else if (thePersianMonthCreated === 11) {
+      bahman.created += 1;
+    }
 
-      // esfand
-      else if (thePersianMonthCreated === 12) {
-        esfand.created += 1;
-      }
+    // esfand
+    else if (thePersianMonthCreated === 12) {
+      esfand.created += 1;
     }
-    if (
-      currentMonth - 6 < thePersianMonthConfirm &&
-      thePersianYearConfirm === currentYear
-    ) {
-      // farvardin
-      if (thePersianMonthConfirm === 1) {
-        farvardin.confirmed += 1;
-      }
-      // ordibehesht
-      else if (thePersianMonthConfirm === 2) {
-        ordibehesht.confirmed += 1;
-      }
-      // khordad
-      else if (thePersianMonthConfirm === 3) {
-        khordad.confirmed += 1;
-      }
-      // tir
-      else if (thePersianMonthConfirm === 4) {
-        tir.confirmed += 1;
-      }
-      // mordad
-      else if (thePersianMonthConfirm === 5) {
-        mordad.confirmed += 1;
-      }
-      // shahrivar
-      else if (thePersianMonthConfirm === 6) {
-        shahrivar.confirmed += 1;
-      }
-      // mehr
-      else if (thePersianMonthConfirm === 7) {
-        mehr.confirmed += 1;
-      }
-      // aban
-      else if (thePersianMonthConfirm === 8) {
-        aban.confirmed += 1;
-      }
-      // azar
-      else if (thePersianMonthConfirm === 9) {
-        azar.confirmed += 1;
-      }
-      // dey
-      else if (thePersianMonthConfirm === 10) {
-        dey.confirmed += 1;
-      }
-      // bahman
-      else if (thePersianMonthConfirm === 11) {
-        bahman.confirmed += 1;
-      }
-      // esfand
-      else if (thePersianMonthConfirm === 12) {
-        esfand.confirmed += 1;
-      }
+
+    // farvardin
+    if (thePersianMonthConfirm === 1) {
+      farvardin.confirmed += 1;
     }
+    // ordibehesht
+    else if (thePersianMonthConfirm === 2) {
+      ordibehesht.confirmed += 1;
+    }
+    // khordad
+    else if (thePersianMonthConfirm === 3) {
+      khordad.confirmed += 1;
+    }
+    // tir
+    else if (thePersianMonthConfirm === 4) {
+      tir.confirmed += 1;
+    }
+    // mordad
+    else if (thePersianMonthConfirm === 5) {
+      mordad.confirmed += 1;
+    }
+    // shahrivar
+    else if (thePersianMonthConfirm === 6) {
+      shahrivar.confirmed += 1;
+    }
+    // mehr
+    else if (thePersianMonthConfirm === 7) {
+      mehr.confirmed += 1;
+    }
+    // aban
+    else if (thePersianMonthConfirm === 8) {
+      aban.confirmed += 1;
+    }
+    // azar
+    else if (thePersianMonthConfirm === 9) {
+      azar.confirmed += 1;
+    }
+    // dey
+    else if (thePersianMonthConfirm === 10) {
+      dey.confirmed += 1;
+    }
+    // bahman
+    else if (thePersianMonthConfirm === 11) {
+      bahman.confirmed += 1;
+    }
+    // esfand
+    else if (thePersianMonthConfirm === 12) {
+      esfand.confirmed += 1;
+    }
+
   }
 
   const twoDaysAgo = new Date();
@@ -295,37 +280,21 @@ export function getNeedsTimeLine(needs: SwmypageNeeds[], who: string) {
   const monthAgo = new Date();
   monthAgo.setDate(monthAgo.getDate() - 30);
 
-  if (who == 'createdBy') {
-    const inTwoDays = needs.filter(
-      (n) => new Date(n.confirmDate).getTime() >= twoDaysAgo.getTime(),
-    );
-    const inWeek = needs.filter(
-      (n) => new Date(n.confirmDate).getTime() >= weekAgo.getTime(),
-    );
-    const inThirtyDays = needs.filter(
-      (n) => new Date(n.confirmDate).getTime() >= monthAgo.getTime(),
-    );
-    summary = {
-      inTwoDays: inTwoDays.length,
-      inWeek: inWeek.length,
-      inThirtyDays: inThirtyDays.length,
-    };
-  } else {
-    const inTwoDays = needs.filter(
-      (n) => new Date(n.confirmDate).getTime() >= twoDaysAgo.getTime(),
-    );
-    const inWeek = needs.filter(
-      (n) => new Date(n.confirmDate).getTime() >= weekAgo.getTime(),
-    );
-    const inThirtyDays = needs.filter(
-      (n) => new Date(n.confirmDate).getTime() >= monthAgo.getTime(),
-    );
-    summary = {
-      inTwoDays: inTwoDays.length,
-      inWeek: inWeek.length,
-      inThirtyDays: inThirtyDays.length,
-    };
-  }
+  const inTwoDays = needs.filter(
+    (n) => new Date(n.confirmDate).getTime() >= twoDaysAgo.getTime(),
+  );
+  const inWeek = needs.filter(
+    (n) => new Date(n.confirmDate).getTime() >= weekAgo.getTime(),
+  );
+  const inThirtyDays = needs.filter(
+    (n) => new Date(n.confirmDate).getTime() >= monthAgo.getTime(),
+  );
+ const summary = {
+    inTwoDays: inTwoDays.length,
+    inWeek: inWeek.length,
+    inThirtyDays: inThirtyDays.length,
+  };
+
   return {
     summary,
     inMonth: {
