@@ -5,7 +5,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { User } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { NeedTypeEnum, SAYPlatformRoles } from 'src/types/interfaces/interface';
 import { getNeedsTimeLine, timeDifferenceWithComment } from 'src/utils/helpers';
@@ -22,6 +22,8 @@ export class AnalyticService {
     private flaskFamilyRepository: Repository<Family>,
     @InjectRepository(UserFamily, 'flaskPostgres')
     private flaskUserFamilyRepository: Repository<UserFamily>,
+    @InjectRepository(SocialWorker, 'flaskPostgres')
+    private flaskSocialWorkerRepository: Repository<SocialWorker>,
     @InjectRepository(User, 'flaskPostgres')
     private flaskUserRepository: Repository<User>,
     @InjectRepository(Child, 'flaskPostgres')
@@ -447,8 +449,13 @@ export class AnalyticService {
     flaskUserId: number,
   ) {
     const today = new Date();
-    const threeMonthsAgo = today.setMonth(today.getMonth() - 3);
+    const threeMonthsAgo = today.setMonth(today.getMonth() - 2);
 
+    const user = await this.flaskSocialWorkerRepository.findOne({
+      where: {
+        id: flaskUserId
+      }
+    })
     const needs = await this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -458,6 +465,7 @@ export class AnalyticService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.id_ngo = :ngoIds', { ngoIds: 22 })
       .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .where('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
       .where('need.created > :startDate', { startDate: new Date(threeMonthsAgo) })
@@ -468,6 +476,7 @@ export class AnalyticService {
       })
       .select([
         // 'child.id_ngo',
+        // 'ngo.id',
         // 'need.id',
         // 'need.child_id',
         // 'need.created_by_id',
@@ -483,16 +492,18 @@ export class AnalyticService {
         // 'need.purchase_date',
         // 'need.expected_delivery_date',
         // 'need.unavailable_from',
+        // 'need.deleted_at'
       ])
+      .orderBy('need.created', 'DESC')
       .getManyAndCount();
 
+    // return needs
+    // return needs
     const time7 = new Date().getTime();
     const { summary, inMonth } = getNeedsTimeLine(needs[0])
     const time8 = new Date().getTime();
-
     timeDifferenceWithComment(time7, time8, 'TimeLine User Analytic In');
 
-    return { summary, inMonth, count: needs[1] }
-
+    return { summary, inMonth, count: needs[1], swIds }
   }
 }

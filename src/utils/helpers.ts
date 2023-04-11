@@ -106,6 +106,9 @@ export function persianMonthString(value: Date) {
 }
 
 export function persianMonth(value: Date) {
+  if (!value) {
+    return null
+  }
   return parseInt(
     new Intl.DateTimeFormat('en-US-u-ca-persian', { month: 'numeric' }).format(
       value,
@@ -167,10 +170,10 @@ export function getNeedsTimeLine(needs: Need[]) {
   const bahman = { created: 0, confirmed: 0 };
   const esfand = { created: 0, confirmed: 0 };
 
-
   for (let i = 0; i < needs.length; i++) {
-    const thePersianMonthCreated = persianMonth(new Date(needs[i].created));
-    const thePersianMonthConfirm = persianMonth(new Date(needs[i].confirmDate));
+console.log(needs[i])
+    const thePersianMonthCreated = persianMonth((needs[i].created));
+    const thePersianMonthConfirm = persianMonth((needs[i].confirmDate));
 
     // farvardin
     if (thePersianMonthCreated === 1) {
@@ -219,6 +222,9 @@ export function getNeedsTimeLine(needs: Need[]) {
 
     // esfand
     else if (thePersianMonthCreated === 12) {
+      console.log(thePersianMonthCreated + "my")
+      console.log(needs[i].id)
+      console.log(needs[i].created)
       esfand.created += 1;
     }
 
@@ -269,6 +275,7 @@ export function getNeedsTimeLine(needs: Need[]) {
     // esfand
     else if (thePersianMonthConfirm === 12) {
       esfand.confirmed += 1;
+
     }
 
   }
@@ -289,7 +296,7 @@ export function getNeedsTimeLine(needs: Need[]) {
   const inThirtyDays = needs.filter(
     (n) => new Date(n.confirmDate).getTime() >= monthAgo.getTime(),
   );
- const summary = {
+  const summary = {
     inTwoDays: inTwoDays.length,
     inWeek: inWeek.length,
     inThirtyDays: inThirtyDays.length,

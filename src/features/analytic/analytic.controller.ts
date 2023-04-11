@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { NeedTypeEnum } from 'src/types/interfaces/interface';
+import { NeedTypeEnum, SAYPlatformRoles } from 'src/types/interfaces/interface';
 import { convertFlaskToSayRoles } from 'src/utils/helpers';
 import { UserService } from '../user/user.service';
 import { AnalyticService } from './analytic.service';
@@ -55,7 +55,16 @@ export class AnalyticController {
     @Param('userType') userType: number
   ) {
     const role = convertFlaskToSayRoles(Number(userType))
-    const swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
+    let swIds: number[]
+    if (role === SAYPlatformRoles.AUDITOR) {
+      swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
+    }
+    if (role === SAYPlatformRoles.NGO_SUPERVISOR) {
+      const supervisor = await this.userService.getFlaskSocialWorker(flaskUserId)
+      swIds = await this.userService.getFlaskSocialWorkerByNgo(supervisor.ngo_id).then(r => r.map(s => s.id))
+
+    }
+
 
     return await this.analyticService.getUserContribution(swIds, role, flaskUserId)
   }
