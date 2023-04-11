@@ -449,7 +449,7 @@ export class AnalyticService {
     flaskUserId: number,
   ) {
     const today = new Date();
-    const threeMonthsAgo = today.setMonth(today.getMonth() - 2);
+    const threeMonthsAgo = today.setMonth(today.getMonth() - 4);
 
     const user = await this.flaskSocialWorkerRepository.findOne({
       where: {
