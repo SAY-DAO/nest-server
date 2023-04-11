@@ -291,7 +291,6 @@ export class AnalyticService {
             .where('payment.id_user = :userId', { userId: user.id_user })
             .getMany()
             .then((userPayments) => {
-              console.log('sht');
               userPayments.map((p) => {
                 if (p.verified && paidNeeds.includes(p.id_need)) {
                   if (!activeUsersId.includes(p.id_user)) {
@@ -449,7 +448,7 @@ export class AnalyticService {
     flaskUserId: number,
   ) {
     const today = new Date();
-    const threeMonthsAgo = today.setMonth(today.getMonth() - 4);
+    const monthsAgo = today.setMonth(today.getMonth() - 4);
 
     const user = await this.flaskSocialWorkerRepository.findOne({
       where: {
@@ -468,7 +467,7 @@ export class AnalyticService {
       .where('child.id_ngo = :ngoIds', { ngoIds: 22 })
       .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .where('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
-      .where('need.created > :startDate', { startDate: new Date(threeMonthsAgo) })
+      .where('need.created > :startDate', { startDate: new Date(monthsAgo) })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.created_by_id IN (:...swIds)', {
         swIds:

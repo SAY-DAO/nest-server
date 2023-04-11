@@ -103,6 +103,9 @@ export class NeedEntity extends BaseEntity {
   purchaseDate: Date;
 
   @Column({ nullable: true })
+  retailerCode: string;
+
+  @Column({ nullable: true })
   status: number;
 
   @Column({ type: 'enum', enum: NeedTypeEnum, nullable: true })

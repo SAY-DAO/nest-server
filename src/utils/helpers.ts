@@ -171,7 +171,6 @@ export function getNeedsTimeLine(needs: Need[]) {
   const esfand = { created: 0, confirmed: 0 };
 
   for (let i = 0; i < needs.length; i++) {
-console.log(needs[i])
     const thePersianMonthCreated = persianMonth((needs[i].created));
     const thePersianMonthConfirm = persianMonth((needs[i].confirmDate));
 
@@ -222,9 +221,6 @@ console.log(needs[i])
 
     // esfand
     else if (thePersianMonthCreated === 12) {
-      console.log(thePersianMonthCreated + "my")
-      console.log(needs[i].id)
-      console.log(needs[i].created)
       esfand.created += 1;
     }
 

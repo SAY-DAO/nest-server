@@ -658,6 +658,7 @@ export class SyncService {
         needRetailerImg: theNeed.img,
         purchaseCost: theNeed.purchase_cost,
         cost: theNeed._cost,
+        retailerCode: theNeed.retailerCode,
         doneAt: theNeed.doneAt,
         isConfirmed: theNeed.isConfirmed,
         unavailableFrom: theNeed.unavailable_from,

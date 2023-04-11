@@ -35,7 +35,6 @@ export class ProviderEntity extends BaseEntity {
     @Column({ default: false })
     isActive: boolean
 
-
     @OneToMany(() => NeedEntity, (need) => need.provider)
     needs: NeedEntity[];
 }

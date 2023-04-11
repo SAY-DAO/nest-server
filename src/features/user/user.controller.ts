@@ -75,6 +75,7 @@ export class UserController {
         let purchased: Paginated<Need>
         let delivered: Paginated<Need>
         let children: number
+        let arrivals: any
 
         const roleId = convertFlaskToSayRoles(typeId);
 
@@ -134,7 +135,7 @@ export class UserController {
                 children = await this.childrenService.countChildren(ngoIds)
 
             }
-   
+            arrivals = await this.ngoService.getNgoArrivals(socialWorkerId, swIds)
             notConfirmedCount = await this.needService.getNotConfirmedNeeds(
                 {
                     page: page,
@@ -291,6 +292,7 @@ export class UserController {
             children,
             // timeLine: { summary, inMonth },
             signatures,
+            arrivals
         };
     }
 }

@@ -250,11 +250,7 @@ export class IpfsService {
         try {
             const result = await this.downloadFile(url, `${name}.jpg`);
             const final = await lastValueFrom(result);
-            console.log("final")
-            console.log(final)
             const content = await fs.promises.readFile(`./${name}.jpg`);
-            console.log("content")
-            console.log(content)
             const type = mime.getType(`./${name}.jpg`);
             const file = new File([content], `${name}`, { type });
             return file;
@@ -264,8 +260,6 @@ export class IpfsService {
     }
 
     downloadFile(fileUrl: string, outputLocationPath: string) {
-        console.log(fileUrl);
-        console.log(outputLocationPath);
         const writer = createWriteStream(outputLocationPath);
         if (fileUrl.startsWith('/')) {
             fileUrl = fileUrl.slice(1);
