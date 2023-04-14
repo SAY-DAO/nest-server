@@ -1,17 +1,71 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ChildrenEntity } from 'src/entities/children.entity';
+import { CityEntity } from 'src/entities/city.entity';
+import { ContributorEntity } from 'src/entities/contributor.entity';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Cities } from 'src/entities/flaskEntities/cities.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
-import { NgoEntity } from '../../entities/ngo.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { NeedEntity } from 'src/entities/need.entity';
+import { PaymentEntity } from 'src/entities/payment.entity';
+import { ProviderEntity } from 'src/entities/provider.entity';
+import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { ReceiptEntity } from 'src/entities/receipt.entity';
+import { StatusEntity } from 'src/entities/status.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
+import { NgoArrivalEntity, NgoEntity } from '../../entities/ngo.entity';
+import { ChildrenService } from '../children/children.service';
+import { LocationService } from '../location/location.service';
+import { NeedService } from '../need/need.service';
+import { PaymentService } from '../payment/payment.service';
+import { ProviderService } from '../provider/provider.service';
+import { ReceiptService } from '../receipt/receipt.service';
+import { StatusService } from '../status/status.service';
+import { SyncService } from '../sync/sync.service';
+import { UserService } from '../user/user.service';
 import { NgoController } from './ngo.controller';
 import { NgoService } from './ngo.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([NGO, Need], 'flaskPostgres'),
-    TypeOrmModule.forFeature([NgoEntity]),
+    TypeOrmModule.forFeature(
+      [Child, NGO, Need, SocialWorker, Payment, Cities],
+      'flaskPostgres',
+    ),
+
+    TypeOrmModule.forFeature([
+      NgoEntity,
+      NgoArrivalEntity,
+      NeedEntity,
+      CityEntity,
+      ProviderJoinNeedEntity,
+      ProviderEntity,
+      StatusEntity,
+      ChildrenEntity,
+      ReceiptEntity,
+      PaymentEntity,
+      ContributorEntity,
+      AllUserEntity,
+      EthereumAccountEntity,
+    ]),
   ],
   controllers: [NgoController],
-  providers: [NgoService],
+  providers: [
+    NgoService,
+    UserService,
+    SyncService,
+    NeedService,
+    ChildrenService,
+    ReceiptService,
+    PaymentService,
+    StatusService,
+    LocationService,
+    ProviderService,
+  ],
 })
+
 export class NgoModule { }

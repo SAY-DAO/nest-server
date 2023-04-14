@@ -79,4 +79,21 @@ export class NgoEntity extends BaseEntity {
 
     @ManyToOne(() => CityEntity, (n) => n.ngos, { eager: true })
     city: CityEntity
+
+}
+
+
+@Entity()
+export class NgoArrivalEntity extends BaseEntity {
+    @Column({ nullable: false })
+    arrivalCode: string;
+
+    @Column({ nullable: false })
+    deliveryCode: string;
+
+    @Column({ nullable: true })
+    website: string;
+
+    @ManyToOne(() => NgoEntity)
+    ngo: NgoEntity
 }

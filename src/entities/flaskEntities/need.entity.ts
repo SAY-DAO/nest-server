@@ -104,7 +104,7 @@ export class Need extends BaseEntity {
   child_id: number;
 
   @Column({ name: 'dkc' })
-  retailerCode: string;
+  deliveryCode: string;
 
   @Column()
   created_by_id: number;

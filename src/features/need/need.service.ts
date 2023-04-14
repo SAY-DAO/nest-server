@@ -32,7 +32,11 @@ import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
-import { Paginated, PaginateQuery, paginate as nestPaginate } from 'nestjs-paginate';
+import {
+  Paginated,
+  PaginateQuery,
+  paginate as nestPaginate,
+} from 'nestjs-paginate';
 
 @Injectable()
 export class NeedService {
@@ -54,6 +58,15 @@ export class NeedService {
       },
     });
   }
+
+  getFlaskNeedsByDeliveryCode(code: string): Promise<Need[]> {
+    return this.flaskNeedRepository.find({
+      where: {
+        deliveryCode: code,
+      },
+    });
+  }
+
 
   getFlaskPreNeed(accessToken: any): Promise<PreneedSummary> {
     const preneedApi = new PreneedAPIApi();
@@ -78,6 +91,7 @@ export class NeedService {
     return this.needRepository.find({
       relations: {
         child: true,
+        verifiedPayments: true
       },
     });
   }
@@ -140,7 +154,8 @@ export class NeedService {
     if (
       !theSw ||
       (needDetails.status >= ProductStatusEnum.PARTIAL_PAY && !theAuditor) ||
-      (needDetails.status >= ProductStatusEnum.PURCHASED_PRODUCT &&
+      (needDetails.type === NeedTypeEnum.PRODUCT &&
+        needDetails.status >= ProductStatusEnum.PURCHASED_PRODUCT &&
         !thePurchaser) ||
       !theNgo
     ) {
@@ -186,7 +201,6 @@ export class NeedService {
 
     return need;
   }
-
 
   async getNotConfirmedNeeds(
     options: PaginateQuery,
@@ -249,10 +263,11 @@ export class NeedService {
         'need.expected_delivery_date',
         'need.unavailable_from',
       ])
+      .cache(60000)
       .orderBy('need.created', 'ASC');
-    const accurateCount = await queryBuilder.getCount()
+    const accurateCount = await queryBuilder.getCount();
 
-    return accurateCount
+    return accurateCount;
   }
 
   async getNotPaidNeeds(
@@ -315,12 +330,13 @@ export class NeedService {
         'need.expected_delivery_date',
         'need.unavailable_from',
       ])
+      .cache(60000);
+
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
       defaultSortBy: [['isConfirmed', 'ASC']],
       nullSort: 'last',
-
-    })
+    });
   }
 
   async getPaidNeeds(
@@ -350,12 +366,17 @@ export class NeedService {
       .andWhere('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.status IN (:...statuses)', {
-        statuses: [PaymentStatusEnum.COMPLETE_PAY, PaymentStatusEnum.PARTIAL_PAY],
+        statuses: [
+          PaymentStatusEnum.COMPLETE_PAY,
+          PaymentStatusEnum.PARTIAL_PAY,
+        ],
       })
       .andWhere('payment.id IS NOT NULL')
       .andWhere('payment.verified IS NOT NULL')
       .andWhere('payment.order_id IS NOT NULL')
-      .andWhere('need.created_by_id IN (:...swIds)', { swIds: socialWorker ? [socialWorker] : [...swIds] })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
       .select([
         'child',
         'ngo.id',
@@ -389,14 +410,15 @@ export class NeedService {
         'need.purchase_date',
         'need.expected_delivery_date',
         'need.unavailable_from',
-        'payment'
+        'payment',
       ])
+      .cache(60000);
+
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
       defaultSortBy: [['doneAt', 'DESC']],
       nullSort: 'last',
-
-    })
+    });
   }
 
   async getPurchasedNeeds(
@@ -447,7 +469,9 @@ export class NeedService {
             });
         }),
       )
-      .andWhere('need.created_by_id IN (:...swIds)', { swIds: socialWorker ? [socialWorker] : [...swIds] })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
       .select([
         'child',
         'ngo.id',
@@ -482,16 +506,16 @@ export class NeedService {
         'need.expected_delivery_date',
         'need.unavailable_from',
         'need_status_updates',
+        'payment',
       ])
+      .cache(60000);
+
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id', 'ngo_delivery_date'],
       defaultSortBy: [['ngo_delivery_date', 'DESC']],
       nullSort: 'last',
-
-    })
-
+    });
   }
-
 
   async getDeliveredNeeds(
     options: PaginateQuery,
@@ -555,7 +579,9 @@ export class NeedService {
             });
         }),
       )
-      .andWhere('need.created_by_id IN (:...swIds)', { swIds: socialWorker ? [socialWorker] : [...swIds] })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
       .select([
         'child',
         'ngo.id',
@@ -590,13 +616,15 @@ export class NeedService {
         'need.expected_delivery_date',
         'need.unavailable_from',
         'need_status_updates',
+        'receipt',
+        'need_receipt',
+        'payment',
       ])
+      .cache(60000);
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
       defaultSortBy: [['child_delivery_date', 'DESC']],
       nullSort: 'last',
-
-    })
+    });
   }
-
 }

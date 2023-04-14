@@ -27,7 +27,7 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { IpfsEntity } from 'src/entities/ipfs.entity';
 import { NgoService } from '../ngo/ngo.service';
-import { NgoEntity } from 'src/entities/ngo.entity';
+import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 
 @Module({
@@ -48,7 +48,8 @@ import { NGO } from 'src/entities/flaskEntities/ngo.entity';
       SignatureEntity,
       EthereumAccountEntity,
       IpfsEntity,
-      NgoEntity
+      NgoEntity,
+      NgoArrivalEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,

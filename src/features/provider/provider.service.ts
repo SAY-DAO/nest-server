@@ -40,7 +40,7 @@ export class ProviderService {
         return provider;
     }
 
-    // --------------------------------- Adds providers for older needs before panel version 2.0.0 ----------------------------------------------- //
+    // --------------------------------- to add providers for older needs before panel version 2.0.0 ----------------------------------------------- //
 
     async getProviderNeedRelationById(flaskNeedId: number): Promise<ProviderJoinNeedEntity> {
         return await this.providerJoinNeedRepository.findOne({

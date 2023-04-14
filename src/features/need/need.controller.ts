@@ -23,6 +23,14 @@ export class NeedController {
     return await this.needService.getFlaskRandomNeed();
   }
 
+  @Get(`flask/arriving/:code`)
+  @ApiOperation({ description: 'Get all done needs from flask' })
+  async getFlaskNeedsByDeliveryCode(
+    @Param('code') code: string
+  ) {
+    return await this.needService.getFlaskNeedsByDeliveryCode(code);
+  }
+
   @Get(`flask/:id`)
   @ApiOperation({ description: 'Get a need from db 2' })
   async getFlaskNeed(

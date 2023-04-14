@@ -128,7 +128,6 @@ export class UserService {
       contributor
 
     });
-    console.log(newUser)
     return await this.allUserRepository.save(newUser);
   }
 

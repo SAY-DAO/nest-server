@@ -14,7 +14,7 @@ import { ReceiptEntity } from '../../entities/receipt.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { SyncService } from './sync.service';
 import { NgoService } from '../ngo/ngo.service';
-import { NgoEntity } from 'src/entities/ngo.entity';
+import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { StatusService } from '../status/status.service';
 import { StatusEntity } from 'src/entities/status.entity';
 import { CityEntity } from 'src/entities/city.entity';
@@ -40,6 +40,7 @@ import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity'
     TypeOrmModule.forFeature([
       ChildrenEntity,
       NgoEntity,
+      NgoArrivalEntity,
       NeedEntity,
       PaymentEntity,
       ReceiptEntity,

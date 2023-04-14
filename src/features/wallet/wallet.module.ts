@@ -16,7 +16,7 @@ import { PaymentEntity } from '../../entities/payment.entity';
 import { SignatureMiddleware } from './middlewares/wallet.middleware';
 import { EthersModule } from 'nestjs-ethers';
 import { NgoService } from '../ngo/ngo.service';
-import { NgoEntity } from 'src/entities/ngo.entity';
+import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { SyncService } from '../sync/sync.service';
 import { ReceiptService } from '../receipt/receipt.service';
 import { ReceiptEntity } from 'src/entities/receipt.entity';
@@ -64,6 +64,7 @@ import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity'
       ContributorEntity,
       AllUserEntity,
       NgoEntity,
+      NgoArrivalEntity,
       ReceiptEntity,
       StatusEntity,
       CityEntity,

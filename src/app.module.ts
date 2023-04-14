@@ -15,7 +15,7 @@ import { PaymentEntity } from './entities/payment.entity';
 import { ReceiptEntity } from './entities/receipt.entity';
 import { EthereumAccountEntity } from './entities/ethereum.account.entity';
 import { EthereumTransaction } from './entities/ethereum.transaction.entity';
-import { NgoEntity } from './entities/ngo.entity';
+import { NgoArrivalEntity, NgoEntity } from './entities/ngo.entity';
 import { TicketEntity } from './entities/ticket.entity';
 import { TicketContentEntity } from './entities/ticketContent.entity';
 import { StatusEntity } from './entities/status.entity';
@@ -70,6 +70,7 @@ const imports = [
       TicketContentEntity,
       ContributorEntity,
       NgoEntity,
+      NgoArrivalEntity,
       PaymentEntity,
       ReceiptEntity,
       NeedEntity,

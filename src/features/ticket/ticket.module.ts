@@ -12,7 +12,7 @@ import { SyncService } from '../sync/sync.service';
 import { NgoService } from '../ngo/ngo.service';
 import { UserService } from '../user/user.service';
 import { ChildrenService } from '../children/children.service';
-import { NgoEntity } from 'src/entities/ngo.entity';
+import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { ReceiptService } from '../receipt/receipt.service';
 import { ReceiptEntity } from 'src/entities/receipt.entity';
@@ -49,6 +49,7 @@ import { ProviderService } from '../provider/provider.service';
       TicketContentEntity,
       NeedEntity,
       NgoEntity,
+      NgoArrivalEntity,
       ContributorEntity,
       ChildrenEntity,
       ReceiptEntity,

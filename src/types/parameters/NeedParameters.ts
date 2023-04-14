@@ -17,7 +17,7 @@ export type NeedParams = {
     link?: string;
     doingDuration?: number;
     needRetailerImg?: string;
-    retailerCode: string;
+    deliveryCode: string;
     purchaseCost?: any;
     cost?: number;
     information?: string;

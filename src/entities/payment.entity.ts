@@ -18,28 +18,19 @@ export class PaymentEntity extends BaseEntity {
     creditAmount: number;
 
     @Column({ nullable: true })
+    orderId: string;
+    
+    @Column({ nullable: true })
     donationAmount: number;
 
     @Column({ nullable: true })
-    useCredit: boolean;
-    
-    @Column({ nullable: true })
-    bankAmount: number;
-
-    @Column({ nullable: true })
     cardNumber: string;
-
-    @Column({ nullable: true })
-    description: string;
 
     @Column({ nullable: true })
     gatewayPaymentId: string;
 
     @Column({ nullable: true })
     gatewayTrackId: string;
-
-    @Column({ nullable: true })
-    hashedCardNumber: string;
 
     @Column({ nullable: true })
     needAmount: number;
@@ -67,8 +58,6 @@ export class PaymentEntity extends BaseEntity {
 
     @ManyToOne(() => AllUserEntity, (family) => family.payments, { eager: true })
     familyMember: AllUserEntity;
-
-
 
     @Column({ nullable: true })
     id_need: number;

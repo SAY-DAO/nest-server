@@ -18,7 +18,7 @@ import { AllUserEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
 import { GetNeedMiddleware } from './middlewares/get-need.middleware';
 import { PostNeedMiddleware } from './middlewares/post-need.middleware';
-import { NgoEntity } from '../../entities/ngo.entity';
+import { NgoArrivalEntity, NgoEntity } from '../../entities/ngo.entity';
 import { NgoService } from '../ngo/ngo.service';
 import { StatusEntity } from 'src/entities/status.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
@@ -45,6 +45,7 @@ import { TicketEntity } from 'src/entities/ticket.entity';
       ContributorEntity,
       AllUserEntity,
       NgoEntity,
+      NgoArrivalEntity,
       EthereumAccountEntity,
       TicketEntity
     ]),

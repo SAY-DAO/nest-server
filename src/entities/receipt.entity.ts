@@ -30,9 +30,6 @@ export class ReceiptEntity extends BaseEntity {
     needStatus: number;
 
     @Column({ nullable: true })
-    isPublic: boolean;
-
-    @Column({ nullable: true })
     deleted: Date;
 
     @ManyToOne(() => NeedEntity, (need) => need.receipts, { eager: false })

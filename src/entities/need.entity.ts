@@ -103,7 +103,7 @@ export class NeedEntity extends BaseEntity {
   purchaseDate: Date;
 
   @Column({ nullable: true })
-  retailerCode: string;
+  deliveryCode: string;
 
   @Column({ nullable: true })
   status: number;

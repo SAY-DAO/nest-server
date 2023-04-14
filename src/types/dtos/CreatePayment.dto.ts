@@ -2,11 +2,18 @@ import { SwmypageStatusUpdates, SwmypageVerifiedPayments } from "src/generated-s
 
 export class CreatePaymentDto {
     id?: number;
-    idNeed?: number;
-    idUser?: number;
     verified?: Date;
-    needAmount?: number;
-    donationAmount?: number;
-    creditAmount?: number;
-    useCredit?: boolean;
+    id_need: number
+    id_user: number
+    order_id: string
+    credit_amount: number
+    donation_amount: number
+    card_no: string
+    gateway_payment_id: string
+    gateway_track_id: string
+    need_amount: number
+    transaction_date: Date
+    created: Date
+    updated: Date
 }
+

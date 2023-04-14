@@ -1,9 +1,9 @@
 export class CreateStatusDto {
     id?: number;
-    swId?: number;
-    needId?: number;
-    newStatus?: number;
-    oldStatus?: number;
+    sw_id?: number;
+    need_id?: number;
+    new_status?: number;
+    old_status?: number;
     created?: Date;
     updated?: Date;
 }

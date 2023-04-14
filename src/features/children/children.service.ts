@@ -8,6 +8,7 @@ import { ChildParams } from 'src/types/parameters/ChildParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
+import { childExistence } from 'src/types/interfaces/interface';
 
 @Injectable()
 export class ChildrenService {
@@ -16,12 +17,18 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-  ) {}
+  ) { }
 
-  async countChildren(ngoIds: number[]): Promise<number> {
+  async countChildren(ngoIds: number[]) {
     return this.flaskChildRepository
       .createQueryBuilder('child')
-      .select(['child.id'])
+      .select(['child'])
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.isDeleted = :childDeleted', { childDeleted: false })
+      .andWhere('child.isMigrated = :childIsMigrated', { childIsMigrated: false })
+      .andWhere('child.existence_status IN (:...existenceStatus)', {
+        existenceStatus: [childExistence.AlivePresent],
+      })
       .andWhere('child.id_ngo IN (:...ngoIds)', {
         ngoIds: [...ngoIds],
       })

@@ -1,3 +1,4 @@
+import { childExistence } from 'src/types/interfaces/interface';
 import {
   Entity,
   Column,
@@ -58,7 +59,7 @@ export class Child extends BaseEntity {
   education: number;
 
   @Column({ nullable: true })
-  existence_status: number;
+  existence_status: childExistence;
 
   @Column({ nullable: true })
   familyCount: number;
