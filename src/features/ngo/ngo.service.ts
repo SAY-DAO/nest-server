@@ -100,7 +100,6 @@ export class NgoService {
       ])
       .getMany();
 
-    console.log(needs)
     // return codes
     const codesArray = needs.map(
       (n: { deliveryCode: string }) => n.deliveryCode,
