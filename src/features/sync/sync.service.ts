@@ -55,7 +55,7 @@ export class SyncService {
     private statusService: StatusService,
     private locationService: LocationService,
     private providerService: ProviderService,
-  ) { }
+  ) {}
 
   async syncContributorNgo(flaskUser: SocialWorker) {
     try {
@@ -244,10 +244,7 @@ export class SyncService {
       console.log('\x1b[36m%s\x1b[0m', 'Social Worker updated ...\n');
     } else {
       swNgo = nestSocialWorker.contributor.ngo;
-      console.log(
-        '\x1b[36m%s\x1b[0m',
-        'Skipped Social Worker updating ...\n',
-      );
+      console.log('\x1b[36m%s\x1b[0m', 'Skipped Social Worker updating ...\n');
     }
     //--------------------------------------------Auditor-------------------------------------
     let nestAuditor: AllUserEntity;
@@ -264,9 +261,7 @@ export class SyncService {
           theNeed.confirmUser,
         );
         if (!nestAuditor) {
-          const flaskAuditor = await this.userService.getFlaskSocialWorker(
-            21,
-          );
+          const flaskAuditor = await this.userService.getFlaskSocialWorker(21);
           const auditorNgo = await this.syncContributorNgo(flaskAuditor);
           const {
             id: auditorFlaskId,
@@ -326,7 +321,10 @@ export class SyncService {
     //     (role) => getSAYRoleInteger(role) === SAYPlatformRoles.PURCHASER,
     //   )
     // ) {
-    if (theNeed.type === NeedTypeEnum.PRODUCT && theNeed.status > PaymentStatusEnum.COMPLETE_PAY) {
+    if (
+      theNeed.type === NeedTypeEnum.PRODUCT &&
+      theNeed.status > PaymentStatusEnum.COMPLETE_PAY
+    ) {
       let purchaserId: number;
       if (!statuses || statuses[0]) {
         // we do not have a history of purchaser id before implementing our new features
@@ -439,10 +437,14 @@ export class SyncService {
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
 
       if (!nestSocialWorker || !nestSocialWorker.contributor) {
-        throw new ObjectNotFound('Something went wrong while trying to create a child!')
+        throw new ObjectNotFound(
+          'Something went wrong while trying to create a child!',
+        );
       }
 
-      const childNgo = await this.ngoService.getNgoById(nestSocialWorker.contributor.flaskNgoId)
+      const childNgo = await this.ngoService.getNgoById(
+        nestSocialWorker.contributor.flaskNgoId,
+      );
       nestChild = await this.childrenService.createChild(
         childDetails,
         childNgo,
@@ -461,43 +463,44 @@ export class SyncService {
     //--------------------------------------------Receipt-------------------------------------
     let nestReceipt: ReceiptEntity;
     const nestReceipts = [];
-    let receiptDetails: ReceiptParams
-    for (let r = 0; r < receipts_.length; r++) {
-      nestReceipt = await this.receiptService.getReceiptById(
-        receipts_[r].receipt[0].id,
-      );
-      receiptDetails = {
-        title: receipts_[r].receipt[0].title || receipts_[r].receipt[0].code,
-        description: receipts_[r].receipt[0].description,
-        attachment: receipts_[r].receipt[0].attachment,
-        code: receipts_[r].receipt[0].code,
-        flaskSwId: receipts_[r].receipt[0].owner_id,
-        needStatus: receipts_[r].receipt[0].need_status,
-        flaskReceiptId: receipts_[r].receipt[0].id,
-        deleted: receipts_[r].receipt[0].deleted,
-        flaskNeedId: theNeed.id,
-      };
+    let receiptDetails: ReceiptParams;
+    if (receipts_) {
+      for (let r = 0; r < receipts_.length; r++) {
+        nestReceipt = await this.receiptService.getReceiptById(
+          receipts_[r].receipt[0].id,
+        );
+        receiptDetails = {
+          title: receipts_[r].receipt[0].title || receipts_[r].receipt[0].code,
+          description: receipts_[r].receipt[0].description,
+          attachment: receipts_[r].receipt[0].attachment,
+          code: receipts_[r].receipt[0].code,
+          flaskSwId: receipts_[r].receipt[0].owner_id,
+          needStatus: receipts_[r].receipt[0].need_status,
+          flaskReceiptId: receipts_[r].receipt[0].id,
+          deleted: receipts_[r].receipt[0].deleted,
+          flaskNeedId: theNeed.id,
+        };
 
-      if (!nestReceipt && receipts_) {
-        // Create Receipt
-        console.log('\x1b[36m%s\x1b[0m', 'Creating a Receipt ...\n' + r);
-        nestReceipt = await this.receiptService.createReceipt(receiptDetails);
-        nestReceipts.push(nestReceipt);
-        console.log('\x1b[36m%s\x1b[0m', 'Created a Receipt ...\n');
+        if (!nestReceipt && receipts_) {
+          // Create Receipt
+          console.log('\x1b[36m%s\x1b[0m', 'Creating a Receipt ...\n' + r);
+          nestReceipt = await this.receiptService.createReceipt(receiptDetails);
+          nestReceipts.push(nestReceipt);
+          console.log('\x1b[36m%s\x1b[0m', 'Created a Receipt ...\n');
+        } else if (nestReceipt) {
+          console.log(receiptDetails);
+          await this.receiptService
+            .updateReceipt(receiptDetails, nestReceipt)
+            .then();
+          nestReceipt = await this.receiptService.getReceiptById(
+            receiptDetails.flaskReceiptId,
+          );
+          console.log('\x1b[36m%s\x1b[0m', 'Receipt updated ...\n');
+        }
       }
-      else if (nestReceipt) {
-        console.log(receiptDetails)
-        await this.receiptService.updateReceipt(receiptDetails, nestReceipt).then();
-        nestReceipt = await this.receiptService.getReceiptById(receiptDetails.flaskReceiptId);
-        console.log('\x1b[36m%s\x1b[0m', 'Receipt updated ...\n');
-      } else {
-        console.log('\x1b[36m%s\x1b[0m', 'Skipped Receipts ...\n');
-
-      }
-
+    } else {
+      console.log('\x1b[36m%s\x1b[0m', 'Skipped Receipts ...\n');
     }
-
-
 
     //--------------------------------------------Payments-------------------------------------
     let PaymentDetails: PaymentParams;
@@ -506,9 +509,7 @@ export class SyncService {
     const nestPayments = [];
     if (payments) {
       for (let p = 0; p < payments.length; p++) {
-        nestPayment = await this.paymentService.getPaymentById(
-          payments[p].id,
-        );
+        nestPayment = await this.paymentService.getPaymentById(payments[p].id);
         if (!nestPayment) {
           nestFamilyMember = await this.userService.getFamilyByFlaskId(
             payments[p].id_user,
@@ -603,9 +604,7 @@ export class SyncService {
     const nestStatuses = [];
     if (statuses) {
       for (let s = 0; s < statuses.length; s++) {
-        nestStatus = await this.statusService.getStatusById(
-          statuses[s].id,
-        );
+        nestStatus = await this.statusService.getStatusById(statuses[s].id);
         if (!nestStatus) {
           const {
             id: statusFlaskId,
@@ -635,9 +634,7 @@ export class SyncService {
           await this.statusService
             .updateStatus(nestStatus.id, StatusDetails)
             .then();
-          nestStatus = await this.statusService.getStatusById(
-            statuses[s].id,
-          );
+          nestStatus = await this.statusService.getStatusById(statuses[s].id);
           console.log('\x1b[36m%s\x1b[0m', 'Status updated ...\n');
         } else {
           console.log('\x1b[36m%s\x1b[0m', 'Skipped Status updating ...\n');
@@ -648,12 +645,15 @@ export class SyncService {
     }
 
     //--------------------------------------------Provider-------------------------------------
-    let theNestProvider: ProviderEntity
-    const nestProviderNeedRelation = await this.providerService.getProviderNeedRelationById(theNeed.id);
+    let theNestProvider: ProviderEntity;
+    const nestProviderNeedRelation =
+      await this.providerService.getProviderNeedRelationById(theNeed.id);
 
     // Needs before panel version 2.0.0 does not have providers, we create them here! sry :(
     if (!nestProviderNeedRelation && theNeed.type === NeedTypeEnum.PRODUCT) {
-      theNestProvider = await this.providerService.getProviderByName('Digikala');
+      theNestProvider = await this.providerService.getProviderByName(
+        'Digikala',
+      );
       if (!theNestProvider) {
         console.log('\x1b[36m%s\x1b[0m', 'Creating a provider ...\n');
 
@@ -667,13 +667,17 @@ export class SyncService {
           state: 3945,
           country: 103,
           logoUrl: 'N/A',
-          isActive: true
+          isActive: true,
         });
         console.log('\x1b[36m%s\x1b[0m', 'Created a provider ...\n');
-
       }
-    } else if (nestProviderNeedRelation && theNeed.type === NeedTypeEnum.PRODUCT) {
-      theNestProvider = await this.providerService.getProviderById(nestProviderNeedRelation.nestProviderId);
+    } else if (
+      nestProviderNeedRelation &&
+      theNeed.type === NeedTypeEnum.PRODUCT
+    ) {
+      theNestProvider = await this.providerService.getProviderById(
+        nestProviderNeedRelation.nestProviderId,
+      );
     } else if (theNestProvider) {
       console.log('\x1b[36m%s\x1b[0m', 'Skipped provider ...\n');
     }
@@ -681,10 +685,11 @@ export class SyncService {
     let needDetails: NeedParams;
     let nestNeed = await this.needService.getNeedByFlaskId(theNeed.id);
     if (!nestSocialWorker || !nestSocialWorker.contributor) {
-      throw new ObjectNotFound('Something went wrong while trying to create the Need!')
+      throw new ObjectNotFound(
+        'Something went wrong while trying to create the Need!',
+      );
     }
     if (!nestNeed) {
-
       needDetails = {
         createdById: theNeed.created_by_id,
         name: theNeed.name_translations.fa,
@@ -720,7 +725,9 @@ export class SyncService {
         information: theNeed.informations,
       };
       console.log('\x1b[36m%s\x1b[0m', 'Creating The Need ...\n');
-      const needNgo = await this.ngoService.getNgoById(nestSocialWorker.contributor.flaskNgoId)
+      const needNgo = await this.ngoService.getNgoById(
+        nestSocialWorker.contributor.flaskNgoId,
+      );
 
       nestNeed = await this.needService.createNeed(
         nestChild,
@@ -732,7 +739,7 @@ export class SyncService {
         nestStatuses,
         nestPayments,
         nestReceipts,
-        theNestProvider
+        theNestProvider,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Created The Need  ...\n');
     } else if (nestNeed && nestNeed.updated !== theNeed.updated) {

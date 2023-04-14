@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Req } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SAYPlatformRoles } from 'src/types/interfaces/interface';
 import { convertFlaskToSayRoles } from 'src/utils/helpers';
@@ -49,15 +49,12 @@ export class NgoController {
   }
 
 
-  @Get(`arrivals/update/:flaskUserId/:deliveryCode/:arrivalCode`)
+  @Patch(`arrivals/update/:flaskUserId/:deliveryCode/:arrivalCode`)
   async updateNgoArrivals(
     @Param('flaskUserId') flaskUserId: number,
     @Param('deliveryCode') deliveryCode: string,
     @Param('arrivalCode') arrivalCode: string,
   ) {
-    console.log(flaskUserId)
-    console.log(deliveryCode)
-    console.log(arrivalCode)
     const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
       flaskUserId,
     );

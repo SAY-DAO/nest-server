@@ -1,5 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 import { SwmypageNeeds } from 'src/generated-sources/openapi';
+import { AnnouncementEnum } from 'src/types/interfaces/interface';
 import { CreatePaymentDto } from '../CreatePayment.dto';
 import { CreateReceiptDto } from '../CreateReceipt.dto';
 import { CreateStatusDto } from '../CreateStatus.dto';
@@ -24,6 +25,8 @@ export class CreateTicketDto {
   flaskUserId: number;
   @IsNotEmpty()
   userTypeId: number;
+  announcement: AnnouncementEnum;
+  arrivalDate: Date;
   statuses?: CreateStatusDto[]
   receipts?: CreateReceiptDto[]
   payments?: CreatePaymentDto[]

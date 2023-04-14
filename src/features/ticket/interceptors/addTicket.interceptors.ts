@@ -8,6 +8,7 @@ export class AddTicketInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         console.log('Intercepting Add Ticket...');
         console.log('Before...');
+
         const now = Date.now();
         return next
             .handle()

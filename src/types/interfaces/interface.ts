@@ -6,6 +6,11 @@ export enum Colors {
     RED = 3,
 }
 
+
+export enum AnnouncementEnum {
+    ARRIVED_AT_NGO = 1,
+}
+
 export enum FlaskUserTypesEnum {
     NO_ROLE = 0,
     SUPER_ADMIN = 1,

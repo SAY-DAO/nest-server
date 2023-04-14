@@ -1,7 +1,6 @@
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { ServerError } from 'src/filters/server-exception.filter';
-import { SwmypageNeeds } from 'src/generated-sources/openapi';
 import {
   NeedTypeEnum,
   PaymentStatusEnum,

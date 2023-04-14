@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, UseFilters, UsePipes, ValidationPipe } from "
 import { SubscribeMessage, WebSocketGateway, MessageBody, WebSocketServer, ConnectedSocket } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io'
 import { TicketEntity } from "src/entities/ticket.entity";
+import { ServerError } from "src/filters/server-exception.filter";
 import { BadRequestTransformationFilter } from "src/filters/socket-exception.filter";
 import { CreateJoinRoomDto } from "src/types/dtos/ticket/CreateJoinRoom.dto";
 import { CreateTicketColorDto } from "src/types/dtos/ticket/CreateTicketColor.dto";
@@ -129,9 +130,15 @@ export class GateWayController implements OnModuleInit {
     async onTicketColorChange(@MessageBody(ValidateGatewayPipe) body: CreateTicketColorDto,
         @ConnectedSocket() client: Socket,
     ) {
+        const { ticket: beforeUpdate } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
+
+        if (beforeUpdate.flaskUserId !== body.flaskUserId) {
+            throw new ServerError('You are not the Ticket creator')
+        }
         await this.ticketService.updateTicketColor(body.ticketId, body.color)
-        console.log('\x1b[36m%s\x1b[0m', 'Socket changing ticket color...\n');
         const { ticket } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
+
+        console.log('\x1b[36m%s\x1b[0m', 'Socket changing ticket color...\n');
         if (this.socket.connected) {
             for (let i = 0; i < ticket.contributors.length; i++) {
                 if (ticket.contributors[i].flaskId !== body.flaskUserId)

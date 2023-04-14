@@ -1,4 +1,4 @@
-import { Colors, SAYPlatformRoles } from "src/types/interfaces/interface";
+import { AnnouncementEnum, Colors, SAYPlatformRoles } from "src/types/interfaces/interface";
 import { Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "./BaseEntity";
 import { NeedEntity } from "./need.entity";
@@ -23,6 +23,9 @@ export class TicketEntity extends BaseEntity {
 
     @Column()
     flaskNeedId: number
+
+    @Column({ nullable: true })
+    announcement: AnnouncementEnum
 
     @ManyToMany(() => AllUserEntity, (user) => user.tickets, { eager: true, onDelete: 'CASCADE' })
     @JoinTable()

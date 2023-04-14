@@ -17,16 +17,25 @@ import {
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from '../../types/dtos/ticket/CreateTicket.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Colors, SAYPlatformRoles } from 'src/types/interfaces/interface';
+import {
+  AnnouncementEnum,
+  Colors,
+  SAYPlatformRoles,
+} from 'src/types/interfaces/interface';
 import { TicketEntity } from '../../entities/ticket.entity';
 import { SyncService } from '../sync/sync.service';
 import { AddTicketInterceptor } from './interceptors/addTicket.interceptors';
 import { CreateTicketContentDto } from '../../types/dtos/ticket/CreateTicketContent.dto';
-import { convertFlaskToSayRoles, getSAYRoleInteger } from 'src/utils/helpers';
+import {
+  convertFlaskToSayRoles,
+  dateConvertToPersian,
+  getSAYRoleInteger,
+} from 'src/utils/helpers';
 import { ValidateTicketPipe } from './pipes/validate-ticket.pipe';
 import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
 import { NeedService } from '../need/need.service';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Tickets')
 @Controller('tickets')
@@ -49,8 +58,11 @@ export class TicketController {
 
   @Get('ticket/:id/:userId')
   async findOne(@Param('id') id: string, @Param('userId') flaskUserId: string) {
-    const { ticket } = await this.ticketService.getTicketById(id, Number(flaskUserId))
-    return ticket
+    const { ticket } = await this.ticketService.getTicketById(
+      id,
+      Number(flaskUserId),
+    );
+    return ticket;
   }
 
   @Post('messages/add')
@@ -59,7 +71,10 @@ export class TicketController {
     @Req() req: Request,
     @Body(ValidateTicketPipe) request: CreateTicketContentDto,
   ) {
-    const { ticket } = await this.ticketService.getTicketById(request.ticketId, request.from);
+    const { ticket } = await this.ticketService.getTicketById(
+      request.ticketId,
+      request.from,
+    );
     const msg = request.message;
     const from = request.from;
 
@@ -67,17 +82,17 @@ export class TicketController {
       message: msg,
       from,
     };
-    return await this.ticketService.createTicketContent(
-      contentDetails,
-      ticket,
-    );
+    return await this.ticketService.createTicketContent(contentDetails, ticket);
   }
 
   @UseInterceptors(AddTicketInterceptor)
   @Post('add')
   @UsePipes(new ValidationPipe()) // validation for dto files
-  async createTicket(@Req() req: Request, @Body(ValidateTicketPipe) body: CreateTicketDto) {
-    const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId)
+  async createTicket(
+    @Req() req: Request,
+    @Body(ValidateTicketPipe) body: CreateTicketDto,
+  ) {
+    const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
 
     console.log('\x1b[36m%s\x1b[0m', 'Syncing ...\n');
     const { nestCaller, nestSocialWorker, nestAuditor, nestPurchaser, need } =
@@ -94,22 +109,37 @@ export class TicketController {
       title: body.title,
       flaskNeedId: body.flaskNeedId,
       need: need,
-      flaskUserId: body.flaskNeedId,
+      flaskUserId: body.flaskUserId,
       role: convertFlaskToSayRoles(body.userTypeId),
+      announcement: body.announcement,
     };
+
     console.log('\x1b[36m%s\x1b[0m', 'Creating Participants ...\n');
 
-    body.roles.find((role) => getSAYRoleInteger(role) === SAYPlatformRoles.AUDITOR)
+    body.roles.find(
+      (role) => getSAYRoleInteger(role) === SAYPlatformRoles.AUDITOR,
+    );
     const participants = [
       nestCaller,
-      body.roles.find((role) => getSAYRoleInteger(role) === SAYPlatformRoles.SOCIAL_WORKER) && nestSocialWorker,
-      body.roles.find((role) => getSAYRoleInteger(role) === SAYPlatformRoles.AUDITOR) && nestAuditor,
-      body.roles.find((role) => getSAYRoleInteger(role) === SAYPlatformRoles.PURCHASER) && nestPurchaser,
+      body.roles.find(
+        (role) => getSAYRoleInteger(role) === SAYPlatformRoles.SOCIAL_WORKER,
+      ) && nestSocialWorker,
+      body.roles.find(
+        (role) => getSAYRoleInteger(role) === SAYPlatformRoles.AUDITOR,
+      ) && nestAuditor,
+      body.roles.find(
+        (role) => getSAYRoleInteger(role) === SAYPlatformRoles.PURCHASER,
+      ) && nestPurchaser,
     ].filter((p) => p);
 
     const uniqueParticipants = [
       ...new Map(participants.map((p) => [p.id, p])).values(),
     ];
+
+    if (uniqueParticipants.length === 1) {
+      throw new ServerError('Two People is needed for the ticket');
+
+    }
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
     const ticket = await this.ticketService.createTicket(
@@ -120,6 +150,19 @@ export class TicketController {
       createTicketDetails.flaskUserId,
       ticket.id,
     );
+
+    // only when announce arrival
+    if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO) {
+      const persianDate = dateConvertToPersian(String(body.arrivalDate));
+      const contentDetails = {
+        message: ` .به سمن رسید - ${persianDate}`,
+        from: body.flaskUserId,
+      };
+      if (!body.arrivalDate) {
+        throw new ServerError('Date is not provided');
+      }
+      await this.ticketService.createTicketContent(contentDetails, ticket);
+    }
 
     return ticket;
   }
@@ -138,13 +181,6 @@ export class TicketController {
     } else {
       throw new HttpException('you need to provide id', HttpStatus.BAD_REQUEST);
     }
-  }
-  @Patch('ticket/:id')
-  async updateTicketColor(
-    @Param('id') id: string,
-    @Query('color') color: Colors,
-  ) {
-    return await this.ticketService.updateTicketColor(id, color);
   }
 
   @Delete(':id')
