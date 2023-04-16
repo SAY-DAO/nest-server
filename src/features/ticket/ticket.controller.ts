@@ -36,6 +36,7 @@ import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
 import { NeedService } from '../need/need.service';
 import { ServerError } from 'src/filters/server-exception.filter';
+import { UserService } from '../user/user.service';
 
 @ApiTags('Tickets')
 @Controller('tickets')
@@ -44,6 +45,7 @@ export class TicketController {
     private readonly ticketService: TicketService,
     private needService: NeedService,
     private readonly syncService: SyncService,
+    private userService: UserService,
   ) { }
 
   @Get('all')
@@ -53,7 +55,15 @@ export class TicketController {
 
   @Get('all/user/:userId')
   async getUserTickets(@Param('userId') userId: number) {
-    return await this.ticketService.getUserTickets(userId);
+    const user = await this.userService.getFlaskSocialWorker(userId)
+    if (convertFlaskToSayRoles(user.type_id) === SAYPlatformRoles.AUDITOR) {
+      console.log(await this.ticketService.getTickets())
+      return await this.ticketService.getTickets();
+
+    } else {
+      return await this.ticketService.getUserTickets(userId);
+
+    }
   }
 
   @Get('ticket/:id/:userId')
@@ -138,7 +148,10 @@ export class TicketController {
 
     if (uniqueParticipants.length === 1) {
       throw new ServerError('Two People is needed for the ticket');
+    }
 
+    if(need.ipfs){
+      throw new ServerError('After IPFS upload you can not change anything.');
     }
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');

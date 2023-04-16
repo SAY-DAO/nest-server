@@ -77,7 +77,7 @@ async function startServer() {
         path: '/api/dao',
         secure: process.env.NODE_ENV === 'development' ? false : true,
         sameSite: process.env.NODE_ENV === 'development' ? false : 'none',
-        maxAge: process.env.NODE_ENV === 'development' ? 10 * 60 * 60 : 10 * 60 * 60
+        maxAge: process.env.NODE_ENV === 'development' ? 1000 * 60 * 60 : 1000 * 60 * 60
       }
     }),
   );

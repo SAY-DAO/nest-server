@@ -59,6 +59,8 @@ export class IpfsService {
         callerFlaskId: number,
         need: NeedEntity,
     ) {
+        const unlinkList = []
+
         const client = new NFTStorage({ token: process.env.NFT_STORAGE_KEY });
         if (!need) {
             throw new ObjectNotFound();
@@ -85,8 +87,8 @@ export class IpfsService {
                     child.awakeAvatarUrl,
                     `${child.sayName}Awake`,
                 );
-                console.log('\x1b[36m%s\x1b[0m', ' Cleaning local storage ...');
-                fs.unlinkSync(`./${child.sayName}Awake.jpg`);
+                unlinkList.push(`./${child.sayName}Awake.jpg`)
+
 
             }
             if (child && child.sleptAvatarUrl) {
@@ -95,14 +97,12 @@ export class IpfsService {
                     child.sleptAvatarUrl,
                     `${child.sayName}Slept`,
                 );
-                console.log('\x1b[36m%s\x1b[0m', ' Cleaning local storage ...');
-                fs.unlinkSync(`./${child.sayName}Slept.jpg`);
+                unlinkList.push(`./${child.sayName}Slept.jpg`)
             }
 
 
             const iconImage = await this.fileFromPath(need.imageUrl, `${need.name}`);
-            fs.unlinkSync(`./${need.name}.jpg`);
-            console.log('\x1b[36m%s\x1b[0m', ' Cleaned last file from local storage!');
+            unlinkList.push(`./${need.name}.jpg`)
             // dates
             const needDates = {
                 estimationDays: need.doingDuration,
@@ -188,6 +188,12 @@ export class IpfsService {
             });
             console.log('\x1b[36m%s\x1b[0m', `Stored Need to IPFS...`);
 
+            for (let i = 0; i < unlinkList.length; i++) {
+                console.log('\x1b[36m%s\x1b[0m', `Cleaning ${unlinkList[i]} from local storage ...`);
+                fs.unlinkSync(unlinkList[i])
+            }
+            console.log('\x1b[36m%s\x1b[0m', ' Cleaned last file from local storage!');
+
 
             const needIpfs = await this.createIpfs(
                 need,
@@ -199,7 +205,6 @@ export class IpfsService {
                 '4- Updated DataBase with IPFS details ...',
             );
             this.logger.log('Stored on IPFS');
-            console.log(needIpfs);
             return needIpfs;
         }
         if (role === SAYPlatformRoles.AUDITOR) {
@@ -244,6 +249,8 @@ export class IpfsService {
             throw new WalletExceptionFilter(403, "could not find your role in this need !")
         }
 
+
+
     }
 
     async fileFromPath(url: string, name = 'noTitle'): Promise<any> {
@@ -272,7 +279,7 @@ export class IpfsService {
             .pipe(map((res) => res.data?.pipe(writer)))
             .pipe(
                 catchError((e) => {
-                    console.log({...e});
+                    console.log({ ...e });
                     throw new WalletExceptionFilter(e.status, e.message);
                 }),
             );

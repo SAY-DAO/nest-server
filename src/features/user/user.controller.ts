@@ -27,6 +27,7 @@ import { ChildrenService } from '../children/children.service';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { Paginated } from 'nestjs-paginate';
 import { NgoService } from '../ngo/ngo.service';
+import { TicketEntity } from 'src/entities/ticket.entity';
 
 @ApiTags('Users')
 @Controller('users')
@@ -77,7 +78,7 @@ export class UserController {
         let children: number
         let arrivals: any
 
-        const roleId = convertFlaskToSayRoles(typeId);
+        const role = convertFlaskToSayRoles(typeId);
 
         try {
             let socialWorkerId: number;
@@ -87,7 +88,7 @@ export class UserController {
             let ngoIds: number[]
             let swIds: number[]
 
-            if (roleId === SAYPlatformRoles.SOCIAL_WORKER) {
+            if (role === SAYPlatformRoles.SOCIAL_WORKER) {
                 console.log('\x1b[33m%s\x1b[0m', `Role for my Page is SOCIAL_WORKER...\n`);
                 socialWorkerId = userId;
                 auditorId = null;
@@ -98,7 +99,7 @@ export class UserController {
                 children = await this.childrenService.countChildren(ngoIds)
 
             }
-            if (roleId === SAYPlatformRoles.AUDITOR) {
+            if (role === SAYPlatformRoles.AUDITOR) {
                 console.log('\x1b[33m%s\x1b[0m', `Role for my Page is AUDITOR...\n`);
                 socialWorkerId = null;
                 auditorId = userId;
@@ -110,7 +111,7 @@ export class UserController {
                 ngoIds = await this.ngoService.getFlaskNgos().then(r => r.map(s => s.id))
                 children = await this.childrenService.countChildren(ngoIds)
             }
-            if (roleId === SAYPlatformRoles.PURCHASER) {
+            if (role === SAYPlatformRoles.PURCHASER) {
                 console.log('\x1b[33m%s\x1b[0m', `Role for my Page is PURCHASER...\n`);
                 socialWorkerId = null;
                 auditorId = null;
@@ -121,7 +122,7 @@ export class UserController {
                 children = await this.childrenService.countChildren(ngoIds)
             }
 
-            if (roleId === SAYPlatformRoles.NGO_SUPERVISOR) {
+            if (role === SAYPlatformRoles.NGO_SUPERVISOR) {
                 console.log('\x1b[33m%s\x1b[0m', `Role for my Page is NGO_SUPERVISOR...\n`);
                 socialWorkerId = null;
                 auditorId = null;
@@ -225,9 +226,16 @@ export class UserController {
 
         const modifiedNeedList = [];
         const time3 = new Date().getTime();
+        // add IPFS + tickets for every need
         try {
-            // add IPFS + tickets for every need
-            const tickets = await this.ticketService.getUserTickets(userId);
+            let tickets: TicketEntity[]
+            if (role === SAYPlatformRoles.AUDITOR) {
+                tickets = await this.ticketService.getTickets();
+
+            } else {
+                tickets = await this.ticketService.getUserTickets(userId);
+
+            }
             for (let i = 0; i < allNeeds.length; i++) {
                 for (let k = 0; k < allNeeds[i].length; k++) {
                     const fetchedNeed = allNeeds[i][k];
