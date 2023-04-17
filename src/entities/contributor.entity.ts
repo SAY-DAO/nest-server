@@ -3,7 +3,6 @@ import {
   Column,
   OneToMany,
   ManyToOne,
-  JoinColumn,
   Index,
 } from 'typeorm';
 import { NeedEntity } from './need.entity';

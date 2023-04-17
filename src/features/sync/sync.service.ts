@@ -260,8 +260,10 @@ export class SyncService {
         nestAuditor = await this.userService.getContributorByFlaskId(
           theNeed.confirmUser,
         );
+        console.log(nestAuditor)
+        console.log("nestAuditor")
         if (!nestAuditor) {
-          const flaskAuditor = await this.userService.getFlaskSocialWorker(21);
+          const flaskAuditor = await this.userService.getFlaskSocialWorker(theNeed.confirmUser);
           const auditorNgo = await this.syncContributorNgo(flaskAuditor);
           const {
             id: auditorFlaskId,
