@@ -4,6 +4,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { ChildrenEntity } from './children.entity';
@@ -13,6 +14,7 @@ import { BaseEntity } from './BaseEntity';
 
 @Entity() // panel admin, sw, auditor, ...
 export class ContributorEntity extends BaseEntity {
+  @Index({ unique: true })
   @Column({ nullable: false })
   flaskId: number;
 

@@ -11,6 +11,7 @@ import {
   PublicNeed,
 } from '../../generated-sources/openapi';
 import {
+  childExistence,
   NeedTypeEnum,
   PaymentStatusEnum,
   ProductStatusEnum,
@@ -210,7 +211,7 @@ export class NeedService {
     ngoSupervisor: number,
     swIds: number[],
     ngoIds: number[]
-    ): Promise<number> {
+  ): Promise<number> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -220,7 +221,7 @@ export class NeedService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.existence_status IN (:...existenceStatus)', { existenceStatus: [childExistence.AlivePresent] })
       .where('need.isConfirmed = :needConfirmed', { needConfirmed: false })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
@@ -289,7 +290,7 @@ export class NeedService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.existence_status IN (:...existenceStatus)', { existenceStatus: [childExistence.AlivePresent] })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.created_by_id IN (:...swIds)', {
@@ -349,7 +350,7 @@ export class NeedService {
     ngoId: number,
     swIds: number[],
     ngoIds: number[]
-    ): Promise<Paginated<Need>> {
+  ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -365,7 +366,7 @@ export class NeedService {
         'payment',
         'payment.id_need = need.id',
       )
-      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      // .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.status IN (:...statuses)', {
@@ -432,7 +433,7 @@ export class NeedService {
     ngoId: number,
     swIds: number[],
     ngoIds: number[]
-    ): Promise<Paginated<Need>> {
+  ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -454,7 +455,7 @@ export class NeedService {
         'need_status_updates',
         'need_status_updates.need_id = need.id',
       )
-      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      // .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .where(
@@ -529,7 +530,7 @@ export class NeedService {
     ngoId: number,
     swIds: number[],
     ngoIds: number[]
-    ): Promise<Paginated<Need>> {
+  ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -565,7 +566,7 @@ export class NeedService {
         'receipt',
         'receipt.id = need_receipt.receipt_id',
       )
-      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      // .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .where(

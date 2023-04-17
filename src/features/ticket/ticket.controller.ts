@@ -145,6 +145,12 @@ export class TicketController {
     const uniqueParticipants = [
       ...new Map(participants.map((p) => [p.id, p])).values(),
     ];
+    console.log(participants.map(p => p.flaskId))
+    console.log(new Map(participants.map((p) => [p.id, p])).values())
+
+    if (uniqueParticipants.length === 0) {
+      throw new ServerError('You are doing something wrong buddy!');
+    }
 
     if (uniqueParticipants.length === 1) {
       throw new ServerError('Two People is needed for the ticket');
@@ -167,7 +173,7 @@ export class TicketController {
     // only when announce arrival
     if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO) {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));
-      
+
       const contentDetails = {
         message: ` .به سمن رسید --- ${persianDate} --- ${body.arrivalDate} `,
         from: body.flaskUserId,
