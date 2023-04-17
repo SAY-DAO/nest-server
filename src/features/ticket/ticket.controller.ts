@@ -122,7 +122,7 @@ export class TicketController {
       need: need,
       flaskUserId: body.flaskUserId,
       role: convertFlaskToSayRoles(body.userTypeId),
-      lastAnnouncement: body.announcement 
+      lastAnnouncement: body.announcement
     };
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating Participants ...\n');
@@ -174,7 +174,7 @@ export class TicketController {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));
 
       const contentDetails = {
-        message: ` .به سمن رسید --- ${persianDate} --- ${body.arrivalDate} `,
+        message: ` .به سمن رسید --- ${persianDate} --- ${`${new Date(body.arrivalDate).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1}-${new Date(body.arrivalDate).getDate()}`} `,
         from: body.flaskUserId,
         announcement: AnnouncementEnum.ARRIVED_AT_NGO,
         announcedArrivalDate: body.arrivalDate
