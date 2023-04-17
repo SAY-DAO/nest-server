@@ -8,6 +8,7 @@ export enum Colors {
 
 
 export enum AnnouncementEnum {
+    NONE = 0,
     ARRIVED_AT_NGO = 1,
 }
 

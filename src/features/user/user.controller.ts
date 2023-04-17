@@ -94,7 +94,7 @@ export class UserController {
                 auditorId = null;
                 purchaserId = null;
                 supervisorId = null;
-                const socialWOrker = await this.userService.getFlaskSocialWorker(userId)
+                const socialWOrker = await this.userService.getFlaskSocialWorker(userId) // sw ngo
                 ngoIds = [socialWOrker.ngo_id]
                 children = await this.childrenService.countChildren(ngoIds)
 
@@ -107,7 +107,7 @@ export class UserController {
                 supervisorId = null;
 
                 // for auditor - admin
-                swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
+                swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id)) // all ngos
                 ngoIds = await this.ngoService.getFlaskNgos().then(r => r.map(s => s.id))
                 children = await this.childrenService.countChildren(ngoIds)
             }
@@ -118,7 +118,7 @@ export class UserController {
                 purchaserId = userId;
                 supervisorId = null;
                 swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
-                ngoIds = await this.ngoService.getFlaskNgos().then(r => r.map(s => s.id))
+                ngoIds = await this.ngoService.getFlaskNgos().then(r => r.map(s => s.id)) // all ngos
                 children = await this.childrenService.countChildren(ngoIds)
             }
 
@@ -132,6 +132,7 @@ export class UserController {
                 // for ngo supervisor
                 const supervisor = await this.userService.getFlaskSocialWorker(userId)
                 swIds = await this.userService.getFlaskSocialWorkerByNgo(supervisor.ngo_id).then(r => r.map(s => s.id))
+
                 ngoIds = [supervisor.ngo_id]
                 children = await this.childrenService.countChildren(ngoIds)
 
@@ -147,7 +148,8 @@ export class UserController {
                 auditorId,
                 purchaserId,
                 supervisorId,
-                swIds
+                swIds,
+                ngoIds
             );
 
             notPaid = await this.needService.getNotPaidNeeds(
@@ -161,7 +163,8 @@ export class UserController {
                 auditorId,
                 purchaserId,
                 supervisorId,
-                swIds
+                swIds,
+                ngoIds
             );
 
 
@@ -176,7 +179,8 @@ export class UserController {
                 auditorId,
                 purchaserId,
                 supervisorId,
-                swIds
+                swIds,
+                ngoIds
 
             );
 
@@ -191,7 +195,8 @@ export class UserController {
                 auditorId,
                 purchaserId,
                 supervisorId,
-                swIds
+                swIds,
+                ngoIds
 
             );
 
@@ -206,7 +211,8 @@ export class UserController {
                 auditorId,
                 purchaserId,
                 supervisorId,
-                swIds
+                swIds,
+                ngoIds
 
             );
             // return delivered

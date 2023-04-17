@@ -91,6 +91,7 @@ export class TicketController {
     const contentDetails = {
       message: msg,
       from,
+      announcement: AnnouncementEnum.NONE
     };
     return await this.ticketService.createTicketContent(contentDetails, ticket);
   }
@@ -121,7 +122,6 @@ export class TicketController {
       need: need,
       flaskUserId: body.flaskUserId,
       role: convertFlaskToSayRoles(body.userTypeId),
-      announcement: body.announcement,
     };
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating Participants ...\n');
@@ -150,7 +150,7 @@ export class TicketController {
       throw new ServerError('Two People is needed for the ticket');
     }
 
-    if(need.ipfs){
+    if (need.ipfs) {
       throw new ServerError('After IPFS upload you can not change anything.');
     }
 
@@ -167,10 +167,13 @@ export class TicketController {
     // only when announce arrival
     if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO) {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));
+      
       const contentDetails = {
-        message: ` .به سمن رسید - ${persianDate}`,
+        message: ` .به سمن رسید --- ${persianDate} --- ${body.arrivalDate} `,
         from: body.flaskUserId,
+        announcement: AnnouncementEnum.ARRIVED_AT_NGO
       };
+
       if (!body.arrivalDate) {
         throw new ServerError('Date is not provided');
       }

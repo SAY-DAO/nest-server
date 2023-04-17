@@ -1,5 +1,4 @@
 import { NeedEntity } from "src/entities/need.entity"
-import { AnnouncementEnum } from "../interfaces/interface"
 
 export class CreateTicketParams {
     title: string
@@ -7,5 +6,4 @@ export class CreateTicketParams {
     role: number
     flaskUserId: number
     flaskNeedId: number
-    announcement: AnnouncementEnum
 }

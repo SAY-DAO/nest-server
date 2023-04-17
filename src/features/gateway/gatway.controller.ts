@@ -9,6 +9,7 @@ import { CreateTicketColorDto } from "src/types/dtos/ticket/CreateTicketColor.dt
 import { CreateTicketContentDto } from "src/types/dtos/ticket/CreateTicketContent.dto";
 import { CreateTicketNotificationDto } from "src/types/dtos/ticket/CreateTicketNotif.dto";
 import { CreateTicketViewDto } from "src/types/dtos/ticket/CreateTicketView.dto";
+import { AnnouncementEnum, SAYPlatformRoles } from "src/types/interfaces/interface";
 import { ticketNotifications } from "src/utils/helpers";
 import { TicketService } from '../ticket/ticket.service';
 import { ValidateGatewayPipe } from "./pipes/validate-gateway.pipe";
@@ -88,7 +89,7 @@ export class GateWayController implements OnModuleInit {
         this.checkConnection()
         const { ticket } = await this.ticketService.getTicketById(body.ticketId, body.from)
         console.log('\x1b[36m%s\x1b[0m', 'Socket Creating Ticket Content ...\n');
-        const content = await this.ticketService.createTicketContent({ message: body.message, from: body.from }, ticket)
+        const content = await this.ticketService.createTicketContent({ message: body.message, from: body.from, announcement: AnnouncementEnum.NONE }, ticket)
         await this.ticketService.updateTicketTime(ticket, body.from)
 
         if (this.socket.connected) {
@@ -130,10 +131,11 @@ export class GateWayController implements OnModuleInit {
     async onTicketColorChange(@MessageBody(ValidateGatewayPipe) body: CreateTicketColorDto,
         @ConnectedSocket() client: Socket,
     ) {
-        const { ticket: beforeUpdate } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
+        const { ticket: ticketBeforeUpdate } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
 
-        if (beforeUpdate.flaskUserId !== body.flaskUserId) {
-            throw new ServerError('You are not the Ticket creator')
+        const ticketParticipant = ticketBeforeUpdate.contributors.find(c => c.flaskId === body.flaskUserId)
+        if (ticketParticipant.role !== SAYPlatformRoles.AUDITOR) {
+            throw new ServerError('You are not an AUDITOR')
         }
         await this.ticketService.updateTicketColor(body.ticketId, body.color)
         const { ticket } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
