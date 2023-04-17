@@ -4,4 +4,5 @@ export class CreateTicketContentParams {
     from: number
     message: string
     announcement: AnnouncementEnum
+    announcedArrivalDate?: Date
 }

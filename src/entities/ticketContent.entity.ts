@@ -14,7 +14,11 @@ export class TicketContentEntity extends BaseEntity {
     @Column({ nullable: true })
     announcement: AnnouncementEnum
 
+    @Column({ type: 'timestamptz', nullable: true })
+    announcedArrivalDate?: Date;
+
     @ManyToOne(() => TicketEntity, (t) => t.ticketHistory, { eager: false })
     ticket: TicketEntity;
+
 }
 

@@ -77,6 +77,6 @@ import { ProviderService } from '../provider/provider.service';
 })
 export class TicketModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TicketMiddleware).forRoutes('tickets');
+    consumer.apply(TicketMiddleware).forRoutes('tickets4');
   }
 }

@@ -176,7 +176,8 @@ export class TicketController {
       const contentDetails = {
         message: ` .به سمن رسید --- ${persianDate} --- ${body.arrivalDate} `,
         from: body.flaskUserId,
-        announcement: AnnouncementEnum.ARRIVED_AT_NGO
+        announcement: AnnouncementEnum.ARRIVED_AT_NGO,
+        announcedArrivalDate: body.arrivalDate
       };
 
       if (!body.arrivalDate) {
