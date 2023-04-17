@@ -149,6 +149,7 @@ export class NgoService {
   getFlaskNgos(): Promise<NGO[]> {
     return this.ngoFlaskRepository.find();
   }
+  
   getFlaskNgo(flaskNgoId: number): Promise<NGO> {
     return this.ngoFlaskRepository.findOne({
       where: { id: flaskNgoId },

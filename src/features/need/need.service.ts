@@ -211,7 +211,7 @@ export class NeedService {
     ngoSupervisor: number,
     swIds: number[],
     ngoIds: number[]
-  ): Promise<number> {
+  ): Promise<any> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -221,10 +221,10 @@ export class NeedService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .andWhere('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
+      .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
       .andWhere('child.existence_status IN (:...existenceStatus)', { existenceStatus: [childExistence.AlivePresent] })
-      .where('need.isConfirmed = :needConfirmed', { needConfirmed: false })
-      .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .andWhere('need.isConfirmed = :needConfirmed', { needConfirmed: false })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.created_by_id IN (:...swIds)', {
         swIds: socialWorker ? [socialWorker] : [...swIds],
@@ -291,8 +291,9 @@ export class NeedService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
       .andWhere('child.existence_status IN (:...existenceStatus)', { existenceStatus: [childExistence.AlivePresent] })
-      .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.created_by_id IN (:...swIds)', {
         swIds: socialWorker ? [socialWorker] : [...swIds],
@@ -367,7 +368,6 @@ export class NeedService {
         'payment',
         'payment.id_need = need.id',
       )
-      // .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.status IN (:...statuses)', {
@@ -456,7 +456,6 @@ export class NeedService {
         'need_status_updates',
         'need_status_updates.need_id = need.id',
       )
-      // .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .where(
@@ -567,7 +566,6 @@ export class NeedService {
         'receipt',
         'receipt.id = need_receipt.receipt_id',
       )
-      // .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .where(
