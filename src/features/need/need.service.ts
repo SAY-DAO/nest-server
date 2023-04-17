@@ -221,6 +221,7 @@ export class NeedService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .andWhere('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
       .andWhere('child.existence_status IN (:...existenceStatus)', { existenceStatus: [childExistence.AlivePresent] })
       .where('need.isConfirmed = :needConfirmed', { needConfirmed: false })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
