@@ -122,6 +122,7 @@ export class TicketController {
       need: need,
       flaskUserId: body.flaskUserId,
       role: convertFlaskToSayRoles(body.userTypeId),
+      lastAnnouncement: body.announcement 
     };
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating Participants ...\n');
@@ -145,8 +146,6 @@ export class TicketController {
     const uniqueParticipants = [
       ...new Map(participants.map((p) => [p.id, p])).values(),
     ];
-    console.log(participants.map(p => p.flaskId))
-    console.log(new Map(participants.map((p) => [p.id, p])).values())
 
     if (uniqueParticipants.length === 0) {
       throw new ServerError('You are doing something wrong buddy!');

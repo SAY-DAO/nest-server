@@ -25,7 +25,7 @@ export class TicketEntity extends BaseEntity {
     flaskNeedId: number
 
     @Column({ nullable: true })
-    announcement: AnnouncementEnum
+    lastAnnouncement: AnnouncementEnum
 
     @ManyToMany(() => AllUserEntity, (user) => user.tickets, { eager: true, onDelete: 'CASCADE' })
     @JoinTable()
