@@ -146,7 +146,6 @@ export class TicketService {
     return this.ticketRepository.find({
       relations: {
         need: true,
-        ticketHistory: true
       },
       where: {
         contributors: { flaskId: flaskUserId },
