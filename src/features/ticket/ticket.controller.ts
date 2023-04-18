@@ -55,14 +55,11 @@ export class TicketController {
 
   @Get('all/user/:userId')
   async getUserTickets(@Param('userId') userId: number) {
-    const user = await this.userService.getFlaskSocialWorker(userId)
+    const user = await this.userService.getFlaskSocialWorker(userId);
     if (convertFlaskToSayRoles(user.type_id) === SAYPlatformRoles.AUDITOR) {
-      console.log(await this.ticketService.getTickets())
       return await this.ticketService.getTickets();
-
     } else {
       return await this.ticketService.getUserTickets(userId);
-
     }
   }
 
@@ -91,7 +88,7 @@ export class TicketController {
     const contentDetails = {
       message: msg,
       from,
-      announcement: AnnouncementEnum.NONE
+      announcement: AnnouncementEnum.NONE,
     };
     return await this.ticketService.createTicketContent(contentDetails, ticket);
   }
@@ -122,7 +119,7 @@ export class TicketController {
       need: need,
       flaskUserId: body.flaskUserId,
       role: convertFlaskToSayRoles(body.userTypeId),
-      lastAnnouncement: body.announcement
+      lastAnnouncement: body.announcement,
     };
 
     console.log('\x1b[36m%s\x1b[0m', 'Creating Participants ...\n');
@@ -174,10 +171,14 @@ export class TicketController {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));
 
       const contentDetails = {
-        message: ` .به سمن رسید --- ${persianDate} --- ${`${new Date(body.arrivalDate).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1}-${new Date(body.arrivalDate).getDate()}`} `,
+        message: ` .به سمن رسید --- ${persianDate} --- ${`${new Date(
+          body.arrivalDate,
+        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
+          }-${new Date(body.arrivalDate).getDate()}`} `,
+
         from: body.flaskUserId,
         announcement: AnnouncementEnum.ARRIVED_AT_NGO,
-        announcedArrivalDate: body.arrivalDate
+        announcedArrivalDate: body.arrivalDate,
       };
 
       if (!body.arrivalDate) {
@@ -206,7 +207,17 @@ export class TicketController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return await this.ticketService.delete(id);
+  async DeleteTicket(@Param('id') id: string) {
+    return await this.ticketService.DeleteTicket(id);
   }
+
+
+  @Get('notifications/:flaskUserId')
+  async getUserNotifications(@Param('flaskUserId') flaskUserId: number) {
+    return await this.ticketService.getUserNotifications(
+      Number(flaskUserId),
+    );
+  }
+
+
 }

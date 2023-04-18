@@ -17,7 +17,7 @@ export class TicketContentEntity extends BaseEntity {
     @Column({ type: 'timestamptz', nullable: true })
     announcedArrivalDate?: Date;
 
-    @ManyToOne(() => TicketEntity, (t) => t.ticketHistory, { eager: false })
+    @ManyToOne(() => TicketEntity, (t) => t.ticketHistories, { eager: false })
     ticket: TicketEntity;
 
 }

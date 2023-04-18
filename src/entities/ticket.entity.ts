@@ -35,7 +35,7 @@ export class TicketEntity extends BaseEntity {
     need: NeedEntity
 
     @OneToMany(() => TicketContentEntity, (c) => c.ticket, { eager: true, nullable: true })
-    ticketHistory?: TicketContentEntity[]
+    ticketHistories?: TicketContentEntity[]
 
     @OneToMany(() => TicketViewEntity, (v) => v.ticket, { eager: true, onDelete: 'CASCADE' })
     views: TicketViewEntity[]

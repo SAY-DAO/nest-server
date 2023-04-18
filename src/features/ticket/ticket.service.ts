@@ -7,7 +7,7 @@ import { AllUserEntity } from 'src/entities/user.entity';
 import { Colors } from 'src/types/interfaces/interface';
 import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
-import { Repository, UpdateResult } from 'typeorm';
+import { Brackets, Repository, UpdateResult, ViewEntity } from 'typeorm';
 
 @Injectable()
 export class TicketService {
@@ -162,8 +162,26 @@ export class TicketService {
     return ticket;
   }
 
-  delete(id: string) {
-    this.ticketRepository.delete({ id });
-    return
+  DeleteTicket(id: string) {
+    return this.ticketRepository.delete({ id });
+  }
+
+  getUserNotifications(flaskUserId: number): Promise<[TicketEntity[], number]> {
+    return this.ticketRepository
+      .createQueryBuilder('ticketEntity')
+      .leftJoinAndSelect("ticketEntity.views", "view")
+      .leftJoinAndSelect("ticketEntity.ticketHistories", "ticketHistory")
+      .where('ticketEntity.updatedAt > :startDate', {startDate: new Date(2019, 5, 3)})
+      .andWhere('view.viewed < ticketEntity.updatedAt')
+      // .where(
+      //   new Brackets((qb) => {
+      //     qb
+      //       .where('view.flaskUserId = :flaskUserId', { flaskUserId: flaskUserId })
+      //       .andWhere("(ticketEntity.updatedAt) <= (view.viewed)")
+      //   }),
+      // )
+      // .leftJoinAndSelect("ticketEntity.contributors", "contributor")
+      // .andWhere('ticketEntity.flaskUserId = :flaskUserId', { flaskUserId: flaskUserId })
+      .getManyAndCount()
   }
 }
