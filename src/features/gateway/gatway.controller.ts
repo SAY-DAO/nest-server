@@ -10,8 +10,9 @@ import { CreateTicketContentDto } from "src/types/dtos/ticket/CreateTicketConten
 import { CreateTicketNotificationDto } from "src/types/dtos/ticket/CreateTicketNotif.dto";
 import { CreateTicketViewDto } from "src/types/dtos/ticket/CreateTicketView.dto";
 import { AnnouncementEnum, SAYPlatformRoles } from "src/types/interfaces/interface";
-import { ticketNotifications } from "src/utils/helpers";
+import { convertFlaskToSayRoles, ticketNotifications } from "src/utils/helpers";
 import { TicketService } from '../ticket/ticket.service';
+import { UserService } from "../user/user.service";
 import { ValidateGatewayPipe } from "./pipes/validate-gateway.pipe";
 
 @WebSocketGateway({
@@ -24,6 +25,7 @@ import { ValidateGatewayPipe } from "./pipes/validate-gateway.pipe";
 export class GateWayController implements OnModuleInit {
     constructor(
         private ticketService: TicketService,
+        private userService: UserService,
     ) { }
     socket: Socket
     currentNotifications: TicketEntity[]
@@ -132,9 +134,9 @@ export class GateWayController implements OnModuleInit {
         @ConnectedSocket() client: Socket,
     ) {
         const { ticket: ticketBeforeUpdate } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
-
+        const caller = await this.userService.getFlaskSocialWorker(body.flaskUserId)
         const ticketParticipant = ticketBeforeUpdate.contributors.find(c => c.flaskId === body.flaskUserId)
-        if (ticketParticipant.role !== SAYPlatformRoles.AUDITOR) {
+        if (ticketParticipant && ticketParticipant.role !== SAYPlatformRoles.AUDITOR) {
             throw new ServerError('You are not an AUDITOR')
         }
         await this.ticketService.updateTicketColor(body.ticketId, body.color)
@@ -144,8 +146,17 @@ export class GateWayController implements OnModuleInit {
         if (this.socket.connected) {
             for (let i = 0; i < ticket.contributors.length; i++) {
                 if (ticket.contributors[i].flaskId !== body.flaskUserId)
-                    console.log('\x1b[36m%s\x1b[0m', `Sending back color details use:${ticket.contributors[i].flaskId}...\n`);
+                    console.log('\x1b[36m%s\x1b[0m', `Sending back color details user:${ticket.contributors[i].flaskId}...\n`);
                 client.emit(`onColorChange${ticket.contributors[i].flaskId}`, {
+                    ticketId: ticket.id,
+                    color: ticket.color,
+                    needFlaskId: ticket.flaskNeedId,
+                    needType: ticket.need.type,
+                    needStatus: ticket.need.status
+                })
+                if (convertFlaskToSayRoles(caller.type_id) === SAYPlatformRoles.AUDITOR)
+                    console.log('\x1b[36m%s\x1b[0m', `Sending back color details user:${body.flaskUserId}...\n`);
+                client.emit(`onColorChange${body.flaskUserId}`, {
                     ticketId: ticket.id,
                     color: ticket.color,
                     needFlaskId: ticket.flaskNeedId,
