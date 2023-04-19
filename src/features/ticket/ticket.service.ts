@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Need } from 'src/entities/flaskEntities/need.entity';
+import { NeedEntity } from 'src/entities/need.entity';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
@@ -7,7 +9,7 @@ import { AllUserEntity } from 'src/entities/user.entity';
 import { Colors } from 'src/types/interfaces/interface';
 import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
-import { Brackets, Repository, UpdateResult, ViewEntity } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class TicketService {
@@ -18,6 +20,10 @@ export class TicketService {
     private ticketContentRepository: Repository<TicketContentEntity>,
     @InjectRepository(TicketViewEntity)
     private ticketViewRepository: Repository<TicketViewEntity>,
+    @InjectRepository(Need, 'flaskPostgres')
+    private flaskNeedRepository: Repository<Need>,
+    @InjectRepository(NeedEntity)
+    private needRepository: Repository<NeedEntity>,
   ) { }
 
   async createTicket(
@@ -153,7 +159,17 @@ export class TicketService {
     });
   }
 
-  getTicketByNeedId(flaskNeedId: number): Promise<TicketEntity> {
+  async getTicketByNeedId(flaskNeedId: number): Promise<TicketEntity> {
+    const flaskNeed = await this.flaskNeedRepository.findOne({
+      where: {
+        id: flaskNeedId
+      }
+    })
+    const nestNeed = await this.needRepository.findOne({
+      where: {
+        flaskId: flaskNeedId
+      }
+    })
     const ticket = this.ticketRepository.findOne({
       where: {
         flaskNeedId: flaskNeedId,
@@ -171,7 +187,7 @@ export class TicketService {
       .createQueryBuilder('ticketEntity')
       .leftJoinAndSelect("ticketEntity.views", "view")
       .leftJoinAndSelect("ticketEntity.ticketHistories", "ticketHistory")
-      .where('ticketEntity.updatedAt > :startDate', {startDate: new Date(2019, 5, 3)})
+      .where('ticketEntity.updatedAt > :startDate', { startDate: new Date(2019, 5, 3) })
       .andWhere('view.viewed < ticketEntity.updatedAt')
       // .where(
       //   new Brackets((qb) => {

@@ -3,14 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpException,
   HttpStatus,
   Req,
   UseInterceptors,
-  Query,
   ValidationPipe,
   UsePipes,
 } from '@nestjs/common';
@@ -19,7 +17,6 @@ import { CreateTicketDto } from '../../types/dtos/ticket/CreateTicket.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   AnnouncementEnum,
-  Colors,
   SAYPlatformRoles,
 } from 'src/types/interfaces/interface';
 import { TicketEntity } from '../../entities/ticket.entity';
@@ -169,7 +166,6 @@ export class TicketController {
     // only when announce arrival
     if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO) {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));
-
       const contentDetails = {
         message: ` .به سمن رسید --- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
@@ -178,6 +174,25 @@ export class TicketController {
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.ARRIVED_AT_NGO,
+        announcedArrivalDate: body.arrivalDate,
+      };
+
+      if (!body.arrivalDate) {
+        throw new ServerError('Date is not provided');
+      }
+      await this.ticketService.createTicketContent(contentDetails, ticket);
+    }
+    // only when announce money received
+    if (body.announcement === AnnouncementEnum.NGO_RECEIVED_MONEY) {
+      const persianDate = dateConvertToPersian(String(body.arrivalDate));
+      const contentDetails = {
+        message: ` .مبلغ دریافت شد--- ${persianDate} --- ${`${new Date(
+          body.arrivalDate,
+        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
+          }-${new Date(body.arrivalDate).getDate()}`} `,
+
+        from: body.flaskUserId,
+        announcement: AnnouncementEnum.NGO_RECEIVED_MONEY,
         announcedArrivalDate: body.arrivalDate,
       };
 

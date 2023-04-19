@@ -38,7 +38,6 @@ export class SocialWorker  extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
-
   @Column({ nullable: true })
   birth_certificate_number?: string;
 

@@ -5,23 +5,18 @@ import { PaymentEntity } from 'src/entities/payment.entity';
 import { ReceiptEntity } from 'src/entities/receipt.entity';
 import { StatusEntity } from 'src/entities/status.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
-import { SwmypageNeeds } from 'src/generated-sources/openapi';
 import {
   NeedTypeDefinitionEnum,
   NeedTypeEnum,
   PaymentStatusEnum,
   SAYPlatformRoles,
 } from 'src/types/interfaces/interface';
-import { ChildParams } from 'src/types/parameters/ChildParameters';
-import { NeedParams } from 'src/types/parameters/NeedParameters';
 import { NgoParams } from 'src/types/parameters/NgoParammeters';
 import { PaymentParams } from 'src/types/parameters/PaymentParameters';
 import { ReceiptParams } from 'src/types/parameters/ReceiptParameter';
 import { StatusParams } from 'src/types/parameters/StausParameters';
 import {
   convertFlaskToSayRoles,
-  daysDifference,
-  getSAYRoleInteger,
 } from 'src/utils/helpers';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
@@ -55,7 +50,7 @@ export class SyncService {
     private statusService: StatusService,
     private locationService: LocationService,
     private providerService: ProviderService,
-  ) {}
+  ) { }
 
   async syncContributorNgo(flaskUser: SocialWorker) {
     try {
@@ -115,8 +110,7 @@ export class SyncService {
         );
         console.log('\x1b[36m%s\x1b[0m', 'Created an NGO ...\n');
       } else if (
-        nestNgo &&
-        daysDifference(currentTime, nestNgo.updatedAt) > 1
+        nestNgo
       ) {
         await this.ngoService
           .updateNgo(nestNgo.id, callerNgoDetails, nestCallerNgoCity)
@@ -133,7 +127,7 @@ export class SyncService {
   }
 
   async syncNeed(
-    theNeed: Need,
+    flaskNeed: Need,
     childId: number,
     callerId: number,
     receipts_: CreateReceiptDto[],
@@ -142,11 +136,26 @@ export class SyncService {
   ) {
     const currentTime = new Date();
     //-------------------------------------------- Controller Caller-------------------------------------
-    let callerDetails: UserParams;
     let nestCaller = await this.userService.getContributorByFlaskId(callerId);
+    const flaskCaller = await this.userService.getFlaskSocialWorker(callerId);
 
+    const {
+      id: callerFlaskId,
+      ngo_id: callerFlaskNgoId,
+      ...callerOtherParams
+    } = flaskCaller;
+
+    const callerDetails = {
+      ...callerOtherParams,
+      typeId: flaskCaller.type_id,
+      firstName: flaskCaller.firstName,
+      lastName: flaskCaller.lastName,
+      avatarUrl: flaskCaller.avatar_url,
+      flaskId: callerFlaskId,
+      birthDate: flaskCaller.birth_date && new Date(flaskCaller.birth_date),
+      role: convertFlaskToSayRoles(flaskCaller.type_id),
+    };
     if (!nestCaller) {
-      const flaskCaller = await this.userService.getFlaskSocialWorker(callerId);
       console.log(
         '\x1b[36m%s\x1b[0m',
         'Syncing NGO and Caller ...\n' + flaskCaller.id,
@@ -156,33 +165,13 @@ export class SyncService {
         '\x1b[36m%s\x1b[0m',
         'Synced NGO and Caller ...\n' + flaskCaller.id,
       );
-
-      const {
-        id: callerFlaskId,
-        ngo_id: callerFlaskNgoId,
-        ...callerOtherParams
-      } = flaskCaller;
-
-      callerDetails = {
-        ...callerOtherParams,
-        typeId: flaskCaller.type_id,
-        firstName: flaskCaller.firstName,
-        lastName: flaskCaller.lastName,
-        avatarUrl: flaskCaller.avatar_url,
-        flaskId: callerFlaskId,
-        birthDate: flaskCaller.birth_date && new Date(flaskCaller.birth_date),
-        role: convertFlaskToSayRoles(flaskCaller.type_id),
-      };
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Caller ...\n');
       nestCaller = await this.userService.createContributor(
         callerDetails,
         CallerNgo,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Created a Caller ...\n');
-    } else if (
-      nestCaller &&
-      daysDifference(currentTime, nestCaller.updatedAt) > 1
-    ) {
+    } else if (nestCaller) {
       await this.userService
         .updateContributor(nestCaller.id, callerDetails)
         .then();
@@ -196,34 +185,31 @@ export class SyncService {
     let nestSocialWorker: AllUserEntity;
     let swNgo: NgoEntity;
     nestSocialWorker = await this.userService.getContributorByFlaskId(
-      theNeed.created_by_id,
+      flaskNeed.created_by_id,
     );
 
-    let swDetails: UserParams;
+    const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
+      flaskNeed.created_by_id,
+    );
+    const {
+      id: swFlaskId,
+      ngo_id: swFlaskNgoId,
+      ...swOtherParams
+    } = flaskSocialWorker;
+
+    const swDetails = {
+      ...swOtherParams,
+      typeId: flaskSocialWorker.type_id,
+      firstName: flaskSocialWorker.firstName,
+      lastName: flaskSocialWorker.lastName,
+      avatarUrl: flaskSocialWorker.avatar_url,
+      flaskId: swFlaskId,
+      birthDate:
+        flaskSocialWorker.birth_date && new Date(flaskSocialWorker.birth_date),
+      role: SAYPlatformRoles.SOCIAL_WORKER,
+    };
     if (!nestSocialWorker) {
-      const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
-        theNeed.created_by_id,
-      );
       swNgo = await this.syncContributorNgo(flaskSocialWorker);
-
-      const {
-        id: swFlaskId,
-        ngo_id: swFlaskNgoId,
-        ...swOtherParams
-      } = flaskSocialWorker;
-
-      swDetails = {
-        ...swOtherParams,
-        typeId: flaskSocialWorker.type_id,
-        firstName: flaskSocialWorker.firstName,
-        lastName: flaskSocialWorker.lastName,
-        avatarUrl: flaskSocialWorker.avatar_url,
-        flaskId: swFlaskId,
-        birthDate:
-          flaskSocialWorker.birth_date &&
-          new Date(flaskSocialWorker.birth_date),
-        role: SAYPlatformRoles.SOCIAL_WORKER,
-      };
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Social Worker ...\n');
       nestSocialWorker = await this.userService.createContributor(
         swDetails,
@@ -231,15 +217,14 @@ export class SyncService {
       );
       console.log('\x1b[36m%s\x1b[0m', 'Created a Social Worker ...\n');
     } else if (
-      nestSocialWorker &&
-      daysDifference(currentTime, nestSocialWorker.updatedAt) > 1
+      nestSocialWorker
     ) {
       swNgo = nestSocialWorker.contributor.ngo;
       await this.userService
         .updateContributor(nestSocialWorker.id, swDetails)
         .then();
       nestSocialWorker = await this.userService.getContributorByFlaskId(
-        theNeed.created_by_id,
+        flaskNeed.created_by_id,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Social Worker updated ...\n');
     } else {
@@ -248,41 +233,34 @@ export class SyncService {
     }
     //--------------------------------------------Auditor-------------------------------------
     let nestAuditor: AllUserEntity;
-
-    // if (
-    //   selectedRoles.find(
-    //     (role) => getSAYRoleInteger(role) === SAYPlatformRoles.AUDITOR,
-    //   )
-    // ) {
     let auditorDetails: UserParams;
     try {
-      if (theNeed.isConfirmed) {
+      if (flaskNeed.isConfirmed) {
         nestAuditor = await this.userService.getContributorByFlaskId(
-          theNeed.confirmUser,
+          flaskNeed.confirmUser,
         );
-        console.log(nestAuditor)
-        console.log("nestAuditor")
-        if (!nestAuditor) {
-          const flaskAuditor = await this.userService.getFlaskSocialWorker(theNeed.confirmUser);
-          const auditorNgo = await this.syncContributorNgo(flaskAuditor);
-          const {
-            id: auditorFlaskId,
-            ngo_id: auditorFlaskNgoId,
-            ...auditorOtherParams
-          } = flaskAuditor;
+        const flaskAuditor = await this.userService.getFlaskSocialWorker(
+          flaskNeed.confirmUser,
+        );
+        const {
+          id: auditorFlaskId,
+          ngo_id: auditorFlaskNgoId,
+          ...auditorOtherParams
+        } = flaskAuditor;
 
-          auditorDetails = {
-            ...auditorOtherParams,
-            typeId: flaskAuditor.type_id,
-            firstName: flaskAuditor.firstName,
-            lastName: flaskAuditor.lastName,
-            avatarUrl: flaskAuditor.avatar_url,
-            flaskId: auditorFlaskId,
-            birthDate:
-              flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
-            role: SAYPlatformRoles.AUDITOR,
-          };
-          // if (!nestAuditor && theNeed.isConfirmed) {
+        auditorDetails = {
+          ...auditorOtherParams,
+          typeId: flaskAuditor.type_id,
+          firstName: flaskAuditor.firstName,
+          lastName: flaskAuditor.lastName,
+          avatarUrl: flaskAuditor.avatar_url,
+          flaskId: auditorFlaskId,
+          birthDate:
+            flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
+          role: SAYPlatformRoles.AUDITOR,
+        };
+        if (!nestAuditor) {
+          const auditorNgo = await this.syncContributorNgo(flaskAuditor);
           console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
           nestAuditor = await this.userService.createContributor(
             auditorDetails,
@@ -292,16 +270,13 @@ export class SyncService {
         } else {
           console.log('\x1b[36m%s\x1b[0m', 'Skipped auditor updating ...\n');
         }
-      } else if (
-        nestAuditor &&
-        daysDifference(currentTime, nestAuditor.updatedAt) > 1
-      ) {
+      } else if (nestAuditor) {
         await this.userService
           .updateContributor(nestAuditor.id, auditorDetails)
           .then();
 
         nestAuditor = await this.userService.getContributorByFlaskId(
-          theNeed.confirmUser,
+          flaskNeed.confirmUser,
         );
         console.log('\x1b[36m%s\x1b[0m', 'Auditor updated ...\n');
       } else {
@@ -314,26 +289,21 @@ export class SyncService {
       console.log(e);
       throw new ServerError(e.statusText, e.status);
     }
-    // }
 
     //--------------------------------------------Purchaser-------------------------------------
     let nestPurchaser: AllUserEntity;
-    // if (
-    //   selectedRoles.find(
-    //     (role) => getSAYRoleInteger(role) === SAYPlatformRoles.PURCHASER,
-    //   )
-    // ) {
+
     if (
-      theNeed.type === NeedTypeEnum.PRODUCT &&
-      theNeed.status > PaymentStatusEnum.COMPLETE_PAY
+      flaskNeed.type === NeedTypeEnum.PRODUCT &&
+      flaskNeed.status > PaymentStatusEnum.COMPLETE_PAY
     ) {
       let purchaserId: number;
       if (!statuses || statuses[0]) {
         // we do not have a history of purchaser id before implementing our new features
-        if (new Date(theNeed.doneAt).getFullYear() < 2023) {
+        if (new Date(flaskNeed.doneAt).getFullYear() < 2023) {
           purchaserId = 31; // Nyaz
         }
-        if (new Date(theNeed.doneAt).getFullYear() >= 2023) {
+        if (new Date(flaskNeed.doneAt).getFullYear() >= 2023) {
           purchaserId = 21; // Neda
         }
       } else {
@@ -342,33 +312,31 @@ export class SyncService {
         )?.sw_id;
       }
 
-      let purchaserDetails: UserParams;
       nestPurchaser = await this.userService.getContributorByFlaskId(
         purchaserId,
       );
+      const flaskPurchaser = await this.userService.getFlaskSocialWorker(
+        purchaserId,
+      );
+      const {
+        id: purchaserFlaskId,
+        ngo_id: purchaserFlaskNgoId,
+        ...purchaserOtherParams
+      } = flaskPurchaser;
+
+      const purchaserDetails = {
+        ...purchaserOtherParams,
+        typeId: flaskPurchaser.type_id,
+        firstName: flaskPurchaser.firstName,
+        lastName: flaskPurchaser.lastName,
+        avatarUrl: flaskPurchaser.avatar_url,
+        flaskId: purchaserFlaskId,
+        birthDate:
+          flaskPurchaser.birth_date && new Date(flaskPurchaser.birth_date),
+        role: SAYPlatformRoles.PURCHASER,
+      };
       if (!nestPurchaser) {
-        const flaskPurchaser = await this.userService.getFlaskSocialWorker(
-          purchaserId,
-        );
         const purchaserNgo = await this.syncContributorNgo(flaskPurchaser);
-
-        const {
-          id: purchaserFlaskId,
-          ngo_id: purchaserFlaskNgoId,
-          ...purchaserOtherParams
-        } = flaskPurchaser;
-
-        purchaserDetails = {
-          ...purchaserOtherParams,
-          typeId: flaskPurchaser.type_id,
-          firstName: flaskPurchaser.firstName,
-          lastName: flaskPurchaser.lastName,
-          avatarUrl: flaskPurchaser.avatar_url,
-          flaskId: purchaserFlaskId,
-          birthDate:
-            flaskPurchaser.birth_date && new Date(flaskPurchaser.birth_date),
-          role: SAYPlatformRoles.PURCHASER,
-        };
         // Create User
         console.log('\x1b[36m%s\x1b[0m', 'Creating a purchaser ...\n');
         nestPurchaser = await this.userService.createContributor(
@@ -376,10 +344,7 @@ export class SyncService {
           purchaserNgo,
         );
         console.log('\x1b[36m%s\x1b[0m', 'Created a purchaser ...\n');
-      } else if (
-        nestPurchaser &&
-        daysDifference(currentTime, nestPurchaser.updatedAt) > 1
-      ) {
+      } else if (nestPurchaser) {
         await this.userService
           .updateContributor(nestPurchaser.id, purchaserDetails)
           .then();
@@ -396,54 +361,50 @@ export class SyncService {
         'Not Purchased, skipping Purchaser ...\n',
       );
     }
-    // }
     //--------------------------------------------Child-------------------------------------
-    let childDetails: ChildParams;
     let nestChild = await this.childrenService.getChildById(childId);
+    const flaskChild = await this.childrenService.getFlaskChild(childId);
+
+    const childDetails = {
+      flaskId: flaskChild.id,
+      sayName: flaskChild.sayname_translations.en,
+      sayNameTranslations: flaskChild.sayname_translations,
+      nationality: flaskChild.nationality,
+      country: flaskChild.country,
+      city: flaskChild.city,
+      awakeAvatarUrl: flaskChild.awakeAvatarUrl,
+      sleptAvatarUrl: flaskChild.sleptAvatarUrl,
+      adultAvatarUrl: flaskChild.adult_avatar_url,
+      bioSummaryTranslations: flaskChild.bio_summary_translations,
+      bioTranslations: flaskChild.bio_translations,
+      voiceUrl: flaskChild.voiceUrl,
+      birthPlace: flaskChild.birthPlace,
+      housingStatus: flaskChild.housingStatus,
+      familyCount: flaskChild.familyCount,
+      sayFamilyCount: flaskChild.sayFamilyCount,
+      education: flaskChild.education,
+      status: flaskChild.status,
+      created: flaskChild.created,
+      updated: flaskChild.updated,
+      isDeleted: flaskChild.isDeleted,
+      isConfirmed: flaskChild.isConfirmed,
+      flaskConfirmUser: flaskChild.confirmUser,
+      confirmDate: flaskChild.confirmDate,
+      generatedCode: flaskChild.generatedCode,
+      isMigrated: flaskChild.isMigrated,
+      migratedId: flaskChild.migratedId,
+      birthDate: flaskChild.birthDate && new Date(flaskChild.birthDate),
+      migrateDate: flaskChild.migrateDate && new Date(flaskChild.migrateDate),
+    };
+
     if (!nestChild) {
-      const flaskChild = await this.childrenService.getFlaskChild(childId);
-
-      childDetails = {
-        flaskId: flaskChild.id,
-        sayName: flaskChild.sayname_translations.en,
-        sayNameTranslations: flaskChild.sayname_translations,
-        nationality: flaskChild.nationality,
-        country: flaskChild.country,
-        city: flaskChild.city,
-        awakeAvatarUrl: flaskChild.awakeAvatarUrl,
-        sleptAvatarUrl: flaskChild.sleptAvatarUrl,
-        adultAvatarUrl: flaskChild.adult_avatar_url,
-        bioSummaryTranslations: flaskChild.bio_summary_translations,
-        bioTranslations: flaskChild.bio_translations,
-        voiceUrl: flaskChild.voiceUrl,
-        birthPlace: flaskChild.birthPlace,
-        housingStatus: flaskChild.housingStatus,
-        familyCount: flaskChild.familyCount,
-        sayFamilyCount: flaskChild.sayFamilyCount,
-        education: flaskChild.education,
-        status: flaskChild.status,
-        created: flaskChild.created,
-        updated: flaskChild.updated,
-        isDeleted: flaskChild.isDeleted,
-        isConfirmed: flaskChild.isConfirmed,
-        flaskConfirmUser: flaskChild.confirmUser,
-        confirmDate: flaskChild.confirmDate,
-        generatedCode: flaskChild.generatedCode,
-        isMigrated: flaskChild.isMigrated,
-        migratedId: flaskChild.migratedId,
-        birthDate: flaskChild.birthDate && new Date(flaskChild.birthDate),
-        migrateDate: flaskChild.migrateDate && new Date(flaskChild.migrateDate),
-      };
-
       // Create Child
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
-
       if (!nestSocialWorker || !nestSocialWorker.contributor) {
         throw new ObjectNotFound(
           'Something went wrong while trying to create a child!',
         );
       }
-
       const childNgo = await this.ngoService.getNgoById(
         nestSocialWorker.contributor.flaskNgoId,
       );
@@ -453,7 +414,7 @@ export class SyncService {
         nestSocialWorker.contributor,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Created a Child ...\n');
-    } else if (nestChild && nestChild.updated === theNeed.updated) {
+    } else if (nestChild && nestChild.updated === flaskNeed.updated) {
       await this.childrenService.updateChild(childDetails, nestChild).then();
       nestChild = await this.childrenService.getChildById(childId);
 
@@ -480,7 +441,7 @@ export class SyncService {
           needStatus: receipts_[r].receipt[0].need_status,
           flaskReceiptId: receipts_[r].receipt[0].id,
           deleted: receipts_[r].receipt[0].deleted,
-          flaskNeedId: theNeed.id,
+          flaskNeedId: flaskNeed.id,
         };
 
         if (!nestReceipt && receipts_) {
@@ -505,17 +466,52 @@ export class SyncService {
     }
 
     //--------------------------------------------Payments-------------------------------------
-    let PaymentDetails: PaymentParams;
+    let paymentDetails: PaymentParams;
     let nestPayment: PaymentEntity;
     let nestFamilyMember: AllUserEntity;
     const nestPayments = [];
     if (payments) {
       for (let p = 0; p < payments.length; p++) {
         nestPayment = await this.paymentService.getPaymentById(payments[p].id);
+
+        const {
+          id: paymentFlaskId,
+          verified: verified,
+          id_need: flaskNeedId,
+          id_user: flaskUserId,
+          order_id: orderId,
+          credit_amount: creditAmount,
+          donation_amount: donationAmount,
+          card_no: cardNumber,
+          gateway_payment_id: gatewayPaymentId,
+          gateway_track_id: gatewayTrackId,
+          need_amount: needAmount,
+          transaction_date: transactionDate,
+          created: created,
+          updated: updated,
+        } = payments[p];
+
+        paymentDetails = {
+          flaskId: paymentFlaskId,
+          flaskNeedId: flaskNeedId,
+          flaskUserId: flaskUserId,
+          orderId: orderId,
+          verified: verified,
+          needAmount: needAmount,
+          donationAmount: donationAmount,
+          creditAmount: creditAmount,
+          cardNumber: cardNumber,
+          gatewayPaymentId: gatewayPaymentId,
+          gatewayTrackId: gatewayTrackId,
+          transactionDate: transactionDate,
+          created: created,
+          updated: updated,
+        };
         if (!nestPayment) {
           nestFamilyMember = await this.userService.getFamilyByFlaskId(
             payments[p].id_user,
           );
+
           if (!nestFamilyMember) {
             // Create Family
             console.log('\x1b[36m%s\x1b[0m', 'Creating a Family ...\n');
@@ -523,10 +519,7 @@ export class SyncService {
               flaskId: payments[p].id_user,
               role: SAYPlatformRoles.FAMILY,
             });
-          } else if (
-            nestFamilyMember &&
-            daysDifference(currentTime, nestFamilyMember.updatedAt) > 1
-          ) {
+          } else if (nestFamilyMember) {
             await this.userService
               .updateFamily(nestFamilyMember.id, {
                 flaskId: payments[p].id_user,
@@ -541,57 +534,21 @@ export class SyncService {
             console.log('\x1b[36m%s\x1b[0m', 'Skipped Family updating ...\n');
           }
 
-          const {
-            id: paymentFlaskId,
-            verified: verified,
-            id_need: flaskNeedId,
-            id_user: flaskUserId,
-            order_id: orderId,
-            credit_amount: creditAmount,
-            donation_amount: donationAmount,
-            card_no: cardNumber,
-            gateway_payment_id: gatewayPaymentId,
-            gateway_track_id: gatewayTrackId,
-            need_amount: needAmount,
-            transaction_date: transactionDate,
-            created: created,
-            updated: updated,
-          } = payments[p];
-
-          PaymentDetails = {
-            flaskId: paymentFlaskId,
-            flaskNeedId: flaskNeedId,
-            flaskUserId: flaskUserId,
-            orderId: orderId,
-            verified: verified,
-            needAmount: needAmount,
-            donationAmount: donationAmount,
-            creditAmount: creditAmount,
-            cardNumber: cardNumber,
-            gatewayPaymentId: gatewayPaymentId,
-            gatewayTrackId: gatewayTrackId,
-            transactionDate: transactionDate,
-            created: created,
-            updated: updated,
-          };
-
           console.log('\x1b[36m%s\x1b[0m', 'Creating a Payment ...\n' + p);
           nestPayment = await this.paymentService.createPayment(
-            PaymentDetails,
+            paymentDetails,
             nestFamilyMember,
           );
           nestPayments.push(nestPayment);
           console.log('\x1b[36m%s\x1b[0m', 'Created a Payment ...\n');
-        } else if (
-          nestPayment &&
-          daysDifference(currentTime, nestPayment.updatedAt) > 1
-        ) {
+        } else if (nestPayment) {
           await this.paymentService
-            .updatePayment(nestPayment.id, PaymentDetails, nestFamilyMember)
+            .updatePayment(nestPayment.id, paymentDetails, nestFamilyMember)
             .then();
           nestPayment = await this.paymentService.getPaymentById(
             payments[p].id,
           );
+          console.log('\x1b[36m%s\x1b[0m', 'Payment updated ...\n');
         } else {
           console.log('\x1b[36m%s\x1b[0m', 'Skipped Payment updating ...\n');
         }
@@ -601,40 +558,39 @@ export class SyncService {
     }
 
     //--------------------------------------------Statuses-------------------------------------
-    let StatusDetails: StatusParams;
+    let statusDetails: StatusParams;
     let nestStatus: StatusEntity;
     const nestStatuses = [];
     if (statuses) {
       for (let s = 0; s < statuses.length; s++) {
         nestStatus = await this.statusService.getStatusById(statuses[s].id);
+        const {
+          id: statusFlaskId,
+          need_id: flaskNeedId,
+          sw_id: swId,
+          new_status: newStatus,
+          old_status: oldStatus,
+          created: created,
+          updated: updated,
+        } = statuses[s];
+
+        statusDetails = {
+          flaskId: statusFlaskId,
+          flaskNeedId: flaskNeedId,
+          swId: swId,
+          newStatus: newStatus,
+          oldStatus: oldStatus,
+          created: created,
+          updated: updated,
+        };
         if (!nestStatus) {
-          const {
-            id: statusFlaskId,
-            need_id: flaskNeedId,
-            sw_id: swId,
-            new_status: newStatus,
-            old_status: oldStatus,
-            created: created,
-            updated: updated,
-          } = statuses[s];
-
-          StatusDetails = {
-            flaskId: statusFlaskId,
-            flaskNeedId: flaskNeedId,
-            swId: swId,
-            newStatus: newStatus,
-            oldStatus: oldStatus,
-            created: created,
-            updated: updated,
-          };
-
           console.log('\x1b[36m%s\x1b[0m', 'Creating a Status ...\n' + s);
-          nestStatus = await this.statusService.createStatus(StatusDetails);
+          nestStatus = await this.statusService.createStatus(statusDetails);
           nestStatuses.push(nestStatus);
           console.log('\x1b[36m%s\x1b[0m', 'Created a Status ...\n');
-        } else if (nestStatus.newStatus !== theNeed.status) {
+        } else if (nestStatus.newStatus !== flaskNeed.status) {
           await this.statusService
-            .updateStatus(nestStatus.id, StatusDetails)
+            .updateStatus(nestStatus.id, statusDetails)
             .then();
           nestStatus = await this.statusService.getStatusById(statuses[s].id);
           console.log('\x1b[36m%s\x1b[0m', 'Status updated ...\n');
@@ -649,10 +605,10 @@ export class SyncService {
     //--------------------------------------------Provider-------------------------------------
     let theNestProvider: ProviderEntity;
     const nestProviderNeedRelation =
-      await this.providerService.getProviderNeedRelationById(theNeed.id);
+      await this.providerService.getProviderNeedRelationById(flaskNeed.id);
 
     // Needs before panel version 2.0.0 does not have providers, we create them here! sry :(
-    if (!nestProviderNeedRelation && theNeed.type === NeedTypeEnum.PRODUCT) {
+    if (!nestProviderNeedRelation && flaskNeed.type === NeedTypeEnum.PRODUCT) {
       theNestProvider = await this.providerService.getProviderByName(
         'Digikala',
       );
@@ -675,7 +631,7 @@ export class SyncService {
       }
     } else if (
       nestProviderNeedRelation &&
-      theNeed.type === NeedTypeEnum.PRODUCT
+      flaskNeed.type === NeedTypeEnum.PRODUCT
     ) {
       theNestProvider = await this.providerService.getProviderById(
         nestProviderNeedRelation.nestProviderId,
@@ -684,53 +640,51 @@ export class SyncService {
       console.log('\x1b[36m%s\x1b[0m', 'Skipped provider ...\n');
     }
     //--------------------------------------------Need-------------------------------------
-    let needDetails: NeedParams;
-    let nestNeed = await this.needService.getNeedByFlaskId(theNeed.id);
+    let nestNeed = await this.needService.getNeedByFlaskId(flaskNeed.id);
     if (!nestSocialWorker || !nestSocialWorker.contributor) {
       throw new ObjectNotFound(
         'Something went wrong while trying to create the Need!',
       );
     }
+    const needDetails = {
+      createdById: flaskNeed.created_by_id,
+      name: flaskNeed.name_translations.fa,
+      nameTranslations: flaskNeed.name_translations,
+      descriptionTranslations: flaskNeed.description_translations,
+      title: flaskNeed.title,
+      status: flaskNeed.status,
+      category: flaskNeed.category,
+      type: flaskNeed.type,
+      isUrgent: flaskNeed.isUrgent,
+      affiliateLinkUrl: flaskNeed.affiliateLinkUrl,
+      link: flaskNeed.link,
+      doingDuration: flaskNeed.doing_duration,
+      needRetailerImg: flaskNeed.img,
+      purchaseCost: flaskNeed.purchase_cost,
+      cost: flaskNeed._cost,
+      deliveryCode: flaskNeed.deliveryCode,
+      doneAt: flaskNeed.doneAt,
+      isConfirmed: flaskNeed.isConfirmed,
+      unavailableFrom: flaskNeed.unavailable_from,
+      created: flaskNeed.created,
+      updated: flaskNeed.updated,
+      purchaseDate: flaskNeed.purchase_date,
+      ngoDeliveryDate: flaskNeed.ngo_delivery_date,
+      expectedDeliveryDate: flaskNeed.expected_delivery_date,
+      childDeliveryDate: flaskNeed.child_delivery_date,
+      bankTrackId: flaskNeed.bank_track_id,
+      confirmDate: flaskNeed.confirmDate,
+      imageUrl: flaskNeed.imageUrl,
+      flaskChildId: childId,
+      flaskId: flaskNeed.id,
+      details: flaskNeed.details,
+      information: flaskNeed.informations,
+    };
     if (!nestNeed) {
-      needDetails = {
-        createdById: theNeed.created_by_id,
-        name: theNeed.name_translations.fa,
-        nameTranslations: theNeed.name_translations,
-        descriptionTranslations: theNeed.description_translations,
-        title: theNeed.title,
-        status: theNeed.status,
-        category: theNeed.category,
-        type: theNeed.type,
-        isUrgent: theNeed.isUrgent,
-        affiliateLinkUrl: theNeed.affiliateLinkUrl,
-        link: theNeed.link,
-        doingDuration: theNeed.doing_duration,
-        needRetailerImg: theNeed.img,
-        purchaseCost: theNeed.purchase_cost,
-        cost: theNeed._cost,
-        deliveryCode: theNeed.deliveryCode,
-        doneAt: theNeed.doneAt,
-        isConfirmed: theNeed.isConfirmed,
-        unavailableFrom: theNeed.unavailable_from,
-        created: theNeed.created,
-        updated: theNeed.updated,
-        purchaseDate: theNeed.purchase_date,
-        ngoDeliveryDate: theNeed.ngo_delivery_date,
-        expectedDeliveryDate: theNeed.expected_delivery_date,
-        childDeliveryDate: theNeed.child_delivery_date,
-        bankTrackId: theNeed.bank_track_id,
-        confirmDate: theNeed.confirmDate,
-        imageUrl: theNeed.imageUrl,
-        flaskChildId: childId,
-        flaskId: theNeed.id,
-        details: theNeed.details,
-        information: theNeed.informations,
-      };
       console.log('\x1b[36m%s\x1b[0m', 'Creating The Need ...\n');
       const needNgo = await this.ngoService.getNgoById(
         nestSocialWorker.contributor.flaskNgoId,
       );
-
       nestNeed = await this.needService.createNeed(
         nestChild,
         needNgo,
@@ -744,7 +698,7 @@ export class SyncService {
         theNestProvider,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Created The Need  ...\n');
-    } else if (nestNeed && nestNeed.updated !== theNeed.updated) {
+    } else if (nestNeed && nestNeed.updated !== flaskNeed.updated) {
       await this.needService
         .updateNeed(
           nestNeed.id,

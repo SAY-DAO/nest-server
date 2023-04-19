@@ -131,6 +131,25 @@ export class UserService {
     return await this.allUserRepository.save(newUser);
   }
 
+  async updateContributor(
+    userId: string,
+    userDetails: UserParams,
+  ): Promise<UpdateResult> {
+
+    const contributor = (await this.getUserById(userId)).contributor
+    const user = this.allUserRepository.create({
+      ...userDetails,
+      role: userDetails.role,
+      roleName: getSAYRoleString(userDetails.role),
+      isContributor: true,
+      contributor
+
+    });
+    return this.allUserRepository.update(userId, {
+      ...user,
+    });
+  }
+
   createFamily(
     userDetails: UserParams,
   ): Promise<AllUserEntity> {
@@ -155,14 +174,6 @@ export class UserService {
     return this.allUserRepository.update(userId, {
       ...userDetails,
       roleName: getSAYRoleString(userDetails.role)
-    });
-  }
-  async updateContributor(
-    userId: string,
-    userDetails: UserParams,
-  ): Promise<UpdateResult> {
-    return this.contributorRepository.update(userId, {
-      ...userDetails,
     });
   }
 
@@ -217,5 +228,5 @@ export class UserService {
     });
     return user;
   }
-  
+
 }
