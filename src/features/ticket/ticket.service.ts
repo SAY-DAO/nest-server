@@ -55,7 +55,6 @@ export class TicketService {
       await this.updateTicketView(new Date(), view)
       console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
     } else {
-
       await this.createTicketView(flaskUserId, ticket.id)
       console.log('\x1b[36m%s\x1b[0m', 'created my view ...\n');
     }

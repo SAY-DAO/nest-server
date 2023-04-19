@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  Index,
-  OneToMany,
-  ManyToOne,
-  OneToOne,
-} from 'typeorm';
+import { Entity, Column, Index, OneToMany, ManyToOne, OneToOne } from 'typeorm';
 import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
 import { PaymentEntity } from './payment.entity';
@@ -114,6 +107,9 @@ export class NeedEntity extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  unavailableFrom: Date;
+
   @Column()
   flaskChildId: number;
 
@@ -139,10 +135,10 @@ export class NeedEntity extends BaseEntity {
   purchaser: AllUserEntity;
 
   @OneToMany(() => TicketEntity, (t) => t.need)
-  tickets?: TicketEntity[]
+  tickets?: TicketEntity[];
 
   @OneToOne(() => IpfsEntity, (ipfs) => ipfs.need, { eager: true }) // specify inverse side as a second parameter
-  ipfs: IpfsEntity
+  ipfs: IpfsEntity;
 
   @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: false })
   verifiedPayments?: PaymentEntity[];
@@ -153,4 +149,3 @@ export class NeedEntity extends BaseEntity {
   @OneToMany(() => StatusEntity, (status) => status.need, { eager: true })
   statusUpdates?: StatusEntity[];
 }
-

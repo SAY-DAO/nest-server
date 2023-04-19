@@ -383,7 +383,6 @@ export function ticketNotifications(
         new Date(
           t.views.find((v) => v.flaskUserId === flaskUserId) &&
           t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
-
         ))
       // when a user creates a ticket, the participants won't have a view assigned to them
       const myView = t.views.find((v) => v.flaskUserId === flaskUserId)

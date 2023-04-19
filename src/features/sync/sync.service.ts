@@ -647,7 +647,6 @@ export class SyncService {
       );
     }
     const needDetails = {
-      createdById: flaskNeed.created_by_id,
       name: flaskNeed.name_translations.fa,
       nameTranslations: flaskNeed.name_translations,
       descriptionTranslations: flaskNeed.description_translations,
