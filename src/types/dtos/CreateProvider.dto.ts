@@ -3,6 +3,7 @@ import { NeedTypeDefinitionEnum } from '../interfaces/interface';
 export class CreateProviderDto {
     name: string;
     description: string;
+    address: string;
     website: string;
     type: string;
     typeName: NeedTypeDefinitionEnum;

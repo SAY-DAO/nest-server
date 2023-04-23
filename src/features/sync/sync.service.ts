@@ -618,6 +618,7 @@ export class SyncService {
         theNestProvider = await this.providerService.createProvider({
           name: 'Digikala',
           description: 'N/A',
+          address: 'N/A',
           website: 'https://digikala.com',
           type: NeedTypeEnum.PRODUCT,
           typeName: NeedTypeDefinitionEnum.PRODUCT,

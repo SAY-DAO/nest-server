@@ -14,6 +14,9 @@ export class ProviderEntity extends BaseEntity {
     @Column({ nullable: true })
     description: string
 
+    @Column({ nullable: true })
+    address: string
+
     @Column()
     city: number
 

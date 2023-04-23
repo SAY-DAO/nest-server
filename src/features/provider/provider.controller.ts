@@ -48,7 +48,8 @@ export class ProviderController {
         let relation: ProviderJoinNeedEntity
         try {
             relation = await this.providerService.createRelation(body.flaskNeedId, body.nestProviderId)
-        } catch (e) {body
+        } catch (e) {
+            body
             throw new ServerError(e.message, e.status);
         }
         return relation;
@@ -63,6 +64,7 @@ export class ProviderController {
         const newProvider = {
             name: request.name,
             description: request?.description,
+            address: request?.address,
             type:
                 parseInt(request.type) === 0
                     ? NeedTypeEnum.SERVICE
@@ -94,6 +96,7 @@ export class ProviderController {
         const newProvider = {
             name: request?.name,
             description: request?.description,
+            address: request?.address,
             type:
                 parseInt(request.type) === 0
                     ? NeedTypeEnum.SERVICE

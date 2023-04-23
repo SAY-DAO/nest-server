@@ -67,6 +67,7 @@ export class ProviderService {
         const newProvider = this.providerRepository.create({
             name: providerDetails.name,
             description: providerDetails.description,
+            address: providerDetails.address,
             type: providerDetails.type,
             typeName: providerDetails.typeName,
             website: providerDetails.website,
