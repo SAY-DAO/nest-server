@@ -339,7 +339,7 @@ export class NeedService {
 
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
-      defaultSortBy: [['isConfirmed', 'ASC']],
+      defaultSortBy: [['created', 'DESC']],
       nullSort: 'last',
     });
   }
@@ -517,7 +517,7 @@ export class NeedService {
 
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id', 'ngo_delivery_date'],
-      defaultSortBy: [['ngo_delivery_date', 'DESC']],
+      defaultSortBy: [['updated', 'DESC']],
       nullSort: 'last',
     });
   }
