@@ -679,6 +679,7 @@ export class SyncService {
       details: flaskNeed.details,
       information: flaskNeed.informations,
     };
+    
     if (!nestNeed) {
       console.log('\x1b[36m%s\x1b[0m', 'Creating The Need ...\n');
       const needNgo = await this.ngoService.getNgoById(

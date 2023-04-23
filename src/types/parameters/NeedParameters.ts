@@ -3,7 +3,6 @@ import { NeedTypeEnum } from "../interfaces/interface";
 export type NeedParams = {
     flaskId: number
     flaskChildId: number
-    createdById?: number
     name?: string,
     nameTranslations: Record<string, string>;
     descriptionTranslations: Record<string, string>;
