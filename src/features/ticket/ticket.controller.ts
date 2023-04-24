@@ -61,7 +61,7 @@ export class TicketController {
   }
 
   @Get('ticket/:id/:userId')
-  async findOne(@Param('id') id: string, @Param('userId') flaskUserId: string) {
+  async getTicketById(@Param('id') id: string, @Param('userId') flaskUserId: string) {
     const { ticket } = await this.ticketService.getTicketById(
       id,
       Number(flaskUserId),
@@ -205,21 +205,21 @@ export class TicketController {
     return ticket;
   }
 
-  @Get(`ticket/:id`)
-  @ApiOperation({ description: 'Get one by id' })
-  async getOneTicket(@Param('id') id: string) {
-    let provider: TicketEntity;
-    if (id) {
-      try {
-        provider = await this.ticketService.getTicketByNeedId(parseInt(id));
-      } catch (e) {
-        throw new AllExceptionsFilter(e);
-      }
-      return provider;
-    } else {
-      throw new HttpException('you need to provide id', HttpStatus.BAD_REQUEST);
-    }
-  }
+  // @Get(`ticket/:id`)
+  // @ApiOperation({ description: 'Get one by id' })
+  // async getOneTicket(@Param('id') id: string) {
+  //   let provider: TicketEntity;
+  //   if (id) {
+  //     try {
+  //       provider = await this.ticketService.getTicketByNeedId(parseInt(id));
+  //     } catch (e) {
+  //       throw new AllExceptionsFilter(e);
+  //     }
+  //     return provider;
+  //   } else {
+  //     throw new HttpException('you need to provide id', HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 
   @Delete(':id')
   async DeleteTicket(@Param('id') id: string) {
@@ -227,12 +227,12 @@ export class TicketController {
   }
 
 
-  @Get('notifications/:flaskUserId')
-  async getUserNotifications(@Param('flaskUserId') flaskUserId: number) {
-    return await this.ticketService.getUserNotifications(
-      Number(flaskUserId),
-    );
-  }
+  // @Get('notifications/:flaskUserId')
+  // async getUserNotifications(@Param('flaskUserId') flaskUserId: number) {
+  //   return await this.ticketService.getUserNotifications(
+  //     Number(flaskUserId),
+  //   );
+  // }
 
 
 }

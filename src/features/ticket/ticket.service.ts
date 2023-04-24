@@ -24,7 +24,7 @@ export class TicketService {
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
-  ) { }
+  ) {}
 
   async createTicket(
     ticketDetails: CreateTicketParams,
@@ -35,10 +35,9 @@ export class TicketService {
       color: Colors.YELLOW, // start with Warning,
     });
 
-    newTicket.contributors = participants
+    newTicket.contributors = participants;
     return this.ticketRepository.save(newTicket);
   }
-
 
   async getTicketById(id: string, flaskUserId: number) {
     const ticket = await this.ticketRepository.findOne({
@@ -46,22 +45,37 @@ export class TicketService {
         id: id,
       },
       relations: {
-        need: true
-      }
+        need: true,
+      },
     });
+
+    const latestView = ticket.views.find(
+      (v) =>
+        Date.parse(v.viewed.toUTCString()) ===
+        Math.max(
+          ...ticket.views.map((t) => Date.parse(t.viewed.toUTCString())),
+        ),
+    );
+
     // create or update view
-    const view = ticket.views.find((v) => (v.flaskUserId === flaskUserId && v.ticketId === ticket.id))
-    if (view) {
-      await this.updateTicketView(new Date(), view)
-      console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
-    } else {
-      await this.createTicketView(flaskUserId, ticket.id)
-      console.log('\x1b[36m%s\x1b[0m', 'created my view ...\n');
+    const myView = ticket.views.find(
+      (v) => v.flaskUserId === flaskUserId && v.ticketId === ticket.id,
+    );
+
+    console.log("myViewwww")
+    console.log(myView)
+    console.log("myViewwww")
+    if (myView) {
+      await this.updateTicketView(latestView.viewed, myView);
+      console.log('\x1b[36m%s\x1b[0m', 'Updated my view to latest ...\n');
+    } else if (!myView) {
+      const view =await this.createTicketView(flaskUserId, ticket.id);
+      await this.updateTicketView(latestView.viewed, view);
+      console.log('\x1b[36m%s\x1b[0m', 'created my view with latest time ...\n');
     }
 
-    return { ticket, view };
+    return { ticket, myView };
   }
-
 
   getTicketViewById(id: string): Promise<TicketViewEntity> {
     const view = this.ticketViewRepository.findOne({
@@ -79,11 +93,10 @@ export class TicketService {
     const newView = this.ticketViewRepository.create({
       ticketId,
       flaskUserId,
-      viewed: new Date()
+      viewed: new Date(),
     });
     return this.ticketViewRepository.save(newView);
   }
-
 
   async updateTicketView(
     currentTime: Date,
@@ -92,8 +105,7 @@ export class TicketService {
     return this.ticketViewRepository.update(view.id, { viewed: currentTime });
   }
 
-
-  updateTicketColor(
+  async updateTicketColor(
     ticketId: string,
     color: Colors,
   ): Promise<UpdateResult> {
@@ -104,46 +116,45 @@ export class TicketService {
 
   async updateTicketTime(
     ticket: TicketEntity,
-    flaskUserId: number
+    flaskUserId: number,
   ): Promise<Date> {
-    const currentTime = new Date()
+    const currentTime = new Date();
     await this.ticketRepository.update(ticket.id, {
       updatedAt: currentTime,
     });
     if (flaskUserId) {
       // create or update view
-      const view = ticket.views.find((v) => (v.flaskUserId === flaskUserId && v.ticketId === ticket.id))
+      const view = ticket.views.find(
+        (v) => v.flaskUserId === flaskUserId && v.ticketId === ticket.id,
+      );
       if (view) {
-        await this.updateTicketView(currentTime, view)
+        await this.updateTicketView(currentTime, view);
         console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
       } else {
-        await this.createTicketView(flaskUserId, ticket.id)
+        await this.createTicketView(flaskUserId, ticket.id);
         console.log('\x1b[36m%s\x1b[0m', 'created my view ...\n');
       }
 
       return view.updatedAt;
     }
-
-
   }
-
 
   createTicketContent(
     contentDetails: CreateTicketContentParams,
-    ticket: TicketEntity
+    ticket: TicketEntity,
   ): Promise<TicketContentEntity> {
     const newContent = this.ticketContentRepository.create({
       ...contentDetails,
     });
-    newContent.ticket = ticket
+    newContent.ticket = ticket;
     return this.ticketContentRepository.save(newContent);
   }
 
   getTickets(): Promise<TicketEntity[]> {
     return this.ticketRepository.find({
       relations: {
-        need: true
-      }
+        need: true,
+      },
     });
   }
 
@@ -161,14 +172,14 @@ export class TicketService {
   async getTicketByNeedId(flaskNeedId: number): Promise<TicketEntity> {
     const flaskNeed = await this.flaskNeedRepository.findOne({
       where: {
-        id: flaskNeedId
-      }
-    })
+        id: flaskNeedId,
+      },
+    });
     const nestNeed = await this.needRepository.findOne({
       where: {
-        flaskId: flaskNeedId
-      }
-    })
+        flaskId: flaskNeedId,
+      },
+    });
     const ticket = this.ticketRepository.findOne({
       where: {
         flaskNeedId: flaskNeedId,
@@ -181,22 +192,22 @@ export class TicketService {
     return this.ticketRepository.delete({ id });
   }
 
-  getUserNotifications(flaskUserId: number): Promise<[TicketEntity[], number]> {
-    return this.ticketRepository
-      .createQueryBuilder('ticketEntity')
-      .leftJoinAndSelect("ticketEntity.views", "view")
-      .leftJoinAndSelect("ticketEntity.ticketHistories", "ticketHistory")
-      .where('ticketEntity.updatedAt > :startDate', { startDate: new Date(2019, 5, 3) })
-      .andWhere('view.viewed < ticketEntity.updatedAt')
-      // .where(
-      //   new Brackets((qb) => {
-      //     qb
-      //       .where('view.flaskUserId = :flaskUserId', { flaskUserId: flaskUserId })
-      //       .andWhere("(ticketEntity.updatedAt) <= (view.viewed)")
-      //   }),
-      // )
-      // .leftJoinAndSelect("ticketEntity.contributors", "contributor")
-      // .andWhere('ticketEntity.flaskUserId = :flaskUserId', { flaskUserId: flaskUserId })
-      .getManyAndCount()
-  }
+  // getUserNotifications(flaskUserId: number): Promise<[TicketEntity[], number]> {
+  //   return this.ticketRepository
+  //     .createQueryBuilder('ticketEntity')
+  //     .leftJoinAndSelect("ticketEntity.views", "view")
+  //     .leftJoinAndSelect("ticketEntity.ticketHistories", "ticketHistory")
+  //     .where('ticketEntity.updatedAt > :startDate', { startDate: new Date(2019, 5, 3) })
+  //     .andWhere('view.viewed < ticketEntity.updatedAt')
+  // .where(
+  //   new Brackets((qb) => {
+  //     qb
+  //       .where('view.flaskUserId = :flaskUserId', { flaskUserId: flaskUserId })
+  //       .andWhere("(ticketEntity.updatedAt) <= (view.viewed)")
+  //   }),
+  // )
+  // .leftJoinAndSelect("ticketEntity.contributors", "contributor")
+  // .andWhere('ticketEntity.flaskUserId = :flaskUserId', { flaskUserId: flaskUserId })
+  // .getManyAndCount()
+  // }
 }

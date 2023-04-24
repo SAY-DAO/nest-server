@@ -374,8 +374,6 @@ export function ticketNotifications(
   myTickets: TicketEntity[],
   flaskUserId: number,
 ) {
-  let diffMilSeconds: number
-
   const unReads = myTickets.filter(
     (t) => {
       console.log((new Date(t.updatedAt)))
@@ -385,21 +383,25 @@ export function ticketNotifications(
           t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
         ))
       // when a user creates a ticket, the participants won't have a view assigned to them
+      console.log(t.views)
       const myView = t.views.find((v) => v.flaskUserId === flaskUserId)
-      if (myView) {
-        const { diff } = timeDifference(
-          new Date(
-            t.views.find((v) => v.flaskUserId === flaskUserId) &&
-            t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
-          ), new Date(t.updatedAt))
-        diffMilSeconds = diff
+      const latestView = t.views.find((v) => Date.parse(v.viewed.toUTCString()) === Math.max(...t.views.map(t => Date.parse(t.viewed.toUTCString()))))
 
-      } else {
-        diffMilSeconds = 1
 
-      }
-      console.log(diffMilSeconds)
-      return diffMilSeconds > 0
+      // if (myView) {
+      //   const { diff } = timeDifference(
+      //     new Date(
+      //       t.views.find((v) => v.flaskUserId === flaskUserId) &&
+      //       t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
+      //     ), new Date(t.updatedAt))
+      //   diffMilSeconds = diff
+
+      // } else {
+      //   diffMilSeconds = 1
+
+      // }
+
+      return !myView || (latestView.flaskUserId !== myView.flaskUserId && Date.parse(myView.viewed.toUTCString()) < Date.parse(latestView.viewed.toUTCString()))
     }
   );
 

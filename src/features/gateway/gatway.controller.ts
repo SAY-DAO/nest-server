@@ -113,15 +113,15 @@ export class GateWayController implements OnModuleInit {
         @ConnectedSocket() client: Socket,
     ) {
         console.log('\x1b[36m%s\x1b[0m', 'Socket Updating Views...\n');
-        const { ticket, view } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
+        const { ticket, myView } = await this.ticketService.getTicketById(body.ticketId, body.flaskUserId)
         console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
         if (this.socket.connected) {
             console.log('\x1b[36m%s\x1b[0m', 'Sending back view details ...\n');
-            client.emit(`onViewMessage${view.flaskUserId}`, {
+            client.emit(`onViewMessage${myView.flaskUserId}`, {
                 ticketId: ticket.id,
-                viewId: view.id,
-                flaskUserId: view.flaskUserId,
-                lastView: view.viewed,
+                viewId: myView.id,
+                flaskUserId: myView.flaskUserId,
+                lastView: myView.viewed,
                 socketId: this.socket.id,
             })
         }

@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserService } from '../user/user.service';
 import { NeedService } from './need.service';
 
 @ApiTags('Needs')
@@ -7,6 +8,7 @@ import { NeedService } from './need.service';
 export class NeedController {
   constructor(
     private needService: NeedService,
+    private userService: UserService,
   ) { }
 
 
@@ -47,4 +49,18 @@ export class NeedController {
     return preNeeds;
   }
 
+  @Get(`unconfirmed/:swId`)
+  @ApiOperation({ description: 'Get all done needs from flask' })
+  async getNotConfirmedNeeds(
+    @Param('swId') socialWorkerId: number
+  ) {
+    const socialWorker = await this.userService.getFlaskSocialWorker(
+      socialWorkerId,
+    ); // sw ngo
+    return await this.needService.getNotConfirmedNeeds(
+      socialWorkerId,
+      null,
+      [socialWorker.ngo_id]
+    );
+  }
 }

@@ -27,8 +27,8 @@ export class NgoController {
   ) {
     let socialWorkerId: number;
     let swIds: number[]
-    const socialWOrker = await this.userService.getFlaskSocialWorker(swId)
-    const roleId = convertFlaskToSayRoles(socialWOrker.type_id);
+    const socialWorker = await this.userService.getFlaskSocialWorker(swId)
+    const roleId = convertFlaskToSayRoles(socialWorker.type_id);
     if (roleId === SAYPlatformRoles.SOCIAL_WORKER) {
       socialWorkerId = swId;
     }
@@ -42,7 +42,7 @@ export class NgoController {
     }
     if (roleId === SAYPlatformRoles.NGO_SUPERVISOR) {
       socialWorkerId = null;
-      swIds = await this.userService.getFlaskSocialWorkerByNgo(socialWOrker.ngo_id).then(r => r.map(s => s.id))
+      swIds = await this.userService.getFlaskSocialWorkerByNgo(socialWorker.ngo_id).then(r => r.map(s => s.id))
     }
     return await this.ngoService.getNgoArrivals(socialWorkerId, swIds);
 

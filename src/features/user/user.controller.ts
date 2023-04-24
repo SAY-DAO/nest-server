@@ -9,10 +9,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ServerError } from '../../filters/server-exception.filter';
-import {
-
-    SAYPlatformRoles,
-} from 'src/types/interfaces/interface';
+import { SAYPlatformRoles } from 'src/types/interfaces/interface';
 import {
     convertFlaskToSayRoles,
     getOrganizedNeeds,
@@ -39,7 +36,7 @@ export class UserController {
         private ticketService: TicketService,
         private signatureService: SignatureService,
         private ipfsService: IpfsService,
-        private ngoService: NgoService
+        private ngoService: NgoService,
     ) { }
 
     @Get(`all`)
@@ -71,12 +68,12 @@ export class UserController {
 
         let allNeeds: Need[][];
         let notConfirmedCount: number;
-        let paid: Paginated<Need>
-        let notPaid: Paginated<Need>
-        let purchased: Paginated<Need>
-        let delivered: Paginated<Need>
-        let children: number
-        let arrivals: any
+        let paid: Paginated<Need>;
+        let notPaid: Paginated<Need>;
+        let purchased: Paginated<Need>;
+        let delivered: Paginated<Need>;
+        let children: number;
+        let arrivals: any;
 
         const role = convertFlaskToSayRoles(typeId);
 
@@ -85,19 +82,23 @@ export class UserController {
             let auditorId: number;
             let purchaserId: number;
             let supervisorId: number;
-            let ngoIds: number[]
-            let swIds: number[]
+            let ngoIds: number[];
+            let swIds: number[];
 
             if (role === SAYPlatformRoles.SOCIAL_WORKER) {
-                console.log('\x1b[33m%s\x1b[0m', `Role for my Page is SOCIAL_WORKER...\n`);
+                console.log(
+                    '\x1b[33m%s\x1b[0m',
+                    `Role for my Page is SOCIAL_WORKER...\n`,
+                );
                 socialWorkerId = userId;
                 auditorId = null;
                 purchaserId = null;
                 supervisorId = null;
-                const socialWOrker = await this.userService.getFlaskSocialWorker(userId) // sw ngo
-                ngoIds = [socialWOrker.ngo_id]
-                children = await this.childrenService.countChildren(ngoIds)
-
+                const socialWorker = await this.userService.getFlaskSocialWorker(
+                    userId,
+                ); // sw ngo
+                ngoIds = [socialWorker.ngo_id];
+                children = await this.childrenService.countChildren(ngoIds);
             }
             if (role === SAYPlatformRoles.AUDITOR) {
                 console.log('\x1b[33m%s\x1b[0m', `Role for my Page is AUDITOR...\n`);
@@ -107,9 +108,13 @@ export class UserController {
                 supervisorId = null;
 
                 // for auditor - admin
-                swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id)) // all ngos
-                ngoIds = await this.ngoService.getFlaskNgos().then(r => r.map(s => s.id))
-                children = await this.childrenService.countChildren(ngoIds)
+                swIds = await this.userService
+                    .getFlaskSwIds()
+                    .then((r) => r.map((s) => s.id)); // all ngos
+                ngoIds = await this.ngoService
+                    .getFlaskNgos()
+                    .then((r) => r.map((s) => s.id));
+                children = await this.childrenService.countChildren(ngoIds);
             }
             if (role === SAYPlatformRoles.PURCHASER) {
                 console.log('\x1b[33m%s\x1b[0m', `Role for my Page is PURCHASER...\n`);
@@ -117,103 +122,95 @@ export class UserController {
                 auditorId = null;
                 purchaserId = userId;
                 supervisorId = null;
-                swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
-                ngoIds = await this.ngoService.getFlaskNgos().then(r => r.map(s => s.id)) // all ngos
-                children = await this.childrenService.countChildren(ngoIds)
+                swIds = await this.userService
+                    .getFlaskSwIds()
+                    .then((r) => r.map((s) => s.id));
+                ngoIds = await this.ngoService
+                    .getFlaskNgos()
+                    .then((r) => r.map((s) => s.id)); // all ngos
+                children = await this.childrenService.countChildren(ngoIds);
             }
 
             if (role === SAYPlatformRoles.NGO_SUPERVISOR) {
-                console.log('\x1b[33m%s\x1b[0m', `Role for my Page is NGO_SUPERVISOR...\n`);
+                console.log(
+                    '\x1b[33m%s\x1b[0m',
+                    `Role for my Page is NGO_SUPERVISOR...\n`,
+                );
                 socialWorkerId = null;
                 auditorId = null;
                 purchaserId = null;
                 supervisorId = userId;
 
                 // for ngo supervisor
-                const supervisor = await this.userService.getFlaskSocialWorker(userId)
-                swIds = await this.userService.getFlaskSocialWorkerByNgo(supervisor.ngo_id).then(r => r.map(s => s.id))
+                const supervisor = await this.userService.getFlaskSocialWorker(userId);
+                swIds = await this.userService
+                    .getFlaskSocialWorkerByNgo(supervisor.ngo_id)
+                    .then((r) => r.map((s) => s.id));
 
-                ngoIds = [supervisor.ngo_id]
-                children = await this.childrenService.countChildren(ngoIds)
-
+                ngoIds = [supervisor.ngo_id];
+                children = await this.childrenService.countChildren(ngoIds);
             }
-            arrivals = await this.ngoService.getNgoArrivals(socialWorkerId, swIds)
+            arrivals = await this.ngoService.getNgoArrivals(socialWorkerId, swIds);
             notConfirmedCount = await this.needService.getNotConfirmedNeeds(
-                {
-                    page: page,
-                    limit: limit,
-                    path: '/'
-                },
                 socialWorkerId,
-                auditorId,
-                purchaserId,
-                supervisorId,
                 swIds,
-                ngoIds
+                ngoIds,
             );
 
             notPaid = await this.needService.getNotPaidNeeds(
                 {
                     page: page,
                     limit: limit,
-                    path: '/'
-
+                    path: '/',
                 },
                 socialWorkerId,
                 auditorId,
                 purchaserId,
                 supervisorId,
                 swIds,
-                ngoIds
+                ngoIds,
             );
-
 
             paid = await this.needService.getPaidNeeds(
                 {
                     page: page,
                     limit: limit,
-                    path: ''
-
+                    path: '',
                 },
                 socialWorkerId,
                 auditorId,
                 purchaserId,
                 supervisorId,
                 swIds,
-                ngoIds
-
+                ngoIds,
             );
 
             purchased = await this.needService.getPurchasedNeeds(
                 {
                     page: page,
                     limit: limit,
-                    path: ''
-
+                    path: '',
                 },
                 socialWorkerId,
                 auditorId,
                 purchaserId,
                 supervisorId,
                 swIds,
-                ngoIds
-
+                ngoIds,
             );
 
             delivered = await this.needService.getDeliveredNeeds(
                 {
                     page: page,
                     limit: limit,
-                    path: ''
-
+                    path: '',
                 },
                 socialWorkerId,
                 auditorId,
                 purchaserId,
                 supervisorId,
                 swIds,
-                ngoIds
-
+                ngoIds,
             );
             // return delivered
             allNeeds = [
@@ -222,7 +219,6 @@ export class UserController {
                 [...purchased.data],
                 [...delivered.data],
             ];
-
 
             const time2 = new Date().getTime();
             timeDifferenceWithComment(time1, time2, 'Fetched Flask In ');
@@ -234,13 +230,11 @@ export class UserController {
         const time3 = new Date().getTime();
         // add IPFS + tickets for every need
         try {
-            let tickets: TicketEntity[]
+            let tickets: TicketEntity[];
             if (role === SAYPlatformRoles.AUDITOR) {
                 tickets = await this.ticketService.getTickets();
-
             } else {
                 tickets = await this.ticketService.getUserTickets(userId);
-
             }
             for (let i = 0; i < allNeeds.length; i++) {
                 for (let k = 0; k < allNeeds[i].length; k++) {
@@ -268,10 +262,10 @@ export class UserController {
 
         const signatures = await this.signatureService.getUserSignatures(userId);
 
-        const paidCount = paid.meta.totalItems
-        const notPaidCount = notPaid.meta.totalItems
-        const purchasedCount = purchased.meta.totalItems
-        const deliveredCount = delivered.meta.totalItems
+        const paidCount = paid.meta.totalItems;
+        const notPaidCount = notPaid.meta.totalItems;
+        const purchasedCount = purchased.meta.totalItems;
+        const deliveredCount = delivered.meta.totalItems;
 
         const max = Math.max(
             paidCount,
@@ -297,8 +291,12 @@ export class UserController {
                 delivered: deliveredCount,
                 total: notPaidCount + paidCount + purchasedCount + deliveredCount,
                 realNotConfirmCount: notConfirmedCount,
-                realConfirmCount: notPaidCount + paidCount + purchasedCount + deliveredCount - notConfirmedCount,
-
+                realConfirmCount:
+                    notPaidCount +
+                    paidCount +
+                    purchasedCount +
+                    deliveredCount -
+                    notConfirmedCount,
             },
             userId,
             typeId,
@@ -306,9 +304,7 @@ export class UserController {
             children,
             // timeLine: { summary, inMonth },
             signatures,
-            arrivals
+            arrivals,
         };
     }
 }
-
-

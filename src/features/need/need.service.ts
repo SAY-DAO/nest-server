@@ -204,11 +204,7 @@ export class NeedService {
   }
 
   async getNotConfirmedNeeds(
-    options: PaginateQuery,
     socialWorker: number,
-    auditor: number,
-    purchaser: number,
-    ngoSupervisor: number,
     swIds: number[],
     ngoIds: number[]
   ): Promise<any> {
