@@ -329,6 +329,7 @@ export class NeedService {
         'need.child_delivery_date',
         'need.purchase_date',
         'need.expected_delivery_date',
+        'need.informations',
         'need.unavailable_from',
       ])
       .cache(60000);
@@ -410,6 +411,7 @@ export class NeedService {
         'need.child_delivery_date',
         'need.purchase_date',
         'need.expected_delivery_date',
+        'need.informations',
         'need.unavailable_from',
         'payment',
       ])
@@ -505,6 +507,7 @@ export class NeedService {
         'need.child_delivery_date',
         'need.purchase_date',
         'need.expected_delivery_date',
+        'need.informations',
         'need.unavailable_from',
         'need_status_updates',
         'payment',
@@ -616,6 +619,7 @@ export class NeedService {
         'need.purchase_date',
         'need.expected_delivery_date',
         'need.unavailable_from',
+        'need.informations',
         'need_status_updates',
         'receipt',
         'need_receipt',
