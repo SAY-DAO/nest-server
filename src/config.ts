@@ -70,3 +70,5 @@ export default function config(): ConfigType {
 
   return configObject;
 }
+
+export const PRODUCT_UNPAYABLE_PERIOD = 24

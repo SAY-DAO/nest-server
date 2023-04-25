@@ -1,3 +1,4 @@
+import { PRODUCT_UNPAYABLE_PERIOD } from 'src/config';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { ServerError } from 'src/filters/server-exception.filter';
@@ -408,3 +409,6 @@ export function ticketNotifications(
   return unReads;
 }
 
+export function isUnpayable(need: Need) {
+  return need.unavailable_from && timeDifference(new Date(), need.unavailable_from).hh < PRODUCT_UNPAYABLE_PERIOD
+}

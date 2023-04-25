@@ -63,4 +63,15 @@ export class NeedController {
       [socialWorker.ngo_id]
     );
   }
+
+  @Get('duplicates/:flaskChildId/:flaskNeedId')
+  @ApiOperation({ description: 'Get duplicates need for confirming' })
+  async getDuplicateNeeds(
+    @Param('flaskChildId') flaskChildId: number,
+    @Param('flaskNeedId') flaskNeedId: number
+  ) {
+    console.log(flaskChildId, flaskNeedId)
+
+    return await this.needService.getDuplicateNeeds(flaskChildId, flaskNeedId)
+  }
 }

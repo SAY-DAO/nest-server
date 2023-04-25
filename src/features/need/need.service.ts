@@ -52,7 +52,7 @@ export class NeedService {
     private needRepository: Repository<NeedEntity>,
   ) { }
 
-  getFlaskNeed(flaskNeedId: number): Promise<Need> {
+  async getFlaskNeed(flaskNeedId: number): Promise<Need> {
     return this.flaskNeedRepository.findOne({
       where: {
         id: flaskNeedId,
@@ -627,5 +627,48 @@ export class NeedService {
       defaultSortBy: [['updated', 'DESC']],
       nullSort: 'last',
     });
+  }
+
+  async getDuplicateNeeds(childId: number, needId: number) {
+    const need = await this.getFlaskNeed(needId)
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      // .where("need.unavailable_from > :startDate", { startDate: new Date(2021, 2, 3) })
+      // .andWhere("need.unavailable_from < :endDate", { endDate: new Date(2023, 1, 3) })
+      .andWhere('need.child_id = :childId', { childId: childId })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.id != :needId', { needId: need.id })
+      .andWhere('need.title = :title', { title: need.title })
+      // .andWhere('need.name_translations.en = :nameTranslations', { nameTranslations: need.name_translations.en })
+
+      .andWhere('need.status < :statusPaid', {
+        statusPaid: PaymentStatusEnum.COMPLETE_PAY,
+      })
+      .select([
+        'need.id',
+        'need.title',
+        'need.imageUrl',
+        'need.child_id',
+        'need.name_translations',
+        'need.title',
+        'need.type',
+        'need.link',
+        'need.status',
+        'need.isConfirmed',
+        'need.doing_duration',
+        'need.status',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+      ])
+      .cache(60000)
+      .orderBy('need.created', 'ASC');
+    return await queryBuilder.getMany();
   }
 }
