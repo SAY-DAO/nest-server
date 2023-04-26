@@ -337,7 +337,7 @@ export class NeedService {
 
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
-      defaultSortBy: [['created', 'DESC']],
+      defaultSortBy: [['isConfirmed', 'ASC']],
       nullSort: 'last',
     });
   }
