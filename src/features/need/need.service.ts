@@ -646,8 +646,8 @@ export class NeedService {
       .andWhere('need.child_id = :childId', { childId: childId })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.id != :needId', { needId: need.id })
-      .andWhere('need.title = :title', { title: need.title })
-      // .andWhere('need.name_translations.en = :nameTranslations', { nameTranslations: need.name_translations.en })
+      // .andWhere('need.title = :title', { title: need.title })
+      .andWhere("need.name_translations -> 'en' = :nameTranslations", { nameTranslations: need.name_translations.en })
 
       .andWhere('need.status < :statusPaid', {
         statusPaid: PaymentStatusEnum.COMPLETE_PAY,
@@ -677,6 +677,7 @@ export class NeedService {
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');
+    console.log("need")
     return await queryBuilder.getMany();
   }
 }
