@@ -30,6 +30,7 @@ async function startServer() {
     origin: [
       "http://localhost:3000",
       "https://panel.saydao.org",
+      "https://panel2.saydao.org",
     ],
     allowedHeaders: [
       'Origin,X-Requested-With,Content-Type ,Accept,X-TAKE, X-SKIP, X-LIMIT, authorization',

@@ -17,17 +17,10 @@ export class ChildrenController {
         return await this.childrenService.getChildren()
     }
 
-    @Get(`all/child`)
-    @ApiOperation({ description: 'Get all children from db' })
+    @Get(`flask/all`)
+    @ApiOperation({ description: 'Get all flask children from db' })
     async getFlaskChildren() {
-        const children = await this.childrenService.getFlaskChildren()
-        // fs.writeFile("test.json",JSON.stringify(children), function(err) {
-        //     if (err) {
-        //         console.log(err);
-        //     }
-        // });
-    
-       
+        return await this.childrenService.getFlaskChildren()
     }
 
 

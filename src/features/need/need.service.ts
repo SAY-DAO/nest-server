@@ -647,6 +647,7 @@ export class NeedService {
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.id != :needId', { needId: need.id })
       // .andWhere('need.title = :title', { title: need.title })
+      
       .andWhere("need.name_translations -> 'en' = :nameTranslations", { nameTranslations: need.name_translations.en })
 
       .andWhere('need.status < :statusPaid', {

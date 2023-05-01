@@ -74,14 +74,14 @@ export class ChildrenService {
   async getFlaskChildren() {
     return await this.flaskChildRepository
       .createQueryBuilder('child')
-      .select([
-        'child.id',
-        'child.id_ngo',
-        'child.sayname_translations',
-        'child.awakeAvatarUrl',
-        'child.sleptAvatarUrl',
-        'child.isConfirmed',
-      ])
+      // .select([
+      //   'child.id',
+      //   'child.id_ngo',
+      //   'child.sayname_translations',
+      //   'child.awakeAvatarUrl',
+      //   'child.sleptAvatarUrl',
+      //   'child.isConfirmed',
+      // ])
       .getMany();
   }
 
