@@ -53,6 +53,7 @@ import { Family } from './entities/flaskEntities/family.entity';
 import { NeedStatusUpdate } from './entities/flaskEntities/NeedStatusUpdate.entity';
 import { NeedReceipt } from './entities/flaskEntities/needReceipt.entity';
 import { Receipt } from './entities/flaskEntities/receipt.entity';
+import { DownloadModule } from './features/download/download.module';
 
 const imports = [
   HttpModule,
@@ -105,7 +106,8 @@ const imports = [
   StepModule,
   WalletModule,
   IpfsModule,
-  AnalyticModule
+  AnalyticModule,
+  DownloadModule
 ];
 
 @Module({

@@ -25,6 +25,8 @@ import { Need } from 'src/entities/flaskEntities/need.entity';
 import { Paginated } from 'nestjs-paginate';
 import { NgoService } from '../ngo/ngo.service';
 import { TicketEntity } from 'src/entities/ticket.entity';
+import { SignatureEntity } from 'src/entities/signature.entity';
+import { IpfsEntity } from 'src/entities/ipfs.entity';
 
 @ApiTags('Users')
 @Controller('users')
@@ -231,20 +233,36 @@ export class UserController {
         // add IPFS + tickets for every need
         try {
             let tickets: TicketEntity[];
+            let signatures: SignatureEntity[];
+            let ipfs: IpfsEntity;
             if (role === SAYPlatformRoles.AUDITOR) {
                 tickets = await this.ticketService.getTickets();
             } else {
                 tickets = await this.ticketService.getUserTickets(userId);
             }
+            console.log(
+                '\x1b[33m%s\x1b[0m',
+                `Taking care of Need signatures + Tickets...\n`,
+            );
+
             for (let i = 0; i < allNeeds.length; i++) {
                 for (let k = 0; k < allNeeds[i].length; k++) {
                     const fetchedNeed = allNeeds[i][k];
                     const ticket = tickets.find(
                         (t) => allNeeds[i][k].id === t.flaskNeedId,
                     );
-                    const ipfs = await this.ipfsService.getNeedIpfs(allNeeds[i][k].id);
+                    // signatures only at the my page last column
+                    if (i === 3) {
+                        signatures = await this.signatureService.getNeedSignatures(
+                            fetchedNeed.id,
+                        );
+                        ipfs = null
+                        if (signatures && signatures.length > 0 && signatures.find((s) => s.role === SAYPlatformRoles.AUDITOR)) {
+                            ipfs = await this.ipfsService.getNeedIpfs(fetchedNeed.id);
+                        }
+                    }
 
-                    const modifiedNeed = { ticket, ipfs, ...fetchedNeed };
+                    const modifiedNeed = { ticket, signatures, ipfs, ...fetchedNeed };
                     modifiedNeedList.push(modifiedNeed);
                 }
             }
@@ -260,8 +278,9 @@ export class UserController {
         const time6 = new Date().getTime();
         timeDifferenceWithComment(time5, time6, 'Second organize In ');
 
-        const signatures = await this.signatureService.getUserSignatures(userId);
-
+        const allUserSignatures = await this.signatureService.getUserSignatures(
+            userId,
+        );
         const paidCount = paid.meta.totalItems;
         const notPaidCount = notPaid.meta.totalItems;
         const purchasedCount = purchased.meta.totalItems;
@@ -303,7 +322,7 @@ export class UserController {
             needs: organizedNeeds,
             children,
             // timeLine: { summary, inMonth },
-            signatures,
+            signatures: allUserSignatures,
             arrivals,
         };
     }

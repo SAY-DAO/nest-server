@@ -1,11 +1,9 @@
-
 export enum Colors {
     WHITE = 0,
     BLUE = 1,
     YELLOW = 2,
     RED = 3,
 }
-
 
 export enum AnnouncementEnum {
     NONE = 0,
@@ -95,7 +93,7 @@ export interface SwSignatureResult {
     SocialWorkerVoucher: SwProductVoucher | SwServiceVoucher;
     types: VoucherTypes;
     domain: Domain;
-    sayRole: SAYPlatformRoles
+    sayRole: SAYPlatformRoles;
 }
 
 export interface VoucherTypes {
@@ -104,24 +102,26 @@ export interface VoucherTypes {
 
 export interface SwServiceVoucher {
     title: string;
-    category: CategoryDefinitionEnum;
+    category: CategoryDefinitionPersianEnum;
     child: string;
-    receipts: string;
+    paid: number;
+    bankTrackId: string;
+    receipts: number;
     // receipts: SwmypageInnerReceipts_[];
-    bankTrackId: string,
     wallet: string;
-    role: string,
+    role: string;
     content: string;
 }
 
 export interface SwProductVoucher {
     title: string;
-    category: CategoryDefinitionEnum;
+    category: CategoryDefinitionPersianEnum;
+    paid: number;
+    deliveryCode: string;
     child: string;
-    receipts: string;
     // receipts: SwmypageInnerReceipts_[];
     wallet: string;
-    role: string,
+    role: string;
     content: string;
 }
 
@@ -132,7 +132,6 @@ export interface FamilyVoucher {
     signerAddress: string;
     content: string;
 }
-
 
 /*   
 ---- PAYMENT-----
@@ -212,6 +211,12 @@ export enum CategoryDefinitionEnum {
     SURROUNDING = 'Surrounding',
 }
 
+export enum CategoryDefinitionPersianEnum {
+    GROWTH = 'رشد',
+    JOY = 'تفریح',
+    HEALTH = 'سلامت',
+    SURROUNDING = 'پیرامون',
+}
 export enum NeedTypeEnum {
     SERVICE = 0,
     PRODUCT = 1,

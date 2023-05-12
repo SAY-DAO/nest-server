@@ -2,10 +2,7 @@ import {
   Entity,
   Column,
   ManyToOne,
-  OneToOne,
-  JoinColumn,
 } from 'typeorm';
-import { NeedEntity } from './need.entity';
 import { SAYPlatformRoles } from '../types/interfaces/interface';
 import { BaseEntity } from './BaseEntity';
 import { AllUserEntity } from './user.entity';
@@ -27,7 +24,4 @@ export class SignatureEntity extends BaseEntity {
 
   @Column({ type: 'enum', enum: SAYPlatformRoles, nullable: true })
   role: SAYPlatformRoles;
-
-  @ManyToOne(() => IpfsEntity, (ipfs) => ipfs.signatures, { eager: false })
-  ipfs: IpfsEntity;
 }

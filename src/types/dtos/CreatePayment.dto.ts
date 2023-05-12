@@ -1,4 +1,3 @@
-import { SwmypageStatusUpdates, SwmypageVerifiedPayments } from "src/generated-sources/openapi";
 
 export class CreatePaymentDto {
     id?: number;

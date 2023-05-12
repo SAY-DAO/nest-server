@@ -24,9 +24,6 @@ export class IpfsEntity extends BaseEntity {
     @Column({ nullable: true })
     paymentsHash: string;
 
-    @OneToMany(() => SignatureEntity, (signature) => signature.ipfs, { eager: true })
-    signatures?: SignatureEntity[];
-
     @OneToOne(() => NeedEntity, (need) => need.ipfs, { eager: false })
     @JoinColumn()
     need: NeedEntity;

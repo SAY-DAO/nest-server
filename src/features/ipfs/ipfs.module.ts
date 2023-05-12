@@ -16,6 +16,7 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PaymentEntity } from 'src/entities/payment.entity';
 import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { DownloadService } from '../download/download.service';
 
 @Module({
   imports: [
@@ -29,6 +30,6 @@ import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
     HttpModule,
   ],
   controllers: [IpfsController],
-  providers: [IpfsService, ChildrenService, NeedService, PaymentService],
+  providers: [IpfsService, ChildrenService, NeedService, PaymentService, DownloadService],
 })
 export class IpfsModule { }

@@ -6,7 +6,7 @@ import { tap } from 'rxjs/operators';
 @Injectable()
 export class MyPageInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        console.log('Intercepring My Page...');
+        console.log('Intercepting My Page...');
         console.log('Before...');
         const now = Date.now();
         return next

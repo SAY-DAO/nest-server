@@ -68,7 +68,6 @@ export class NeedService {
     });
   }
 
-
   getFlaskPreNeed(accessToken: any): Promise<PreneedSummary> {
     const preneedApi = new PreneedAPIApi();
     const preneeds = preneedApi.apiV2PreneedsGet(accessToken);
@@ -92,7 +91,7 @@ export class NeedService {
     return this.needRepository.find({
       relations: {
         child: true,
-        verifiedPayments: true
+        verifiedPayments: true,
       },
     });
   }
@@ -155,9 +154,11 @@ export class NeedService {
     if (
       !theSw ||
       (needDetails.status >= ProductStatusEnum.PARTIAL_PAY && !theAuditor) ||
+      (needDetails.isConfirmed && !theAuditor) ||
       (needDetails.type === NeedTypeEnum.PRODUCT &&
         needDetails.status >= ProductStatusEnum.PURCHASED_PRODUCT &&
         !thePurchaser) ||
+      (needDetails.status >= ProductStatusEnum.PARTIAL_PAY && (!verifiedPayments || !verifiedPayments[0])) ||
       !theNgo
     ) {
       throw new ForbiddenException(
@@ -206,7 +207,7 @@ export class NeedService {
   async getNotConfirmedNeeds(
     socialWorker: number,
     swIds: number[],
-    ngoIds: number[]
+    ngoIds: number[],
   ): Promise<any> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
@@ -219,7 +220,9 @@ export class NeedService {
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
       .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
-      .andWhere('child.existence_status IN (:...existenceStatus)', { existenceStatus: [childExistence.AlivePresent] })
+      .andWhere('child.existence_status IN (:...existenceStatus)', {
+        existenceStatus: [childExistence.AlivePresent],
+      })
       .andWhere('need.isConfirmed = :needConfirmed', { needConfirmed: false })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.created_by_id IN (:...swIds)', {
@@ -276,7 +279,7 @@ export class NeedService {
     purchaser: number,
     ngoSupervisor: number,
     swIds: number[],
-    ngoIds: number[]
+    ngoIds: number[],
   ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
@@ -289,7 +292,9 @@ export class NeedService {
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
       .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
-      .andWhere('child.existence_status IN (:...existenceStatus)', { existenceStatus: [childExistence.AlivePresent] })
+      .andWhere('child.existence_status IN (:...existenceStatus)', {
+        existenceStatus: [childExistence.AlivePresent],
+      })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.created_by_id IN (:...swIds)', {
         swIds: socialWorker ? [socialWorker] : [...swIds],
@@ -349,7 +354,7 @@ export class NeedService {
     purchaser: number,
     ngoId: number,
     swIds: number[],
-    ngoIds: number[]
+    ngoIds: number[],
   ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
@@ -433,7 +438,7 @@ export class NeedService {
     purchaser: number,
     ngoId: number,
     swIds: number[],
-    ngoIds: number[]
+    ngoIds: number[],
   ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
@@ -531,7 +536,7 @@ export class NeedService {
     purchaser: number,
     ngoId: number,
     swIds: number[],
-    ngoIds: number[]
+    ngoIds: number[],
   ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
@@ -638,7 +643,7 @@ export class NeedService {
   }
 
   async getDuplicateNeeds(childId: number, needId: number) {
-    const need = await this.getFlaskNeed(needId)
+    const need = await this.getFlaskNeed(needId);
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       // .where("need.unavailable_from > :startDate", { startDate: new Date(2021, 2, 3) })
@@ -647,8 +652,10 @@ export class NeedService {
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.id != :needId', { needId: need.id })
       // .andWhere('need.title = :title', { title: need.title })
-      
-      .andWhere("need.name_translations -> 'en' = :nameTranslations", { nameTranslations: need.name_translations.en })
+
+      .andWhere("need.name_translations -> 'en' = :nameTranslations", {
+        nameTranslations: need.name_translations.en,
+      })
 
       .andWhere('need.status < :statusPaid', {
         statusPaid: PaymentStatusEnum.COMPLETE_PAY,
@@ -678,7 +685,7 @@ export class NeedService {
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');
-    console.log("need")
+    console.log('need');
     return await queryBuilder.getMany();
   }
 }

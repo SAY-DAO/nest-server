@@ -5,7 +5,6 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Req,
   Request,
   Res,
   Session,
@@ -34,8 +33,12 @@ import { WalletInterceptor } from './interceptors/wallet.interceptors';
 import { UserService } from '../user/user.service';
 import { convertFlaskToSayRoles } from 'src/utils/helpers';
 import { NeedService } from '../need/need.service';
-import { SocialWorkerAPIApi } from 'src/generated-sources/openapi';
+import {
+  FamilyAPIApi,
+  SocialWorkerAPIApi,
+} from 'src/generated-sources/openapi';
 
+@UseInterceptors(WalletInterceptor)
 @ApiTags('Wallet')
 @Controller('wallet')
 export class SignatureController {
@@ -47,7 +50,6 @@ export class SignatureController {
     private needService: NeedService,
   ) { }
 
-  @UseInterceptors(WalletInterceptor)
   @Get('nonce/:userId/:typeId')
   @ApiOperation({ description: 'Get SIWE nonce' })
   async getNonce(
@@ -57,51 +59,62 @@ export class SignatureController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('typeId', ParseIntPipe) typeId: number,
   ) {
-
     const accessToken = req.headers['authorization'];
-
-    const flaskApi = new SocialWorkerAPIApi();
     const role = convertFlaskToSayRoles(typeId);
 
-    if (
-      role === SAYPlatformRoles.SOCIAL_WORKER ||
-      role === SAYPlatformRoles.AUDITOR ||
-      role === SAYPlatformRoles.PURCHASER ||
-      role === SAYPlatformRoles.NGO_SUPERVISOR
-    ) {
-      try {
-        const socialWorker = await flaskApi.apiV2SocialworkersIdGet(accessToken, userId);
+    try {
+      if (
+        role === SAYPlatformRoles.SOCIAL_WORKER ||
+        role === SAYPlatformRoles.AUDITOR ||
+        role === SAYPlatformRoles.PURCHASER ||
+        role === SAYPlatformRoles.NGO_SUPERVISOR
+      ) {
+        const flaskApi = new SocialWorkerAPIApi();
+        const socialWorker = await flaskApi.apiV2SocialworkersIdGet(
+          accessToken,
+          userId,
+        );
 
         if (socialWorker.id === userId) {
           if (!session.nonce) {
             session.nonce = generateNonce();
             session.save();
           }
-          console.log(session);
+          res.setHeader('Content-Type', 'application/json');
+          res
+            .status(200)
+            .send({ nonce: session.nonce, expiry: session.cookie._expires });
+        }
+      }
+      if (role === SAYPlatformRoles.FAMILY) {
+        const flaskApi = new FamilyAPIApi();
+        const familyMember = await flaskApi.apiV2FamilyFamilyIdfamilyIdGet(
+          accessToken,
+          userId,
+        );
+        if (familyMember.userId === userId) {
+          if (!session.nonce) {
+            session.nonce = generateNonce();
+            session.save();
+          }
 
           res.setHeader('Content-Type', 'application/json');
           res
             .status(200)
             .send({ nonce: session.nonce, expiry: session.cookie._expires });
         }
-      } catch (e) {
-        req.session.destroy();
-        throw new WalletExceptionFilter(e.status, e.message)
       }
-      if (
-        role === SAYPlatformRoles.FAMILY
-      ) {
-        // return session.nonce
-      }
+    } catch (e) {
+      req.session.destroy();
+      throw new WalletExceptionFilter(e.status, e.message);
     }
-
-
   }
 
-  @Post(`verify/:flaskUserId`)
+  @Post(`verify/:userId/:typeId`)
   @ApiOperation({ description: 'Verify SIWE' })
   async verifySiwe(
-    @Param('flaskUserId') flaskUserId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('typeId', ParseIntPipe) typeId: number,
     @Session() session,
     @Request() req,
     @Body(ValidateSignaturePipe) body: VerifyWalletDto,
@@ -122,63 +135,73 @@ export class SignatureController {
         throw new WalletExceptionFilter(422, `Invalid nonce.`);
       }
       session.siwe = fields;
-      session.siwe.flaskUserId = flaskUserId;
+      session.siwe.flaskUserId = userId;
+      session.siwe.flaskTypeId = typeId;
       // session.cookie._expires = new Date(fields.expirationTime);
-      session.clear;
+      // session.clear();
       session.save();
+      const role = convertFlaskToSayRoles(typeId);
 
-      let nestContributor = await this.userService.getContributorByFlaskId(
-        flaskUserId,
-      );
-
-      if (!nestContributor) {
-        const flaskCaller = await this.userService.getFlaskSocialWorker(
-          flaskUserId,
-        );
-        console.log(
-          '\x1b[36m%s\x1b[0m',
-          'Syncing NGO and Caller ...\n' + flaskCaller.id,
-        );
-        const CallerNgo = await this.syncService.syncContributorNgo(
-          flaskCaller,
-        );
-        console.log(
-          '\x1b[36m%s\x1b[0m',
-          'Synced NGO and Caller ...\n' + flaskCaller.id,
+      if (
+        role === SAYPlatformRoles.SOCIAL_WORKER ||
+        role === SAYPlatformRoles.AUDITOR ||
+        role === SAYPlatformRoles.PURCHASER ||
+        role === SAYPlatformRoles.NGO_SUPERVISOR
+      ) {
+        let nestContributor = await this.userService.getContributorByFlaskId(
+          userId,
         );
 
-        const {
-          id: callerFlaskId,
-          ngo_id: callerFlaskNgoId,
-          ...callerOtherParams
-        } = flaskCaller;
+        if (!nestContributor) {
+          const flaskCaller = await this.userService.getFlaskSocialWorker(
+            userId,
+          );
+          console.log(
+            '\x1b[36m%s\x1b[0m',
+            'Syncing NGO and Caller ...\n' + flaskCaller.id,
+          );
+          const CallerNgo = await this.syncService.syncContributorNgo(
+            flaskCaller,
+          );
+          console.log(
+            '\x1b[36m%s\x1b[0m',
+            'Synced NGO and Caller ...\n' + flaskCaller.id,
+          );
 
-        const callerDetails = {
-          ...callerOtherParams,
-          typeId: flaskCaller.type_id,
-          firstName: flaskCaller.firstName,
-          lastName: flaskCaller.lastName,
-          avatarUrl: flaskCaller.avatar_url,
-          flaskId: callerFlaskId,
-          flaskNgoId: callerFlaskNgoId,
-          birthDate: flaskCaller.birth_date && new Date(flaskCaller.birth_date),
-          role: convertFlaskToSayRoles(flaskCaller.type_id),
-        };
-        console.log('\x1b[36m%s\x1b[0m', 'Creating a user ...\n');
-        nestContributor = await this.userService.createContributor(
-          callerDetails,
-          CallerNgo,
-        );
-        console.log('\x1b[36m%s\x1b[0m', 'Created a user ...\n');
+          const {
+            id: callerFlaskId,
+            ngo_id: callerFlaskNgoId,
+            ...callerOtherParams
+          } = flaskCaller;
+
+          const callerDetails = {
+            ...callerOtherParams,
+            typeId: flaskCaller.type_id,
+            firstName: flaskCaller.firstName,
+            lastName: flaskCaller.lastName,
+            avatarUrl: flaskCaller.avatar_url,
+            flaskId: callerFlaskId,
+            flaskNgoId: callerFlaskNgoId,
+            birthDate:
+              flaskCaller.birth_date && new Date(flaskCaller.birth_date),
+            role: convertFlaskToSayRoles(flaskCaller.type_id),
+          };
+          console.log('\x1b[36m%s\x1b[0m', 'Creating a user ...\n');
+          nestContributor = await this.userService.createContributor(
+            callerDetails,
+            CallerNgo,
+          );
+          console.log('\x1b[36m%s\x1b[0m', 'Created a user ...\n');
+        }
+        if (nestContributor && !nestContributor.wallet) {
+          await this.userService.createUserWallet(
+            body.message.address,
+            body.message.chainId,
+            nestContributor,
+          );
+        }
+        return session.nonce;
       }
-      if (nestContributor && !nestContributor.wallet) {
-        await this.userService.createUserWallet(
-          body.message.address,
-          body.message.chainId,
-          nestContributor,
-        );
-      }
-      return session.nonce;
     } catch (e) {
       session.siwe = null;
       session.nonce = null;
@@ -219,10 +242,9 @@ export class SignatureController {
     return await this.signatureService.getSignatures();
   }
 
-  @UseInterceptors(WalletInterceptor)
-  @Post(`sw/generate`)
+  @Post(`signature/prepare`)
   @UsePipes(new ValidationPipe()) // validation for dto files
-  async swSignTransaction(
+  async prepareSignature(
     @Body(ValidateSignaturePipe) body: SwGenerateSignatureDto,
     @Session() session: Record<string, any>,
   ) {
@@ -231,6 +253,8 @@ export class SignatureController {
     }
     let transaction: SwSignatureResult;
     try {
+      const flaskUserId = session.siwe.flaskUserId;
+
       const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
       const { need, child } = await this.syncService.syncNeed(
         flaskNeed,
@@ -242,11 +266,11 @@ export class SignatureController {
       );
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
 
-      transaction = await this.signatureService.swSignTransaction(
+      transaction = await this.signatureService.prepareSignature(
         session.siwe.address,
         need,
         child,
-        body.userTypeId,
+        flaskUserId,
       );
       return transaction;
     } catch (e) {
@@ -255,7 +279,7 @@ export class SignatureController {
     }
   }
 
-  @Post(`create/:signature`)
+  @Post(`signature/create/:signature`)
   @ApiOperation({ description: 'Get all signatures' })
   async createSignature(
     @Param('signature') signature: string,
@@ -265,33 +289,94 @@ export class SignatureController {
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
-    const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
     try {
-      if (
-        !need.ipfs ||
-        !need.ipfs.signatures.find(
-          (s) => s.flaskUserId === session.siwe.flaskUserId,
-        )
-      ) {
-        console.log('\x1b[36m%s\x1b[0m', 'Uploading to IPFS ...');
-        const ipfs = await this.ipfsService.handleIpfs(
-          signature,
-          body.role,
-          session.siwe.flaskUserId,
-          need,
-        );
+      const flaskUserId = session.siwe.flaskUserId;
+      const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
+      const needSignatures = await this.signatureService.getNeedSignatures(
+        body.flaskNeedId,
+      );
+      const initialSignature = needSignatures.find(
+        (s) => s.flaskUserId === need.socialWorker.contributor.flaskId,
+      );
+      const theSignature = needSignatures.find((s) => s.hash === signature);
 
-        console.log('\x1b[36m%s\x1b[0m', 'Finalizing IPFS and Signature ...');
-        const userSignature = await this.signatureService.createSignature(
-          signature,
-          ipfs,
-          body.flaskNeedId,
-          body.role,
-          session.siwe.flaskUserId,
-        );
-        return { ipfs, signature: userSignature };
+      if (!theSignature && need) {
+        // social worker
+        if (!initialSignature && need.socialWorker.contributor.flaskId === Number(flaskUserId) && body.sayRole === SAYPlatformRoles.SOCIAL_WORKER) {
+          console.log(
+            '\x1b[36m%s\x1b[0m',
+            'Creating Social Worker Signature ...',
+          );
+          const initialSignature = await this.signatureService.createSignature(
+            signature,
+            body.flaskNeedId,
+            SAYPlatformRoles.SOCIAL_WORKER,
+            flaskUserId,
+          );
+          return { signature: initialSignature };
+        }
+        if (initialSignature && initialSignature.flaskUserId === need.socialWorker.contributor.flaskId) {
+          // auditor
+          if (need.auditor.contributor.flaskId === Number(flaskUserId) && body.sayRole === SAYPlatformRoles.AUDITOR) {
+            console.log('\x1b[36m%s\x1b[0m', 'Uploading to IPFS ...');
+            const ipfs = await this.ipfsService.handleIpfs(
+              signature,
+              SAYPlatformRoles.AUDITOR,
+              flaskUserId,
+              need,
+            );
+            console.log(
+              '\x1b[36m%s\x1b[0m',
+              'Creating Social Worker Signature ...',
+            );
+            const auditorSignature = await this.signatureService.createSignature(
+              signature,
+              body.flaskNeedId,
+              SAYPlatformRoles.AUDITOR,
+              flaskUserId,
+            );
+            return { ipfs, signature: auditorSignature };
+          }
+          // purchaser
+          if (need.purchaser.contributor.flaskId === Number(flaskUserId) && body.sayRole === SAYPlatformRoles.PURCHASER) {
+            console.log('\x1b[36m%s\x1b[0m', 'Creating Purchaser Signature ...');
+            const purchaserSignature =
+              await this.signatureService.createSignature(
+                signature,
+                body.flaskNeedId,
+                SAYPlatformRoles.PURCHASER,
+                flaskUserId,
+              );
+            return { signature: purchaserSignature };
+          }
+          // family
+          else if (need.verifiedPayments.find(p => p.id_user === flaskUserId) && body.sayRole === SAYPlatformRoles.FAMILY) {
+            console.log(
+              '\x1b[36m%s\x1b[0m',
+              'Creating Virtual Family Signatures ...',
+            );
+            const familySignature = await this.signatureService.createSignature(
+              signature,
+              body.flaskNeedId,
+              SAYPlatformRoles.FAMILY,
+              flaskUserId,
+            );
+            return { signature: familySignature };
+          }
+          else {
+            throw new WalletExceptionFilter(
+              403,
+              'could not find your role in this need !',
+            );
+          }
+        } else {
+          throw new WalletExceptionFilter(
+            401,
+            'Social worker signature is needed.',
+          );
+        }
       } else {
-        throw new WalletExceptionFilter(403, 'already signed!');
+        throw new WalletExceptionFilter(403, 'Bad request!');
       }
     } catch (e) {
       const theSignature = await this.getSignature(signature);

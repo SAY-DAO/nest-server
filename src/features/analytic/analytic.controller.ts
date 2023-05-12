@@ -64,7 +64,11 @@ export class AnalyticController {
       swIds = await this.userService.getFlaskSocialWorkerByNgo(supervisor.ngo_id).then(r => r.map(s => s.id))
 
     }
-
+    if (role === SAYPlatformRoles.PURCHASER) {
+      swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
+    }
+    console.log(swIds)
+    console.log(role)
 
     return await this.analyticService.getUserContribution(swIds, role, flaskUserId)
   }

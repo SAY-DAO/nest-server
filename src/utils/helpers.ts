@@ -74,6 +74,25 @@ export function getSAYRoleString(sayRole: number) {
   return roleString;
 }
 
+export function getSAYRolePersian(sayRole: number) {
+  let roleString: string;
+  if (sayRole === SAYPlatformRoles.AUDITOR) {
+    roleString = 'شاهد';
+  } else if (sayRole === SAYPlatformRoles.SOCIAL_WORKER) {
+    roleString = 'مددکار';
+  } else if (sayRole === SAYPlatformRoles.PURCHASER) {
+    roleString = 'میانجی';
+  } else if (sayRole === SAYPlatformRoles.NGO_SUPERVISOR) {
+    roleString = 'ngoSupervisor';
+  } else if (sayRole === SAYPlatformRoles.FAMILY) {
+    roleString = 'خانواده';
+  } else if (sayRole === SAYPlatformRoles.FRIEND) {
+    roleString = 'خویش‌آوند';
+  } else if (sayRole === SAYPlatformRoles.NO_ROLE) {
+    roleString = 'noRole';
+  }
+  return roleString;
+}
 
 export function getUserSAYRoleString(userTypeId: number) {
   if (userTypeId === FlaskUserTypesEnum.SOCIAL_WORKER) {

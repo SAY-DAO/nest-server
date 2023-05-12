@@ -134,7 +134,6 @@ export class SyncService {
     payments: CreatePaymentDto[],
     statuses: CreateStatusDto[],
   ) {
-    const currentTime = new Date();
     //-------------------------------------------- Controller Caller-------------------------------------
     let nestCaller = await this.userService.getContributorByFlaskId(callerId);
     const flaskCaller = await this.userService.getFlaskSocialWorker(callerId);

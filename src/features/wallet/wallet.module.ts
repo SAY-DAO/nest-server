@@ -40,6 +40,7 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { ProviderService } from '../provider/provider.service';
 import { ProviderEntity } from 'src/entities/provider.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { DownloadService } from '../download/download.service';
 
 @Module({
   imports: [
@@ -87,7 +88,8 @@ import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity'
     ReceiptService,
     StatusService,
     IpfsService,
-    ProviderService
+    ProviderService,
+    DownloadService
   ],
 })
 export class WalletModule {

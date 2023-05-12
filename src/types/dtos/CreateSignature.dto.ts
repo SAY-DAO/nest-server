@@ -37,18 +37,17 @@ export class VerifySignatureDto {
 export class SwGenerateSignatureDto {
   @IsNotEmpty()
   flaskNeedId: number;
-  @IsNotEmpty()
-  userTypeId: number;
   statuses?: CreateStatusDto[]
   receipts?: CreateReceiptDto[]
+  @IsNotEmpty()
   payments?: CreatePaymentDto[]
 }
 
 export class CreateSignatureDto {
   @IsNotEmpty()
-  flaskNeedId: number;
+  sayRole: SAYPlatformRoles;
   @IsNotEmpty()
-  role: SAYPlatformRoles;
+  flaskNeedId: number;
 }
 
 

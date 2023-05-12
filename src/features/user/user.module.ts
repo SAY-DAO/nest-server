@@ -29,6 +29,7 @@ import { IpfsEntity } from 'src/entities/ipfs.entity';
 import { NgoService } from '../ngo/ngo.service';
 import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import { DownloadService } from '../download/download.service';
 
 @Module({
   imports: [
@@ -63,7 +64,8 @@ import { NGO } from 'src/entities/flaskEntities/ngo.entity';
     PaymentService,
     SignatureService,
     IpfsService,
-    NgoService
+    NgoService,
+    DownloadService
   ],
 })
 export class UserModule implements NestModule {
