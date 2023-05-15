@@ -128,7 +128,6 @@ export class SignatureService {
     const socialWorkerId = need.socialWorker.contributor.flaskId;
     const auditorId = need.auditor.contributor.flaskId;
     const purchaserId = need.purchaser.contributor.flaskId;
-
     const role =
       flaskUserId === socialWorkerId
         ? SAYPlatformRoles.SOCIAL_WORKER
@@ -136,6 +135,12 @@ export class SignatureService {
           ? SAYPlatformRoles.AUDITOR
           : flaskUserId === purchaserId && SAYPlatformRoles.PURCHASER;
 
+    if (!role) {
+      throw new WalletExceptionFilter(
+        403,
+        'could not find your role in this need !',
+      );
+    }
     // define your data types
     if (need.type === NeedTypeEnum.SERVICE) {
       serviceVoucher = {
@@ -160,10 +165,10 @@ export class SignatureService {
         Voucher: [
           { name: 'title', type: 'string' },
           { name: 'category', type: 'string' },
-          { name: 'paid', type: 'number' },
+          { name: 'paid', type: 'uint256' },
           { name: 'child', type: 'string' },
           { name: 'bankTrackId', type: 'string' },
-          { name: 'receipts', type: 'number' },
+          { name: 'receipts', type: 'uint256' },
           { name: 'wallet', type: 'address' },
           { name: 'role', type: 'string' },
           { name: 'content', type: 'string' },
@@ -186,7 +191,7 @@ export class SignatureService {
         child: child.sayNameTranslations.fa,
         wallet: signerAddress,
         role: getSAYRolePersian(role), // string human readable
-        content: `Your ${impacts} impacts will be ready for a friend to mint!`,
+        content: ` با امضای دیجیتال این نیاز امکان ذخیره غیر متمرکز و ثبت این نیاز بر روی بلاکچین را فراهم می‌کنید.  نیازی که دارای امضای دیجیتال مددکار، شاهد، میانجی و خانواده مجازی باشد نه تنها به شفافیت تراکنش‌ها کمک می‌کند، بلکه امکان تولید ارز دیجیتال (توکن / سهام) را به خویش‌آوندان می‌دهد تا سِی در جهت تبدیل شدن به مجموعه‌ای خودمختار و غیر متمرکز گام بردارد. توکن های تولید شده از هر نیاز به افرادی که در برطرف شدن نیاز مشارکت داشته‌اند ارسال می‌شود، که می‌توانند از آن برای رای دادن، ارتقا کیفیت کودکان و سِی استفاده کنند.`,
       };
       types = {
         Voucher: [
