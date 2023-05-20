@@ -17,6 +17,7 @@ import { CreateTicketDto } from '../../types/dtos/ticket/CreateTicket.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   AnnouncementEnum,
+  Colors,
   SAYPlatformRoles,
 } from 'src/types/interfaces/interface';
 import { TicketEntity } from '../../entities/ticket.entity';
@@ -157,8 +158,7 @@ export class TicketController {
     ticket = await this.ticketService.getTicketByNeed(body.flaskNeedId)
     if (ticket) {
       console.log('\x1b[36m%s\x1b[0m', 'Updating The Ticket ...\n');
-      await this.ticketService.updateTicketContributors(ticket, participants)
-      ticket = await this.ticketService.getTicketByNeed(body.flaskNeedId)
+      ticket = await this.ticketService.updateTicketContributors(ticket, participants)
     }
     if (!ticket) {
       console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
@@ -211,8 +211,10 @@ export class TicketController {
       }
       await this.ticketService.createTicketContent(contentDetails, ticket);
     }
-
-    return ticket;
+    console.log("contentDetails")
+    await this.ticketService.updateTicketAnnouncement(ticket.id, body.announcement)
+    const { ticket: updatedTicket } = await this.ticketService.getTicketById(ticket.id, body.flaskUserId)
+    return updatedTicket
   }
 
   @Delete(':id')

@@ -6,7 +6,7 @@ import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
-import { Colors } from 'src/types/interfaces/interface';
+import { AnnouncementEnum, Colors } from 'src/types/interfaces/interface';
 import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
 import { Repository, UpdateResult } from 'typeorm';
@@ -43,7 +43,7 @@ export class TicketService {
     const ticket = this.ticketRepository.findOne({
       where: {
         need: {
-          flaskId: flaskNeedId
+          flaskId: flaskNeedId,
         },
       },
       relations: {
@@ -123,6 +123,15 @@ export class TicketService {
     view: TicketViewEntity,
   ): Promise<UpdateResult> {
     return this.ticketViewRepository.update(view.id, { viewed: currentTime });
+  }
+
+  async updateTicketAnnouncement(
+    ticketId: string,
+    lastAnnouncement: AnnouncementEnum,
+  ): Promise<UpdateResult> {
+    return this.ticketRepository.update(ticketId, {
+      lastAnnouncement: lastAnnouncement,
+    });
   }
 
   async updateTicketColor(

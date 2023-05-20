@@ -248,7 +248,7 @@ export class UserController {
             for (let i = 0; i < allNeeds.length; i++) {
                 for (let k = 0; k < allNeeds[i].length; k++) {
                     const fetchedNeed = allNeeds[i][k];
-                    const ticket = tickets.find(
+                    const needTickets = tickets.filter(
                         (t) => allNeeds[i][k].id === t.flaskNeedId,
                     );
                     // signatures only at the my page last column
@@ -262,7 +262,7 @@ export class UserController {
                         }
                     }
 
-                    const modifiedNeed = { ticket, signatures, ipfs, ...fetchedNeed };
+                    const modifiedNeed = { tickets: needTickets, signatures, ipfs, ...fetchedNeed };
                     modifiedNeedList.push(modifiedNeed);
                 }
             }
