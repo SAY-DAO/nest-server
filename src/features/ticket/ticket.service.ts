@@ -112,10 +112,10 @@ export class TicketService {
   async updateTicketContributors(
     ticket: TicketEntity,
     participants: AllUserEntity[],
-  ): Promise<UpdateResult> {
+  ): Promise<TicketEntity> {
     const oldParticipants = ticket.contributors;
-
-    return this.ticketRepository.update(ticket.id, { contributors: [...oldParticipants, ...participants] });
+    ticket.contributors = [...oldParticipants, ...participants]
+    return this.ticketRepository.save(ticket);
   }
 
   async updateTicketView(
