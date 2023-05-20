@@ -153,11 +153,21 @@ export class TicketController {
       throw new ServerError('After IPFS upload you can not change anything.');
     }
 
-    console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
-    const ticket = await this.ticketService.createTicket(
-      createTicketDetails,
-      uniqueParticipants,
-    );
+    let ticket: TicketEntity
+    ticket = await this.ticketService.getTicketByNeed(body.flaskNeedId)
+    if (ticket) {
+      console.log('\x1b[36m%s\x1b[0m', 'Updating The Ticket ...\n');
+      await this.ticketService.updateTicketContributors(ticket, participants)
+      ticket = await this.ticketService.getTicketByNeed(body.flaskNeedId)
+    }
+    if (!ticket) {
+      console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
+      ticket = await this.ticketService.createTicket(
+        createTicketDetails,
+        uniqueParticipants,
+      );
+    }
+
     await this.ticketService.createTicketView(
       createTicketDetails.flaskUserId,
       ticket.id,
@@ -204,22 +214,6 @@ export class TicketController {
 
     return ticket;
   }
-
-  // @Get(`ticket/:id`)
-  // @ApiOperation({ description: 'Get one by id' })
-  // async getOneTicket(@Param('id') id: string) {
-  //   let provider: TicketEntity;
-  //   if (id) {
-  //     try {
-  //       provider = await this.ticketService.getTicketByNeedId(parseInt(id));
-  //     } catch (e) {
-  //       throw new AllExceptionsFilter(e);
-  //     }
-  //     return provider;
-  //   } else {
-  //     throw new HttpException('you need to provide id', HttpStatus.BAD_REQUEST);
-  //   }
-  // }
 
   @Delete(':id')
   async DeleteTicket(@Param('id') id: string) {

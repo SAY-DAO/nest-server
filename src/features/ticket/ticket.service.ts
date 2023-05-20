@@ -24,7 +24,7 @@ export class TicketService {
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
-  ) {}
+  ) { }
 
   async createTicket(
     ticketDetails: CreateTicketParams,
@@ -37,6 +37,20 @@ export class TicketService {
 
     newTicket.contributors = participants;
     return this.ticketRepository.save(newTicket);
+  }
+
+  getTicketByNeed(flaskNeedId: number): Promise<TicketEntity> {
+    const ticket = this.ticketRepository.findOne({
+      where: {
+        need: {
+          flaskId: flaskNeedId
+        },
+      },
+      relations: {
+        need: true,
+      },
+    });
+    return ticket;
   }
 
   async getTicketById(id: string, flaskUserId: number) {
@@ -62,14 +76,11 @@ export class TicketService {
       (v) => v.flaskUserId === flaskUserId && v.ticketId === ticket.id,
     );
 
-    console.log("myViewwww")
-    console.log(myView)
-    console.log("myViewwww")
     if (myView) {
       await this.updateTicketView(latestView.viewed, myView);
       console.log('\x1b[36m%s\x1b[0m', 'Updated my view to latest ...\n');
     } else if (!myView) {
-      const view =await this.createTicketView(flaskUserId, ticket.id);
+      const view = await this.createTicketView(flaskUserId, ticket.id);
       await this.updateTicketView(latestView.viewed, view);
       console.log('\x1b[36m%s\x1b[0m', 'created my view with latest time ...\n');
     }
@@ -96,6 +107,15 @@ export class TicketService {
       viewed: new Date(),
     });
     return this.ticketViewRepository.save(newView);
+  }
+
+  async updateTicketContributors(
+    ticket: TicketEntity,
+    participants: AllUserEntity[],
+  ): Promise<UpdateResult> {
+    const oldParticipants = ticket.contributors;
+
+    return this.ticketRepository.update(ticket.id, { contributors: [...oldParticipants, ...participants] });
   }
 
   async updateTicketView(
@@ -167,25 +187,6 @@ export class TicketService {
         contributors: { flaskId: flaskUserId },
       },
     });
-  }
-
-  async getTicketByNeedId(flaskNeedId: number): Promise<TicketEntity> {
-    const flaskNeed = await this.flaskNeedRepository.findOne({
-      where: {
-        id: flaskNeedId,
-      },
-    });
-    const nestNeed = await this.needRepository.findOne({
-      where: {
-        flaskId: flaskNeedId,
-      },
-    });
-    const ticket = this.ticketRepository.findOne({
-      where: {
-        flaskNeedId: flaskNeedId,
-      },
-    });
-    return ticket;
   }
 
   DeleteTicket(id: string) {
