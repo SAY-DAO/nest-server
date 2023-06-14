@@ -5,8 +5,8 @@ import {
 } from 'typeorm';
 import { SAYPlatformRoles } from '../types/interfaces/interface';
 import { BaseEntity } from './BaseEntity';
+import { NeedEntity } from './need.entity';
 import { AllUserEntity } from './user.entity';
-import { IpfsEntity } from './ipfs.entity';
 
 @Entity()
 export class SignatureEntity extends BaseEntity {
@@ -24,4 +24,7 @@ export class SignatureEntity extends BaseEntity {
 
   @Column({ type: 'enum', enum: SAYPlatformRoles, nullable: true })
   role: SAYPlatformRoles;
+
+  @ManyToOne(() => NeedEntity, (n) => n.signatures, { eager: false, nullable: false })
+  need: NeedEntity;
 }

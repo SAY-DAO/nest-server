@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
-import {
-  AllUserEntity,
-} from '../../entities/user.entity';
-import { SocialWorkerAPIApi, SwMyPage } from 'src/generated-sources/openapi';
-import {
-  UserParams,
-} from 'src/types/parameters/UserParameters';
+import { AllUserEntity } from '../../entities/user.entity';
+import { UserParams } from 'src/types/parameters/UserParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 import { getSAYRoleString } from 'src/utils/helpers';
-import { SAYPlatformRoles } from 'src/types/interfaces/interface';
+import {
+  PanelContributors,
+  SAYPlatformRoles,
+} from 'src/types/interfaces/interface';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 
 @Injectable()
@@ -35,22 +33,20 @@ export class UserService {
   getFlaskSwIds(): Promise<SocialWorker[]> {
     return this.flaskSocialWorker.find({
       select: {
-        id: true
-      }
+        id: true,
+      },
     });
   }
-
 
   getFlaskSocialWorker(id: number): Promise<SocialWorker> {
     return this.flaskSocialWorker.findOne({
-      where: { id: id }
+      where: { id: id },
     });
   }
 
-
   getFlaskSocialWorkerByNgo(ngoId: number): Promise<SocialWorker[]> {
     return this.flaskSocialWorker.find({
-      where: { ngo_id: ngoId }
+      where: { ngo_id: ngoId },
     });
   }
 
@@ -61,11 +57,10 @@ export class UserService {
   getContributors(): Promise<AllUserEntity[]> {
     return this.allUserRepository.find({
       where: {
-        isContributor: true
-      }
+        isContributor: true,
+      },
     });
   }
-
 
   // getMyPage(
   //   accessToken: any,
@@ -97,73 +92,110 @@ export class UserService {
   createUserWallet(
     address: string,
     chainId: number,
-    user: AllUserEntity
+    user: AllUserEntity,
   ): Promise<EthereumAccountEntity> {
-    console.log(user)
+    console.log(user);
     const newWallet = this.ethereumWalletRepository.create({
       address,
       chainId,
-      user
+      user,
     });
     return this.ethereumWalletRepository.save(newWallet);
   }
-
 
   async createContributor(
     userDetails: UserParams,
     ngo: NgoEntity,
   ): Promise<AllUserEntity> {
-    const newContributor = this.contributorRepository.create({
-      flaskId: userDetails.flaskId,
+    const newContribution = this.contributorRepository.create({
+      flaskUserId: userDetails.flaskUserId,
       flaskNgoId: ngo.flaskNgoId,
       ngo: ngo,
+      panelRole: userDetails.panelRole,
+      panelRoleName: getSAYRoleString(userDetails.panelRole),
     });
-    const contributor = await this.contributorRepository.save(newContributor);
 
-    const newUser = this.allUserRepository.create({
-      ...userDetails,
-      role: userDetails.role,
-      roleName: getSAYRoleString(userDetails.role),
-      isContributor: true,
-      contributor
+    const theContribution = await this.contributorRepository.save(
+      newContribution,
+    );
 
-    });
-    return await this.allUserRepository.save(newUser);
+
+    const theUser = await this.getUserByFlaskId(userDetails.flaskUserId);
+    if (!theUser) {
+      const newUser = this.allUserRepository.create({
+        ...userDetails,
+        flaskUserId: userDetails.flaskUserId,
+        isContributor: true,
+        contributions: [theContribution],
+      });
+      return await this.allUserRepository.save(newUser);
+    } else if (theUser) {
+      theUser.contributions = [...theUser.contributions, theContribution];
+      await this.allUserRepository.save(theUser);
+      return await this.getUserByFlaskId(userDetails.flaskUserId);
+    }
   }
 
   async updateContributor(
     userId: string,
     userDetails: UserParams,
   ): Promise<UpdateResult> {
+    // // update social worker need
+    // if (userDetails.need) {
+    //   if (userDetails.role === SAYPlatformRoles.SOCIAL_WORKER) {
+    //     contributor.createdNeeds = contributor.createdNeeds ? [...contributor.createdNeeds, userDetails.need] : [userDetails.need]
+    //   }
+    //   // update purchaser needs
+    //   if (userDetails.role === SAYPlatformRoles.PURCHASER) {
+    //     contributor.purchasedNeeds = contributor.purchasedNeeds ? [...contributor.purchasedNeeds, userDetails.need] : [userDetails.need]
+    //   }
 
-    const contributor = (await this.getUserById(userId)).contributor
+    //   // update auditor needs
+    //   if (userDetails.role === SAYPlatformRoles.AUDITOR) {
+    //     contributor.auditedNeeds = contributor.auditedNeeds ? [...contributor.auditedNeeds, userDetails.need] : [userDetails.need]
+    //   }
+    //   console.log('\x1b[36m%s\x1b[0m', 'here ...\n');
+    //   console.log(contributor)
+
+    //   await this.contributorRepository.update(contributor.id, {
+    //     ...contributor,
+    //   })
+    // }
+
+    // await this.contributorRepository.save(contributor);
+
+
     const user = this.allUserRepository.create({
       ...userDetails,
-      role: userDetails.role,
-      roleName: getSAYRoleString(userDetails.role),
-      isContributor: true,
-      contributor
 
+      isContributor: true,
     });
-    return this.allUserRepository.update(userId, {
+    const theUSer = await this.allUserRepository.update(userId, {
       ...user,
     });
+
+    if (userDetails.panelRole >= PanelContributors.NO_ROLE) {
+      const contribution = this.contributorRepository.create({
+        flaskUserId: userDetails.flaskUserId,
+        panelRole: userDetails.panelRole,
+        panelRoleName: getSAYRoleString(userDetails.panelRole),
+        user: user,
+      });
+      await this.contributorRepository.save(contribution);
+    }
+
+    return theUSer;
   }
 
-  createFamily(
-    userDetails: UserParams,
-  ): Promise<AllUserEntity> {
-    if (userDetails.role === SAYPlatformRoles.FAMILY) {
+  createFamily(userDetails: UserParams): Promise<AllUserEntity> {
+    if (userDetails.panelRole == PanelContributors.NO_ROLE) {
       const newUser = this.allUserRepository.create({
         ...userDetails,
-        role: userDetails.role,
-        roleName: getSAYRoleString(userDetails.role),
-        isContributor: false
-
+        flaskUserId: userDetails.flaskUserId,
+        isContributor: false,
       });
       return this.allUserRepository.save({ id: newUser.id, ...newUser });
     } else {
-
     }
   }
 
@@ -173,18 +205,20 @@ export class UserService {
   ): Promise<UpdateResult> {
     return this.allUserRepository.update(userId, {
       ...userDetails,
-      roleName: getSAYRoleString(userDetails.role)
     });
   }
 
   async updateFamily(
     userId: string,
-    userDetails: UserParams
+    userDetails: UserParams,
   ): Promise<UpdateResult> {
-    return this.allUserRepository.update(userId, {
-      ...userDetails,
-      roleName: getSAYRoleString(userDetails.role)
-    });
+    if (userDetails.panelRole == PanelContributors.NO_ROLE) {
+      const { panelRole, ...others } = userDetails
+      return this.allUserRepository.update(userId, {
+        ...others,
+        flaskUserId: userDetails.flaskUserId,
+      });
+    }
   }
 
   // async getFlaskContributor(accessToken: any, flaskSwId: number): Promise<SocialWorkerModel> {
@@ -192,11 +226,17 @@ export class UserService {
   //   return await swApi.apiV2SocialworkersIdGet(accessToken, flaskSwId);
   // }
 
-  getContributorByFlaskId(flaskSwId: number): Promise<AllUserEntity> {
+  getContributorByFlaskId(
+    flaskSwId: number,
+    panelRole: PanelContributors,
+  ): Promise<AllUserEntity> {
     const user = this.allUserRepository.findOne({
       where: {
-        flaskId: flaskSwId,
-        isContributor: true
+        flaskUserId: flaskSwId,
+        isContributor: true,
+        contributions: {
+          panelRole,
+        },
       },
     });
     return user;
@@ -205,8 +245,8 @@ export class UserService {
   getFamilyByFlaskId(flaskFamilyId: number): Promise<AllUserEntity> {
     const familyMember = this.allUserRepository.findOne({
       where: {
-        flaskId: flaskFamilyId,
-        isContributor: false
+        flaskUserId: flaskFamilyId,
+        isContributor: false,
       },
     });
     return familyMember;
@@ -216,6 +256,11 @@ export class UserService {
       where: {
         id: id,
       },
+      relations: {
+        contributions: {
+          createdNeeds: true,
+        },
+      },
     });
     return user;
   }
@@ -223,10 +268,9 @@ export class UserService {
   getUserByFlaskId(flaskId: number): Promise<AllUserEntity> {
     const user = this.allUserRepository.findOne({
       where: {
-        flaskId: flaskId,
+        flaskUserId: flaskId,
       },
     });
     return user;
   }
-
 }

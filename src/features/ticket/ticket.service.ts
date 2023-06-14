@@ -24,7 +24,7 @@ export class TicketService {
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
-  ) { }
+  ) {}
 
   async createTicket(
     ticketDetails: CreateTicketParams,
@@ -82,7 +82,10 @@ export class TicketService {
     } else if (!myView) {
       const view = await this.createTicketView(flaskUserId, ticket.id);
       await this.updateTicketView(latestView.viewed, view);
-      console.log('\x1b[36m%s\x1b[0m', 'created my view with latest time ...\n');
+      console.log(
+        '\x1b[36m%s\x1b[0m',
+        'created my view with latest time ...\n',
+      );
     }
 
     return { ticket, myView };
@@ -114,7 +117,7 @@ export class TicketService {
     participants: AllUserEntity[],
   ): Promise<TicketEntity> {
     const oldParticipants = ticket.contributors;
-    ticket.contributors = [...oldParticipants, ...participants]
+    ticket.contributors = [...oldParticipants, ...participants];
     return this.ticketRepository.save(ticket);
   }
 
@@ -193,7 +196,7 @@ export class TicketService {
         need: true,
       },
       where: {
-        contributors: { flaskId: flaskUserId },
+        contributors: { flaskUserId: flaskUserId },
       },
     });
   }

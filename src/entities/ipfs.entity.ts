@@ -3,11 +3,9 @@ import {
     Column,
     OneToOne,
     JoinColumn,
-    OneToMany,
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
-import { SignatureEntity } from './signature.entity';
 
 
 @Entity()

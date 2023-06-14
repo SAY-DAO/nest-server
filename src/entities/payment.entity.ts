@@ -58,18 +58,5 @@ export class PaymentEntity extends BaseEntity {
 
     @ManyToOne(() => AllUserEntity, (family) => family.payments, { eager: true })
     familyMember: AllUserEntity;
-
-    @Column({ nullable: true })
-    id_need: number;
-
-    @Column({ nullable: true })
-    id_user: number;
-
-    @Column({ nullable: true })
-    credit_amount: number;
-
-    @Column({ nullable: true })
-    donation_amount: number;
-
 }
 

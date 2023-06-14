@@ -10,6 +10,7 @@ import { TicketEntity } from './ticket.entity';
 import { StatusEntity } from './status.entity';
 import { IpfsEntity } from './ipfs.entity';
 import { AllUserEntity } from './user.entity';
+import { SignatureEntity } from './signature.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
@@ -136,6 +137,9 @@ export class NeedEntity extends BaseEntity {
 
   @OneToMany(() => TicketEntity, (t) => t.need)
   tickets?: TicketEntity[];
+
+  @OneToMany(() => SignatureEntity, (s) => s.need)
+  signatures?: SignatureEntity[];
 
   @OneToOne(() => IpfsEntity, (ipfs) => ipfs.need, { eager: true }) // specify inverse side as a second parameter
   ipfs: IpfsEntity;

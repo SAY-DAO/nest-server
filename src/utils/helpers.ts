@@ -9,6 +9,7 @@ import {
   FlaskUserTypesEnum,
   SAYPlatformRoles,
   ServiceStatusEnum,
+  PanelContributors,
 } from 'src/types/interfaces/interface';
 
 export function getSAYRoleInteger(sayRole: string) {
@@ -52,6 +53,27 @@ export function convertFlaskToSayRoles(flaskUserType: number) {
     role = SAYPlatformRoles.FAMILY;
   }
   return role;
+}
+
+export function convertFlaskToSayPanelRoles(flaskUserType: number) {
+  if (typeof flaskUserType != "number") {
+    throw new ServerError('bad role type')
+  }
+  let panelRole: PanelContributors;
+  if (flaskUserType === FlaskUserTypesEnum.SAY_SUPERVISOR) {
+    panelRole = PanelContributors.AUDITOR;
+  } else if (flaskUserType === FlaskUserTypesEnum.ADMIN) {
+    panelRole = PanelContributors.AUDITOR;
+  } else if (flaskUserType === FlaskUserTypesEnum.SUPER_ADMIN) {
+    panelRole = PanelContributors.AUDITOR;
+  } else if (flaskUserType === FlaskUserTypesEnum.SOCIAL_WORKER) {
+    panelRole = PanelContributors.SOCIAL_WORKER;
+  } else if (flaskUserType === FlaskUserTypesEnum.COORDINATOR) {
+    panelRole = PanelContributors.PURCHASER;
+  } else if (flaskUserType === FlaskUserTypesEnum.NGO_SUPERVISOR) {
+    panelRole = PanelContributors.NGO_SUPERVISOR;
+  }
+  return panelRole;
 }
 
 export function getSAYRoleString(sayRole: number) {

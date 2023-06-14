@@ -75,7 +75,12 @@ export class SignatureService {
     flaskUserId: number,
   ): Promise<SignatureEntity> {
     const user = await this.userService.getUserByFlaskId(flaskUserId);
+    let theNeed: NeedEntity
+    try {
+      theNeed = await this.needService.getNeedByFlaskId(flaskNeedId)
+    } catch (e) {
 
+    }
     const theSignature = this.signatureRepository.create({
       hash: signature,
       role,
@@ -83,6 +88,7 @@ export class SignatureService {
       flaskNeedId,
     });
     theSignature.user = user;
+    theSignature.need = theNeed
 
     return await this.signatureRepository.save(theSignature);
   }
@@ -111,7 +117,7 @@ export class SignatureService {
       name: SIGNING_DOMAIN_NAME,
       version: SIGNING_DOMAIN_VERSION,
       verifyingContract: verifyingContract.address,
-      chainId: chainId,
+      chainId: chainId.toNumber(),
     };
   }
 
@@ -125,9 +131,9 @@ export class SignatureService {
     let productVoucher: SwProductVoucher;
     let serviceVoucher: SwServiceVoucher;
     let types: VoucherTypes;
-    const socialWorkerId = need.socialWorker.contributor.flaskId;
-    const auditorId = need.auditor.contributor.flaskId;
-    const purchaserId = need.purchaser.contributor.flaskId;
+    const socialWorkerId = need.socialWorker.contributions.find(c => c.flaskUserId == need.socialWorker.flaskUserId).flaskUserId;
+    const auditorId = need.auditor.contributions.find(c => c.flaskUserId == need.auditor.flaskUserId).flaskUserId;
+    const purchaserId = need.purchaser.contributions.find(c => c.flaskUserId == need.purchaser.flaskUserId).flaskUserId;
     const role =
       flaskUserId === socialWorkerId
         ? SAYPlatformRoles.SOCIAL_WORKER
@@ -160,7 +166,8 @@ export class SignatureService {
         wallet: signerAddress,
         role: getSAYRolePersian(role),
         content: `Your ${impacts} impacts will be ready for a friend to mint!`,
-      };
+      } as const;
+
       types = {
         Voucher: [
           { name: 'title', type: 'string' },
@@ -192,7 +199,7 @@ export class SignatureService {
         wallet: signerAddress,
         role: getSAYRolePersian(role), // string human readable
         content: ` با امضای دیجیتال این نیاز امکان ذخیره غیر متمرکز و ثبت این نیاز بر روی بلاکچین را فراهم می‌کنید.  نیازی که دارای امضای دیجیتال مددکار، شاهد، میانجی و خانواده مجازی باشد نه تنها به شفافیت تراکنش‌ها کمک می‌کند، بلکه امکان تولید ارز دیجیتال (توکن / سهام) را به خویش‌آوندان می‌دهد تا سِی در جهت تبدیل شدن به مجموعه‌ای خودمختار و غیر متمرکز گام بردارد. توکن های تولید شده از هر نیاز به افرادی که در برطرف شدن نیاز مشارکت داشته‌اند ارسال می‌شود، که می‌توانند از آن برای رای دادن، ارتقا کیفیت کودکان و سِی استفاده کنند.`,
-      };
+      } as const;
       types = {
         Voucher: [
           { name: 'title', type: 'string' },
@@ -216,14 +223,14 @@ export class SignatureService {
     console.log('\x1b[36m%s\x1b[0m', 'Prepared the domain! ...\n');
 
     return {
-      SocialWorkerVoucher: productVoucher || serviceVoucher,
+      message: productVoucher || serviceVoucher,
       types,
       domain,
       sayRole: role,
     };
   }
 
-  async deleteOne(signature: SignatureEntity): Promise<Observable<any>> {
-    return from(this.signatureRepository.delete(signature.id));
+  async deleteOne(signatureId): Promise<Observable<any>> {
+    return from(this.signatureRepository.delete(signatureId));
   }
 }

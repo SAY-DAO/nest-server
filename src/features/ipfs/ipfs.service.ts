@@ -154,9 +154,9 @@ export class IpfsService {
 
       const needContributors = {
         // contributors
-        auditorId: need.auditor.contributor.flaskId,
-        socialWorkerId: need.socialWorker.contributor.flaskId,
-        purchaserId: need.purchaser.contributor.flaskId,
+        auditorId: need.auditor.contributions.find(c => c.flaskUserId == need.auditor.flaskUserId).flaskUserId,
+        socialWorkerId: need.socialWorker.contributions.find(c => c.flaskUserId == need.socialWorker.flaskUserId).flaskUserId,
+        purchaserId: need.purchaser.contributions.find(c => c.flaskUserId == need.purchaser.flaskUserId).flaskUserId,
         // family
         // virtualFamilies: [
         //   ...new Map(need.verifiedPayments.map((p) => p.verified && [p.id, p.id_user])).values(),

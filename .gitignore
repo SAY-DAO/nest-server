@@ -2,7 +2,7 @@
 /dist
 /node_modules
 /data
-
+/.yarn
 # Logs
 logs
 *.log

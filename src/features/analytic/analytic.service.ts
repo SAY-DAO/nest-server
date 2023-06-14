@@ -98,32 +98,42 @@ export class AnalyticService {
         'child.isConfirmed',
       ])
       .where('child.id_ngo != :ngoId', { ngoId: 3 })
+      .andWhere('child.isMigrated = :childIsMigrated', { childIsMigrated: false })
       .getManyAndCount();
 
     const dead = await this.flaskChildRepository.count({
       where: {
+        isConfirmed: true,
         existence_status: 0,
+        isMigrated: false
       },
     });
 
     const alivePresent = await this.flaskChildRepository.count({
       where: {
+        isConfirmed: true,
         existence_status: 1,
+        isMigrated: false
       },
     });
     const aliveGone = await this.flaskChildRepository.count({
       where: {
+        isConfirmed: true,
         existence_status: 2,
+        isMigrated: false
       },
     });
     const tempGone = await this.flaskChildRepository.count({
       where: {
+        isConfirmed: true,
         existence_status: 3,
+        isMigrated: false
       },
     });
     const confirmed = await this.flaskChildRepository.count({
       where: {
         isConfirmed: true,
+        isMigrated: false
       },
     });
 
@@ -152,18 +162,21 @@ export class AnalyticService {
     const all = await this.flaskNeedRepository
       .createQueryBuilder('need')
       .where('need.child_id = :childId', { childId: childId })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const confirmed = await this.flaskNeedRepository
       .createQueryBuilder('need')
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const unConfirmed = await this.flaskNeedRepository
       .createQueryBuilder('need')
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: false })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const confirmedNotPaid = await this.flaskNeedRepository
@@ -171,18 +184,21 @@ export class AnalyticService {
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('need.status = 0')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const partialPay = await this.flaskNeedRepository
       .createQueryBuilder('need')
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.status = 1')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const completePay = await this.flaskNeedRepository
       .createQueryBuilder('need')
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.status = 2')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const purchased = await this.flaskNeedRepository
@@ -190,6 +206,7 @@ export class AnalyticService {
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.type = :type', { type: 1 })
       .andWhere('need.status = 3')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const moneyToNgo = await this.flaskNeedRepository
@@ -197,6 +214,7 @@ export class AnalyticService {
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.type = :type', { type: 0 })
       .andWhere('need.status = 3')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const deliveredNgo = await this.flaskNeedRepository
@@ -204,6 +222,7 @@ export class AnalyticService {
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.type = :type', { type: 1 })
       .andWhere('need.status = 4')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     const deliveredChild = await this.flaskNeedRepository
@@ -211,6 +230,7 @@ export class AnalyticService {
       .select(['need.id', 'need.child_id', 'need.child_delivery_date'])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.child_delivery_date IS NOT NULL')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
     // const childWithNeeds = await this.flaskUserRepository

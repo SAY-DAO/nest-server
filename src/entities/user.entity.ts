@@ -7,30 +7,26 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { PaymentEntity } from './payment.entity';
-import { FlaskUserTypesEnum, SAYPlatformRoles } from '../types/interfaces/interface';
 import { BaseEntity } from './BaseEntity';
 import { EthereumAccountEntity } from './ethereum.account.entity';
 import { TicketEntity } from './ticket.entity';
 import { ContributorEntity } from './contributor.entity';
 import { SignatureEntity } from './signature.entity';
 
-
 @Entity()
 export class AllUserEntity extends BaseEntity {
   @Column({ nullable: false })
-  flaskId: number;
+  flaskUserId: number;
 
   @Column({ nullable: true })
   typeId?: number; // for contributors
 
-  @OneToOne(() => ContributorEntity, { eager: true })
-  @JoinColumn()
-  contributor?: ContributorEntity;
+  @OneToMany(() => ContributorEntity, (c) => c.user, { eager: true })
+  contributions?: ContributorEntity[];
 
-  @Column({ type: 'enum', enum: FlaskUserTypesEnum, nullable: true })
-  role: SAYPlatformRoles;
-
-  @OneToOne(() => EthereumAccountEntity, (account) => account.user, { eager: true })
+  @OneToOne(() => EthereumAccountEntity, (account) => account.user, {
+    eager: true,
+  })
   @JoinColumn()
   wallet?: EthereumAccountEntity;
 
@@ -45,9 +41,6 @@ export class AllUserEntity extends BaseEntity {
 
   @Column({ nullable: true })
   avatarUrl?: string;
-
-  @Column({ nullable: false })
-  roleName: string;
 
   @Column({ nullable: true })
   created?: Date;
@@ -72,5 +65,4 @@ export class AllUserEntity extends BaseEntity {
     eager: false,
   })
   signatures: SignatureEntity[];
-
 }

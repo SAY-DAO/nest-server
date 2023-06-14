@@ -106,7 +106,7 @@ export class ChildrenService {
       ...childDetails,
       ngo: ngo,
       socialWorker: socialWorker,
-      flaskSwId: socialWorker.flaskId,
+      flaskSwId: socialWorker.flaskUserId,
       flaskNgoId: ngo.flaskNgoId,
     });
 

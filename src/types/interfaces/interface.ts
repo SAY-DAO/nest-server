@@ -22,10 +22,11 @@ export enum FlaskUserTypesEnum {
 }
 
 export enum PanelContributors {
-    AUDITOR = 4,
+    NO_ROLE = 0,
     SOCIAL_WORKER = 1,
-    PURCHASER = 3,
     NGO_SUPERVISOR = 2,
+    PURCHASER = 3,
+    AUDITOR = 4,
 }
 export enum AppContributors {
     FAMILY = 5,
@@ -90,7 +91,7 @@ export interface Domain {
 }
 
 export interface SwSignatureResult {
-    SocialWorkerVoucher: SwProductVoucher | SwServiceVoucher;
+    message: SwProductVoucher | SwServiceVoucher;
     types: VoucherTypes;
     domain: Domain;
     sayRole: SAYPlatformRoles;

@@ -20,9 +20,6 @@ export class ChildrenEntity extends BaseEntity {
   flaskConfirmUser?: number; //confirmUser from flask
 
   @Column({ nullable: true })
-  address: string;
-
-  @Column({ nullable: true })
   awakeAvatarUrl: string;
 
   @Column({ nullable: true })
