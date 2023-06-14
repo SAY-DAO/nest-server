@@ -248,6 +248,7 @@ export class SyncService {
           flaskNeed.confirmUser,
           PanelContributors.AUDITOR,
         );
+
         const flaskAuditor = await this.userService.getFlaskSocialWorker(
           flaskNeed.confirmUser,
         );

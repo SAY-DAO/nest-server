@@ -131,9 +131,9 @@ export class SignatureService {
     let productVoucher: SwProductVoucher;
     let serviceVoucher: SwServiceVoucher;
     let types: VoucherTypes;
-    const socialWorkerId = need.socialWorker.contributions.find(c => c.flaskUserId == need.socialWorker.flaskUserId).flaskUserId;
-    const auditorId = need.auditor.contributions.find(c => c.flaskUserId == need.auditor.flaskUserId).flaskUserId;
-    const purchaserId = need.purchaser.contributions.find(c => c.flaskUserId == need.purchaser.flaskUserId).flaskUserId;
+    const socialWorkerId = need.socialWorker.contributions && need.socialWorker.contributions.find(c => c.flaskUserId == need.socialWorker.flaskUserId).flaskUserId;
+    const auditorId = need.auditor.contributions && need.auditor.contributions.find(c => c.flaskUserId == need.auditor.flaskUserId).flaskUserId;
+    const purchaserId = need.purchaser.contributions && need.purchaser.contributions.find(c => c.flaskUserId == need.purchaser.flaskUserId).flaskUserId;
     const role =
       flaskUserId === socialWorkerId
         ? SAYPlatformRoles.SOCIAL_WORKER

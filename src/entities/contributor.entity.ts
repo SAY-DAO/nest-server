@@ -3,7 +3,6 @@ import {
   Column,
   OneToMany,
   ManyToOne,
-  Index,
 } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { ChildrenEntity } from './children.entity';
@@ -39,7 +38,6 @@ export class ContributorEntity extends BaseEntity {
   @ManyToOne(() => AllUserEntity, (n) => n.contributions, { eager: false })
   user?: AllUserEntity;
 
-  @Index({ unique: true })
   @Column({ type: 'enum', enum: PanelContributors, nullable: true })
   panelRole: PanelContributors;
 

@@ -107,29 +107,51 @@ export class UserService {
     userDetails: UserParams,
     ngo: NgoEntity,
   ): Promise<AllUserEntity> {
-    const newContribution = this.contributorRepository.create({
-      flaskUserId: userDetails.flaskUserId,
-      flaskNgoId: ngo.flaskNgoId,
-      ngo: ngo,
-      panelRole: userDetails.panelRole,
-      panelRoleName: getSAYRoleString(userDetails.panelRole),
-    });
-
-    const theContribution = await this.contributorRepository.save(
-      newContribution,
-    );
-
 
     const theUser = await this.getUserByFlaskId(userDetails.flaskUserId);
     if (!theUser) {
+      console.log('\x1b[36m%s\x1b[0m', 'Creating a user ...');
+
       const newUser = this.allUserRepository.create({
         ...userDetails,
         flaskUserId: userDetails.flaskUserId,
         isContributor: true,
-        contributions: [theContribution],
       });
-      return await this.allUserRepository.save(newUser);
-    } else if (theUser) {
+      const theUser = await this.allUserRepository.save(newUser);
+      console.log(theUser)
+
+      if (userDetails.panelRole >= PanelContributors.NO_ROLE) {
+        console.log('\x1b[33m%s\x1b[0m', 'Creating a contribution ...\n');
+        const newContribution = this.contributorRepository.create({
+          flaskUserId: userDetails.flaskUserId,
+          flaskNgoId: ngo.flaskNgoId,
+          ngo: ngo,
+          panelRole: userDetails.panelRole,
+          panelRoleName: getSAYRoleString(userDetails.panelRole),
+          user: theUser
+        });
+
+        await this.contributorRepository.save(
+          newContribution,
+        );
+        console.log('\x1b[33m%s\x1b[0m', 'Saved a contribution ...\n');
+      }
+      return theUser
+    } else if (theUser && userDetails.panelRole >= PanelContributors.NO_ROLE && theUser.contributions && !theUser.contributions.find(c => c.panelRole == userDetails.panelRole)) {
+      console.log('\x1b[36m%s\x1b[0m', 'Updating a user ...');
+      console.log('\x1b[33m%s\x1b[0m', 'Creating a contribution ...\n');
+      const newContribution = this.contributorRepository.create({
+        flaskUserId: userDetails.flaskUserId,
+        flaskNgoId: ngo.flaskNgoId,
+        ngo: ngo,
+        panelRole: userDetails.panelRole,
+        panelRoleName: getSAYRoleString(userDetails.panelRole),
+        user: theUser
+      });
+      const theContribution = await this.contributorRepository.save(
+        newContribution,
+      );
+      console.log('\x1b[33m%s\x1b[0m', 'Saved a contribution ...\n');
       theUser.contributions = [...theUser.contributions, theContribution];
       await this.allUserRepository.save(theUser);
       return await this.getUserByFlaskId(userDetails.flaskUserId);
@@ -140,47 +162,26 @@ export class UserService {
     userId: string,
     userDetails: UserParams,
   ): Promise<UpdateResult> {
-    // // update social worker need
-    // if (userDetails.need) {
-    //   if (userDetails.role === SAYPlatformRoles.SOCIAL_WORKER) {
-    //     contributor.createdNeeds = contributor.createdNeeds ? [...contributor.createdNeeds, userDetails.need] : [userDetails.need]
-    //   }
-    //   // update purchaser needs
-    //   if (userDetails.role === SAYPlatformRoles.PURCHASER) {
-    //     contributor.purchasedNeeds = contributor.purchasedNeeds ? [...contributor.purchasedNeeds, userDetails.need] : [userDetails.need]
-    //   }
-
-    //   // update auditor needs
-    //   if (userDetails.role === SAYPlatformRoles.AUDITOR) {
-    //     contributor.auditedNeeds = contributor.auditedNeeds ? [...contributor.auditedNeeds, userDetails.need] : [userDetails.need]
-    //   }
-    //   console.log('\x1b[36m%s\x1b[0m', 'here ...\n');
-    //   console.log(contributor)
-
-    //   await this.contributorRepository.update(contributor.id, {
-    //     ...contributor,
-    //   })
-    // }
-
-    // await this.contributorRepository.save(contributor);
-
-
     const user = this.allUserRepository.create({
       ...userDetails,
-
       isContributor: true,
     });
+
     const theUSer = await this.allUserRepository.update(userId, {
       ...user,
     });
+    const updatedUser = await this.getUserByFlaskId(userDetails.flaskUserId)
 
-    if (userDetails.panelRole >= PanelContributors.NO_ROLE) {
+
+
+    if (userDetails.panelRole >= PanelContributors.NO_ROLE && !updatedUser.contributions.find(c => c.panelRole == userDetails.panelRole)) {
       const contribution = this.contributorRepository.create({
         flaskUserId: userDetails.flaskUserId,
         panelRole: userDetails.panelRole,
         panelRoleName: getSAYRoleString(userDetails.panelRole),
         user: user,
       });
+
       await this.contributorRepository.save(contribution);
     }
 
@@ -213,7 +214,7 @@ export class UserService {
     userDetails: UserParams,
   ): Promise<UpdateResult> {
     if (userDetails.panelRole == PanelContributors.NO_ROLE) {
-      const { panelRole, ...others } = userDetails
+      const { panelRole, ...others } = userDetails;
       return this.allUserRepository.update(userId, {
         ...others,
         flaskUserId: userDetails.flaskUserId,
