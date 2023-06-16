@@ -10,6 +10,8 @@ RUN yarn install --frozen-lockfile \
     && yarn run build
 
 # ---
+CMD ["sh", "-c", "yarn typeorm migration:run && yarn start:prod"]
+
 
 FROM node:18.14-alpine as production
 

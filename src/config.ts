@@ -31,7 +31,7 @@ function loadConfig() {
       database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
       synchronize: true,
-      logging: false,
+      logging: true,
       dropSchema: false,
       autoLoadEntities: true,
       entities: [`${__dirname}/entities/*.js`],
