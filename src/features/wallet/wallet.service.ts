@@ -118,12 +118,12 @@ export class SignatureService {
     // const tx = await verifyingContract.deployed()
     const chainId = await verifyingContract.getChainID();
     console.log(`chainId from signature service: ${chainId}`);
-      
+
     return {
       name: SIGNING_DOMAIN_NAME,
       version: SIGNING_DOMAIN_VERSION,
       verifyingContract: verifyingContract.address,
-      chainId: 11155111,
+      chainId: chainId.toNumber(),
     };
   }
 
