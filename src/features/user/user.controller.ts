@@ -278,9 +278,6 @@ export class UserController {
         const time6 = new Date().getTime();
         timeDifferenceWithComment(time5, time6, 'Second organize In ');
 
-        const allUserSignatures = await this.signatureService.getUserSignatures(
-            userId,
-        );
         const paidCount = paid.meta.totalItems;
         const notPaidCount = notPaid.meta.totalItems;
         const purchasedCount = purchased.meta.totalItems;
@@ -321,8 +318,6 @@ export class UserController {
             typeId,
             needs: organizedNeeds,
             children,
-            // timeLine: { summary, inMonth },
-            signatures: allUserSignatures,
             arrivals,
         };
     }

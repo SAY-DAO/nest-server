@@ -285,7 +285,7 @@ export class SignatureController {
   }
 
   @Post(`signature/create/:signature`)
-  @ApiOperation({ description: 'Get all signatures' })
+  @ApiOperation({ description: 'Create a signature' })
   async createSignature(
     @Param('signature') signature: string,
     @Body(ValidateSignaturePipe) body: CreateSignatureDto,
@@ -479,10 +479,17 @@ export class SignatureController {
   }
 
   @Get(`signature/:signature`)
-  @ApiOperation({ description: 'Get all signatures' })
+  @ApiOperation({ description: 'Get all signature' })
   async getSignature(@Param('signature') signature: string) {
     return await this.signatureService.getSignature(signature);
   }
+
+  @Get(`signatures/:flaskUserId`)
+  @ApiOperation({ description: 'Get user signatures' })
+  async getUserSignatures(@Param('flaskUserId') flaskUserId: number) {
+    return await this.signatureService.getUserSignatures(flaskUserId);
+  }
+
 
   @Delete(`signature/:signature`)
   @ApiOperation({ description: 'Delete a signatures' })

@@ -53,6 +53,9 @@ export class SignatureService {
       where: {
         flaskUserId,
       },
+      relations: {
+        user: true
+      }
     });
   }
 
@@ -61,6 +64,9 @@ export class SignatureService {
       where: {
         flaskNeedId,
       },
+      relations: {
+        user: true
+      }
     });
   }
 
