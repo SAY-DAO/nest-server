@@ -30,7 +30,7 @@ function loadConfig() {
       password: process.env.DB_PASS ?? 'postgres',
       database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
-      synchronize: true,
+      synchronize: false,
       logging: false,
       dropSchema: false,
       autoLoadEntities: true,
