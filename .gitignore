@@ -3,6 +3,7 @@
 /node_modules
 /data
 /.yarn
+yarn.lock
 # Logs
 logs
 *.log
