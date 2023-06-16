@@ -14,7 +14,7 @@ import { PanelContributors, } from 'src/types/interfaces/interface';
 
 @Entity() // panel admin, sw, auditor, ...
 export class ContributorEntity extends BaseEntity {
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   flaskUserId: number;
 
   @Column({ nullable: true })
