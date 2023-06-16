@@ -34,6 +34,7 @@ function loadConfig() {
       logging: true,
       dropSchema: true,
       autoLoadEntities: true,
+      migrationsRun: true
       // entities: [`${__dirname}/entities/*.js`],
     },
     db2: {
