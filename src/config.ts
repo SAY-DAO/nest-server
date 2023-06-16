@@ -32,9 +32,9 @@ function loadConfig() {
       enabled: true,
       synchronize: true,
       logging: true,
-      dropSchema: false,
+      dropSchema: true,
       autoLoadEntities: true,
-      entities: [`${__dirname}/entities/*.js`],
+      // entities: [`${__dirname}/entities/*.js`],
     },
     db2: {
       name: 'flaskPostgres',
