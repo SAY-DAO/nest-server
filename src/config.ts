@@ -30,11 +30,11 @@ function loadConfig() {
       password: process.env.DB_PASS ?? 'postgres',
       database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
-      synchronize: false,
+      synchronize: true,
       logging: false,
       dropSchema: false,
       autoLoadEntities: true,
-      // entities: [`${__dirname}/entities/*.js`],
+      entities: [`${__dirname}/entities/*.js`],
     },
     db2: {
       name: 'flaskPostgres',
