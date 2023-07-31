@@ -1,3 +1,12 @@
+export enum VirtualFamilyRole {
+    FATHER = 0,
+    MOTHER = 1,
+    AMOO = 2,
+    KHALEH = 3,
+    DAEI = 4,
+    AMME = 5,
+}
+
 export enum Colors {
     WHITE = 0,
     BLUE = 1,

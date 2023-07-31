@@ -19,7 +19,7 @@ import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { SignatureService } from '../wallet/wallet.service';
 import { SignatureEntity } from 'src/entities/signature.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
@@ -30,11 +30,13 @@ import { NgoService } from '../ngo/ngo.service';
 import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { DownloadService } from '../download/download.service';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, SocialWorker, Child, Payment, NGO],
+      [Need, SocialWorker, Child, Payment, NGO, UserFamily, Family, User],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -50,7 +52,7 @@ import { DownloadService } from '../download/download.service';
       EthereumAccountEntity,
       IpfsEntity,
       NgoEntity,
-      NgoArrivalEntity
+      NgoArrivalEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -65,7 +67,7 @@ import { DownloadService } from '../download/download.service';
     SignatureService,
     IpfsService,
     NgoService,
-    DownloadService
+    DownloadService,
   ],
 })
 export class UserModule implements NestModule {

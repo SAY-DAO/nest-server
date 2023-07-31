@@ -5,7 +5,7 @@ import { AllUserEntity } from '../../entities/user.entity';
 import { UserParams } from 'src/types/parameters/UserParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { getSAYRoleString } from 'src/utils/helpers';
 import {
   PanelContributors,
@@ -24,6 +24,8 @@ export class UserService {
     private ethereumWalletRepository: Repository<EthereumAccountEntity>,
     @InjectRepository(SocialWorker, 'flaskPostgres')
     private flaskSocialWorker: Repository<SocialWorker>,
+    @InjectRepository(User, 'flaskPostgres')
+    private flaskUser: Repository<User>,
   ) { }
 
   getFlaskSws(): Promise<SocialWorker[]> {
@@ -52,6 +54,10 @@ export class UserService {
 
   getUsers(): Promise<AllUserEntity[]> {
     return this.allUserRepository.find();
+  }
+
+  getFlaskUsers(): Promise<User[]> {
+    return this.flaskUser.find();
   }
 
   getContributors(): Promise<AllUserEntity[]> {
@@ -118,8 +124,6 @@ export class UserService {
         isContributor: true,
       });
       const theUser = await this.allUserRepository.save(newUser);
-      console.log(theUser)
-
       if (userDetails.panelRole >= PanelContributors.NO_ROLE) {
         console.log('\x1b[33m%s\x1b[0m', 'Creating a contribution ...\n');
         const newContribution = this.contributorRepository.create({

@@ -4,7 +4,5 @@ export class CreateStatusDto {
     need_id?: number;
     new_status?: number;
     old_status?: number;
-    created?: Date;
-    updated?: Date;
 }
 

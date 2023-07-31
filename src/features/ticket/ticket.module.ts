@@ -22,7 +22,7 @@ import { StatusService } from '../status/status.service';
 import { StatusEntity } from 'src/entities/status.entity';
 import { CityEntity } from 'src/entities/city.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
-import { SocialWorker } from '../../entities/flaskEntities/user.entity';
+import { SocialWorker, User } from '../../entities/flaskEntities/user.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { LocationService } from '../location/location.service';
@@ -34,11 +34,23 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { ProviderEntity } from 'src/entities/provider.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 import { ProviderService } from '../provider/provider.service';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, SocialWorker, NGO, Cities, Child, Payment],
+      [
+        Need,
+        SocialWorker,
+        NGO,
+        Cities,
+        Child,
+        Payment,
+        UserFamily,
+        Family,
+        User,
+      ],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -72,7 +84,7 @@ import { ProviderService } from '../provider/provider.service';
     UserService,
     ChildrenService,
     StatusService,
-    ProviderService
+    ProviderService,
   ],
 })
 export class TicketModule implements NestModule {

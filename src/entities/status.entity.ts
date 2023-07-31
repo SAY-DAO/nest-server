@@ -21,12 +21,6 @@ export class StatusEntity extends BaseEntity {
     @Column({ nullable: true })
     oldStatus?: number;
 
-    @Column({ nullable: true })
-    created?: Date;
-
-    @Column({ nullable: true })
-    updated?: Date;
-
     @ManyToOne(() => NeedEntity, (need) => need.statusUpdates, { eager: false })
     need: NeedEntity;
 }

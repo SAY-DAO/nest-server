@@ -1,4 +1,5 @@
 import 'dotenv/config'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+import DataCache from './utils/dataCache';
 
 let configObject;
 
@@ -11,6 +12,9 @@ const Environments = {
 
 function loadConfig() {
   const NODE_ENV = process.env.NODE_ENV ?? Environments.development;
+  process.env.TZ = "Asia/Tehran";
+  console.log(process.env);
+  
 
   const configs = {
     serverPort: process.env.PORT || 8002,
@@ -30,7 +34,7 @@ function loadConfig() {
       password: process.env.DB_PASS ?? 'postgres',
       database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
-      synchronize: false,
+      synchronize:NODE_ENV === 'development' ? true: false,
       logging: true,
       dropSchema: false,
       autoLoadEntities: true,
@@ -53,6 +57,8 @@ function loadConfig() {
       // entities: [`${__dirname}/entities/flaskEntities/*.js`],
     },
     logPretty: 'LOG_PRETTY_PRINT',
+    dataCache: new DataCache(),
+
   };
 
   configs.documentUrl =

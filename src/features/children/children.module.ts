@@ -11,11 +11,16 @@ import { NgoEntity } from '../../entities/ngo.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Need, Child, Payment, SocialWorker], 'flaskPostgres'),
+    TypeOrmModule.forFeature(
+      [Need, Child, Payment, SocialWorker, UserFamily, Family, User],
+      'flaskPostgres',
+    ),
     TypeOrmModule.forFeature([ChildrenEntity, NeedEntity, NgoEntity]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -23,4 +28,4 @@ import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
   controllers: [ChildrenController],
   providers: [ChildrenService, NeedService, ChildrenService],
 })
-export class ChildrenModule { }
+export class ChildrenModule {}

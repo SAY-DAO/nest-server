@@ -28,9 +28,10 @@ async function startServer() {
   // app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
     origin: [
-      "http://localhost:3000",
-      "https://panel.saydao.org",
-      "https://panel2.saydao.org",
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://panel.saydao.org',
+      'https://panel2.saydao.org',
     ],
     allowedHeaders: [
       'Origin,X-Requested-With,Content-Type ,Accept,X-TAKE, X-SKIP, X-LIMIT, authorization',
@@ -38,7 +39,7 @@ async function startServer() {
       'Access-Control-Allow-Credentials',
       'Access-Control-Allow-Methods',
       'Access-Control-Allow-Origin',
-      'flaskUserId'
+      'flaskUserId',
     ],
 
     methods: ['GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'],
@@ -46,7 +47,6 @@ async function startServer() {
     credentials: true,
     preflightContinue: false,
   });
-
 
   app.use(cookieParser());
 
@@ -61,7 +61,7 @@ async function startServer() {
     database: 'say_dapp',
   });
 
-  app.set('trust proxy', 1) // trust first proxy
+  app.set('trust proxy', 1); // trust first proxy
 
   app.use(
     session({
@@ -74,17 +74,22 @@ async function startServer() {
       resave: true,
       saveUninitialized: true,
       cookie: {
-        domain: process.env.NODE_ENV === 'development' ? '127.0.0.1' : 'nest.saydao.org',
+        domain:
+          process.env.NODE_ENV === 'development'
+            ? '127.0.0.1'
+            : 'nest.saydao.org',
         path: '/api/dao',
         secure: process.env.NODE_ENV === 'development' ? false : true,
         sameSite: process.env.NODE_ENV === 'development' ? false : 'none',
-        maxAge: process.env.NODE_ENV === 'development' ? 1000 * 60 * 60 : 1000 * 60 * 60
-      }
+        maxAge:
+          process.env.NODE_ENV === 'development'
+            ? 1000 * 60 * 60
+            : 1000 * 60 * 60,
+      },
     }),
   );
 
   await app.listen(config().serverPort);
-
 }
 
 async function stopServer() {

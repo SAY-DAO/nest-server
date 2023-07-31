@@ -147,7 +147,12 @@ export class NgoService {
   }
 
   getFlaskNgos(): Promise<NGO[]> {
-    return this.ngoFlaskRepository.find();
+    return this.ngoFlaskRepository.createQueryBuilder('ngo')
+    .andWhere('ngo.id NOT IN (:...testNgoIds)', {
+      testNgoIds: [3, 14],
+    })
+    .cache(10000)
+    .getMany();
   }
   
   getFlaskNgo(flaskNgoId: number): Promise<NGO> {

@@ -590,8 +590,6 @@ export class SyncService {
           sw_id: swId,
           new_status: newStatus,
           old_status: oldStatus,
-          created: created,
-          updated: updated,
         } = statuses[s];
 
         statusDetails = {
@@ -600,8 +598,6 @@ export class SyncService {
           swId: swId,
           newStatus: newStatus,
           oldStatus: oldStatus,
-          created: created,
-          updated: updated,
         };
         if (!nestStatus) {
           console.log('\x1b[36m%s\x1b[0m', 'Creating a Status ...\n' + s);

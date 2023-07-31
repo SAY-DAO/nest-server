@@ -10,16 +10,18 @@ import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildrenService } from '../children/children.service';
 import { PaymentController } from './payment.controller';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, SocialWorker, Child, Payment],
+      [Need, SocialWorker, Child, Payment, UserFamily, Family, User],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -34,4 +36,4 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
   controllers: [PaymentController],
   providers: [PaymentService, UserService, NeedService, ChildrenService],
 })
-export class PaymentModule { }
+export class PaymentModule {}

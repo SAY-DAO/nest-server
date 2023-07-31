@@ -54,6 +54,8 @@ import { NeedStatusUpdate } from './entities/flaskEntities/NeedStatusUpdate.enti
 import { NeedReceipt } from './entities/flaskEntities/needReceipt.entity';
 import { Receipt } from './entities/flaskEntities/receipt.entity';
 import { DownloadModule } from './features/download/download.module';
+import { NeedFamily } from './entities/flaskEntities/needFamily';
+import { ScheduleTaskModule } from './features/schedule/schedule.module';
 
 const imports = [
   HttpModule,
@@ -88,8 +90,21 @@ const imports = [
   }),
   TypeOrmModule.forRoot({
     ...config().db2,
-    entities: [Need, SocialWorker, NGO, Cities, Child, Payment, Family, NeedStatusUpdate, Receipt, NeedReceipt],
+    entities: [
+      Need,
+      SocialWorker,
+      NGO,
+      Cities,
+      Child,
+      Payment,
+      Family,
+      NeedFamily,
+      NeedStatusUpdate,
+      Receipt,
+      NeedReceipt,
+    ],
   }),
+  ScheduleTaskModule,
   GatewayModule,
   LocationModule,
   StatusModule,
@@ -107,7 +122,7 @@ const imports = [
   WalletModule,
   IpfsModule,
   AnalyticModule,
-  DownloadModule
+  DownloadModule,
 ];
 
 @Module({
@@ -115,4 +130,4 @@ const imports = [
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

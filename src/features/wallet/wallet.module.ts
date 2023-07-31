@@ -8,9 +8,7 @@ import { UserService } from '../user/user.service';
 import { ChildrenService } from '../children/children.service';
 import { NeedEntity } from '../../entities/need.entity';
 import { ChildrenEntity } from '../../entities/children.entity';
-import {
-  AllUserEntity,
-} from '../../entities/user.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { SignatureMiddleware } from './middlewares/wallet.middleware';
@@ -23,13 +21,11 @@ import { ReceiptEntity } from 'src/entities/receipt.entity';
 import { StatusEntity } from 'src/entities/status.entity';
 import { StatusService } from '../status/status.service';
 import { CityEntity } from 'src/entities/city.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { HttpModule } from '@nestjs/axios';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { IpfsService } from '../ipfs/ipfs.service';
-import {
-  IpfsEntity,
-} from 'src/entities/ipfs.entity';
+import { IpfsEntity } from 'src/entities/ipfs.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { LocationService } from '../location/location.service';
 import { Cities } from 'src/entities/flaskEntities/cities.entity';
@@ -41,6 +37,8 @@ import { ProviderService } from '../provider/provider.service';
 import { ProviderEntity } from 'src/entities/provider.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 import { DownloadService } from '../download/download.service';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
@@ -56,7 +54,20 @@ import { DownloadService } from '../download/download.service';
       quorum: 1,
       useDefaultProvider: true,
     }),
-    TypeOrmModule.forFeature([SocialWorker, Need, NGO, Cities, Child, Payment], 'flaskPostgres'),
+    TypeOrmModule.forFeature(
+      [
+        SocialWorker,
+        Need,
+        NGO,
+        Cities,
+        Child,
+        Payment,
+        UserFamily,
+        Family,
+        User,
+      ],
+      'flaskPostgres',
+    ),
     TypeOrmModule.forFeature([
       PaymentEntity,
       SignatureEntity,
@@ -89,7 +100,7 @@ import { DownloadService } from '../download/download.service';
     StatusService,
     IpfsService,
     ProviderService,
-    DownloadService
+    DownloadService,
   ],
 })
 export class WalletModule {

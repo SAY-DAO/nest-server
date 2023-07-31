@@ -8,7 +8,15 @@ import { ChildParams } from 'src/types/parameters/ChildParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
-import { childExistence } from 'src/types/interfaces/interface';
+import {
+  VirtualFamilyRole,
+  childExistence,
+} from 'src/types/interfaces/interface';
+import { Family } from 'src/entities/flaskEntities/family.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { User } from 'src/entities/flaskEntities/user.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { Need } from 'src/entities/flaskEntities/need.entity';
 
 @Injectable()
 export class ChildrenService {
@@ -17,7 +25,11 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-  ) { }
+    @InjectRepository(Family, 'flaskPostgres')
+    private flaskFamilyRepository: Repository<Family>,
+    @InjectRepository(User, 'flaskPostgres')
+    private flaskUserRepository: Repository<User>,
+  ) {}
 
   async countChildren(ngoIds: number[]) {
     return this.flaskChildRepository
@@ -25,7 +37,9 @@ export class ChildrenService {
       .select(['child'])
       .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('child.isDeleted = :childDeleted', { childDeleted: false })
-      .andWhere('child.isMigrated = :childIsMigrated', { childIsMigrated: false })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
       .andWhere('child.existence_status IN (:...existenceStatus)', {
         existenceStatus: [childExistence.AlivePresent],
       })
@@ -34,36 +48,6 @@ export class ChildrenService {
       })
       .getCount();
   }
-
-  // async getAllFlaskChildren(
-  //   options: HeaderOptions,
-  //   params: ChildApiParams,
-  // ): Promise<ChildrenData> {
-  //   const childApi = new ChildAPIApi();
-  //   const needs = childApi.apiV2ChildAllConfirmconfirmGet(
-  //     options.accessToken,
-  //     params.confirm,
-  //     params.ngoId,
-  //     params.swId,
-  //     options.X_TAKE,
-  //     options.X_SKIP,
-  //     params.existenceStatus,
-  //   );
-  //   return needs;
-  // }
-
-  // async getFlaskChild(
-  //   accessToken: string,
-  //   childId: number,
-  // ): Promise<ChildModel> {
-  //   const childApi = new ChildAPIApi();
-  //   const child = childApi.apiV2ChildChildIdchildIdconfirmconfirmGet(
-  //     accessToken,
-  //     childId,
-  //     2,
-  //   );
-  //   return child;
-  // }
 
   getFlaskChild(flaskChildId: number) {
     return this.flaskChildRepository.findOne({
@@ -74,14 +58,6 @@ export class ChildrenService {
   async getFlaskChildren() {
     return await this.flaskChildRepository
       .createQueryBuilder('child')
-      // .select([
-      //   'child.id',
-      //   'child.id_ngo',
-      //   'child.sayname_translations',
-      //   'child.awakeAvatarUrl',
-      //   'child.sleptAvatarUrl',
-      //   'child.isConfirmed',
-      // ])
       .getMany();
   }
 
@@ -135,5 +111,82 @@ export class ChildrenService {
       },
     });
     return child;
+  }
+
+  async getFamilyMembers(familyId: number): Promise<any> {
+    return await this.flaskFamilyRepository
+      .createQueryBuilder('family')
+      .innerJoinAndMapMany(
+        'family.members',
+        UserFamily,
+        'userFamily',
+        'userFamily.id_family = family.id',
+      )
+      .where('userFamily.id_family = :familyId', { familyId: familyId })
+      .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
+      .select(['family', 'userFamily'])
+      .getManyAndCount();
+  }
+
+  async getFamilyRoles(
+    userId: number,
+    vFamilyRole: VirtualFamilyRole,
+  ): Promise<any> {
+    return await this.flaskUserRepository
+      .createQueryBuilder('user')
+      .leftJoinAndMapMany(
+        'user.payments',
+        Payment,
+        'payment',
+        'payment.id_user = user.id',
+      )
+      .leftJoinAndMapOne(
+        'payment.need',
+        Need,
+        'need',
+        'need.id = payment.id_need',
+      )
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapMany(
+        'user.user_families',
+        UserFamily,
+        'userFamily',
+        'userFamily.id_user = user.id',
+      )
+      .leftJoinAndMapOne(
+        'userFamily.family',
+        Family,
+        'family',
+        'family.id = userFamily.id_family',
+      )
+      .where('user.id = :userId', { userId: userId })
+      .andWhere('need.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
+      .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('userFamily.flaskFamilyRole = :flaskFamilyRole', {
+        flaskFamilyRole: vFamilyRole,
+      })
+      .andWhere('payment.id_user = :userId', { userId: userId })
+      .andWhere('payment.id_need IS NOT NULL')
+      .andWhere('payment.id IS NOT NULL')
+      .andWhere('payment.verified IS NOT NULL')
+      .andWhere('payment.order_id IS NOT NULL')
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      // .select([
+      //   'user.id',
+      //   'payment',
+      //   'need.id',
+      //   'need.child_id',
+      //   'user.userName',
+      //   'family',
+      //   'userFamily',
+      // ])
+      .getMany();
   }
 }

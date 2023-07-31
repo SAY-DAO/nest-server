@@ -10,31 +10,43 @@ import {
   SAYPlatformRoles,
   ServiceStatusEnum,
   PanelContributors,
+  VirtualFamilyRole,
 } from 'src/types/interfaces/interface';
+
+export function duplicates(array: any[]) {
+  const set = new Set(array);
+  return array.filter((item) => {
+    if (set.has(item)) {
+      set.delete(item);
+    } else {
+      return item;
+    }
+  });
+}
 
 export function getSAYRoleInteger(sayRole: string) {
   let roleInteger: SAYPlatformRoles;
-  if (sayRole === "AUDITOR") {
+  if (sayRole === 'AUDITOR') {
     roleInteger = SAYPlatformRoles.AUDITOR;
-  } else if (sayRole === "SOCIAL_WORKER") {
+  } else if (sayRole === 'SOCIAL_WORKER') {
     roleInteger = SAYPlatformRoles.SOCIAL_WORKER;
-  } else if (sayRole === "PURCHASER") {
+  } else if (sayRole === 'PURCHASER') {
     roleInteger = SAYPlatformRoles.PURCHASER;
-  } else if (sayRole === "NGO_SUPERVISOR") {
+  } else if (sayRole === 'NGO_SUPERVISOR') {
     roleInteger = SAYPlatformRoles.NGO_SUPERVISOR;
-  } else if (sayRole === "FAMILY") {
+  } else if (sayRole === 'FAMILY') {
     roleInteger = SAYPlatformRoles.FAMILY;
-  } else if (sayRole === "FRIEND") {
+  } else if (sayRole === 'FRIEND') {
     roleInteger = SAYPlatformRoles.FRIEND;
-  } else if (sayRole === "NO_ROLE") {
+  } else if (sayRole === 'NO_ROLE') {
     roleInteger = SAYPlatformRoles.NO_ROLE;
   }
   return roleInteger;
 }
 
 export function convertFlaskToSayRoles(flaskUserType: number) {
-  if (typeof flaskUserType != "number") {
-    throw new ServerError('bad role type')
+  if (typeof flaskUserType != 'number') {
+    throw new ServerError('bad role type');
   }
   let role: SAYPlatformRoles;
   if (flaskUserType === FlaskUserTypesEnum.SAY_SUPERVISOR) {
@@ -56,8 +68,8 @@ export function convertFlaskToSayRoles(flaskUserType: number) {
 }
 
 export function convertFlaskToSayPanelRoles(flaskUserType: number) {
-  if (typeof flaskUserType != "number") {
-    throw new ServerError('bad role type')
+  if (typeof flaskUserType != 'number') {
+    throw new ServerError('bad role type');
   }
   let panelRole: PanelContributors;
   if (flaskUserType === FlaskUserTypesEnum.SAY_SUPERVISOR) {
@@ -148,7 +160,7 @@ export function persianMonthString(value: Date) {
 
 export function persianMonth(value: Date) {
   if (!value) {
-    return null
+    return null;
   }
   return parseInt(
     new Intl.DateTimeFormat('en-US-u-ca-persian', { month: 'numeric' }).format(
@@ -181,10 +193,14 @@ export function timeDifference(time1: Date, time2: Date) {
   msec -= mm * 1000 * 60;
   const ss = Math.floor(msec / 1000);
   msec -= ss * 1000;
-  return { hh, mm, ss, diff }
+  return { hh, mm, ss, diff };
 }
 
-export function timeDifferenceWithComment(time1: number, time2: number, comment: string) {
+export function timeDifferenceWithComment(
+  time1: number,
+  time2: number,
+  comment: string,
+) {
   const diff = time2 - time1;
   let msec = diff;
   const hh = Math.floor(msec / 1000 / 60 / 60);
@@ -212,8 +228,8 @@ export function getNeedsTimeLine(needs: Need[]) {
   const esfand = { created: 0, confirmed: 0 };
 
   for (let i = 0; i < needs.length; i++) {
-    const thePersianMonthCreated = persianMonth((needs[i].created));
-    const thePersianMonthConfirm = persianMonth((needs[i].confirmDate));
+    const thePersianMonthCreated = persianMonth(needs[i].created);
+    const thePersianMonthConfirm = persianMonth(needs[i].confirmDate);
 
     // farvardin
     if (thePersianMonthCreated === 1) {
@@ -312,9 +328,7 @@ export function getNeedsTimeLine(needs: Need[]) {
     // esfand
     else if (thePersianMonthConfirm === 12) {
       esfand.confirmed += 1;
-
     }
-
   }
 
   const twoDaysAgo = new Date();
@@ -416,40 +430,144 @@ export function ticketNotifications(
   myTickets: TicketEntity[],
   flaskUserId: number,
 ) {
-  const unReads = myTickets.filter(
-    (t) => {
-      console.log((new Date(t.updatedAt)))
-      console.log(
-        new Date(
-          t.views.find((v) => v.flaskUserId === flaskUserId) &&
+  const unReads = myTickets.filter((t) => {
+    console.log(new Date(t.updatedAt));
+    console.log(
+      new Date(
+        t.views.find((v) => v.flaskUserId === flaskUserId) &&
           t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
-        ))
-      // when a user creates a ticket, the participants won't have a view assigned to them
-      console.log(t.views)
-      const myView = t.views.find((v) => v.flaskUserId === flaskUserId)
-      const latestView = t.views.find((v) => Date.parse(v.viewed.toUTCString()) === Math.max(...t.views.map(t => Date.parse(t.viewed.toUTCString()))))
+      ),
+    );
+    // when a user creates a ticket, the participants won't have a view assigned to them
+    console.log(t.views);
+    const myView = t.views.find((v) => v.flaskUserId === flaskUserId);
+    const latestView = t.views.find(
+      (v) =>
+        Date.parse(v.viewed.toUTCString()) ===
+        Math.max(...t.views.map((t) => Date.parse(t.viewed.toUTCString()))),
+    );
 
+    // if (myView) {
+    //   const { diff } = timeDifference(
+    //     new Date(
+    //       t.views.find((v) => v.flaskUserId === flaskUserId) &&
+    //       t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
+    //     ), new Date(t.updatedAt))
+    //   diffMilSeconds = diff
 
-      // if (myView) {
-      //   const { diff } = timeDifference(
-      //     new Date(
-      //       t.views.find((v) => v.flaskUserId === flaskUserId) &&
-      //       t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
-      //     ), new Date(t.updatedAt))
-      //   diffMilSeconds = diff
+    // } else {
+    //   diffMilSeconds = 1
 
-      // } else {
-      //   diffMilSeconds = 1
+    // }
 
-      // }
-
-      return !myView || (latestView.flaskUserId !== myView.flaskUserId && Date.parse(myView.viewed.toUTCString()) < Date.parse(latestView.viewed.toUTCString()))
-    }
-  );
+    return (
+      !myView ||
+      (latestView.flaskUserId !== myView.flaskUserId &&
+        Date.parse(myView.viewed.toUTCString()) <
+          Date.parse(latestView.viewed.toUTCString()))
+    );
+  });
 
   return unReads;
 }
 
 export function isUnpayable(need: Need) {
-  return need.unavailable_from && timeDifference(new Date(), need.unavailable_from).hh < PRODUCT_UNPAYABLE_PERIOD
+  return (
+    need.unavailable_from &&
+    timeDifference(new Date(), need.unavailable_from).hh <
+      PRODUCT_UNPAYABLE_PERIOD
+  );
+}
+
+export function calculateRolesPayments(
+  paymetnsThisRole: any[],
+  vfamilyRole: VirtualFamilyRole,
+): any {
+  const final = [];
+  let diffCounter = 0;
+  let roleAvg = 0;
+
+  if (paymetnsThisRole[0]) {
+    paymetnsThisRole[0].map((n) => {
+      // we might have two payments for a need, we get the father one
+      const usersInThisRole = n.participants.filter(
+        (u) => u.flaskFamilyRole === vfamilyRole,
+      );
+      usersInThisRole.forEach((partic) => {
+        // get the payment of the participant
+        const payment = n.payments.find((p) => p.id_user === partic.id_user);
+
+        if (payment && payment.id_user) {
+          final.push({
+            userId: payment.id_user,
+            needId: n.id,
+            status: n.status,
+            vfamilyRole: getVFamiliyRoleString(vfamilyRole),
+            confirmDate: n.confirmDate,
+            payDate: payment.created,
+            diff: daysDifference(n.confirmDate, payment.created),
+          });
+        }
+        diffCounter += daysDifference(n.confirmDate, payment.created);
+        roleAvg = Math.round(diffCounter / final.length);
+      });
+    });
+  }
+  return { final, diffCounter, roleAvg };
+}
+
+export function calculateUserAsRolePayments(
+  paymetnsThisRole: any[],
+  vfamilyRole: VirtualFamilyRole,
+  userId: number,
+): any {
+  const final = [];
+  let diffCounter = 0;
+  let roleAvg = 0;
+  if (paymetnsThisRole[0]) {
+    paymetnsThisRole[0].map((n) => {
+      // we might have two payments for a need, we get the father one
+      const userInThisRole = n.participants.find((u) => {
+        if (u.flaskFamilyRole === vfamilyRole && u.id_user === userId) return u;
+      });
+
+      // get the payment of the participant
+      if (userInThisRole) {
+        const payment = n.payments.find((p) => p.id_user === userId);
+
+        if (payment && payment.id_user) {
+          final.push({
+            userId: payment.id_user,
+            needId: n.id,
+            status: n.status,
+            vfamilyRole: getVFamiliyRoleString(vfamilyRole),
+            confirmDate: n.confirmDate,
+            payDate: payment.created,
+            diff: daysDifference(n.confirmDate, payment.created),
+          });
+          diffCounter += daysDifference(n.confirmDate, payment.created);
+          roleAvg = Math.round(diffCounter / final.length);
+        }
+      }
+    });
+  }
+  return { final, diffCounter, roleAvg };
+}
+
+export function getVFamiliyRoleString(vfamilyRole: number) {
+  let roleString: string;
+  if (vfamilyRole === VirtualFamilyRole.FATHER) {
+    roleString = 'FATHER';
+  } else if (vfamilyRole === VirtualFamilyRole.MOTHER) {
+    roleString = 'MOTHER';
+  } else if (vfamilyRole === VirtualFamilyRole.AMOO) {
+    roleString = 'AMOO';
+  } else if (vfamilyRole === VirtualFamilyRole.KHALEH) {
+    roleString = 'KHALEH';
+  } else if (vfamilyRole === VirtualFamilyRole.DAEI) {
+    roleString = 'DAEI';
+  } else if (vfamilyRole === VirtualFamilyRole.AMME) {
+    roleString = 'AMME';
+  }
+  return roleString;
 }

@@ -81,6 +81,7 @@ export class IpfsService {
         throw new WalletExceptionFilter(403, 'Child could not be found!');
       }
 
+
       let awakeImage: any;
       let sleptImage: any;
       if (child.awakeAvatarUrl) {
@@ -89,10 +90,10 @@ export class IpfsService {
           child.awakeAvatarUrl,
           `${child.sayName}Awake`,
         );
-        unlinkList.push(`./${child.sayName}Awake.jpg`);
+      unlinkList.push(`./${child.sayName}Awake.jpg`);
       }
       if (child && child.sleptAvatarUrl) {
-        // Slept avatar
+      // Slept avatar
         sleptImage = await this.fileFromPath(
           child.sleptAvatarUrl,
           `${child.sayName}Slept`,
@@ -295,7 +296,7 @@ export class IpfsService {
           '\x1b[36m%s\x1b[0m',
           `Cleaning ${unlinkList[i]} from local storage ...`,
         );
-        // fs.unlinkSync(unlinkList[i]);
+        fs.unlinkSync(unlinkList[i]);
       }
       console.log(
         '\x1b[36m%s\x1b[0m',
@@ -316,19 +317,19 @@ export class IpfsService {
 
 
     } catch (e) {
-      console.log('\x1b[36m%s\x1b[0m', `Stored Need to IPFS...`);
       for (let i = 0; i < unlinkList.length; i++) {
         console.log(
           '\x1b[36m%s\x1b[0m',
           `Cleaning ${unlinkList[i]} from local storage ...`,
         );
-        // fs.unlinkSync(unlinkList[i]);
+        fs.unlinkSync(unlinkList[i]);
       }
       console.log(
         '\x1b[36m%s\x1b[0m',
-        ' Cleaned last file from local storage!',
+        ' Error: Cleaned last file from local storage!',
       );
 
+      console.log(e)
       throw new ServerError(e.message, e.status);
     }
   }
@@ -337,7 +338,6 @@ export class IpfsService {
     try {
       await this.downloadService.downloadFile(url, `${name}.jpg`);
       const content = await fs.promises.readFile(`${name}.jpg`);
-
       if (!content) {
         throw new ServerError('could not read the file.');
       }

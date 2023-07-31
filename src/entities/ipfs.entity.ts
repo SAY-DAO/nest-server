@@ -1,28 +1,25 @@
-import {
-    Entity,
-    Column,
-    OneToOne,
-    JoinColumn,
-} from 'typeorm';
+import { Entity, Column, OneToOne, JoinColumn } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
 
-
 @Entity()
 export class IpfsEntity extends BaseEntity {
-    @Column()
-    flaskNeedId: number;
+  @Column()
+  flaskNeedId: number;
 
-    @Column({ nullable: false })
-    needDetailsHash: string;
+  @Column({ nullable: false })
+  needDetailsHash: string;
 
-    @Column({ nullable: true })
-    receiptsHash: string;
+  @Column({ nullable: true })
+  receiptsHash: string;
 
-    @Column({ nullable: true })
-    paymentsHash: string;
+  @Column({ nullable: true })
+  paymentsHash: string;
 
-    @OneToOne(() => NeedEntity, (need) => need.ipfs, { eager: false })
-    @JoinColumn()
-    need: NeedEntity;
+  @OneToOne(() => NeedEntity, (need) => need.ipfs, {
+    eager: false,
+    nullable: false,
+  })
+  @JoinColumn()
+  need: NeedEntity;
 }

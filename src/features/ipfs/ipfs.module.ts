@@ -6,30 +6,39 @@ import { NeedService } from '../need/need.service';
 import { NeedEntity } from 'src/entities/need.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import {
-  IpfsEntity,
-} from 'src/entities/ipfs.entity';
+import { IpfsEntity } from 'src/entities/ipfs.entity';
 import { ChildrenService } from '../children/children.service';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PaymentEntity } from 'src/entities/payment.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { DownloadService } from '../download/download.service';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Need, Child, Payment, SocialWorker], 'flaskPostgres'),
+    TypeOrmModule.forFeature(
+      [Need, Child, Payment, SocialWorker, UserFamily, Family, User],
+      'flaskPostgres',
+    ),
     TypeOrmModule.forFeature([
       NeedEntity,
       IpfsEntity,
       ChildrenEntity,
-      PaymentEntity
+      PaymentEntity,
     ]),
     HttpModule,
   ],
   controllers: [IpfsController],
-  providers: [IpfsService, ChildrenService, NeedService, PaymentService, DownloadService],
+  providers: [
+    IpfsService,
+    ChildrenService,
+    NeedService,
+    PaymentService,
+    DownloadService,
+  ],
 })
-export class IpfsModule { }
+export class IpfsModule {}

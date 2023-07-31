@@ -1,7 +1,4 @@
-import {
-  Entity,
-  Column,
-} from 'typeorm';
+import { Entity, Column } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 
 @Entity()
@@ -13,9 +10,14 @@ export class UserFamily extends BaseEntity {
   id_family: number;
 
   @Column({ name: 'userRole' })
-  flaskFamilyRole: number
+  flaskFamilyRole: number;
 
   @Column()
-  isDeleted: boolean
+  isDeleted: boolean;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  created: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  updated: Date;
 }

@@ -9,7 +9,7 @@ import { Cities } from 'src/entities/flaskEntities/cities.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { NeedEntity } from 'src/entities/need.entity';
 import { PaymentEntity } from 'src/entities/payment.entity';
 import { ProviderEntity } from 'src/entities/provider.entity';
@@ -29,11 +29,23 @@ import { SyncService } from '../sync/sync.service';
 import { UserService } from '../user/user.service';
 import { NgoController } from './ngo.controller';
 import { NgoService } from './ngo.service';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Child, NGO, Need, SocialWorker, Payment, Cities],
+      [
+        Child,
+        NGO,
+        Need,
+        SocialWorker,
+        Payment,
+        Cities,
+        UserFamily,
+        Family,
+        User,
+      ],
       'flaskPostgres',
     ),
 
@@ -67,5 +79,4 @@ import { NgoService } from './ngo.service';
     ProviderService,
   ],
 })
-
-export class NgoModule { }
+export class NgoModule {}

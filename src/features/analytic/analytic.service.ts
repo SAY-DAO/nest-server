@@ -7,7 +7,11 @@ import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
-import { NeedTypeEnum, SAYPlatformRoles } from 'src/types/interfaces/interface';
+import {
+  NeedTypeEnum,
+  SAYPlatformRoles,
+  childExistence,
+} from 'src/types/interfaces/interface';
 import { getNeedsTimeLine, timeDifferenceWithComment } from 'src/utils/helpers';
 import { Repository } from 'typeorm';
 
@@ -30,7 +34,7 @@ export class AnalyticService {
     private flaskChildRepository: Repository<Child>,
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
-  ) { }
+  ) {}
 
   async getNeedsAnalytic(type: NeedTypeEnum) {
     return await this.flaskNeedRepository
@@ -97,43 +101,79 @@ export class AnalyticService {
         'child.sayname_translations',
         'child.isConfirmed',
       ])
-      .where('child.id_ngo != :ngoId', { ngoId: 3 })
-      .andWhere('child.isMigrated = :childIsMigrated', { childIsMigrated: false })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
       .getManyAndCount();
 
-    const dead = await this.flaskChildRepository.count({
-      where: {
-        isConfirmed: true,
-        existence_status: 0,
-        isMigrated: false
-      },
-    });
+    const dead = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: childExistence.DEAD,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
 
-    const alivePresent = await this.flaskChildRepository.count({
-      where: {
-        isConfirmed: true,
-        existence_status: 1,
-        isMigrated: false
-      },
-    });
-    const aliveGone = await this.flaskChildRepository.count({
-      where: {
-        isConfirmed: true,
-        existence_status: 2,
-        isMigrated: false
-      },
-    });
+    const alivePresent = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: childExistence.AlivePresent,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
+
+    const aliveGone = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: childExistence.AliveGone,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
+
     const tempGone = await this.flaskChildRepository.count({
       where: {
         isConfirmed: true,
         existence_status: 3,
-        isMigrated: false
+        isMigrated: false,
       },
     });
     const confirmed = await this.flaskChildRepository.count({
       where: {
         isConfirmed: true,
-        isMigrated: false
+        isMigrated: false,
       },
     });
 
@@ -421,39 +461,39 @@ export class AnalyticService {
       ),
       meanConfirmedPerChild: Math.round(
         listConfirmed.reduce((partialSum, a) => partialSum + a, 0) /
-        listConfirmed.length,
+          listConfirmed.length,
       ),
       meanUnConfirmedPerChild: Math.round(
         listUnConfirmed.reduce((partialSum, a) => partialSum + a, 0) /
-        listUnConfirmed.length,
+          listUnConfirmed.length,
       ),
       meanConfirmedNotPaidPerChild: Math.round(
         listConfirmedNotPaid.reduce((partialSum, a) => partialSum + a, 0) /
-        listConfirmedNotPaid.length,
+          listConfirmedNotPaid.length,
       ),
       meanCompletePayPerChild: Math.round(
         listCompletePay.reduce((partialSum, a) => partialSum + a, 0) /
-        listCompletePay.length,
+          listCompletePay.length,
       ),
       meanPartialPayPerChild: Math.round(
         listPartialPay.reduce((partialSum, a) => partialSum + a, 0) /
-        listPartialPay.length,
+          listPartialPay.length,
       ),
       meanPurchasedPerChild: Math.round(
         listPurchased.reduce((partialSum, a) => partialSum + a, 0) /
-        listPurchased.length,
+          listPurchased.length,
       ),
       meanMoneyToNgoPerChild: Math.round(
         listMoneyToNgo.reduce((partialSum, a) => partialSum + a, 0) /
-        listMoneyToNgo.length,
+          listMoneyToNgo.length,
       ),
       meanDeliveredNgoPerChild: Math.round(
         listDeliveredNgo.reduce((partialSum, a) => partialSum + a, 0) /
-        listDeliveredNgo.length,
+          listDeliveredNgo.length,
       ),
       meanDeliveredChildPerChild: Math.round(
         listDeliveredChild.reduce((partialSum, a) => partialSum + a, 0) /
-        listDeliveredChild.length,
+          listDeliveredChild.length,
       ),
       totalFamilies,
       totalFamilyMembers,
@@ -470,11 +510,6 @@ export class AnalyticService {
     const today = new Date();
     const monthsAgo = today.setMonth(today.getMonth() - 4);
 
-    const user = await this.flaskSocialWorkerRepository.findOne({
-      where: {
-        id: flaskUserId
-      }
-    })
     const needs = await this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -516,13 +551,12 @@ export class AnalyticService {
       .orderBy('need.created', 'DESC')
       .getManyAndCount();
 
-    // return needs
-    // return needs
     const time7 = new Date().getTime();
-    const { summary, inMonth } = getNeedsTimeLine(needs[0])
+    const { summary, inMonth } = getNeedsTimeLine(needs[0]);
     const time8 = new Date().getTime();
     timeDifferenceWithComment(time7, time8, 'TimeLine User Analytic In');
 
-    return { summary, inMonth, count: needs[1], swIds }
+    return { summary, inMonth, count: needs[1], swIds };
   }
+  
 }

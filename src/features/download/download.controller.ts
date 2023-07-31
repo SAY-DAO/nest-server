@@ -1,5 +1,12 @@
 import { DownloadService } from './download.service';
-import { Controller, Get, Param, Res, StreamableFile, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Res,
+  StreamableFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { ApiFileResponse } from './api-file-response.decorator';
 import { DownloadInterceptor } from './interceptors/download.interceptors';
@@ -7,13 +14,14 @@ import { ApiTags } from '@nestjs/swagger';
 import { HttpService } from '@nestjs/axios';
 import fs from 'fs';
 
-
 @UseInterceptors(DownloadInterceptor)
 @ApiTags('Download')
 @Controller('download')
 export class DownloadController {
-  constructor(private readonly downloadService: DownloadService,
-  ) { }
+  constructor(
+    private readonly downloadService: DownloadService,
+    private readonly httpService: HttpService,
+  ) {}
 
   @ApiFileResponse('image/png')
   @Get('buffer')
@@ -36,6 +44,4 @@ export class DownloadController {
     // const file = this.downloadService.fileBuffer();
     return new StreamableFile(file); // 👈 supports Buffer and Stream
   }
-
-
 }

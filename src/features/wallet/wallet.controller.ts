@@ -240,7 +240,7 @@ export class SignatureController {
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all signatures' })
-  async getTransaction(@Session() session: Record<string, any>) {
+  async getSignatures(@Session() session: Record<string, any>) {
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
@@ -359,6 +359,12 @@ export class SignatureController {
             (c) => c.flaskUserId == need.socialWorker.flaskUserId,
           ).flaskUserId
         ) {
+          console.log(initialSignature.flaskUserId )
+          console.log(need.auditor.flaskUserId)
+          console.log(need.auditor.contributions.find(
+              (c) => c.flaskUserId == need.auditor.flaskUserId,
+            ).flaskUserId )
+
           // auditor
           if (
             need.auditor.contributions.find(
@@ -485,16 +491,21 @@ export class SignatureController {
   }
 
   @Get(`signatures/:flaskUserId`)
-  @ApiOperation({ description: 'Get user signatures' })
-  async getUserSignatures(@Param('flaskUserId') flaskUserId: number) {
+  @ApiOperation({ description: 'Get contributors signatures' })
+  async getContributorSignatures(@Param('flaskUserId') flaskUserId: number) {
     return await this.signatureService.getUserSignatures(flaskUserId);
   }
 
-
+  @Get(`signatures/ready/:flaskUserId`)
+  @ApiOperation({ description: 'Get virtual family member signatures' })
+  async getFamilyMemberSignatures(@Param('flaskUserId') flaskUserId: number) {
+    return await this.signatureService.getUserSignatures(flaskUserId);
+  }
   @Delete(`signature/:signature`)
   @ApiOperation({ description: 'Delete a signatures' })
   async deleteSignature(@Param('signature') signature: string) {
     const theSignature = await this.signatureService.getSignature(signature);
     return await this.signatureService.deleteOne(theSignature.id);
   }
+
 }

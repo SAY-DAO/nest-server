@@ -18,7 +18,7 @@ import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { StatusService } from '../status/status.service';
 import { StatusEntity } from 'src/entities/status.entity';
 import { CityEntity } from 'src/entities/city.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { LocationService } from '../location/location.service';
@@ -30,11 +30,23 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { ProviderService } from '../provider/provider.service';
 import { ProviderEntity } from 'src/entities/provider.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [SocialWorker, Need, NGO, Cities, Child, Payment],
+      [
+        SocialWorker,
+        Need,
+        NGO,
+        Cities,
+        Child,
+        Payment,
+        UserFamily,
+        Family,
+        User,
+      ],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -66,7 +78,7 @@ import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity'
     ReceiptService,
     UserService,
     StatusService,
-    ProviderService
+    ProviderService,
   ], // add entity and services to be available in the module
 })
-export class SyncModule { }
+export class SyncModule {}

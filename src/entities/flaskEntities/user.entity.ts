@@ -15,6 +15,9 @@ export class User extends BaseEntity {
   lastName?: string;
 
   @Column({ nullable: true })
+  userName?: string;
+
+  @Column({ nullable: true })
   avatarUrl?: string;
 
   @Column({ type: 'timestamptz', nullable: true })
