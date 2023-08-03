@@ -17,6 +17,7 @@ import { NeedService } from '../need/need.service';
 import { NeedEntity } from 'src/entities/need.entity';
 import { ChildrenService } from '../children/children.service';
 import { ChildrenEntity } from 'src/entities/children.entity';
+import { FamilyService } from '../family/family.service';
 
 @Module({
   imports: [
@@ -29,11 +30,17 @@ import { ChildrenEntity } from 'src/entities/children.entity';
       ContributorEntity,
       EthereumAccountEntity,
       NeedEntity,
-      ChildrenEntity
+      ChildrenEntity,
     ]),
   ],
 
   controllers: [AnalyticController],
-  providers: [AnalyticService, UserService, NeedService, ChildrenService],
+  providers: [
+    AnalyticService,
+    UserService,
+    NeedService,
+    ChildrenService,
+    FamilyService,
+  ],
 })
 export class AnalyticModule {}

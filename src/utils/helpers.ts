@@ -13,13 +13,17 @@ import {
   VirtualFamilyRole,
 } from 'src/types/interfaces/interface';
 
-export function duplicates(array: any[]) {
+export const Q1_LOWER_COEFFICIENT = 1;
+export const Q1_TO_Q2_COEFFICIENT = 1.25;
+export const Q2_TO_Q3_COEFFICIENT = 1.5;
+export const Q3_UPPER_COEFFICIENT = 1.75;
+export function removeDuplicates(array: any[]) {
   const set = new Set(array);
   return array.filter((item) => {
-    if (set.has(item)) {
-      set.delete(item);
+    if (set.has(item.id)) {
+      set.delete(item.id);
     } else {
-      return item;
+      return item.id;
     }
   });
 }
@@ -479,81 +483,6 @@ export function isUnpayable(need: Need) {
   );
 }
 
-export function calculateRolesPayments(
-  paymetnsThisRole: any[],
-  vfamilyRole: VirtualFamilyRole,
-): any {
-  const final = [];
-  let diffCounter = 0;
-  let roleAvg = 0;
-
-  if (paymetnsThisRole[0]) {
-    paymetnsThisRole[0].map((n) => {
-      // we might have two payments for a need, we get the father one
-      const usersInThisRole = n.participants.filter(
-        (u) => u.flaskFamilyRole === vfamilyRole,
-      );
-      usersInThisRole.forEach((partic) => {
-        // get the payment of the participant
-        const payment = n.payments.find((p) => p.id_user === partic.id_user);
-
-        if (payment && payment.id_user) {
-          final.push({
-            userId: payment.id_user,
-            needId: n.id,
-            status: n.status,
-            vfamilyRole: getVFamiliyRoleString(vfamilyRole),
-            confirmDate: n.confirmDate,
-            payDate: payment.created,
-            diff: daysDifference(n.confirmDate, payment.created),
-          });
-        }
-        diffCounter += daysDifference(n.confirmDate, payment.created);
-        roleAvg = Math.round(diffCounter / final.length);
-      });
-    });
-  }
-  return { final, diffCounter, roleAvg };
-}
-
-export function calculateUserAsRolePayments(
-  paymetnsThisRole: any[],
-  vfamilyRole: VirtualFamilyRole,
-  userId: number,
-): any {
-  const final = [];
-  let diffCounter = 0;
-  let roleAvg = 0;
-  if (paymetnsThisRole[0]) {
-    paymetnsThisRole[0].map((n) => {
-      // we might have two payments for a need, we get the father one
-      const userInThisRole = n.participants.find((u) => {
-        if (u.flaskFamilyRole === vfamilyRole && u.id_user === userId) return u;
-      });
-
-      // get the payment of the participant
-      if (userInThisRole) {
-        const payment = n.payments.find((p) => p.id_user === userId);
-
-        if (payment && payment.id_user) {
-          final.push({
-            userId: payment.id_user,
-            needId: n.id,
-            status: n.status,
-            vfamilyRole: getVFamiliyRoleString(vfamilyRole),
-            confirmDate: n.confirmDate,
-            payDate: payment.created,
-            diff: daysDifference(n.confirmDate, payment.created),
-          });
-          diffCounter += daysDifference(n.confirmDate, payment.created);
-          roleAvg = Math.round(diffCounter / final.length);
-        }
-      }
-    });
-  }
-  return { final, diffCounter, roleAvg };
-}
-
 export function getVFamiliyRoleString(vfamilyRole: number) {
   let roleString: string;
   if (vfamilyRole === VirtualFamilyRole.FATHER) {
@@ -570,4 +499,77 @@ export function getVFamiliyRoleString(vfamilyRole: number) {
     roleString = 'AMME';
   }
   return roleString;
+}
+
+// https://en.wikipedia.org/wiki/File:Boxplot_vs_PDF.svg
+export function findQuertileBonus(userValues, Qs) {
+  // delivered <= Q1, Q1 < delivered <= Q2 , Q2 < delivered <= Q3,  delivered > Q3
+  let fatherQBonus = 1;
+  if (userValues.fatherDelivered <= Qs.Q1.father) {
+    fatherQBonus = Q1_LOWER_COEFFICIENT;
+  } else if (
+    Qs.Q1.father < userValues.fatherDelivered &&
+    userValues.fatherDelivered <= Qs.Q2.father
+  ) {
+    fatherQBonus = Q1_TO_Q2_COEFFICIENT;
+  } else if (
+    Qs.Q2.father < userValues.fatherDelivered &&
+    userValues.fatherDelivered <= Qs.Q3.father
+  ) {
+    fatherQBonus = Q2_TO_Q3_COEFFICIENT;
+  } else if (userValues.fatherDelivered > Qs.Q3.father) {
+    fatherQBonus = Q3_UPPER_COEFFICIENT;
+  }
+
+  // if (userValues.fatherDelivered <= Qs.Q1.father) {
+  //   fatherQBonus = 1;
+  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
+  //   fatherQBonus = 1.25;
+  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
+  //   fatherQBonus = 1.5;
+  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
+  //   fatherQBonus = 1.75;
+  // }
+
+  // if (userValues.fatherDelivered <= Qs.Q1.father) {
+  //   fatherQBonus = 1;
+  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
+  //   fatherQBonus = 1.25;
+  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
+  //   fatherQBonus = 1.5;
+  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
+  //   fatherQBonus = 1.75;
+  // }
+
+  // if (userValues.fatherDelivered <= Qs.Q1.father) {
+  //   fatherQBonus = 1;
+  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
+  //   fatherQBonus = 1.25;
+  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
+  //   fatherQBonus = 1.5;
+  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
+  //   fatherQBonus = 1.75;
+  // }
+
+  // if (userValues.fatherDelivered <= Qs.Q1.father) {
+  //   fatherQBonus = 1;
+  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
+  //   fatherQBonus = 1.25;
+  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
+  //   fatherQBonus = 1.5;
+  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
+  //   fatherQBonus = 1.75;
+  // }
+
+  // if (userValues.fatherDelivered <= Qs.Q1.father) {
+  //   fatherQBonus = 1;
+  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
+  //   fatherQBonus = 1.25;
+  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
+  //   fatherQBonus = 1.5;
+  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
+  //   fatherQBonus = 1.75;
+  // }
+
+  return fatherQBonus;
 }

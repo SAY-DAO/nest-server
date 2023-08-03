@@ -56,6 +56,7 @@ import { Receipt } from './entities/flaskEntities/receipt.entity';
 import { DownloadModule } from './features/download/download.module';
 import { NeedFamily } from './entities/flaskEntities/needFamily';
 import { ScheduleTaskModule } from './features/schedule/schedule.module';
+import { FamilyModule } from './features/family/family.module';
 
 const imports = [
   HttpModule,
@@ -123,6 +124,7 @@ const imports = [
   IpfsModule,
   AnalyticModule,
   DownloadModule,
+  FamilyModule
 ];
 
 @Module({

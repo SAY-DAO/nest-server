@@ -11,10 +11,7 @@ const Environments = {
 };
 
 function loadConfig() {
-  const NODE_ENV = process.env.NODE_ENV ?? Environments.development;
-  process.env.TZ = "Asia/Tehran";
-  console.log(process.env);
-  
+  const NODE_ENV = process.env.NODE_ENV ?? Environments.development;  
 
   const configs = {
     serverPort: process.env.PORT || 8002,

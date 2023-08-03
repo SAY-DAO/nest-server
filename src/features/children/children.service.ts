@@ -8,15 +8,9 @@ import { ChildParams } from 'src/types/parameters/ChildParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
-import {
-  VirtualFamilyRole,
-  childExistence,
-} from 'src/types/interfaces/interface';
-import { Family } from 'src/entities/flaskEntities/family.entity';
+import { childExistence } from 'src/types/interfaces/interface';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
-import { User } from 'src/entities/flaskEntities/user.entity';
-import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { Need } from 'src/entities/flaskEntities/need.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Injectable()
 export class ChildrenService {
@@ -25,10 +19,6 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-    @InjectRepository(Family, 'flaskPostgres')
-    private flaskFamilyRepository: Repository<Family>,
-    @InjectRepository(User, 'flaskPostgres')
-    private flaskUserRepository: Repository<User>,
   ) {}
 
   async countChildren(ngoIds: number[]) {
@@ -113,80 +103,27 @@ export class ChildrenService {
     return child;
   }
 
-  async getFamilyMembers(familyId: number): Promise<any> {
-    return await this.flaskFamilyRepository
-      .createQueryBuilder('family')
+  async getMyChildren(userId: number): Promise<any> {
+    return await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapMany(
+        'child.family',
+        Family,
+        'family',
+        'family.id_child = child.id',
+      )
       .innerJoinAndMapMany(
         'family.members',
         UserFamily,
         'userFamily',
         'userFamily.id_family = family.id',
       )
-      .where('userFamily.id_family = :familyId', { familyId: familyId })
-      .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
-      .select(['family', 'userFamily'])
-      .getManyAndCount();
-  }
-
-  async getFamilyRoles(
-    userId: number,
-    vFamilyRole: VirtualFamilyRole,
-  ): Promise<any> {
-    return await this.flaskUserRepository
-      .createQueryBuilder('user')
-      .leftJoinAndMapMany(
-        'user.payments',
-        Payment,
-        'payment',
-        'payment.id_user = user.id',
-      )
-      .leftJoinAndMapOne(
-        'payment.need',
-        Need,
-        'need',
-        'need.id = payment.id_need',
-      )
-      .leftJoinAndMapOne(
-        'need.child',
-        Child,
-        'child',
-        'child.id = need.child_id',
-      )
-      .leftJoinAndMapMany(
-        'user.user_families',
-        UserFamily,
-        'userFamily',
-        'userFamily.id_user = user.id',
-      )
-      .leftJoinAndMapOne(
-        'userFamily.family',
-        Family,
-        'family',
-        'family.id = userFamily.id_family',
-      )
-      .where('user.id = :userId', { userId: userId })
-      .andWhere('need.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
-      .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('userFamily.flaskFamilyRole = :flaskFamilyRole', {
-        flaskFamilyRole: vFamilyRole,
+      .where('userFamily.id_user = :userId', { userId: userId })
+      .andWhere('child.existence_status IN (:...existence_status)', {
+        existence_status: [childExistence.AlivePresent],
       })
-      .andWhere('payment.id_user = :userId', { userId: userId })
-      .andWhere('payment.id_need IS NOT NULL')
-      .andWhere('payment.id IS NOT NULL')
-      .andWhere('payment.verified IS NOT NULL')
-      .andWhere('payment.order_id IS NOT NULL')
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      // .select([
-      //   'user.id',
-      //   'payment',
-      //   'need.id',
-      //   'need.child_id',
-      //   'user.userName',
-      //   'family',
-      //   'userFamily',
-      // ])
+      .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
+      .select(['child', 'family', 'userFamily'])
       .getMany();
   }
 }

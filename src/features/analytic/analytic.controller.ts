@@ -5,22 +5,20 @@ import {
   SAYPlatformRoles,
   VirtualFamilyRole,
 } from 'src/types/interfaces/interface';
-import {
-  calculateUserAsRolePayments,
-  convertFlaskToSayRoles,
-} from 'src/utils/helpers';
+import { convertFlaskToSayRoles, findQuertileBonus } from 'src/utils/helpers';
 import { UserService } from '../user/user.service';
 import { AnalyticService } from './analytic.service';
-import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
 import config from 'src/config';
+import { FamilyService } from '../family/family.service';
+import { max, round } from 'mathjs';
 
 @ApiTags('Analytic')
 @Controller('analytic')
 export class AnalyticController {
   constructor(
     private userService: UserService,
-    private needService: NeedService,
+    private familyService: FamilyService,
     private childrenService: ChildrenService,
     private readonly analyticService: AnalyticService,
   ) {}
@@ -64,100 +62,135 @@ export class AnalyticController {
   @Get(`family/:userId`)
   @ApiOperation({ description: 'Get all family role analysis for a user' })
   async getFamilyMemberAnalytic(@Param('userId') userId: number) {
-    const userAsFather = await this.needService.getFamilyRoleDelivered(
+    const myChildren = await this.childrenService.getMyChildren(userId);
+    let allMyChildrenHasPayments = false;
+    for await (const child of myChildren) {
+      if (child.id === 118) {
+        continue;
+      }
+      const childPayments = await this.familyService.countMyChildPayments(
+        userId,
+        child.id,
+      );
+
+      if (childPayments) {
+        allMyChildrenHasPayments = true;
+        continue;
+      } else {
+        allMyChildrenHasPayments = false;
+        break;
+      }
+    }
+    const userAsFather = await this.familyService.getFamilyRoleDelivered(
       VirtualFamilyRole.FATHER,
       Number(userId),
     );
-    const userAsMother = await this.needService.getFamilyRoleDelivered(
+    const userAsMother = await this.familyService.getFamilyRoleDelivered(
       VirtualFamilyRole.MOTHER,
       Number(userId),
     );
-    const userAsAmoo = await this.needService.getFamilyRoleDelivered(
+    const userAsAmoo = await this.familyService.getFamilyRoleDelivered(
       VirtualFamilyRole.AMOO,
       Number(userId),
     );
-    const userAsKhaleh = await this.needService.getFamilyRoleDelivered(
+    const userAsKhaleh = await this.familyService.getFamilyRoleDelivered(
       VirtualFamilyRole.KHALEH,
       Number(userId),
     );
-    const userAsDaei = await this.needService.getFamilyRoleDelivered(
+    const userAsDaei = await this.familyService.getFamilyRoleDelivered(
       VirtualFamilyRole.DAEI,
       Number(userId),
     );
-    const userAsAmme = await this.needService.getFamilyRoleDelivered(
+    const userAsAmme = await this.familyService.getFamilyRoleDelivered(
       VirtualFamilyRole.AMME,
       Number(userId),
     );
 
-    const fathersFinal = calculateUserAsRolePayments(
-      userAsFather,
-      VirtualFamilyRole.FATHER,
-      Number(userId),
-    );
-    const mothersFinal = calculateUserAsRolePayments(
-      userAsMother,
-      VirtualFamilyRole.MOTHER,
-      Number(userId),
-    );
-    const amoosFinal = calculateUserAsRolePayments(
-      userAsAmoo,
-      VirtualFamilyRole.AMOO,
-      Number(userId),
-    );
-    const daeisFinal = calculateUserAsRolePayments(
-      userAsDaei,
-      VirtualFamilyRole.DAEI,
-      Number(userId),
-    );
-    const khalehsFinal = calculateUserAsRolePayments(
-      userAsKhaleh,
-      VirtualFamilyRole.KHALEH,
-      Number(userId),
-    );
-    const ammesFinal = calculateUserAsRolePayments(
-      userAsAmme,
-      VirtualFamilyRole.AMME,
-      Number(userId),
+    const ecoDeliveredMedian = config().dataCache.theMedian();
+    const ecoDeliveredAsRole = config().dataCache.fetchFamilyAll();
+    const rolesCount = config().dataCache.fetchFamilyCount();
+
+    const calculatedResult = findQuertileBonus(
+      {
+        fatherDelivered: userAsFather[1],
+        motherDelivered: userAsMother[1],
+        amooDelivered: userAsAmoo[1],
+        khalehDelivered: userAsKhaleh[1],
+        daeiDelivered: userAsDaei[1],
+        ammeDelivered: userAsAmme[1],
+      },
+      ecoDeliveredMedian.IQRObject,
     );
 
-    console.log('---- counters ----');
-    console.log('# of Delivered needs as father: ' + userAsFather[1]);
-    console.log('# of Delivered needs as mother: ' + userAsMother[1]);
-    console.log('# of Delivered needs as amoo: ' + userAsAmoo[1]);
-    console.log('# of Delivered needs as khaleh: ' + userAsKhaleh[1]);
-    console.log('# of Delivered needs as daei: ' + userAsDaei[1]);
-    console.log('# of Delivered needs as amme: ' + userAsAmme[1]);
-
-    console.log('---- counters ----');
-    console.log('father avg delvery days: ' + fathersFinal.roleAvg);
-    console.log('mother avg delvery days: ' + mothersFinal.roleAvg);
-    console.log('amoo avg delvery days: ' + amoosFinal.roleAvg);
-    console.log('khaleh avg delvery days: ' + daeisFinal.roleAvg);
-    console.log('daei avg delvery days: ' + khalehsFinal.roleAvg);
-    console.log('amme avg delvery days: ' + ammesFinal.roleAvg);
+    const fatherQuerter =
+      userAsFather[1] / ecoDeliveredMedian.IQRObject.Q2.father;
+    const motherQuerter =
+      userAsMother[1] / ecoDeliveredMedian.IQRObject.Q2.mother;
+    const amooQuerter = userAsAmoo[1] / ecoDeliveredMedian.IQRObject.Q2.amoo;
+    const daeiQuerter =
+      userAsKhaleh[1] / ecoDeliveredMedian.IQRObject.Q2.khaleh;
+    const khalehQuerter = userAsDaei[1] / ecoDeliveredMedian.IQRObject.Q2.daei;
+    const ammeQuerter = userAsAmme[1] / ecoDeliveredMedian.IQRObject.Q2.amme;
 
     return {
-      userAsFatherRate:
-        fathersFinal.roleAvg / config().dataCache.fetchFamilyAll().fathersAvg,
-      userAsMotherRate:
-        mothersFinal.roleAvg / config().dataCache.fetchFamilyAll().mothersAvg,
-      userAsAmooRate:
-        amoosFinal.roleAvg / config().dataCache.fetchFamilyAll().ammesAvg,
-      userAsDaeiRate:
-        daeisFinal.roleAvg / config().dataCache.fetchFamilyAll().khalehsAvg,
-      userAsKhalehRate:
-        khalehsFinal.roleAvg / config().dataCache.fetchFamilyAll().daeisAvg,
-      userAsAmmeRate:
-        ammesFinal.roleAvg / config().dataCache.fetchFamilyAll().ammesAvg,
-      userDistanceAvg: {
-        fathersFinal: fathersFinal.roleAvg,
-        mothersFinal: mothersFinal.roleAvg,
-        amoosFinal: amoosFinal.roleAvg,
-        daeisFinal: daeisFinal.roleAvg,
-        khalehsFinal: khalehsFinal.roleAvg,
-        ammesFinal: ammesFinal.roleAvg,
+      calculatedResult,
+      // calculatedResult: allMyChildrenHasPayments
+      //   ? round(
+      //       max(
+      //         fatherQuerter,
+      //         motherQuerter,
+      //         amooQuerter,
+      //         daeiQuerter,
+      //         khalehQuerter,
+      //         ammeQuerter,
+      //       ),
+      //     )
+      //   : 0,
+      // be ware that some needs counted more than once (e.g more than 1 participants, amoo, Khaleh paid)
+      theUser: {
+        allMyChildrenHasPayments,
+        fatherDelivered: userAsFather[1],
+        motherDelivered: userAsMother[1],
+        amooDelivered: userAsAmoo[1],
+        daeiDelivered: userAsKhaleh[1],
+        khalehDelivered: userAsDaei[1],
+        ammeDelivered: userAsAmme[1],
+        fatherQuerter,
+        motherQuerter,
+        amooQuerter,
+        daeiQuerter,
+        khalehQuerter,
+        ammeQuerter,
       },
-      ecosystemDistanceAvg: config().dataCache.fetchFamilyAll(),
+      ecosystem: {
+        fathersCount: rolesCount.fathersCount,
+        mothersCount: rolesCount.mothersCount,
+        amoosCount: rolesCount.amoosCount,
+        khalehsCount: rolesCount.khalehsCount,
+        daeisCount: rolesCount.daeisCount,
+        ammesCount: rolesCount.ammesCount,
+        totalCount:
+          rolesCount.fathersCount +
+          rolesCount.mothersCount +
+          rolesCount.amoosCount +
+          rolesCount.khalehsCount +
+          rolesCount.daeisCount +
+          rolesCount.ammesCount,
+        fathersDelivered: ecoDeliveredAsRole.fathersData.length,
+        mothersDelivered: ecoDeliveredAsRole.mothersData.length,
+        amoosDelivered: ecoDeliveredAsRole.amoosData.length,
+        khalehsDelivered: ecoDeliveredAsRole.khalehsData.length,
+        daeisDelivered: ecoDeliveredAsRole.daeisData.length,
+        ammesDelivered: ecoDeliveredAsRole.ammesData.length,
+        totalDelivered:
+          ecoDeliveredAsRole.fathersData.length +
+          ecoDeliveredAsRole.mothersData.length +
+          ecoDeliveredAsRole.amoosData.length +
+          ecoDeliveredAsRole.khalehsData.length +
+          ecoDeliveredAsRole.daeisData.length +
+          ecoDeliveredAsRole.ammesData.length,
+        ecoDeliveredMedian,
+      },
       // paidNeed: father[0][0],
       // minedCount: amooFinal,
       // difficultyRatio: 0,
@@ -166,10 +199,12 @@ export class AnalyticController {
     };
   }
 
-  @Get(`family/roles/all`)
+  @Get(`family/roles/scattered`)
   @ApiOperation({ description: 'Get all family role analysis for a user' })
   async getFamilyMemberAnalyticCache() {
-    return config().dataCache.fetchFamilyAll();
+    return {
+      scattered: config().dataCache.roleScatteredData(),
+    };
   }
 
   @Get('contributions/:flaskUserId/:userType')

@@ -4,24 +4,20 @@ import { NeedService } from '../need/need.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { NeedEntity } from 'src/entities/need.entity';
+import { FamilyService } from '../family/family.service';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [
-        Need,
-        SocialWorker,
-        Child,
-      ],
+      [Need, SocialWorker, Child, User, Family],
       'flaskPostgres',
     ),
-    TypeOrmModule.forFeature([
-      NeedEntity,
-    ]),
+    TypeOrmModule.forFeature([NeedEntity]),
   ],
   controllers: [],
-  providers: [ScheduleService, NeedService],
+  providers: [ScheduleService, NeedService, FamilyService],
 })
 export class ScheduleTaskModule {}

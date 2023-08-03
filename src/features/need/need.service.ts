@@ -34,14 +34,12 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
-import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 import {
   Paginated,
   PaginateQuery,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
-import { Family } from 'src/entities/flaskEntities/family.entity';
-import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 
 @Injectable()
 export class NeedService {
@@ -778,86 +776,4 @@ export class NeedService {
     return accurateCount;
   }
 
-  async getFamilyRoleDelivered(
-    vfamilyRole: VirtualFamilyRole,
-    userId: number,
-  ): Promise<any> {
-    return (
-      this.flaskNeedRepository
-        .createQueryBuilder('need')
-        .leftJoinAndMapMany(
-          'need.participants',
-          NeedFamily,
-          'needFamily',
-          'needFamily.id_need = need.id',
-        )
-        .leftJoinAndMapOne(
-          'need.child',
-          Child,
-          'child',
-          'child.id = need.child_id',
-        )
-        .leftJoinAndMapMany(
-          'need.payments',
-          Payment,
-          'payment',
-          'payment.id_need = need.id',
-        )
-        .where(
-          new Brackets((qb) => {
-            qb.where('need.type = :typeProduct', {
-              typeProduct: NeedTypeEnum.PRODUCT,
-            })
-              .andWhere('need.status = :productStatus', {
-                productStatus: ProductStatusEnum.DELIVERED,
-              })
-              .orWhere('need.type = :typeService', {
-                typeService: NeedTypeEnum.SERVICE,
-              })
-              .andWhere('need.status = :serviceStatus', {
-                serviceStatus: ServiceStatusEnum.DELIVERED,
-              });
-          }),
-        )
-        .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-        // .andWhere('payment.id_user = :userId', { userId: 115 })
-        .andWhere(userId > 0 && `payment.id_user = :userId` , { userId: userId })
-        .andWhere(userId > 0 && `needFamily.id_user = :userId` , { userId: userId })
-        // -----> From here: diff from what we get on panel delivered column
-        .andWhere('needFamily.isDeleted = :needFamilyDeleted', {
-          needFamilyDeleted: false,
-        })
-        .andWhere('needFamily.flaskFamilyRole = :flaskFamilyRole', {
-          flaskFamilyRole: vfamilyRole, // we have -1 and -2 in data as well (e.g user id:208 is SAY)
-        })
-        .andWhere('child.existence_status = :existence_status', {
-          existence_status: childExistence.AlivePresent,
-        })
-        //<------- to here
-        .andWhere('payment.id IS NOT NULL')
-        .andWhere('payment.verified IS NOT NULL')
-        .andWhere('payment.order_id IS NOT NULL')
-        .andWhere('payment.id_need IS NOT NULL')
-        .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-          testNgoIds: [3, 14],
-        })
-        .select([
-          // 'need',
-          'need.id',
-          'need.created',
-          'need.child_delivery_date',
-          'need._cost',
-          'need.status',
-          'need.isConfirmed',
-          'need.confirmDate',
-          'need.isDeleted',
-          'need.status',
-          'need.child_id',
-          'needFamily',
-          'payment',
-        ])
-        .cache(10000)
-        .getManyAndCount()
-    );
-  }
 }

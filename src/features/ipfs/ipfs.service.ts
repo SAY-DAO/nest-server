@@ -80,25 +80,23 @@ export class IpfsService {
       if (!child) {
         throw new WalletExceptionFilter(403, 'Child could not be found!');
       }
-
-
       let awakeImage: any;
       let sleptImage: any;
+      unlinkList.push(`./${child.sayName}Awake.jpg`);
       if (child.awakeAvatarUrl) {
         // Awake avatar
         awakeImage = await this.fileFromPath(
           child.awakeAvatarUrl,
           `${child.sayName}Awake`,
         );
-      unlinkList.push(`./${child.sayName}Awake.jpg`);
       }
+      unlinkList.push(`./${child.sayName}Slept.jpg`);
       if (child && child.sleptAvatarUrl) {
       // Slept avatar
         sleptImage = await this.fileFromPath(
           child.sleptAvatarUrl,
           `${child.sayName}Slept`,
         );
-        unlinkList.push(`./${child.sayName}Slept.jpg`);
       }
 
       const iconImage = await this.fileFromPath(
@@ -152,7 +150,6 @@ export class IpfsService {
       };
 
       // Main need IPFS
-
       const needContributors = {
         // contributors
         auditorId: need.auditor.contributions.find(c => c.flaskUserId == need.auditor.flaskUserId).flaskUserId,
@@ -165,66 +162,66 @@ export class IpfsService {
       };
 
       console.log('\x1b[36m%s\x1b[0m', `2- Storing Need to IPFS...`);
-      console.log({
-        image: iconImage,
-        name: need.name,
-        description: need.descriptionTranslations
-          ? need.descriptionTranslations.fa
-          : 'N/A',
-        properties: {
-          needDetails,
-          needDates,
-          initialSignature: signature,
-        },
-        child: {
-          awakeImage: awakeImage,
-          sleptImage: sleptImage,
-          name: {
-            en: child.sayNameTranslations.en,
-            fa: child.sayNameTranslations.fa,
-          },
-          story: {
-            en: child.bioTranslations.en,
-            fa: child.bioTranslations.fa,
-          },
-          joined: String(child.created),
-          cityId: child.city,
-          countryId: child.country,
-          nationality: child.nationality,
-          birthDate: String(child.birthDate),
-        },
-        receipt: {
-          properties: {
-          },
-          receipts: need.receipts.map(async r => {
-            const receiptImage = await this.fileFromPath(
-              r.attachment,
-              r.title,
-            )
-            return {
-              image: receiptImage,
-              name: r.title,
-              description: r.description,
-            }
-          })
-        },
-        ngo: {
-          name: child.ngo.name,
-          website: child.ngo.website,
-          cityId: child.ngo.city.flaskCityId,
-          stateId: child.ngo.city.stateId,
-          countryId: child.ngo.city.countryId,
-          countryName: child.ngo.city.countryName,
-          cityName: child.ngo.city.name,
-        },
-        provider: need.provider && {
-          providerId: need.provider.id,
-          name: need.provider.name,
-          website: need.provider.website,
-        },
-        contributors: needContributors,
+      // console.log({
+      //   image: iconImage,
+      //   name: need.name,
+      //   description: need.descriptionTranslations
+      //     ? need.descriptionTranslations.fa
+      //     : 'N/A',
+      //   properties: {
+      //     needDetails,
+      //     needDates,
+      //     initialSignature: signature,
+      //   },
+      //   child: {
+      //     awakeImage: awakeImage,
+      //     sleptImage: sleptImage,
+      //     name: {
+      //       en: child.sayNameTranslations.en,
+      //       fa: child.sayNameTranslations.fa,
+      //     },
+      //     story: {
+      //       en: child.bioTranslations.en,
+      //       fa: child.bioTranslations.fa,
+      //     },
+      //     joined: String(child.created),
+      //     cityId: child.city,
+      //     countryId: child.country,
+      //     nationality: child.nationality,
+      //     birthDate: String(child.birthDate),
+      //   },
+      //   receipt: {
+      //     properties: {
+      //     },
+      //     receipts: need.receipts.map(async r => {
+      //       const receiptImage = await this.fileFromPath(
+      //         r.attachment,
+      //         r.title,
+      //       )
+      //       return {
+      //         image: receiptImage,
+      //         name: r.title,
+      //         description: r.description,
+      //       }
+      //     })
+      //   },
+      //   ngo: {
+      //     name: child.ngo.name,
+      //     website: child.ngo.website,
+      //     cityId: child.ngo.city.flaskCityId,
+      //     stateId: child.ngo.city.stateId,
+      //     countryId: child.ngo.city.countryId,
+      //     countryName: child.ngo.city.countryName,
+      //     cityName: child.ngo.city.name,
+      //   },
+      //   provider: need.provider && {
+      //     providerId: need.provider.id,
+      //     name: need.provider.name,
+      //     website: need.provider.website,
+      //   },
+      //   contributors: needContributors,
 
-      })
+      // })
       dataNeed = await client.store({
         image: iconImage,
         name: need.name,
@@ -291,13 +288,13 @@ export class IpfsService {
       if (status.pin.status !== null) {
         console.log(status);
       }
-      for (let i = 0; i < unlinkList.length; i++) {
-        console.log(
-          '\x1b[36m%s\x1b[0m',
-          `Cleaning ${unlinkList[i]} from local storage ...`,
-        );
-        fs.unlinkSync(unlinkList[i]);
-      }
+      // for (let i = 0; i < unlinkList.length; i++) {
+        // console.log(
+        //   '\x1b[36m%s\x1b[0m',
+        //   `Cleaning ${unlinkList[i]} from local storage ...`,
+        // );
+        // fs.unlinkSync(unlinkList[i]);
+      // }
       console.log(
         '\x1b[36m%s\x1b[0m',
         ' Cleaned last file from local storage!',
@@ -317,13 +314,13 @@ export class IpfsService {
 
 
     } catch (e) {
-      for (let i = 0; i < unlinkList.length; i++) {
-        console.log(
-          '\x1b[36m%s\x1b[0m',
-          `Cleaning ${unlinkList[i]} from local storage ...`,
-        );
-        fs.unlinkSync(unlinkList[i]);
-      }
+      // for (let i = 0; i < unlinkList.length; i++) {
+      //   console.log(
+      //     '\x1b[36m%s\x1b[0m',
+      //     `Cleaning ${unlinkList[i]} from local storage ...`,
+      //   );
+      //   fs.unlinkSync(unlinkList[i]);
+      // }
       console.log(
         '\x1b[36m%s\x1b[0m',
         ' Error: Cleaned last file from local storage!',
@@ -335,7 +332,9 @@ export class IpfsService {
   }
 
   async fileFromPath(url: string, name = 'noTitle'): Promise<any> {
-    try {
+    try {    
+      console.log('Downloading '+ name);
+        
       await this.downloadService.downloadFile(url, `${name}.jpg`);
       const content = await fs.promises.readFile(`${name}.jpg`);
       if (!content) {
@@ -344,6 +343,7 @@ export class IpfsService {
       const type = mime.getType(`${name}.jpg`);
 
       const file = new File([content], `${name}`, { type: type });
+      console.log('Downloaded !! '+ name);
       return file;
     } catch (e) {
       throw new WalletExceptionFilter(e.status, e.message);
