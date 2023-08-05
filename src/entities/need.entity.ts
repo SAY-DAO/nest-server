@@ -11,6 +11,7 @@ import { StatusEntity } from './status.entity';
 import { IpfsEntity } from './ipfs.entity';
 import { AllUserEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
+import { MidjourneyEntity } from './midjourney.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {

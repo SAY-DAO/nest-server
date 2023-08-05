@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
 import { ReceiptEntity } from '../../entities/receipt.entity';
@@ -10,6 +10,7 @@ import { ContributorEntity } from 'src/entities/contributor.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { ReceiptMiddleware } from './middlewares/receipt.middleware';
 
 @Module({
   imports: [
@@ -24,4 +25,8 @@ import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
   controllers: [ReceiptController],
   providers: [ReceiptService, NeedService],
 })
-export class ReceiptModule { }
+export class ReceiptModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ReceiptMiddleware).forRoutes('receipt');
+  }
+}

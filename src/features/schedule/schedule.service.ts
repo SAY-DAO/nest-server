@@ -6,38 +6,36 @@ import { FamilyService } from '../family/family.service';
 
 @Injectable()
 export class ScheduleService {
-  constructor(
-    private familyService: FamilyService,
-  ) {}
+  constructor(private familyService: FamilyService) {}
   private readonly logger = new Logger(ScheduleService.name);
 
   async helper() {
-    const father = await this.familyService.getFamilyRoleDelivered(
+    const father = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.FATHER,
       0,
     );
-    const mother = await this.familyService.getFamilyRoleDelivered(
+    const mother = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.MOTHER,
       0,
     );
-    const amoo = await this.familyService.getFamilyRoleDelivered(
+    const amoo = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.AMOO,
       0,
     );
-    const khaleh = await this.familyService.getFamilyRoleDelivered(
+    const khaleh = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.KHALEH,
       0,
     );
-    const daei = await this.familyService.getFamilyRoleDelivered(
+    const daei = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.DAEI,
       0,
     );
-    const amme = await this.familyService.getFamilyRoleDelivered(
+    const amme = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.AMME,
       0,
     );
 
-    config().dataCache.store({
+    config().dataCache.storeFamilyData({
       fathersData: father[0],
       mothersData: mother[0],
       amoosData: amoo[0],
@@ -47,7 +45,7 @@ export class ScheduleService {
     });
   }
 
-  async rolesCount(){
+  async rolesCount() {
     // total count (e.g how many fathers in our ecosystem)
     const fathersCount = await this.familyService.getFamilyRolesCount(
       VirtualFamilyRole.FATHER,
@@ -76,7 +74,6 @@ export class ScheduleService {
       daeisCount,
       ammesCount,
     });
-
   }
 
   @Timeout(2000)

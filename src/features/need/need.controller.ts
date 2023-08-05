@@ -1,10 +1,15 @@
-import { Controller, Delete, Get, Param, Req } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, Req } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { UserService } from '../user/user.service';
 import { NeedService } from './need.service';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 
 @ApiTags('Needs')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskSwId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('needs')
 export class NeedController {
   constructor(
@@ -22,19 +27,6 @@ export class NeedController {
   @ApiOperation({ description: 'Get all needs from db 1' })
   async getCandidates() {
     return await this.needService.getDeleteCandidates();
-  }
-
-  @Get(`family/signatures/ready/:userId`)
-  @ApiOperation({
-    description: 'Get all signed needs for virtual family member',
-  })
-  async getReadyNeeds(@Param('userId') userId: number) {
-    if (!userId) {
-      throw new ObjectNotFound(
-        'We need the user ID!',
-      );
-    }
-    return await this.needService.getFamilyReadyNeeds(userId);
   }
 
   // @Delete(`all/old`)

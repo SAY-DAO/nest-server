@@ -11,12 +11,16 @@ import {
   ServiceStatusEnum,
   PanelContributors,
   VirtualFamilyRole,
+  childExistence,
 } from 'src/types/interfaces/interface';
 
 export const Q1_LOWER_COEFFICIENT = 1;
 export const Q1_TO_Q2_COEFFICIENT = 1.25;
 export const Q2_TO_Q3_COEFFICIENT = 1.5;
 export const Q3_UPPER_COEFFICIENT = 1.75;
+const PARENTS_DELIVERED_RANGE = 1;
+const RELETIVES_DELIVERED_RANGE = 3;
+
 export function removeDuplicates(array: any[]) {
   const set = new Set(array);
   return array.filter((item) => {
@@ -443,7 +447,7 @@ export function ticketNotifications(
       ),
     );
     // when a user creates a ticket, the participants won't have a view assigned to them
-    console.log(t.views);
+    // console.log(t.views);
     const myView = t.views.find((v) => v.flaskUserId === flaskUserId);
     const latestView = t.views.find(
       (v) =>
@@ -502,74 +506,226 @@ export function getVFamiliyRoleString(vfamilyRole: number) {
 }
 
 // https://en.wikipedia.org/wiki/File:Boxplot_vs_PDF.svg
-export function findQuertileBonus(userValues, Qs) {
+export function findQuertileBonus(
+  userValues: {
+    fatherCompletePay: any;
+    motherCompletePay: any;
+    amooCompletePay: any;
+    khalehCompletePay: any;
+    daeiCompletePay: any;
+    ammeCompletePay: any;
+  },
+  childrenList: any[],
+  Qs: {
+    Q1: {
+      father: number;
+      mother: number;
+      amoo: number;
+      khaleh: number;
+      daei: number;
+      amme: number;
+    };
+    Q2: {
+      father: number;
+      mother: number;
+      amoo: number;
+      khaleh: number;
+      daei: number;
+      amme: number;
+    };
+    Q3: {
+      father: number;
+      mother: number;
+      amoo: number;
+      khaleh: number;
+      daei: number;
+      amme: number;
+    };
+    IQR?: {
+      father: number;
+      mother: number;
+      amoo: number;
+      khaleh: number;
+      daei: number;
+      amme: number;
+    };
+  },
+) {
   // delivered <= Q1, Q1 < delivered <= Q2 , Q2 < delivered <= Q3,  delivered > Q3
-  let fatherQBonus = 1;
-  if (userValues.fatherDelivered <= Qs.Q1.father) {
+  let fatherQBonus: number | null;
+  let motherQBonus: number | null;
+  let amooQBonus: number | null;
+  let khalehQBonus: number | null;
+  let daeiQBonus: number | null;
+  let ammeQBonus: number | null;
+
+  // do not add bonus when even one child has no payment => user need to pay at least one need per child or leave family to gain bonus
+  if (
+    childrenList.find(
+      (c) => c.caredFor === false && c.status === childExistence.AlivePresent,
+    )
+  ) {
+    return {
+      allChildrenCaredFor: false,
+      fatherQBonus: null,
+      motherQBonus: null,
+      amooQBonus: null,
+      khalehQBonus: null,
+      daeiQBonus: null,
+      ammeQBonus: null,
+      avg: null,
+    };
+  }
+  if (
+    0 < userValues.fatherCompletePay &&
+    userValues.fatherCompletePay <= Qs.Q1.father
+  ) {
     fatherQBonus = Q1_LOWER_COEFFICIENT;
   } else if (
-    Qs.Q1.father < userValues.fatherDelivered &&
-    userValues.fatherDelivered <= Qs.Q2.father
+    Qs.Q1.father < userValues.fatherCompletePay &&
+    userValues.fatherCompletePay <= Qs.Q2.father
   ) {
     fatherQBonus = Q1_TO_Q2_COEFFICIENT;
   } else if (
-    Qs.Q2.father < userValues.fatherDelivered &&
-    userValues.fatherDelivered <= Qs.Q3.father
+    Qs.Q2.father < userValues.fatherCompletePay &&
+    userValues.fatherCompletePay <= Qs.Q3.father
   ) {
     fatherQBonus = Q2_TO_Q3_COEFFICIENT;
-  } else if (userValues.fatherDelivered > Qs.Q3.father) {
+  } else if (userValues.fatherCompletePay > Qs.Q3.father) {
     fatherQBonus = Q3_UPPER_COEFFICIENT;
+  } else {
+    fatherQBonus = null;
   }
+  // Mother
+  if (
+    0 < userValues.motherCompletePay &&
+    userValues.motherCompletePay <= Qs.Q1.mother
+  ) {
+    motherQBonus = Q1_LOWER_COEFFICIENT;
+  } else if (
+    Qs.Q1.mother < userValues.motherCompletePay &&
+    userValues.motherCompletePay <= Qs.Q2.mother
+  ) {
+    motherQBonus = Q1_TO_Q2_COEFFICIENT;
+  } else if (
+    Qs.Q2.mother < userValues.motherCompletePay &&
+    userValues.motherCompletePay <= Qs.Q3.mother
+  ) {
+    motherQBonus = Q2_TO_Q3_COEFFICIENT;
+  } else if (userValues.motherCompletePay > Qs.Q3.mother) {
+    motherQBonus = Q3_UPPER_COEFFICIENT;
+  } else {
+    motherQBonus = null;
+  }
+  // Amoo
+  if (
+    0 < userValues.amooCompletePay &&
+    userValues.amooCompletePay <= Qs.Q1.amoo
+  ) {
+    amooQBonus = Q1_LOWER_COEFFICIENT;
+  } else if (
+    Qs.Q1.amoo < userValues.amooCompletePay &&
+    userValues.amooCompletePay <= Qs.Q2.amoo
+  ) {
+    amooQBonus = Q1_TO_Q2_COEFFICIENT;
+  } else if (
+    Qs.Q2.amoo < userValues.amooCompletePay &&
+    userValues.amooCompletePay <= Qs.Q3.amoo
+  ) {
+    amooQBonus = Q2_TO_Q3_COEFFICIENT;
+  } else if (userValues.amooCompletePay > Qs.Q3.amoo) {
+    amooQBonus = Q3_UPPER_COEFFICIENT;
+  } else {
+    amooQBonus = null;
+  }
+  // Khaleh
+  if (
+    0 < userValues.khalehCompletePay &&
+    userValues.khalehCompletePay <= Qs.Q1.khaleh
+  ) {
+    khalehQBonus = Q1_LOWER_COEFFICIENT;
+  } else if (
+    Qs.Q1.khaleh < userValues.khalehCompletePay &&
+    userValues.khalehCompletePay <= Qs.Q2.khaleh
+  ) {
+    khalehQBonus = Q1_TO_Q2_COEFFICIENT;
+  } else if (
+    Qs.Q2.khaleh < userValues.khalehCompletePay &&
+    userValues.khalehCompletePay <= Qs.Q3.khaleh
+  ) {
+    khalehQBonus = Q2_TO_Q3_COEFFICIENT;
+  } else if (userValues.khalehCompletePay > Qs.Q3.khaleh) {
+    khalehQBonus = Q3_UPPER_COEFFICIENT;
+  } else {
+    khalehQBonus = null;
+  }
+  // Daie
+  if (
+    0 < userValues.daeiCompletePay &&
+    userValues.daeiCompletePay <= Qs.Q1.daei
+  ) {
+    daeiQBonus = Q1_LOWER_COEFFICIENT;
+  } else if (
+    Qs.Q1.daei < userValues.daeiCompletePay &&
+    userValues.daeiCompletePay <= Qs.Q2.daei
+  ) {
+    daeiQBonus = Q1_TO_Q2_COEFFICIENT;
+  } else if (
+    Qs.Q2.daei < userValues.daeiCompletePay &&
+    userValues.daeiCompletePay <= Qs.Q3.daei
+  ) {
+    daeiQBonus = Q2_TO_Q3_COEFFICIENT;
+  } else if (userValues.daeiCompletePay > Qs.Q3.daei) {
+    daeiQBonus = Q3_UPPER_COEFFICIENT;
+  } else {
+    daeiQBonus = null;
+  }
+  // Amme
+  if (
+    0 < userValues.ammeCompletePay &&
+    userValues.ammeCompletePay <= Qs.Q1.amme
+  ) {
+    ammeQBonus = Q1_LOWER_COEFFICIENT;
+  } else if (
+    Qs.Q1.amme < userValues.ammeCompletePay &&
+    userValues.ammeCompletePay <= Qs.Q2.amme
+  ) {
+    ammeQBonus = Q1_TO_Q2_COEFFICIENT;
+  } else if (
+    Qs.Q2.amme < userValues.ammeCompletePay &&
+    userValues.ammeCompletePay <= Qs.Q3.amme
+  ) {
+    ammeQBonus = Q2_TO_Q3_COEFFICIENT;
+  } else if (userValues.ammeCompletePay > Qs.Q3.amme) {
+    ammeQBonus = Q3_UPPER_COEFFICIENT;
+  } else {
+    ammeQBonus = null;
+  }
+  let total = 0;
+  if (fatherQBonus > 0) total++;
+  if (motherQBonus > 0) total++;
+  if (amooQBonus > 0) total++;
+  if (khalehQBonus > 0) total++;
+  if (daeiQBonus > 0) total++;
+  if (ammeQBonus > 0) total++;
 
-  // if (userValues.fatherDelivered <= Qs.Q1.father) {
-  //   fatherQBonus = 1;
-  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
-  //   fatherQBonus = 1.25;
-  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
-  //   fatherQBonus = 1.5;
-  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
-  //   fatherQBonus = 1.75;
-  // }
+  const avg =
+    (fatherQBonus +
+      motherQBonus +
+      amooQBonus +
+      khalehQBonus +
+      daeiQBonus +
+      ammeQBonus) /
+    total;
 
-  // if (userValues.fatherDelivered <= Qs.Q1.father) {
-  //   fatherQBonus = 1;
-  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
-  //   fatherQBonus = 1.25;
-  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
-  //   fatherQBonus = 1.5;
-  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
-  //   fatherQBonus = 1.75;
-  // }
-
-  // if (userValues.fatherDelivered <= Qs.Q1.father) {
-  //   fatherQBonus = 1;
-  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
-  //   fatherQBonus = 1.25;
-  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
-  //   fatherQBonus = 1.5;
-  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
-  //   fatherQBonus = 1.75;
-  // }
-
-  // if (userValues.fatherDelivered <= Qs.Q1.father) {
-  //   fatherQBonus = 1;
-  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
-  //   fatherQBonus = 1.25;
-  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
-  //   fatherQBonus = 1.5;
-  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
-  //   fatherQBonus = 1.75;
-  // }
-
-  // if (userValues.fatherDelivered <= Qs.Q1.father) {
-  //   fatherQBonus = 1;
-  // } else if (Qs.Q1.father < userValues.fatherDelivered <= Qs.Q2.father) {
-  //   fatherQBonus = 1.25;
-  // } else if (Qs.Q2.father < userValues.fatherDelivered <= Qs.Q3.father) {
-  //   fatherQBonus = 1.5;
-  // } else if (userValues.fatherDelivered > Qs.Q3.father) {
-  //   fatherQBonus = 1.75;
-  // }
-
-  return fatherQBonus;
+  return {
+    allChildrenCaredFor: true,
+    fatherQBonus,
+    motherQBonus,
+    amooQBonus,
+    khalehQBonus,
+    daeiQBonus,
+    ammeQBonus,
+    avg,
+  };
 }

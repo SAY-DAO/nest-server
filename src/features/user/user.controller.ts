@@ -6,7 +6,14 @@ import {
   Req,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiProperty,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ServerError } from '../../filters/server-exception.filter';
 import { SAYPlatformRoles } from 'src/types/interfaces/interface';
@@ -17,7 +24,7 @@ import {
 } from 'src/utils/helpers';
 import { MyPageInterceptor } from './interceptors/mypage.interceptors';
 import { TicketService } from '../ticket/ticket.service';
-import { SignatureService } from '../wallet/wallet.service';
+import { WalletService } from '../wallet/wallet.service';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
@@ -29,6 +36,12 @@ import { SignatureEntity } from 'src/entities/signature.entity';
 import { IpfsEntity } from 'src/entities/ipfs.entity';
 
 @ApiTags('Users')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskSwId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('users')
 export class UserController {
   constructor(
@@ -36,7 +49,7 @@ export class UserController {
     private needService: NeedService,
     private childrenService: ChildrenService,
     private ticketService: TicketService,
-    private signatureService: SignatureService,
+    private walletService: WalletService,
     private ipfsService: IpfsService,
     private ngoService: NgoService,
   ) {}
@@ -253,7 +266,7 @@ export class UserController {
           );
           // signatures only at the my page last column
           if (i === 3) {
-            signatures = await this.signatureService.getNeedSignatures(
+            signatures = await this.walletService.getNeedSignatures(
               fetchedNeed.id,
             );
             ipfs = null;

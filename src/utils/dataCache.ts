@@ -1,12 +1,23 @@
 import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
+import { removeDuplicates } from './helpers';
 
 export default class DataCache {
+  flaskAccessToken = {};
   familyData = null;
   familyRolesCount = null;
   medianList = [];
+  midjourneyList = [];
 
-  store = ({
+  storeAccessToken = (token: string, swFlaskId: number) => {
+    this.flaskAccessToken[swFlaskId] = token;
+  };
+
+  storeMidjourny = (list: any[]) => {
+    list.forEach((e) => this.midjourneyList.push(e));
+  };
+
+  storeFamilyData = ({
     fathersData,
     mothersData,
     amoosData,
@@ -25,7 +36,6 @@ export default class DataCache {
     this.roleScatteredData();
     this.theMedian();
   };
-
 
   storeRolesCount = ({
     fathersCount,
@@ -50,9 +60,13 @@ export default class DataCache {
     return result;
   };
 
+  fetchMidjourney = () =>
+    (this.midjourneyList = removeDuplicates(this.midjourneyList));
+
   fetchFamilyAll = () => this.familyData;
   fetchFamilyCount = () => this.familyRolesCount;
-
+  fetchAccessToken = () => this.flaskAccessToken;
+  deleteAnAccessToken = (flaskSwId: number) => this.flaskAccessToken[flaskSwId];
   getScattered(data: any[], vRole: VirtualFamilyRole) {
     const series = [];
     const usersPays = [];
@@ -102,13 +116,22 @@ export default class DataCache {
         this.familyData.mothersData,
         VirtualFamilyRole.MOTHER,
       ),
-      amoo: this.getScattered(this.familyData.amoosData, VirtualFamilyRole.AMOO),
+      amoo: this.getScattered(
+        this.familyData.amoosData,
+        VirtualFamilyRole.AMOO,
+      ),
       khaleh: this.getScattered(
         this.familyData.khalehsData,
         VirtualFamilyRole.KHALEH,
       ),
-      daie: this.getScattered(this.familyData.daeisData, VirtualFamilyRole.DAEI),
-      amme: this.getScattered(this.familyData.ammesData, VirtualFamilyRole.AMME),
+      daei: this.getScattered(
+        this.familyData.daeisData,
+        VirtualFamilyRole.DAEI,
+      ),
+      amme: this.getScattered(
+        this.familyData.ammesData,
+        VirtualFamilyRole.AMME,
+      ),
     };
   }
 
@@ -123,7 +146,7 @@ export default class DataCache {
     };
 
     //  Q1 (also called the lower quartile), Q2 (the median), and Q3 (also called the upper quartile).
-    // delivered <= Q1, Q1 < delivered <= Q2 , Q2 < delivered <= Q3,  delivered > Q3 
+    // delivered <= Q1, Q1 < delivered <= Q2 , Q2 < delivered <= Q3,  delivered > Q3
     const IQRObject = {
       // median of lower half
       Q1: {
@@ -244,6 +267,4 @@ export default class DataCache {
 
     return { medianObject, IQRObject };
   }
-
-
 }

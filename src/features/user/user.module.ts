@@ -17,7 +17,7 @@ import { PaymentService } from '../payment/payment.service';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { SignatureService } from '../wallet/wallet.service';
+import { WalletService } from '../wallet/wallet.service';
 import { SignatureEntity } from 'src/entities/signature.entity';
 import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
@@ -64,7 +64,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
     NeedService,
     ChildrenService,
     PaymentService,
-    SignatureService,
+    WalletService,
     IpfsService,
     NgoService,
     DownloadService,
@@ -72,6 +72,6 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 })
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UserMiddleware).forRoutes('users');
+    consumer.apply( UserMiddleware).forRoutes('users');
   }
 }

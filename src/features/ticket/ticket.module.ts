@@ -89,6 +89,6 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 })
 export class TicketModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TicketMiddleware).forRoutes('tickets4');
+    consumer.apply(TicketMiddleware).forRoutes('tickets');
   }
 }

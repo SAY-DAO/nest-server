@@ -2,7 +2,6 @@ import { DownloadService } from './download.service';
 import {
   Controller,
   Get,
-  Param,
   Res,
   StreamableFile,
   UseInterceptors,
@@ -10,12 +9,17 @@ import {
 import { Response } from 'express';
 import { ApiFileResponse } from './api-file-response.decorator';
 import { DownloadInterceptor } from './interceptors/download.interceptors';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { HttpService } from '@nestjs/axios';
-import fs from 'fs';
 
 @UseInterceptors(DownloadInterceptor)
 @ApiTags('Download')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskSwId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('download')
 export class DownloadController {
   constructor(

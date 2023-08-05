@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
   NeedTypeEnum,
   SAYPlatformRoles,
@@ -11,9 +11,14 @@ import { AnalyticService } from './analytic.service';
 import { ChildrenService } from '../children/children.service';
 import config from 'src/config';
 import { FamilyService } from '../family/family.service';
-import { max, round } from 'mathjs';
 
 @ApiTags('Analytic')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskSwId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('analytic')
 export class AnalyticController {
   constructor(
@@ -27,6 +32,7 @@ export class AnalyticController {
   @ApiOperation({ description: 'get SAY ecosystem analytics' })
   async getEcosystemAnalytic() {
     return await this.analyticService.getEcosystemAnalytic();
+    return;
   }
 
   @Get(`needs/:typeId`)
@@ -62,105 +68,84 @@ export class AnalyticController {
   @Get(`family/:userId`)
   @ApiOperation({ description: 'Get all family role analysis for a user' })
   async getFamilyMemberAnalytic(@Param('userId') userId: number) {
-    const myChildren = await this.childrenService.getMyChildren(userId);
-    let allMyChildrenHasPayments = false;
-    for await (const child of myChildren) {
-      if (child.id === 118) {
-        continue;
-      }
-      const childPayments = await this.familyService.countMyChildPayments(
-        userId,
-        child.id,
-      );
-
-      if (childPayments) {
-        allMyChildrenHasPayments = true;
-        continue;
-      } else {
-        allMyChildrenHasPayments = false;
-        break;
-      }
-    }
-    const userAsFather = await this.familyService.getFamilyRoleDelivered(
+    const userAsFather = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.FATHER,
       Number(userId),
     );
-    const userAsMother = await this.familyService.getFamilyRoleDelivered(
+    const userAsMother = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.MOTHER,
       Number(userId),
     );
-    const userAsAmoo = await this.familyService.getFamilyRoleDelivered(
+    const userAsAmoo = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.AMOO,
       Number(userId),
     );
-    const userAsKhaleh = await this.familyService.getFamilyRoleDelivered(
+    const userAsKhaleh = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.KHALEH,
       Number(userId),
     );
-    const userAsDaei = await this.familyService.getFamilyRoleDelivered(
+    const userAsDaei = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.DAEI,
       Number(userId),
     );
-    const userAsAmme = await this.familyService.getFamilyRoleDelivered(
+    const userAsAmme = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.AMME,
       Number(userId),
     );
 
-    const ecoDeliveredMedian = config().dataCache.theMedian();
-    const ecoDeliveredAsRole = config().dataCache.fetchFamilyAll();
+    const ecoCompletePayMedian = config().dataCache.theMedian();
+    const ecoCompletePayAsRole = config().dataCache.fetchFamilyAll();
     const rolesCount = config().dataCache.fetchFamilyCount();
+
+    const myChildren = await this.childrenService.getMyChildren(userId);
+    // Check if paid at least one need for all my children
+    let childrenStatus: {
+      childId: any;
+      caredFor: boolean;
+      status: number;
+      userRole: number;
+    };
+    const childrenList = [];
+    for await (const child of myChildren) {
+      const caredFor = await this.familyService.isChildCaredOnce(
+        userId,
+        child.id,
+      );
+
+      childrenStatus = {
+        childId: child.id,
+        caredFor: caredFor,
+        status: child.existence_status,
+        userRole: child.family.members.find((m) => m.id_user === Number(userId))
+          .flaskFamilyRole,
+      };
+      childrenList.push(childrenStatus);
+    }
+    console.log(childrenList);
 
     const calculatedResult = findQuertileBonus(
       {
-        fatherDelivered: userAsFather[1],
-        motherDelivered: userAsMother[1],
-        amooDelivered: userAsAmoo[1],
-        khalehDelivered: userAsKhaleh[1],
-        daeiDelivered: userAsDaei[1],
-        ammeDelivered: userAsAmme[1],
+        fatherCompletePay: userAsFather[1],
+        motherCompletePay: userAsMother[1],
+        amooCompletePay: userAsAmoo[1],
+        khalehCompletePay: userAsKhaleh[1],
+        daeiCompletePay: userAsDaei[1],
+        ammeCompletePay: userAsAmme[1],
       },
-      ecoDeliveredMedian.IQRObject,
+      childrenList,
+      ecoCompletePayMedian.IQRObject,
     );
 
-    const fatherQuerter =
-      userAsFather[1] / ecoDeliveredMedian.IQRObject.Q2.father;
-    const motherQuerter =
-      userAsMother[1] / ecoDeliveredMedian.IQRObject.Q2.mother;
-    const amooQuerter = userAsAmoo[1] / ecoDeliveredMedian.IQRObject.Q2.amoo;
-    const daeiQuerter =
-      userAsKhaleh[1] / ecoDeliveredMedian.IQRObject.Q2.khaleh;
-    const khalehQuerter = userAsDaei[1] / ecoDeliveredMedian.IQRObject.Q2.daei;
-    const ammeQuerter = userAsAmme[1] / ecoDeliveredMedian.IQRObject.Q2.amme;
-
     return {
-      calculatedResult,
-      // calculatedResult: allMyChildrenHasPayments
-      //   ? round(
-      //       max(
-      //         fatherQuerter,
-      //         motherQuerter,
-      //         amooQuerter,
-      //         daeiQuerter,
-      //         khalehQuerter,
-      //         ammeQuerter,
-      //       ),
-      //     )
-      //   : 0,
       // be ware that some needs counted more than once (e.g more than 1 participants, amoo, Khaleh paid)
       theUser: {
-        allMyChildrenHasPayments,
-        fatherDelivered: userAsFather[1],
-        motherDelivered: userAsMother[1],
-        amooDelivered: userAsAmoo[1],
-        daeiDelivered: userAsKhaleh[1],
-        khalehDelivered: userAsDaei[1],
-        ammeDelivered: userAsAmme[1],
-        fatherQuerter,
-        motherQuerter,
-        amooQuerter,
-        daeiQuerter,
-        khalehQuerter,
-        ammeQuerter,
+        fatherCompletePay: userAsFather[1],
+        motherCompletePay: userAsMother[1],
+        amooCompletePay: userAsAmoo[1],
+        daeiCompletePay: userAsDaei[1],
+        khalehCompletePay: userAsKhaleh[1],
+        ammeCompletePay: userAsAmme[1],
+        distanceRatio: calculatedResult,
       },
       ecosystem: {
         fathersCount: rolesCount.fathersCount,
@@ -176,20 +161,20 @@ export class AnalyticController {
           rolesCount.khalehsCount +
           rolesCount.daeisCount +
           rolesCount.ammesCount,
-        fathersDelivered: ecoDeliveredAsRole.fathersData.length,
-        mothersDelivered: ecoDeliveredAsRole.mothersData.length,
-        amoosDelivered: ecoDeliveredAsRole.amoosData.length,
-        khalehsDelivered: ecoDeliveredAsRole.khalehsData.length,
-        daeisDelivered: ecoDeliveredAsRole.daeisData.length,
-        ammesDelivered: ecoDeliveredAsRole.ammesData.length,
-        totalDelivered:
-          ecoDeliveredAsRole.fathersData.length +
-          ecoDeliveredAsRole.mothersData.length +
-          ecoDeliveredAsRole.amoosData.length +
-          ecoDeliveredAsRole.khalehsData.length +
-          ecoDeliveredAsRole.daeisData.length +
-          ecoDeliveredAsRole.ammesData.length,
-        ecoDeliveredMedian,
+        fathersCompletePay: ecoCompletePayAsRole.fathersData.length,
+        mothersCompletePay: ecoCompletePayAsRole.mothersData.length,
+        amoosCompletePay: ecoCompletePayAsRole.amoosData.length,
+        khalehsCompletePay: ecoCompletePayAsRole.khalehsData.length,
+        daeisCompletePay: ecoCompletePayAsRole.daeisData.length,
+        ammesCompletePay: ecoCompletePayAsRole.ammesData.length,
+        totalCompletePay:
+          ecoCompletePayAsRole.fathersData.length +
+          ecoCompletePayAsRole.mothersData.length +
+          ecoCompletePayAsRole.amoosData.length +
+          ecoCompletePayAsRole.khalehsData.length +
+          ecoCompletePayAsRole.daeisData.length +
+          ecoCompletePayAsRole.ammesData.length,
+        ecoCompletePayMedian,
       },
       // paidNeed: father[0][0],
       // minedCount: amooFinal,

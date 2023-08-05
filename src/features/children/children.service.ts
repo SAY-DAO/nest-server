@@ -106,7 +106,7 @@ export class ChildrenService {
   async getMyChildren(userId: number): Promise<any> {
     return await this.flaskChildRepository
       .createQueryBuilder('child')
-      .leftJoinAndMapMany(
+      .leftJoinAndMapOne(
         'child.family',
         Family,
         'family',
@@ -119,9 +119,9 @@ export class ChildrenService {
         'userFamily.id_family = family.id',
       )
       .where('userFamily.id_user = :userId', { userId: userId })
-      .andWhere('child.existence_status IN (:...existence_status)', {
-        existence_status: [childExistence.AlivePresent],
-      })
+      // .andWhere('child.existence_status IN (:...existence_status)', {
+      //   existence_status: [childExistence.AlivePresent],
+      // })
       .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
       .select(['child', 'family', 'userFamily'])
       .getMany();

@@ -78,16 +78,11 @@ import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 })
 export class NeedModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(GetNeedMiddleware)
-      .forRoutes({
-        path: 'needs/all',
-        method: RequestMethod.GET,
-      })
-      .apply(PostNeedMiddleware)
-      .forRoutes({
-        path: 'needs/add',
-        method: RequestMethod.POST,
-      });
+    consumer.apply(GetNeedMiddleware).forRoutes('needs');
+    // .apply(PostNeedMiddleware)
+    // .forRoutes({
+    //   path: 'needs/add',
+    //   method: RequestMethod.POST,
+    // });
   }
 }

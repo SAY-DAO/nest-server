@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { CityEntity } from 'src/entities/city.entity';
@@ -31,6 +31,7 @@ import { NgoController } from './ngo.controller';
 import { NgoService } from './ngo.service';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { NgoMiddleware } from './middlewares/ngo.middleware';
 
 @Module({
   imports: [
@@ -79,4 +80,8 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
     ProviderService,
   ],
 })
-export class NgoModule {}
+export class NgoModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(NgoMiddleware).forRoutes('ngo');
+  }
+}

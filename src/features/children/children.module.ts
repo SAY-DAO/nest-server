@@ -1,5 +1,5 @@
 import { HttpModule } from '@nestjs/axios';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
@@ -14,6 +14,7 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { ChildrenMiddleware } from './middlewares/children.middleware';
 
 @Module({
   imports: [
@@ -28,4 +29,8 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
   controllers: [ChildrenController],
   providers: [ChildrenService, NeedService, ChildrenService],
 })
-export class ChildrenModule {}
+export class ChildrenModule  implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ChildrenMiddleware).forRoutes('children');
+  }
+}

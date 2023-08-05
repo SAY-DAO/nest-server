@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AnalyticService } from './analytic.service';
 import { AnalyticController } from './analytic.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,6 +18,7 @@ import { NeedEntity } from 'src/entities/need.entity';
 import { ChildrenService } from '../children/children.service';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { FamilyService } from '../family/family.service';
+import { AnalyticMiddleware } from './middlewares/analytic.middleware';
 
 @Module({
   imports: [
@@ -43,4 +44,8 @@ import { FamilyService } from '../family/family.service';
     FamilyService,
   ],
 })
-export class AnalyticModule {}
+export class AnalyticModule  implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AnalyticMiddleware).forRoutes('analytic');
+  }
+}

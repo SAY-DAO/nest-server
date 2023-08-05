@@ -3,7 +3,7 @@ import { LoggerModule } from 'nestjs-pino';
 import config from './config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import 'reflect-metadata';
 import { MileStoneEntity } from './entities/milestone.entity';
 import { NeedEntity } from './entities/need.entity';
@@ -37,7 +37,6 @@ import { ChildrenModule } from './features/children/children.module';
 import { NeedModule } from './features/need/need.module';
 import { MilestoneModule } from './features/milestone/milestone.module';
 import { WalletModule } from './features/wallet/wallet.module';
-import { Session } from './entities/session.entity';
 import { Need } from './entities/flaskEntities/need.entity';
 import { IpfsModule } from './features/ipfs/ipfs.module';
 import { IpfsEntity } from 'src/entities/ipfs.entity';
@@ -57,6 +56,8 @@ import { DownloadModule } from './features/download/download.module';
 import { NeedFamily } from './entities/flaskEntities/needFamily';
 import { ScheduleTaskModule } from './features/schedule/schedule.module';
 import { FamilyModule } from './features/family/family.module';
+import { MidjourneyModule } from './features/midjourney/midjourney.module';
+import { MidjourneyEntity } from './entities/midjourney.entity';
 
 const imports = [
   HttpModule,
@@ -66,7 +67,6 @@ const imports = [
   TypeOrmModule.forRoot({
     ...config().db1,
     entities: [
-      Session,
       CityEntity,
       StatusEntity,
       TicketEntity,
@@ -87,6 +87,7 @@ const imports = [
       EthereumAccountEntity,
       EthereumTransaction,
       IpfsEntity,
+      MidjourneyEntity
     ],
   }),
   TypeOrmModule.forRoot({
@@ -124,7 +125,8 @@ const imports = [
   IpfsModule,
   AnalyticModule,
   DownloadModule,
-  FamilyModule
+  FamilyModule,
+  MidjourneyModule
 ];
 
 @Module({

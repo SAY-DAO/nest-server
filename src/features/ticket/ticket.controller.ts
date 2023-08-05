@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from '../../types/dtos/ticket/CreateTicket.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
   AnnouncementEnum,
   Colors,
@@ -30,13 +30,18 @@ import {
   getSAYRoleInteger,
 } from 'src/utils/helpers';
 import { ValidateTicketPipe } from './pipes/validate-ticket.pipe';
-import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
 import { NeedService } from '../need/need.service';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { UserService } from '../user/user.service';
 
 @ApiTags('Tickets')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskSwId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('tickets')
 export class TicketController {
   constructor(
@@ -44,7 +49,7 @@ export class TicketController {
     private needService: NeedService,
     private readonly syncService: SyncService,
     private userService: UserService,
-  ) { }
+  ) {}
 
   @Get('all')
   async findAll() {
@@ -62,7 +67,10 @@ export class TicketController {
   }
 
   @Get('ticket/:id/:userId')
-  async getTicketById(@Param('id') id: string, @Param('userId') flaskUserId: string) {
+  async getTicketById(
+    @Param('id') id: string,
+    @Param('userId') flaskUserId: string,
+  ) {
     const { ticket } = await this.ticketService.getTicketById(
       id,
       Number(flaskUserId),
@@ -154,11 +162,14 @@ export class TicketController {
       throw new ServerError('After IPFS upload you can not change anything.');
     }
 
-    let ticket: TicketEntity
-    ticket = await this.ticketService.getTicketByNeed(body.flaskNeedId)
+    let ticket: TicketEntity;
+    ticket = await this.ticketService.getTicketByNeed(body.flaskNeedId);
     if (ticket) {
       console.log('\x1b[36m%s\x1b[0m', 'Updating The Ticket ...\n');
-      ticket = await this.ticketService.updateTicketContributors(ticket, participants)
+      ticket = await this.ticketService.updateTicketContributors(
+        ticket,
+        participants,
+      );
     }
     if (!ticket) {
       console.log('\x1b[36m%s\x1b[0m', 'Creating The Ticket ...\n');
@@ -179,8 +190,9 @@ export class TicketController {
       const contentDetails = {
         message: ` .به سمن رسید --- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
-        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
-          }-${new Date(body.arrivalDate).getDate()}`} `,
+        ).getFullYear()}-${
+          new Date(body.arrivalDate).getMonth() + 1
+        }-${new Date(body.arrivalDate).getDate()}`} `,
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.ARRIVED_AT_NGO,
@@ -198,8 +210,9 @@ export class TicketController {
       const contentDetails = {
         message: ` .مبلغ دریافت شد--- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
-        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
-          }-${new Date(body.arrivalDate).getDate()}`} `,
+        ).getFullYear()}-${
+          new Date(body.arrivalDate).getMonth() + 1
+        }-${new Date(body.arrivalDate).getDate()}`} `,
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.NGO_RECEIVED_MONEY,
@@ -211,10 +224,15 @@ export class TicketController {
       }
       await this.ticketService.createTicketContent(contentDetails, ticket);
     }
-    console.log("contentDetails")
-    await this.ticketService.updateTicketAnnouncement(ticket.id, body.announcement)
-    const { ticket: updatedTicket } = await this.ticketService.getTicketById(ticket.id, body.flaskUserId)
-    return updatedTicket
+    await this.ticketService.updateTicketAnnouncement(
+      ticket.id,
+      body.announcement,
+    );
+    const { ticket: updatedTicket } = await this.ticketService.getTicketById(
+      ticket.id,
+      body.flaskUserId,
+    );
+    return updatedTicket;
   }
 
   @Delete(':id')
@@ -222,13 +240,10 @@ export class TicketController {
     return await this.ticketService.DeleteTicket(id);
   }
 
-
   // @Get('notifications/:flaskUserId')
   // async getUserNotifications(@Param('flaskUserId') flaskUserId: number) {
   //   return await this.ticketService.getUserNotifications(
   //     Number(flaskUserId),
   //   );
   // }
-
-
 }

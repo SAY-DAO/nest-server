@@ -414,6 +414,7 @@ export class SyncService {
     };
 
     if (!nestChild) {
+      console.log(nestSocialWorker);
       // Create Child
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
       if (!nestSocialWorker || !nestSocialWorker.contributions) {
@@ -421,7 +422,6 @@ export class SyncService {
           'Something went wrong while trying to create a child!',
         );
       }
-      console.log(nestSocialWorker);
       const childNgo = await this.ngoService.getNgoById(
         nestSocialWorker.contributions.find(
           (c) => c.flaskUserId == nestSocialWorker.flaskUserId,

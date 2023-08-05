@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { IpfsService } from './ipfs.service';
 import { IpfsController } from './ipfs.controller';
 import { HttpModule } from '@nestjs/axios';
@@ -17,6 +17,7 @@ import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { DownloadService } from '../download/download.service';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { IpfsMiddleware } from './middlewares/ipfs.middleware';
 
 @Module({
   imports: [
@@ -41,4 +42,8 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
     DownloadService,
   ],
 })
-export class IpfsModule {}
+export class IpfsModule  implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(IpfsMiddleware).forRoutes('ipfs');
+  }
+}

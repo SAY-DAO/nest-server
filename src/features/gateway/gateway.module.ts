@@ -1,5 +1,5 @@
 import { HttpModule } from '@nestjs/axios';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ContributorEntity } from 'src/entities/contributor.entity';
@@ -14,6 +14,7 @@ import { AllUserEntity } from 'src/entities/user.entity';
 import { TicketService } from '../ticket/ticket.service';
 import { UserService } from '../user/user.service';
 import { GateWayController } from './gatway.controller';
+import { GateWayMiddleware } from './middlewares/gateway.middleware';
 
 @Module({
   imports: [
@@ -33,4 +34,8 @@ import { GateWayController } from './gatway.controller';
   controllers: [],
   providers: [GateWayController, TicketService, UserService],
 })
-export class GatewayModule {}
+export class GatewayModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(GateWayMiddleware).forRoutes('gateway');
+  }
+}

@@ -29,8 +29,10 @@ import { from, Observable } from 'rxjs';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
 
 @Injectable()
-export class SignatureService {
+export class WalletService {
   constructor(
+    @InjectRepository(NeedEntity)
+    private needRepository: Repository<NeedEntity>,
     @InjectRepository(SignatureEntity)
     private signatureRepository: Repository<SignatureEntity>,
     private needService: NeedService,
@@ -38,7 +40,7 @@ export class SignatureService {
     @InjectSignerProvider()
     private readonly ethersSigner: EthersSigner,
     private readonly ethersContract: EthersContract,
-  ) { }
+  ) {}
 
   async getSignature(signature: string): Promise<SignatureEntity> {
     return await this.signatureRepository.findOne({
@@ -54,8 +56,8 @@ export class SignatureService {
         flaskUserId,
       },
       relations: {
-        user: true
-      }
+        user: true,
+      },
     });
   }
 
@@ -65,8 +67,8 @@ export class SignatureService {
         flaskNeedId,
       },
       relations: {
-        user: true
-      }
+        user: true,
+      },
     });
   }
 
@@ -81,12 +83,10 @@ export class SignatureService {
     flaskUserId: number,
   ): Promise<SignatureEntity> {
     const user = await this.userService.getUserByFlaskId(flaskUserId);
-    let theNeed: NeedEntity
+    let theNeed: NeedEntity;
     try {
-      theNeed = await this.needService.getNeedByFlaskId(flaskNeedId)
-    } catch (e) {
-
-    }
+      theNeed = await this.needService.getNeedByFlaskId(flaskNeedId);
+    } catch (e) {}
     const theSignature = this.signatureRepository.create({
       hash: signature,
       role,
@@ -94,7 +94,7 @@ export class SignatureService {
       flaskNeedId,
     });
     theSignature.user = user;
-    theSignature.need = theNeed
+    theSignature.need = theNeed;
 
     return await this.signatureRepository.save(theSignature);
   }
@@ -137,15 +137,27 @@ export class SignatureService {
     let productVoucher: SwProductVoucher;
     let serviceVoucher: SwServiceVoucher;
     let types: VoucherTypes;
-    const socialWorkerId = need.socialWorker.contributions && need.socialWorker.contributions.find(c => c.flaskUserId == need.socialWorker.flaskUserId).flaskUserId;
-    const auditorId = need.auditor.contributions && need.auditor.contributions.find(c => c.flaskUserId == need.auditor.flaskUserId).flaskUserId;
-    const purchaserId = need.purchaser.contributions && need.purchaser.contributions.find(c => c.flaskUserId == need.purchaser.flaskUserId).flaskUserId;
+    const socialWorkerId =
+      need.socialWorker.contributions &&
+      need.socialWorker.contributions.find(
+        (c) => c.flaskUserId == need.socialWorker.flaskUserId,
+      ).flaskUserId;
+    const auditorId =
+      need.auditor.contributions &&
+      need.auditor.contributions.find(
+        (c) => c.flaskUserId == need.auditor.flaskUserId,
+      ).flaskUserId;
+    const purchaserId =
+      need.purchaser.contributions &&
+      need.purchaser.contributions.find(
+        (c) => c.flaskUserId == need.purchaser.flaskUserId,
+      ).flaskUserId;
     const role =
       flaskUserId === socialWorkerId
         ? SAYPlatformRoles.SOCIAL_WORKER
         : flaskUserId === auditorId
-          ? SAYPlatformRoles.AUDITOR
-          : flaskUserId === purchaserId && SAYPlatformRoles.PURCHASER;
+        ? SAYPlatformRoles.AUDITOR
+        : flaskUserId === purchaserId && SAYPlatformRoles.PURCHASER;
 
     if (!role) {
       throw new WalletExceptionFilter(
@@ -161,10 +173,10 @@ export class SignatureService {
           need.category === CategoryEnum.GROWTH
             ? CategoryDefinitionPersianEnum.GROWTH
             : need.category === CategoryEnum.HEALTH
-              ? CategoryDefinitionPersianEnum.HEALTH
-              : need.category === CategoryEnum.JOY
-                ? CategoryDefinitionPersianEnum.JOY
-                : CategoryDefinitionPersianEnum.SURROUNDING,
+            ? CategoryDefinitionPersianEnum.HEALTH
+            : need.category === CategoryEnum.JOY
+            ? CategoryDefinitionPersianEnum.JOY
+            : CategoryDefinitionPersianEnum.SURROUNDING,
         paid: need.cost,
         bankTrackId: need.bankTrackId || 'N/A',
         child: child.sayNameTranslations.fa,
@@ -195,10 +207,10 @@ export class SignatureService {
           need.category === CategoryEnum.GROWTH
             ? CategoryDefinitionPersianEnum.GROWTH
             : need.category === CategoryEnum.HEALTH
-              ? CategoryDefinitionPersianEnum.HEALTH
-              : need.category === CategoryEnum.JOY
-                ? CategoryDefinitionPersianEnum.JOY
-                : CategoryDefinitionPersianEnum.SURROUNDING,
+            ? CategoryDefinitionPersianEnum.HEALTH
+            : need.category === CategoryEnum.JOY
+            ? CategoryDefinitionPersianEnum.JOY
+            : CategoryDefinitionPersianEnum.SURROUNDING,
         paid: need.cost,
         deliveryCode: need.deliveryCode,
         child: child.sayNameTranslations.fa,
@@ -235,6 +247,39 @@ export class SignatureService {
       sayRole: role,
     };
   }
+
+  async getFamilyReadyToSignNeeds(familyMemberId: number): Promise<NeedEntity[]> {
+    const needs = this.needRepository.find({
+      relations: {
+        verifiedPayments: true,
+        signatures: true,
+      },
+      where: {
+        verifiedPayments: {
+          flaskUserId: familyMemberId,
+        },
+        signatures: {
+          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
+        },
+      },
+    });
+    return needs;
+  }
+
+  async getAllFamilyReadyToSignNeeds(): Promise<NeedEntity[]> {
+    const needs = this.needRepository.find({
+      relations: {
+        signatures: true,
+      },
+      where: {
+        signatures: {
+          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
+        },
+      },
+    });
+    return needs;
+  }
+
 
   async deleteOne(signatureId): Promise<Observable<any>> {
     return from(this.signatureRepository.delete(signatureId));

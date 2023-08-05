@@ -718,24 +718,6 @@ export class NeedService {
     return await queryBuilder.getMany();
   }
 
-  async getFamilyReadyNeeds(familyMemberId: number): Promise<NeedEntity[]> {
-    const needs = this.needRepository.find({
-      relations: {
-        verifiedPayments: true,
-        signatures: true,
-      },
-      where: {
-        verifiedPayments: {
-          flaskUserId: familyMemberId,
-        },
-        signatures: {
-          role: SAYPlatformRoles.AUDITOR, // must be signed by auditor to have IPFS hash
-        },
-      },
-    });
-    return needs;
-  }
-
   async getDeleteCandidates(): Promise<any> {
     const date = new Date();
     date.setMonth(date.getMonth() - 3); // three months ago

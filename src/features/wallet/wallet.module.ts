@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SignatureController } from './wallet.controller';
 import { SignatureEntity } from '../../entities/signature.entity';
-import { SignatureService } from './wallet.service';
+import { WalletService } from './wallet.service';
 import { NeedService } from '../need/need.service';
 import { UserService } from '../user/user.service';
 import { ChildrenService } from '../children/children.service';
@@ -11,7 +11,7 @@ import { ChildrenEntity } from '../../entities/children.entity';
 import { AllUserEntity } from '../../entities/user.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PaymentEntity } from '../../entities/payment.entity';
-import { SignatureMiddleware } from './middlewares/wallet.middleware';
+import { WalletMiddleware } from './middlewares/wallet.middleware';
 import { EthersModule } from 'nestjs-ethers';
 import { NgoService } from '../ngo/ngo.service';
 import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
@@ -89,7 +89,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
   controllers: [SignatureController],
   providers: [
     LocationService,
-    SignatureService,
+    WalletService,
     NeedService,
     PaymentService,
     UserService,
@@ -105,6 +105,6 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 })
 export class WalletModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(SignatureMiddleware).forRoutes('signatures');
+    consumer.apply( WalletMiddleware).forRoutes('wallet');
   }
 }

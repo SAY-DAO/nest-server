@@ -40,6 +40,7 @@ async function startServer() {
       'Access-Control-Allow-Methods',
       'Access-Control-Allow-Origin',
       'flaskUserId',
+      'flaskSwId',
     ],
 
     methods: ['GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'],

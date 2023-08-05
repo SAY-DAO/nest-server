@@ -13,7 +13,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
   PanelContributors,
   SAYPlatformRoles,
@@ -25,7 +25,7 @@ import {
   VerifyWalletDto,
 } from '../../types/dtos/CreateSignature.dto';
 import { ValidateSignaturePipe } from './pipes/validate-wallet.pipe';
-import { SignatureService } from './wallet.service';
+import { WalletService } from './wallet.service';
 import { SyncService } from '../sync/sync.service';
 import { generateNonce, ErrorTypes, SiweMessage } from 'siwe';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
@@ -42,18 +42,25 @@ import {
   FamilyAPIApi,
   SocialWorkerAPIApi,
 } from 'src/generated-sources/openapi';
+import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 
 @UseInterceptors(WalletInterceptor)
 @ApiTags('Wallet')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskSwId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('wallet')
 export class SignatureController {
   constructor(
-    private signatureService: SignatureService,
+    private walletService: WalletService,
     private syncService: SyncService,
     private ipfsService: IpfsService,
     private userService: UserService,
     private needService: NeedService,
-  ) { }
+  ) {}
 
   @Get('nonce/:userId/:typeId')
   @ApiOperation({ description: 'Get SIWE nonce' })
@@ -240,11 +247,8 @@ export class SignatureController {
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all signatures' })
-  async getSignatures(@Session() session: Record<string, any>) {
-    if (!session.siwe) {
-      throw new WalletExceptionFilter(401, 'You have to first sign_in');
-    }
-    return await this.signatureService.getSignatures();
+  async getSignatures() {
+    return await this.walletService.getSignatures();
   }
 
   @Post(`signature/prepare`)
@@ -271,7 +275,7 @@ export class SignatureController {
       );
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
 
-      transaction = await this.signatureService.prepareSignature(
+      transaction = await this.walletService.prepareSignature(
         session.siwe.address,
         need,
         child,
@@ -297,7 +301,7 @@ export class SignatureController {
     try {
       const sessionFlaskUserId = session.siwe.flaskUserId;
       const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
-      const needSignatures = await this.signatureService.getNeedSignatures(
+      const needSignatures = await this.walletService.getNeedSignatures(
         body.flaskNeedId,
       );
 
@@ -323,7 +327,7 @@ export class SignatureController {
             '\x1b[36m%s\x1b[0m',
             'Creating Social Worker Signature ...',
           );
-          const initialSignature = await this.signatureService.createSignature(
+          const initialSignature = await this.walletService.createSignature(
             signature,
             need.flaskId,
             SAYPlatformRoles.SOCIAL_WORKER,
@@ -355,15 +359,17 @@ export class SignatureController {
         if (
           initialSignature &&
           initialSignature.flaskUserId ===
-          need.socialWorker.contributions.find(
-            (c) => c.flaskUserId == need.socialWorker.flaskUserId,
-          ).flaskUserId
+            need.socialWorker.contributions.find(
+              (c) => c.flaskUserId == need.socialWorker.flaskUserId,
+            ).flaskUserId
         ) {
-          console.log(initialSignature.flaskUserId )
-          console.log(need.auditor.flaskUserId)
-          console.log(need.auditor.contributions.find(
+          console.log(initialSignature.flaskUserId);
+          console.log(need.auditor.flaskUserId);
+          console.log(
+            need.auditor.contributions.find(
               (c) => c.flaskUserId == need.auditor.flaskUserId,
-            ).flaskUserId )
+            ).flaskUserId,
+          );
 
           // auditor
           if (
@@ -380,13 +386,12 @@ export class SignatureController {
               need,
             );
             console.log('\x1b[36m%s\x1b[0m', 'Creating Auditor Signature ...');
-            const auditorSignature =
-              await this.signatureService.createSignature(
-                signature,
-                need.flaskId,
-                SAYPlatformRoles.AUDITOR,
-                sessionFlaskUserId,
-              );
+            const auditorSignature = await this.walletService.createSignature(
+              signature,
+              need.flaskId,
+              SAYPlatformRoles.AUDITOR,
+              sessionFlaskUserId,
+            );
 
             const auditorDetails = {
               firstName: need.auditor.firstName,
@@ -419,13 +424,12 @@ export class SignatureController {
               '\x1b[36m%s\x1b[0m',
               'Creating Purchaser Signature ...',
             );
-            const purchaserSignature =
-              await this.signatureService.createSignature(
-                signature,
-                need.flaskId,
-                SAYPlatformRoles.PURCHASER,
-                sessionFlaskUserId,
-              );
+            const purchaserSignature = await this.walletService.createSignature(
+              signature,
+              need.flaskId,
+              SAYPlatformRoles.PURCHASER,
+              sessionFlaskUserId,
+            );
             return { signature: purchaserSignature };
           }
           // family
@@ -446,13 +450,12 @@ export class SignatureController {
                 '\x1b[36m%s\x1b[0m',
                 'Creating Virtual Family Signatures ...',
               );
-              const familySignature =
-                await this.signatureService.createSignature(
-                  signature,
-                  body.flaskNeedId,
-                  SAYPlatformRoles.FAMILY,
-                  sessionFlaskUserId,
-                );
+              const familySignature = await this.walletService.createSignature(
+                signature,
+                body.flaskNeedId,
+                SAYPlatformRoles.FAMILY,
+                sessionFlaskUserId,
+              );
               return { signature: familySignature };
             } else {
               throw new WalletExceptionFilter(
@@ -478,7 +481,7 @@ export class SignatureController {
     } catch (e) {
       const theSignature = await this.getSignature(signature);
       if (theSignature) {
-        await this.signatureService.deleteOne(theSignature);
+        await this.walletService.deleteOne(theSignature);
       }
       throw new WalletExceptionFilter(e.status, e.message);
     }
@@ -487,25 +490,35 @@ export class SignatureController {
   @Get(`signature/:signature`)
   @ApiOperation({ description: 'Get all signature' })
   async getSignature(@Param('signature') signature: string) {
-    return await this.signatureService.getSignature(signature);
+    return await this.walletService.getSignature(signature);
   }
 
   @Get(`signatures/:flaskUserId`)
   @ApiOperation({ description: 'Get contributors signatures' })
   async getContributorSignatures(@Param('flaskUserId') flaskUserId: number) {
-    return await this.signatureService.getUserSignatures(flaskUserId);
+    return await this.walletService.getUserSignatures(flaskUserId);
   }
 
   @Get(`signatures/ready/:flaskUserId`)
   @ApiOperation({ description: 'Get virtual family member signatures' })
   async getFamilyMemberSignatures(@Param('flaskUserId') flaskUserId: number) {
-    return await this.signatureService.getUserSignatures(flaskUserId);
+    return await this.walletService.getUserSignatures(flaskUserId);
   }
   @Delete(`signature/:signature`)
   @ApiOperation({ description: 'Delete a signatures' })
   async deleteSignature(@Param('signature') signature: string) {
-    const theSignature = await this.signatureService.getSignature(signature);
-    return await this.signatureService.deleteOne(theSignature.id);
+    const theSignature = await this.walletService.getSignature(signature);
+    return await this.walletService.deleteOne(theSignature.id);
   }
 
+  @Get(`family/signatures/ready/:userId`)
+  @ApiOperation({
+    description: 'Get all signed needs for virtual family member',
+  })
+  async getReadyNeeds(@Param('userId') userId: number) {
+    if (!userId) {
+      throw new ObjectNotFound('We need the user ID!');
+    }
+    return await this.walletService.getFamilyReadyToSignNeeds(Number(userId));
+  }
 }

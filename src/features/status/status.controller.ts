@@ -1,10 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Delete } from '@nestjs/common';
 import { StatusService } from './status.service';
+import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Status')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskSwId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('status')
 export class StatusController {
-  constructor(private readonly statusService: StatusService) { }
-
+  constructor(private readonly statusService: StatusService) {}
 
   @Get()
   findAll() {

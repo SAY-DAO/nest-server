@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   NeedTypeEnum,
+  PaymentStatusEnum,
   ProductStatusEnum,
   ServiceStatusEnum,
   VirtualFamilyRole,
@@ -68,74 +69,69 @@ export class FamilyService {
       .getCount();
   }
 
-//   async getFamilyRoles(
-//     userId: number,
-//     vFamilyRole: VirtualFamilyRole,
-//   ): Promise<any> {
-//     return await this.flaskUserRepository
-//       .createQueryBuilder('user')
-//       .leftJoinAndMapMany(
-//         'user.payments',
-//         Payment,
-//         'payment',
-//         'payment.id_user = user.id',
-//       )
-//       .leftJoinAndMapOne(
-//         'payment.need',
-//         Need,
-//         'need',
-//         'need.id = payment.id_need',
-//       )
-//       .leftJoinAndMapOne(
-//         'need.child',
-//         Child,
-//         'child',
-//         'child.id = need.child_id',
-//       )
-//       .leftJoinAndMapMany(
-//         'user.user_families',
-//         UserFamily,
-//         'userFamily',
-//         'userFamily.id_user = user.id',
-//       )
-//       .leftJoinAndMapOne(
-//         'userFamily.family',
-//         Family,
-//         'family',
-//         'family.id = userFamily.id_family',
-//       )
-//       .where('user.id = :userId', { userId: userId })
-//       .andWhere('need.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
-//       .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
-//       .andWhere('userFamily.flaskFamilyRole = :flaskFamilyRole', {
-//         flaskFamilyRole: vFamilyRole,
-//       })
-//       .andWhere('payment.id_user = :userId', { userId: userId })
-//       .andWhere('payment.id_need IS NOT NULL')
-//       .andWhere('payment.id IS NOT NULL')
-//       .andWhere('payment.verified IS NOT NULL')
-//       .andWhere('payment.order_id IS NOT NULL')
-//       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-//         testNgoIds: [3, 14],
-//       })
-//       // .select([
-//       //   'user.id',
-//       //   'payment',
-//       //   'need.id',
-//       //   'need.child_id',
-//       //   'user.userName',
-//       //   'family',
-//       //   'userFamily',
-//       // ])
-//       .getMany();
-//   }
+  //   async getFamilyRoles(
+  //     userId: number,
+  //     vFamilyRole: VirtualFamilyRole,
+  //   ): Promise<any> {
+  //     return await this.flaskUserRepository
+  //       .createQueryBuilder('user')
+  //       .leftJoinAndMapMany(
+  //         'user.payments',
+  //         Payment,
+  //         'payment',
+  //         'payment.id_user = user.id',
+  //       )
+  //       .leftJoinAndMapOne(
+  //         'payment.need',
+  //         Need,
+  //         'need',
+  //         'need.id = payment.id_need',
+  //       )
+  //       .leftJoinAndMapOne(
+  //         'need.child',
+  //         Child,
+  //         'child',
+  //         'child.id = need.child_id',
+  //       )
+  //       .leftJoinAndMapMany(
+  //         'user.user_families',
+  //         UserFamily,
+  //         'userFamily',
+  //         'userFamily.id_user = user.id',
+  //       )
+  //       .leftJoinAndMapOne(
+  //         'userFamily.family',
+  //         Family,
+  //         'family',
+  //         'family.id = userFamily.id_family',
+  //       )
+  //       .where('user.id = :userId', { userId: userId })
+  //       .andWhere('need.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
+  //       .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
+  //       .andWhere('userFamily.flaskFamilyRole = :flaskFamilyRole', {
+  //         flaskFamilyRole: vFamilyRole,
+  //       })
+  //       .andWhere('payment.id_user = :userId', { userId: userId })
+  //       .andWhere('payment.id_need IS NOT NULL')
+  //       .andWhere('payment.id IS NOT NULL')
+  //       .andWhere('payment.verified IS NOT NULL')
+  //       .andWhere('payment.order_id IS NOT NULL')
+  //       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+  //         testNgoIds: [3, 14],
+  //       })
+  //       // .select([
+  //       //   'user.id',
+  //       //   'payment',
+  //       //   'need.id',
+  //       //   'need.child_id',
+  //       //   'user.userName',
+  //       //   'family',
+  //       //   'userFamily',
+  //       // ])
+  //       .getMany();
+  //   }
 
-
-
-  async countMyChildPayments(
-    userId: number,
-    childId:number,
-  ): Promise<any> {
+  async isChildCaredOnce(userId: number, childId: number): Promise<boolean> {
     return await this.flaskUserRepository
       .createQueryBuilder('user')
       .leftJoinAndMapMany(
@@ -164,10 +160,10 @@ export class FamilyService {
       .andWhere('payment.id IS NOT NULL')
       .andWhere('payment.verified IS NOT NULL')
       .andWhere('payment.order_id IS NOT NULL')
-      .getCount();
+      .getExists();
   }
 
-  async getFamilyRoleDelivered(
+  async getFamilyRoleCompletePay(
     vfamilyRole: VirtualFamilyRole,
     userId: number,
   ): Promise<any> {
@@ -192,24 +188,10 @@ export class FamilyService {
           'payment',
           'payment.id_need = need.id',
         )
-        .where(
-          new Brackets((qb) => {
-            qb.where('need.type = :typeProduct', {
-              typeProduct: NeedTypeEnum.PRODUCT,
-            })
-              .andWhere('need.status = :productStatus', {
-                productStatus: ProductStatusEnum.DELIVERED,
-              })
-              .orWhere('need.type = :typeService', {
-                typeService: NeedTypeEnum.SERVICE,
-              })
-              .andWhere('need.status = :serviceStatus', {
-                serviceStatus: ServiceStatusEnum.DELIVERED,
-              });
-          }),
-        )
+        .andWhere('need.status >= :statusNotPaid', {
+          statusNotPaid: PaymentStatusEnum.COMPLETE_PAY,
+        })
         .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-        // .andWhere('payment.id_user = :userId', { userId: 115 })
         .andWhere(userId > 0 && `payment.id_user = :userId`, { userId: userId })
         .andWhere(userId > 0 && `needFamily.id_user = :userId`, {
           userId: userId,
@@ -221,9 +203,6 @@ export class FamilyService {
         .andWhere('needFamily.flaskFamilyRole = :flaskFamilyRole', {
           flaskFamilyRole: vfamilyRole, // we have -1 and -2 in data as well (e.g user id:208 is SAY)
         })
-        // .andWhere('child.existence_status IN (:...existence_status)', {
-        //   existence_status: [childExistence.AlivePresent],
-        // })
         //<------- to here
         .andWhere('payment.id IS NOT NULL')
         .andWhere('payment.verified IS NOT NULL')

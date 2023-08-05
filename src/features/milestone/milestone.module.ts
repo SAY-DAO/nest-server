@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HttpModule } from '@nestjs/axios';
@@ -23,6 +23,7 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { MileStoneMiddleware } from './middlewares/milestone.middleware';
 
 @Module({
   imports: [
@@ -53,4 +54,8 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
     PaymentService,
   ],
 })
-export class MilestoneModule {}
+export class MilestoneModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MileStoneMiddleware).forRoutes('milestone');
+  }
+}

@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Patch, Req } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { SAYPlatformRoles } from 'src/types/interfaces/interface';
 import { convertFlaskToSayRoles } from 'src/utils/helpers';
 import { SyncService } from '../sync/sync.service';
@@ -8,12 +8,19 @@ import { UserService } from '../user/user.service';
 import { NgoService } from './ngo.service';
 
 @ApiTags('Ngo')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskSwId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('ngo')
 export class NgoController {
-  constructor(private ngoService: NgoService,
+  constructor(
+    private ngoService: NgoService,
     private userService: UserService,
-    private syncService: SyncService
-  ) { }
+    private syncService: SyncService,
+  ) {}
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all ngos' })
@@ -22,32 +29,34 @@ export class NgoController {
   }
 
   @Get(`arrivals/:swId`)
-  async getNgoArrivals(
-    @Param('swId') swId: number,
-  ) {
+  async getNgoArrivals(@Param('swId') swId: number) {
     let socialWorkerId: number;
-    let swIds: number[]
-    const socialWorker = await this.userService.getFlaskSocialWorker(swId)
+    let swIds: number[];
+    const socialWorker = await this.userService.getFlaskSocialWorker(swId);
     const roleId = convertFlaskToSayRoles(socialWorker.type_id);
     if (roleId === SAYPlatformRoles.SOCIAL_WORKER) {
       socialWorkerId = swId;
     }
     if (roleId === SAYPlatformRoles.AUDITOR) {
       socialWorkerId = null;
-      swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
+      swIds = await this.userService
+        .getFlaskSwIds()
+        .then((r) => r.map((s) => s.id));
     }
     if (roleId === SAYPlatformRoles.PURCHASER) {
       socialWorkerId = null;
-      swIds = await this.userService.getFlaskSwIds().then(r => r.map(s => s.id))
+      swIds = await this.userService
+        .getFlaskSwIds()
+        .then((r) => r.map((s) => s.id));
     }
     if (roleId === SAYPlatformRoles.NGO_SUPERVISOR) {
       socialWorkerId = null;
-      swIds = await this.userService.getFlaskSocialWorkerByNgo(socialWorker.ngo_id).then(r => r.map(s => s.id))
+      swIds = await this.userService
+        .getFlaskSocialWorkerByNgo(socialWorker.ngo_id)
+        .then((r) => r.map((s) => s.id));
     }
     return await this.ngoService.getNgoArrivals(socialWorkerId, swIds);
-
   }
-
 
   @Patch(`arrivals/update/:flaskUserId/:deliveryCode/:arrivalCode`)
   async updateNgoArrivals(
@@ -58,12 +67,12 @@ export class NgoController {
     const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
       flaskUserId,
     );
-    const ngo = await this.syncService.syncContributorNgo(flaskSocialWorker)
+    const ngo = await this.syncService.syncContributorNgo(flaskSocialWorker);
 
-    return await this.ngoService.updateNgoArrivals(ngo, deliveryCode, arrivalCode);
-
+    return await this.ngoService.updateNgoArrivals(
+      ngo,
+      deliveryCode,
+      arrivalCode,
+    );
   }
 }
-
-
-
