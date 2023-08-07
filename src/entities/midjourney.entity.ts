@@ -1,19 +1,15 @@
-import { Column, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { NeedEntity } from './need.entity';
 
+@Entity()
 export class MidjourneyEntity extends BaseEntity {
+  @Index({ unique: true })
   @Column()
   flaskNeedId: number;
 
-  @Column({ nullable: false })
-  needDetailsHash: string;
-
-  @Column({ nullable: true })
-  receiptsHash: string;
-
-  @Column({ nullable: true })
-  paymentsHash: string;
+  @Column()
+  fileName: string;
 
   @OneToOne(() => NeedEntity)
   @JoinColumn()

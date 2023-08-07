@@ -13,6 +13,7 @@ import {
   VirtualFamilyRole,
   childExistence,
 } from 'src/types/interfaces/interface';
+import fs from 'fs';
 
 export const Q1_LOWER_COEFFICIENT = 1;
 export const Q1_TO_Q2_COEFFICIENT = 1.25;
@@ -20,6 +21,19 @@ export const Q2_TO_Q3_COEFFICIENT = 1.5;
 export const Q3_UPPER_COEFFICIENT = 1.75;
 const PARENTS_DELIVERED_RANGE = 1;
 const RELETIVES_DELIVERED_RANGE = 3;
+
+export function getAllFilesFromFolder(dir: string) {
+  let results = [];
+  fs.readdirSync(dir).forEach(function (file) {
+    file = dir + '/' + file;
+    const stat = fs.statSync(file);
+
+    if (stat && stat.isDirectory()) {
+      results = results.concat(getAllFilesFromFolder(file));
+    } else results.push(file);
+  });
+  return results;
+}
 
 export function removeDuplicates(array: any[]) {
   const set = new Set(array);

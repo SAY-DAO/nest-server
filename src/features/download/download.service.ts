@@ -2,15 +2,13 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { createReadStream, readFileSync } from 'fs';
 import { join } from 'path';
-import  { createWriteStream } from 'fs';
-import { catchError, firstValueFrom } from 'rxjs';
-import axios, { AxiosError} from 'axios';
-import { Readable } from "stream";
+import { createWriteStream } from 'fs';
+import axios from 'axios';
+import { Readable } from 'stream';
 
 @Injectable()
 export class DownloadService {
   private readonly logger = new Logger(DownloadService.name);
-
   constructor(private httpService: HttpService) {}
 
   async imageBuffer(fileName: string) {
@@ -62,9 +60,12 @@ export class DownloadService {
     //       }),
     //     ),
     // );
-    const { data } = await axios.get<Readable>(`https://api.sayapp.company/${fileUrl}`, {
-      responseType: "stream",
-    });
+    const { data } = await axios.get<Readable>(
+      `https://api.sayapp.company/${fileUrl}`,
+      {
+        responseType: 'stream',
+      },
+    );
     // now, you can process or transform the data as a Readable type.
     const writeStream = createWriteStream(name);
     data.pipe(writeStream); // save file to local file system

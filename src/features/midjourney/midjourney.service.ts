@@ -1,26 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMidjourneyDto } from './dto/create-midjourney.dto';
-import { UpdateMidjourneyDto } from './dto/update-midjourney.dto';
+import { MidjourneyEntity } from '../../entities/midjourney.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { NeedEntity } from 'src/entities/need.entity';
 
 @Injectable()
 export class MidjourneyService {
-  create(createMidjourneyDto: CreateMidjourneyDto) {
-    return 'This action adds a new midjourney';
+  constructor(
+    @InjectRepository(MidjourneyEntity)
+    private readonly midjourneyRepository: Repository<MidjourneyEntity>,
+  ) {}
+
+  async getAllImages(): Promise<MidjourneyEntity[]> {
+    return this.midjourneyRepository.find();
   }
 
-  findAll() {
-    return `This action returns all midjourney`;
+  async getImage(flaskNeedId: number): Promise<MidjourneyEntity> {
+    return this.midjourneyRepository.findOne({
+      where: {
+        flaskNeedId: flaskNeedId,
+      },
+    });
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} midjourney`;
-  }
-
-  update(id: number, updateMidjourneyDto: UpdateMidjourneyDto) {
-    return `This action updates a #${id} midjourney`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} midjourney`;
+  async createImage(values: {
+    flaskNeedId: number;
+    need: NeedEntity;
+    fileName: string;
+  }): Promise<MidjourneyEntity> {
+    return this.midjourneyRepository.save({
+      flaskNeedId: values.flaskNeedId,
+      fileName: values.fileName,
+      need: values.need,
+    });
   }
 }

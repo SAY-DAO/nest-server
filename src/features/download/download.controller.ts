@@ -27,23 +27,24 @@ export class DownloadController {
     private readonly httpService: HttpService,
   ) {}
 
+
   @ApiFileResponse('image/png')
   @Get('buffer')
   async buffer(@Res() response: Response) {
-    const file = await this.downloadService.imageBuffer('dao.png');
+    const file = await this.downloadService.imageBuffer('../../midjourney/dao.png');
     response.contentType('image/png');
     response.send(file);
   }
 
   @Get('stream')
   async stream(@Res() response: Response) {
-    const file = await this.downloadService.imageStream('dao.png');
+    const file = await this.downloadService.imageStream('../../midjourney/dao.png');
     file.pipe(response);
   }
 
   @Get('streamable')
   async streamable(@Res({ passthrough: true }) response: Response) {
-    const file = await this.downloadService.fileStream('dao.png');
+    const file = await this.downloadService.fileStream('../../midjourney/dao.png');
     // or
     // const file = this.downloadService.fileBuffer();
     return new StreamableFile(file); // 👈 supports Buffer and Stream

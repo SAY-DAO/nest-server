@@ -3,7 +3,7 @@ import { LoggerModule } from 'nestjs-pino';
 import config from './config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import 'reflect-metadata';
 import { MileStoneEntity } from './entities/milestone.entity';
 import { NeedEntity } from './entities/need.entity';
@@ -58,6 +58,10 @@ import { ScheduleTaskModule } from './features/schedule/schedule.module';
 import { FamilyModule } from './features/family/family.module';
 import { MidjourneyModule } from './features/midjourney/midjourney.module';
 import { MidjourneyEntity } from './entities/midjourney.entity';
+import { MulterModule } from '@nestjs/platform-express';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { Session } from './entities/session.entity';
 
 const imports = [
   HttpModule,
@@ -67,6 +71,7 @@ const imports = [
   TypeOrmModule.forRoot({
     ...config().db1,
     entities: [
+      Session,
       CityEntity,
       StatusEntity,
       TicketEntity,
@@ -87,7 +92,7 @@ const imports = [
       EthereumAccountEntity,
       EthereumTransaction,
       IpfsEntity,
-      MidjourneyEntity
+      MidjourneyEntity,
     ],
   }),
   TypeOrmModule.forRoot({
@@ -106,6 +111,12 @@ const imports = [
       NeedReceipt,
     ],
   }),
+  // MulterModule.register({
+  //   dest: '../../midjourney',
+  // }),
+  // ServeStaticModule.forRoot({
+  //   rootPath: join(__dirname, '..', 'files'),
+  // }),
   ScheduleTaskModule,
   GatewayModule,
   LocationModule,
@@ -126,7 +137,7 @@ const imports = [
   AnalyticModule,
   DownloadModule,
   FamilyModule,
-  MidjourneyModule
+  MidjourneyModule,
 ];
 
 @Module({

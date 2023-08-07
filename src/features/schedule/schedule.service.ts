@@ -82,8 +82,8 @@ export class ScheduleService {
     this.logger.debug(
       'Called only once after 10 seconds of the server initiation',
     );
-    this.helper();
-    this.rolesCount();
+    // this.helper();
+    // this.rolesCount();
   }
 
   @Cron(CronExpression.EVERY_WEEK)

@@ -24,7 +24,7 @@ import {
 } from '../../types/dtos/CreateProvider.dto';
 import { Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { storage } from '../../storage';
+import { providerStorage } from '../../providerStorage';
 import { UpdateResult } from 'typeorm';
 import {
   NeedTypeDefinitionEnum,
@@ -86,7 +86,7 @@ export class ProviderController {
 
   @Post('add')
   @UsePipes(new ValidationPipe()) // validation for dto files
-  @UseInterceptors(FileInterceptor('file', storage))
+  @UseInterceptors(FileInterceptor('file', providerStorage))
   @ApiOperation({ description: 'Create one provider' })
   async createProvider(
     @UploadedFile() file,
@@ -123,7 +123,7 @@ export class ProviderController {
 
   @Patch('update/:id')
   @UsePipes(new ValidationPipe()) // validation for dto files
-  @UseInterceptors(FileInterceptor('file', storage))
+  @UseInterceptors(FileInterceptor('file', providerStorage))
   async updateProvider(
     @Param('id') id,
     @UploadedFile() file,

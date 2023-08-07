@@ -15,9 +15,12 @@ import { ContributorEntity } from 'src/entities/contributor.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { MidjourneyMiddleware } from './middlewares/midjourney.middleware';
+import { DownloadService } from '../download/download.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule,
     TypeOrmModule.forFeature(
       [Child, Need, SocialWorker, User],
       'flaskPostgres',
@@ -32,7 +35,13 @@ import { MidjourneyMiddleware } from './middlewares/midjourney.middleware';
     ]),
   ],
   controllers: [MidjourneyController],
-  providers: [MidjourneyService, WalletService, NeedService, UserService],
+  providers: [
+    MidjourneyService,
+    WalletService,
+    NeedService,
+    UserService,
+    DownloadService,
+  ],
 })
 export class MidjourneyModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

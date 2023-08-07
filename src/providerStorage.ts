@@ -2,7 +2,7 @@ import { diskStorage } from 'multer';
 import { uuid } from 'uuidv4';
 import path from 'path';
 
-export const storage = {
+export const providerStorage = {
     storage: diskStorage({
         destination: './uploads/providers/logos',
         filename: (req, file, cb) => {
