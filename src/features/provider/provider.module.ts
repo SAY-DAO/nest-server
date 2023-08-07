@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProviderEntity } from '../../entities/provider.entity';
 import { ProviderService } from './provider.service';
@@ -16,6 +21,9 @@ import { ProviderMiddleware } from './middlewares/provider.middleware';
 })
 export class ProviderModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ProviderMiddleware).forRoutes('providers');
+    consumer
+      .apply(ProviderMiddleware)
+      .exclude('providers/images/:fileName')
+      .forRoutes(ProviderController);
   }
 }

@@ -34,23 +34,29 @@ import { ValidateProviderPipe } from './pipes/validate-provider.pipe';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 
 @ApiTags('Provider')
-@ApiSecurity('flask-access-token')
-@ApiHeader({
-  name: 'flaskSwId',
-  description: 'to use cache and flask authentication',
-  required: true,
-})
 @Controller('providers')
 export class ProviderController {
   constructor(private providerService: ProviderService) {}
 
   @Get(`all`)
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskSwId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @ApiOperation({ description: 'Get all providers' })
   async getProviders() {
     return await this.providerService.getProviders();
   }
 
   @Get(`:id`)
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskSwId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @ApiOperation({ description: 'Get one by id' })
   async getOneProvider(@Param('id') id: string) {
     let provider: ProviderEntity;
@@ -67,6 +73,12 @@ export class ProviderController {
   }
 
   @Post('join')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskSwId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @ApiOperation({ description: 'Create one provider' })
   async createRelation(
     @Body() body: CreateProviderJoinNeedDto,
@@ -85,6 +97,12 @@ export class ProviderController {
   }
 
   @Post('add')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskSwId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @UsePipes(new ValidationPipe()) // validation for dto files
   @UseInterceptors(FileInterceptor('file', providerStorage))
   @ApiOperation({ description: 'Create one provider' })
@@ -122,6 +140,12 @@ export class ProviderController {
   }
 
   @Patch('update/:id')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskSwId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @UsePipes(new ValidationPipe()) // validation for dto files
   @UseInterceptors(FileInterceptor('file', providerStorage))
   async updateProvider(
@@ -153,12 +177,21 @@ export class ProviderController {
   }
 
   @Delete(':id')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskSwId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   deleteOne(@Param('id') id: number): Observable<any> {
     return this.providerService.deleteOne(id);
   }
 
-  @Get('images/:fileId')
-  async serveAvatar(@Param('fileId') fileId, @Res() res: any): Promise<any> {
-    res.sendFile(fileId, { root: './uploads/providers/logos' });
+  @Get('images/:fileName')
+  async serveAvatar(
+    @Param('fileName') fileName: string,
+    @Res() res: any,
+  ): Promise<any> {
+    res.sendFile(fileName, { root: './uploads/providers/logos' });
   }
 }
