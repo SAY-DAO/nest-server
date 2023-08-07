@@ -93,6 +93,17 @@ export class ChildrenService {
     return this.childrenRepository.find();
   }
 
+  async getFlaskActiveChildren(): Promise<Child[]> {
+    return await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .where('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('child.id_ngo NOT IN (:...ngoIds)', {
+        ngoIds: [3, 14],
+      })
+      .getMany();
+  }
+
   getChildById(flaskId: number): Promise<ChildrenEntity> {
     const child = this.childrenRepository.findOne({
       relations: { ngo: true },

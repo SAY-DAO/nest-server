@@ -19,6 +19,13 @@ export class ChildrenController {
     return await this.childrenService.getChildren();
   }
 
+  @Get(`all/actives`)
+  @ApiOperation({ description: 'Get all active children from flask db' })
+  async getActiveChildren() {
+    return await this.childrenService.getFlaskActiveChildren();
+  }
+
+
   @Get(`flask/all`)
   @ApiOperation({ description: 'Get all flask children from db' })
   async getFlaskChildren() {
