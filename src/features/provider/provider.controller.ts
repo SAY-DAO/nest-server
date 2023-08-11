@@ -128,7 +128,7 @@ export class ProviderController {
       state: request?.state,
       country: request.country,
       logoUrl: file?.filename,
-      isActive: request?.isActive,
+      isActive: true,
     };
 
     try {

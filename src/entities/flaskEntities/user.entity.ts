@@ -8,6 +8,7 @@ import { BaseEntity } from './BaseEntity';
 
 @Entity()
 export class User extends BaseEntity {
+  [x: string]: any; // when in analytic.service user.payments not available from flask this helps
   @Column({ nullable: true })
   firstName?: string;
 

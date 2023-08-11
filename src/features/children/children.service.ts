@@ -98,8 +98,14 @@ export class ChildrenService {
       .createQueryBuilder('child')
       .where('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('child.id_ngo NOT IN (:...ngoIds)', {
-        ngoIds: [3, 14],
+      .where('child.existence_status = :existence_status', {
+        existence_status: childExistence.AlivePresent,
+      })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
       })
       .getMany();
   }

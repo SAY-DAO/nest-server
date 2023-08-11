@@ -15,6 +15,7 @@ lerna-debug.log*
 
 # images
 /uploads
+midJourney.json
 
 # OS
 .DS_Store

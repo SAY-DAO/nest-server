@@ -6,6 +6,12 @@ import { AllUserEntity } from './user.entity';
 
 @Entity()
 export class SignatureEntity extends BaseEntity {
+  @Column({ nullable: false })
+  verifyingContract: string;
+
+  @Column({ nullable: true })
+  isVerified: boolean;
+
   @ManyToOne(() => AllUserEntity, (user) => user.signatures, {
     eager: false,
     nullable: false,

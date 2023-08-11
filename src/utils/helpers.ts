@@ -12,6 +12,7 @@ import {
   PanelContributors,
   VirtualFamilyRole,
   childExistence,
+  AppContributors,
 } from 'src/types/interfaces/interface';
 import fs from 'fs';
 
@@ -36,13 +37,8 @@ export function getAllFilesFromFolder(dir: string) {
 }
 
 export function removeDuplicates(array: any[]) {
-  const set = new Set(array);
-  return array.filter((item) => {
-    if (set.has(item.id)) {
-      set.delete(item.id);
-    } else {
-      return item.id;
-    }
+  return array.filter((obj, index) => {
+    return index === array.findIndex((o) => obj.id === o.id);
   });
 }
 
@@ -58,8 +54,8 @@ export function getSAYRoleInteger(sayRole: string) {
     roleInteger = SAYPlatformRoles.NGO_SUPERVISOR;
   } else if (sayRole === 'FAMILY') {
     roleInteger = SAYPlatformRoles.FAMILY;
-  } else if (sayRole === 'FRIEND') {
-    roleInteger = SAYPlatformRoles.FRIEND;
+  } else if (sayRole === 'RELATIVE') {
+    roleInteger = SAYPlatformRoles.RELATIVE;
   } else if (sayRole === 'NO_ROLE') {
     roleInteger = SAYPlatformRoles.NO_ROLE;
   }
@@ -83,10 +79,25 @@ export function convertFlaskToSayRoles(flaskUserType: number) {
     role = SAYPlatformRoles.PURCHASER;
   } else if (flaskUserType === FlaskUserTypesEnum.NGO_SUPERVISOR) {
     role = SAYPlatformRoles.NGO_SUPERVISOR;
-  } else if (!flaskUserType) {
+  } else if (flaskUserType === FlaskUserTypesEnum.FAMILY) {
     role = SAYPlatformRoles.FAMILY;
+  } else if (flaskUserType === FlaskUserTypesEnum.RELATIVE) {
+    role = SAYPlatformRoles.RELATIVE;
   }
   return role;
+}
+
+export function convertFlaskToSayAppRoles(flaskUserType: number) {
+  if (typeof flaskUserType != 'number') {
+    throw new ServerError('bad role type');
+  }
+  let panelRole: AppContributors;
+  if (flaskUserType === FlaskUserTypesEnum.FAMILY) {
+    panelRole = AppContributors.FAMILY;
+  } else if (flaskUserType === FlaskUserTypesEnum.RELATIVE) {
+    panelRole = AppContributors.RELATIVE;
+  }
+  return panelRole;
 }
 
 export function convertFlaskToSayPanelRoles(flaskUserType: number) {
@@ -94,11 +105,8 @@ export function convertFlaskToSayPanelRoles(flaskUserType: number) {
     throw new ServerError('bad role type');
   }
   let panelRole: PanelContributors;
-  if (flaskUserType === FlaskUserTypesEnum.SAY_SUPERVISOR) {
-    panelRole = PanelContributors.AUDITOR;
-  } else if (flaskUserType === FlaskUserTypesEnum.ADMIN) {
-    panelRole = PanelContributors.AUDITOR;
-  } else if (flaskUserType === FlaskUserTypesEnum.SUPER_ADMIN) {
+
+  if (flaskUserType === FlaskUserTypesEnum.SUPER_ADMIN) {
     panelRole = PanelContributors.AUDITOR;
   } else if (flaskUserType === FlaskUserTypesEnum.SOCIAL_WORKER) {
     panelRole = PanelContributors.SOCIAL_WORKER;
@@ -106,6 +114,10 @@ export function convertFlaskToSayPanelRoles(flaskUserType: number) {
     panelRole = PanelContributors.PURCHASER;
   } else if (flaskUserType === FlaskUserTypesEnum.NGO_SUPERVISOR) {
     panelRole = PanelContributors.NGO_SUPERVISOR;
+  } else if (flaskUserType === FlaskUserTypesEnum.SAY_SUPERVISOR) {
+    panelRole = PanelContributors.AUDITOR;
+  } else if (flaskUserType === FlaskUserTypesEnum.ADMIN) {
+    panelRole = PanelContributors.AUDITOR;
   }
   return panelRole;
 }
@@ -122,8 +134,8 @@ export function getSAYRoleString(sayRole: number) {
     roleString = 'ngoSupervisor';
   } else if (sayRole === SAYPlatformRoles.FAMILY) {
     roleString = 'familyMember';
-  } else if (sayRole === SAYPlatformRoles.FRIEND) {
-    roleString = 'friend';
+  } else if (sayRole === SAYPlatformRoles.RELATIVE) {
+    roleString = 'relative';
   } else if (sayRole === SAYPlatformRoles.NO_ROLE) {
     roleString = 'noRole';
   }
@@ -131,7 +143,7 @@ export function getSAYRoleString(sayRole: number) {
 }
 
 export function getSAYRolePersian(sayRole: number) {
-  let roleString: string;
+    let roleString: string;
   if (sayRole === SAYPlatformRoles.AUDITOR) {
     roleString = 'شاهد';
   } else if (sayRole === SAYPlatformRoles.SOCIAL_WORKER) {
@@ -139,10 +151,10 @@ export function getSAYRolePersian(sayRole: number) {
   } else if (sayRole === SAYPlatformRoles.PURCHASER) {
     roleString = 'میانجی';
   } else if (sayRole === SAYPlatformRoles.NGO_SUPERVISOR) {
-    roleString = 'ngoSupervisor';
+    roleString = 'نماینده انجمن';
   } else if (sayRole === SAYPlatformRoles.FAMILY) {
     roleString = 'خانواده';
-  } else if (sayRole === SAYPlatformRoles.FRIEND) {
+  } else if (sayRole === SAYPlatformRoles.RELATIVE) {
     roleString = 'خویش‌آوند';
   } else if (sayRole === SAYPlatformRoles.NO_ROLE) {
     roleString = 'noRole';
@@ -742,4 +754,47 @@ export function findQuertileBonus(
     ammeQBonus,
     avg,
   };
+}
+
+export function getScattered(
+  data: any[],
+  vRole: VirtualFamilyRole,
+  medianList: any[],
+) {
+  const series = [];
+  const usersPays = [];
+  if (data) {
+    data.forEach((n) => {
+      n.participants.forEach((partic) => {
+        // get the payment of the participant
+        const payment = n.payments.find((p) => p.id_user === partic.id_user);
+        if (payment && payment.id_user) {
+          usersPays.push({
+            userId: payment.id_user,
+            created: payment.created,
+          });
+        }
+      });
+    });
+  }
+  const listOfIds = [];
+  usersPays.forEach((u) => {
+    const onlyThisUserPays = usersPays.filter((p) => p.userId === u.userId);
+    if (!listOfIds.find((item) => item.userId === u.userId)) {
+      listOfIds.push({ userId: u.userId });
+      series.push({ userId: u.userId, total: onlyThisUserPays.length });
+    }
+  });
+
+  // {userId: 126, total: 101}
+  const sorted = series.sort((a, b) => a.total - b.total);
+
+  // const listOfIds2 = [];
+  const scatteredData = sorted.map((s) => {
+    return [s.total, sorted.filter((o) => o.total === s.total).length];
+  });
+  // [[1,162],[4, 5], ...]
+
+  medianList.push({ [vRole]: scatteredData.map((el) => el[0]) });
+  return scatteredData;
 }

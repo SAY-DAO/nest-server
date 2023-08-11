@@ -1,1 +1,3 @@
-{"timeLock":"0x7Ae94dC5bd94Ad44b8ed57a1b481dDa574AFAc28","verifyVoucher":"0x3106c2720d7f836F83a945Ab702fec0A70844362"}
+{
+  "sepolia": { "verifyVoucherAddress": "0xd40331596139bdC0A490D025Cd83f609Ceed8e3d" }
+}

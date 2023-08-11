@@ -1,10 +1,4 @@
-import {
-  Entity,
-  Column,
-  Index,
-  OneToMany,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, Column, Index, OneToMany, ManyToOne } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
 import { EducationEnum, HousingEnum } from '../types/interfaces/interface';
@@ -25,10 +19,10 @@ export class ChildrenEntity extends BaseEntity {
   @Column({ nullable: true })
   adultAvatarUrl: string;
 
-  @Column({ type: "hstore", hstoreType: "object" })
+  @Column({ type: 'hstore', hstoreType: 'object' })
   bioSummaryTranslations: Record<string, string>;
 
-  @Column({ type: "hstore", hstoreType: "object" })
+  @Column({ type: 'hstore', hstoreType: 'object' })
   bioTranslations: Record<string, string>;
 
   @Column({ type: 'timestamptz', nullable: true })
@@ -50,16 +44,10 @@ export class ChildrenEntity extends BaseEntity {
   created: Date;
 
   @Column({ nullable: true })
-  doneNeedsCount: number;
-
-  @Column({ nullable: true })
   education: EducationEnum;
 
   @Column({ nullable: true })
   existenceStatus: number;
-
-  @Column({ nullable: true })
-  familyCount: number;
 
   @Column({ nullable: true })
   generatedCode: string;
@@ -79,9 +67,6 @@ export class ChildrenEntity extends BaseEntity {
   @Column({ nullable: true })
   isMigrated: boolean;
 
-  @Column({ nullable: true })
-  isGone: boolean;
-
   @Column({ type: 'timestamptz', nullable: true })
   migrateDate: Date;
 
@@ -97,14 +82,11 @@ export class ChildrenEntity extends BaseEntity {
   @Column({ nullable: true })
   sayName: string;
 
-  @Column({ type: "hstore", hstoreType: "object" })
+  @Column({ type: 'hstore', hstoreType: 'object' })
   sayNameTranslations: Record<string, string>;
 
   @Column({ nullable: true })
   sleptAvatarUrl: string;
-
-  @Column({ nullable: true })
-  status: number;
 
   @Column({ nullable: true })
   flaskNgoId: number;
@@ -116,15 +98,14 @@ export class ChildrenEntity extends BaseEntity {
   voiceUrl: string;
 
   @OneToMany(() => NeedEntity, (need) => need.child)
-  needs?: NeedEntity[]
+  needs?: NeedEntity[];
 
-  @ManyToOne(() => NgoEntity, (n) => n.children, { eager: true, nullable: false  })
+  @ManyToOne(() => NgoEntity, (n) => n.children, {
+    eager: true,
+    nullable: false,
+  })
   ngo: NgoEntity;
 
   @ManyToOne(() => ContributorEntity, (s) => s.children, { eager: true })
   socialWorker: ContributorEntity;
-
-  @ManyToOne(() => ContributorEntity, (s) => s.children, { eager: false })
-  supervisor: ContributorEntity;
 }
-

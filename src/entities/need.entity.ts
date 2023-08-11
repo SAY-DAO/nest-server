@@ -77,9 +77,6 @@ export class NeedEntity extends BaseEntity {
   isDeleted: boolean;
 
   @Column({ nullable: true })
-  isDone: boolean;
-
-  @Column({ nullable: true })
   isUrgent: boolean;
 
   @Column({ nullable: true })

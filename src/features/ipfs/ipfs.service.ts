@@ -25,16 +25,13 @@ export class IpfsService {
     private downloadService: DownloadService,
     @InjectRepository(IpfsEntity)
     private ipfsRepository: Repository<IpfsEntity>,
-  ) { }
+  ) {}
 
   private readonly logger = new Logger(IpfsService.name);
 
-
-  async getAllIpfs(
-  ): Promise<IpfsEntity[]> {
-    return this.ipfsRepository.find()
+  async getAllIpfs(): Promise<IpfsEntity[]> {
+    return this.ipfsRepository.find();
   }
-
 
   async createIpfs(
     need: NeedEntity,
@@ -56,21 +53,16 @@ export class IpfsService {
     });
   }
 
-  async handleIpfs(
-    signature: string,
-    role: SAYPlatformRoles,
-    callerFlaskId: number,
-    need: NeedEntity,
-  ) {
+  async handleIpfs(signature: string, need: NeedEntity) {
     const unlinkList = [];
-    const endpoint = new URL('https://api.nft.storage')
-    const token = process.env.NFT_STORAGE_KEY
-    const client = new NFTStorage({ endpoint, token })
+    const endpoint = new URL('https://api.nft.storage');
+    const token = process.env.NFT_STORAGE_KEY;
+    const client = new NFTStorage({ endpoint, token });
     if (!need) {
       throw new ObjectNotFound();
     }
     if (need.ipfs) {
-      return need.ipfs;
+      throw new WalletExceptionFilter(403, 'Need has an IPFS hash!');
     }
     let dataNeed: Token<{ image: any; name: string; description: string }>;
     // Need
@@ -92,17 +84,14 @@ export class IpfsService {
       }
       unlinkList.push(`./${child.sayName}Slept.jpg`);
       if (child && child.sleptAvatarUrl) {
-      // Slept avatar
+        // Slept avatar
         sleptImage = await this.fileFromPath(
           child.sleptAvatarUrl,
           `${child.sayName}Slept`,
         );
       }
 
-      const iconImage = await this.fileFromPath(
-        need.imageUrl,
-        `${need.name}`,
-      );
+      const iconImage = await this.fileFromPath(need.imageUrl, `${need.name}`);
 
       unlinkList.push(`./${need.name}.jpg`);
       // dates
@@ -128,15 +117,15 @@ export class IpfsService {
         information: need.information ? need.information : '',
         description: need.descriptionTranslations
           ? {
-            en: need.descriptionTranslations.en,
-            fa: need.descriptionTranslations.fa,
-          }
+              en: need.descriptionTranslations.en,
+              fa: need.descriptionTranslations.fa,
+            }
           : 'N/A',
         titles: need.nameTranslations
           ? {
-            en: need.nameTranslations.en,
-            fa: need.nameTranslations.fa,
-          }
+              en: need.nameTranslations.en,
+              fa: need.nameTranslations.fa,
+            }
           : 'N/A',
         title: need.title,
         isUrgent: need.isUrgent,
@@ -152,9 +141,15 @@ export class IpfsService {
       // Main need IPFS
       const needContributors = {
         // contributors
-        auditorId: need.auditor.contributions.find(c => c.flaskUserId == need.auditor.flaskUserId).flaskUserId,
-        socialWorkerId: need.socialWorker.contributions.find(c => c.flaskUserId == need.socialWorker.flaskUserId).flaskUserId,
-        purchaserId: need.purchaser.contributions.find(c => c.flaskUserId == need.purchaser.flaskUserId).flaskUserId,
+        auditorId: need.auditor.contributions.find(
+          (c) => c.flaskUserId == need.auditor.flaskUserId,
+        ).flaskUserId,
+        socialWorkerId: need.socialWorker.contributions.find(
+          (c) => c.flaskUserId == need.socialWorker.flaskUserId,
+        ).flaskUserId,
+        purchaserId: need.purchaser.contributions.find(
+          (c) => c.flaskUserId == need.purchaser.flaskUserId,
+        ).flaskUserId,
         // family
         // virtualFamilies: [
         //   ...new Map(need.verifiedPayments.map((p) => p.verified && [p.id, p.id_user])).values(),
@@ -251,19 +246,15 @@ export class IpfsService {
           birthDate: String(child.birthDate),
         },
         receipt: {
-          properties: {
-          },
-          receipts: need.receipts.map(async r => {
-            const receiptImage = await this.fileFromPath(
-              r.attachment,
-              r.title,
-            )
+          properties: {},
+          receipts: need.receipts.map(async (r) => {
+            const receiptImage = await this.fileFromPath(r.attachment, r.title);
             return {
               image: receiptImage,
               name: r.title,
               description: r.description,
-            }
-          })
+            };
+          }),
         },
         ngo: {
           name: child.ngo.name,
@@ -280,7 +271,6 @@ export class IpfsService {
           website: need.provider.website,
         },
         contributors: needContributors,
-
       });
       console.log('\x1b[36m%s\x1b[0m', `Stored Need to IPFS...`);
 
@@ -289,11 +279,11 @@ export class IpfsService {
         console.log(status);
       }
       // for (let i = 0; i < unlinkList.length; i++) {
-        // console.log(
-        //   '\x1b[36m%s\x1b[0m',
-        //   `Cleaning ${unlinkList[i]} from local storage ...`,
-        // );
-        // fs.unlinkSync(unlinkList[i]);
+      // console.log(
+      //   '\x1b[36m%s\x1b[0m',
+      //   `Cleaning ${unlinkList[i]} from local storage ...`,
+      // );
+      // fs.unlinkSync(unlinkList[i]);
       // }
       console.log(
         '\x1b[36m%s\x1b[0m',
@@ -309,10 +299,6 @@ export class IpfsService {
       this.logger.log('Stored on IPFS');
 
       return needIpfs;
-
-
-
-
     } catch (e) {
       // for (let i = 0; i < unlinkList.length; i++) {
       //   console.log(
@@ -326,15 +312,15 @@ export class IpfsService {
         ' Error: Cleaned last file from local storage!',
       );
 
-      console.log(e)
+      console.log(e);
       throw new ServerError(e.message, e.status);
     }
   }
 
   async fileFromPath(url: string, name = 'noTitle'): Promise<any> {
-    try {    
-      console.log('Downloading '+ name);
-        
+    try {
+      console.log('Downloading ' + name);
+
       await this.downloadService.downloadFile(url, `${name}.jpg`);
       const content = await fs.promises.readFile(`${name}.jpg`);
       if (!content) {
@@ -343,14 +329,10 @@ export class IpfsService {
       const type = mime.getType(`${name}.jpg`);
 
       const file = new File([content], `${name}`, { type: type });
-      console.log('Downloaded !! '+ name);
+      console.log('Downloaded !! ' + name);
       return file;
     } catch (e) {
       throw new WalletExceptionFilter(e.status, e.message);
     }
   }
-
-
-
-
 }

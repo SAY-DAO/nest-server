@@ -5,9 +5,9 @@ export type NgoParams = {
     socialWorkers?: ContributorEntity[];
     name?: string;
     website?: string;
-    cityId?: number
-    stateId?: number
-    countryId?: number;
+    flaskCityId?: number
+    flaskStateId?: number
+    flaskCountryId?: number;
     logoUrl?: string;
     isActive?: boolean
     isDeleted?: boolean

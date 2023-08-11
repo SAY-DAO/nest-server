@@ -1,8 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
+  Logger,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -15,6 +18,8 @@ import {
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
+  AppContributors,
+  FlaskUserTypesEnum,
   PanelContributors,
   SAYPlatformRoles,
   SwSignatureResult,
@@ -27,13 +32,14 @@ import {
 import { ValidateSignaturePipe } from './pipes/validate-wallet.pipe';
 import { WalletService } from './wallet.service';
 import { SyncService } from '../sync/sync.service';
-import { generateNonce, ErrorTypes, SiweMessage } from 'siwe';
+import { generateNonce, SiweErrorType, SiweMessage } from 'siwe';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
 import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { WalletInterceptor } from './interceptors/wallet.interceptors';
 import { UserService } from '../user/user.service';
 import {
+  convertFlaskToSayAppRoles,
   convertFlaskToSayPanelRoles,
   convertFlaskToSayRoles,
 } from 'src/utils/helpers';
@@ -54,6 +60,8 @@ import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 })
 @Controller('wallet')
 export class SignatureController {
+  private readonly logger = new Logger(SignatureController.name);
+
   constructor(
     private walletService: WalletService,
     private syncService: SyncService,
@@ -126,7 +134,7 @@ export class SignatureController {
   @ApiOperation({ description: 'Verify SIWE' })
   async verifySiwe(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('typeId', ParseIntPipe) typeId: number,
+    @Param('typeId', ParseIntPipe) typeId: FlaskUserTypesEnum,
     @Session() session,
     @Request() req,
     @Body(ValidateSignaturePipe) body: VerifyWalletDto,
@@ -205,7 +213,13 @@ export class SignatureController {
           );
           console.log('\x1b[36m%s\x1b[0m', 'Created a user ...\n');
         }
-        if (nestContributor && !nestContributor.wallet) {
+        if (
+          nestContributor &&
+          (!nestContributor.wallets ||
+            nestContributor.wallets.find(
+              (w) => w.address !== body.message.address,
+            ))
+        ) {
           await this.userService.createUserWallet(
             body.message.address,
             body.message.chainId,
@@ -214,17 +228,24 @@ export class SignatureController {
         }
         return session.nonce;
       }
+
+      const appRole = convertFlaskToSayAppRoles(typeId);
+      if (
+        appRole === AppContributors.FAMILY ||
+        appRole === AppContributors.RELATIVE
+      ) {
+      }
     } catch (e) {
       session.siwe = null;
       session.nonce = null;
       req.session.destroy();
 
       switch (e) {
-        case ErrorTypes.EXPIRED_MESSAGE: {
+        case SiweErrorType.EXPIRED_MESSAGE: {
           session.save();
           throw new WalletExceptionFilter(e.status, e.message);
         }
-        case ErrorTypes.INVALID_SIGNATURE: {
+        case SiweErrorType.INVALID_SIGNATURE: {
           session.save();
           throw new WalletExceptionFilter(e.status, e.message);
         }
@@ -289,7 +310,7 @@ export class SignatureController {
   }
 
   @Post(`signature/create/:signature`)
-  @ApiOperation({ description: 'Create a signature' })
+  @ApiOperation({ description: 'Create a signature db' })
   async createSignature(
     @Param('signature') signature: string,
     @Body(ValidateSignaturePipe) body: CreateSignatureDto,
@@ -298,31 +319,57 @@ export class SignatureController {
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
+    this.logger.log('Initiating signature creation');
+
     try {
       const sessionFlaskUserId = session.siwe.flaskUserId;
       const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
-      const needSignatures = await this.walletService.getNeedSignatures(
-        body.flaskNeedId,
+
+      const foundSw = need.socialWorker.contributions.find(
+        (c) => c.flaskUserId == need.socialWorker.flaskUserId,
       );
+      const foundSwId = foundSw && foundSw.flaskUserId;
 
-      const theSignature = needSignatures.find((s) => s.hash === signature);
+      const foundPayments = need.verifiedPayments.length > 0;
 
-      if (!theSignature && need) {
-        const initialSignature = needSignatures.find(
-          (s) =>
-            s.flaskUserId ===
-            need.socialWorker.contributions.find(
-              (c) => c.flaskUserId == need.socialWorker.flaskUserId,
-            ).flaskUserId,
+      const foundAuditor = need.auditor.contributions.find(
+        (c) => c.flaskUserId == need.auditor.flaskUserId,
+      );
+      const foundAuditorId = foundAuditor && foundAuditor.flaskUserId;
+
+      const foundPurchaser = need.purchaser.contributions.find(
+        (c) => c.flaskUserId == need.purchaser.flaskUserId,
+      );
+      const foundPurchaserId = foundPurchaser && foundPurchaser.flaskUserId;
+
+      if (
+        !foundSwId ||
+        !foundPayments ||
+        !foundAuditorId ||
+        !foundPurchaserId
+      ) {
+        throw new WalletExceptionFilter(
+          400,
+          'At least one of the roles are missing here!',
         );
-        // social worker
+      }
+      if (!need) {
+        throw new NotFoundException(404, 'Need was not found!');
+      }
+
+      if (body.sayRoles) {
         if (
-          !initialSignature &&
-          need.socialWorker.contributions.find(
-            (c) => c.flaskUserId == need.socialWorker.flaskUserId,
-          ).flaskUserId === Number(sessionFlaskUserId) &&
-          body.sayRole === SAYPlatformRoles.SOCIAL_WORKER
+          !need.signatures[0] &&
+          body.sayRoles.includes(SAYPlatformRoles.SOCIAL_WORKER)
         ) {
+          this.logger.log('This is a social worker signature creation');
+          if (foundSwId !== Number(sessionFlaskUserId)) {
+            throw new WalletExceptionFilter(
+              403,
+              'Could not match the social worker!',
+            );
+          }
+
           console.log(
             '\x1b[36m%s\x1b[0m',
             'Creating Social Worker Signature ...',
@@ -332,6 +379,7 @@ export class SignatureController {
             need.flaskId,
             SAYPlatformRoles.SOCIAL_WORKER,
             sessionFlaskUserId,
+            body.verifyVoucherAddress,
           );
 
           const swDetails = {
@@ -355,97 +403,36 @@ export class SignatureController {
           );
 
           return { signature: initialSignature };
-        }
-        if (
-          initialSignature &&
-          initialSignature.flaskUserId ===
-            need.socialWorker.contributions.find(
-              (c) => c.flaskUserId == need.socialWorker.flaskUserId,
-            ).flaskUserId
+        } else if (
+          !need.signatures &&
+          !body.sayRoles.includes(SAYPlatformRoles.SOCIAL_WORKER)
         ) {
-          console.log(initialSignature.flaskUserId);
-          console.log(need.auditor.flaskUserId);
-          console.log(
-            need.auditor.contributions.find(
-              (c) => c.flaskUserId == need.auditor.flaskUserId,
-            ).flaskUserId,
+          throw new WalletExceptionFilter(
+            403,
+            'This need is not signed by social worker!',
           );
-
-          // auditor
-          if (
-            need.auditor.contributions.find(
-              (c) => c.flaskUserId == need.auditor.flaskUserId,
-            ).flaskUserId === Number(sessionFlaskUserId) &&
-            body.sayRole === SAYPlatformRoles.AUDITOR
-          ) {
-            console.log('\x1b[36m%s\x1b[0m', 'Uploading to IPFS ...');
-            const ipfs = await this.ipfsService.handleIpfs(
-              signature,
-              SAYPlatformRoles.AUDITOR,
-              sessionFlaskUserId,
-              need,
-            );
-            console.log('\x1b[36m%s\x1b[0m', 'Creating Auditor Signature ...');
-            const auditorSignature = await this.walletService.createSignature(
-              signature,
-              need.flaskId,
-              SAYPlatformRoles.AUDITOR,
-              sessionFlaskUserId,
-            );
-
-            const auditorDetails = {
-              firstName: need.auditor.firstName,
-              lastName: need.auditor.lastName,
-              avatarUrl: need.auditor.avatarUrl,
-              flaskUserId: need.auditor.contributions.find(
-                (c) => c.flaskUserId == need.auditor.flaskUserId,
+        } else {
+          const initialSignature = need.signatures.find(
+            (s) =>
+              s.flaskUserId ===
+              need.socialWorker.contributions.find(
+                (c) => c.flaskUserId == need.socialWorker.flaskUserId,
               ).flaskUserId,
-              birthDate:
-                need.auditor.birthDate && new Date(need.socialWorker.birthDate),
-              panelRole: need.auditor.contributions.find(
-                (c) => c.flaskUserId == need.auditor.flaskUserId,
-              ).panelRole,
-              need,
-            };
-            await this.userService.updateContributor(
-              need.auditor.id,
-              auditorDetails,
-            );
-            return { ipfs, signature: auditorSignature };
-          }
-          // purchaser
-          if (
-            need.purchaser.contributions.find(
-              (c) => c.flaskUserId == need.purchaser.flaskUserId,
-            ).flaskUserId === Number(sessionFlaskUserId) &&
-            body.sayRole === SAYPlatformRoles.PURCHASER
-          ) {
-            console.log(
-              '\x1b[36m%s\x1b[0m',
-              'Creating Purchaser Signature ...',
-            );
-            const purchaserSignature = await this.walletService.createSignature(
-              signature,
-              need.flaskId,
-              SAYPlatformRoles.PURCHASER,
-              sessionFlaskUserId,
-            );
-            return { signature: purchaserSignature };
-          }
-          // family
-          else if (
-            need.verifiedPayments.find(
-              (p) => p.flaskUserId === Number(sessionFlaskUserId),
-            ) &&
-            body.sayRole === SAYPlatformRoles.FAMILY
-          ) {
-            // family need the auditor signature
-            if (
-              need.signatures.find(
-                (s) => s.role === SAYPlatformRoles.AUDITOR,
-              ) &&
-              need.ipfs
-            ) {
+          );
+          if (initialSignature && initialSignature.flaskUserId === foundSwId) {
+            if (body.sayRoles.includes(SAYPlatformRoles.FAMILY)) {
+              this.logger.log('This is the family signature creation');
+              const foundFamilyId = need.verifiedPayments.find(
+                (p) => p.flaskUserId === Number(sessionFlaskUserId),
+              ).flaskUserId;
+
+              if (foundFamilyId !== Number(sessionFlaskUserId)) {
+                throw new WalletExceptionFilter(
+                  403,
+                  'Could not match the family!',
+                );
+              }
+
               console.log(
                 '\x1b[36m%s\x1b[0m',
                 'Creating Virtual Family Signatures ...',
@@ -455,25 +442,160 @@ export class SignatureController {
                 body.flaskNeedId,
                 SAYPlatformRoles.FAMILY,
                 sessionFlaskUserId,
+                body.verifyVoucherAddress,
               );
               return { signature: familySignature };
+            } else if (body.sayRoles.includes(SAYPlatformRoles.AUDITOR)) {
+              this.logger.log('This is the auditor signature creation');
+              const auditorSignature = need.signatures.find(
+                (s) =>
+                  s.flaskUserId ===
+                  need.auditor.contributions.find(
+                    (c) => c.flaskUserId == need.auditor.flaskUserId,
+                  ).flaskUserId,
+              );
+
+              if (!auditorSignature) {
+                const familySignature = need.signatures.find((s) =>
+                  need.verifiedPayments.find(
+                    (p) => p.familyMember.flaskUserId == s.flaskUserId,
+                  ),
+                );
+                if (
+                  foundAuditorId !== Number(sessionFlaskUserId) ||
+                  !familySignature
+                ) {
+                  throw new WalletExceptionFilter(
+                    403,
+                    'We need the family signature!',
+                  );
+                }
+                console.log('\x1b[36m%s\x1b[0m', 'Uploading to IPFS ...');
+                const ipfs = await this.ipfsService.handleIpfs(signature, need);
+
+                console.log(
+                  '\x1b[36m%s\x1b[0m',
+                  'Creating Auditor Signature ...',
+                );
+                const auditorSignature =
+                  await this.walletService.createSignature(
+                    signature,
+                    need.flaskId,
+                    SAYPlatformRoles.AUDITOR,
+                    sessionFlaskUserId,
+                    body.verifyVoucherAddress,
+                  );
+
+                const auditorDetails = {
+                  firstName: need.auditor.firstName,
+                  lastName: need.auditor.lastName,
+                  avatarUrl: need.auditor.avatarUrl,
+                  flaskUserId: need.auditor.contributions.find(
+                    (c) => c.flaskUserId == need.auditor.flaskUserId,
+                  ).flaskUserId,
+                  birthDate:
+                    need.auditor.birthDate && new Date(need.auditor.birthDate),
+                  panelRole: need.auditor.contributions.find(
+                    (c) => c.flaskUserId == need.auditor.flaskUserId,
+                  ).panelRole,
+                  need,
+                };
+                await this.userService.updateContributor(
+                  need.auditor.id,
+                  auditorDetails,
+                );
+                return { ipfs, signature: auditorSignature };
+              } else if (auditorSignature) {
+                throw new WalletExceptionFilter(
+                  403,
+                  'Auditor has already signed!',
+                );
+              }
+            } else if (body.sayRoles.includes(SAYPlatformRoles.PURCHASER)) {
+              this.logger.log('This is the purchaser signature creation');
+              const familySignature = need.signatures.find((s) =>
+                need.verifiedPayments.find(
+                  (p) => p.familyMember.flaskUserId == s.flaskUserId,
+                ),
+              );
+              const auditorSignature = need.signatures.find(
+                (s) =>
+                  s.flaskUserId ===
+                  need.auditor.contributions.find(
+                    (c) => c.flaskUserId == need.auditor.flaskUserId,
+                  ).flaskUserId,
+              );
+              const purchaserSignature = need.signatures.find(
+                (s) =>
+                  s.flaskUserId ===
+                  need.purchaser.contributions.find(
+                    (c) => c.flaskUserId == need.purchaser.flaskUserId,
+                  ).flaskUserId,
+              );
+
+              if (!purchaserSignature) {
+                if (
+                  foundPurchaserId !== Number(sessionFlaskUserId) ||
+                  !auditorSignature ||
+                  !familySignature
+                ) {
+                  throw new WalletExceptionFilter(
+                    403,
+                    'Could not match one of signers!',
+                  );
+                }
+
+                console.log(
+                  '\x1b[36m%s\x1b[0m',
+                  'Creating Purchaser Signature ...',
+                );
+                const purchaserSignature =
+                  await this.walletService.createSignature(
+                    signature,
+                    need.flaskId,
+                    SAYPlatformRoles.PURCHASER,
+                    sessionFlaskUserId,
+                    body.verifyVoucherAddress,
+                  );
+
+                const purchaserDetails = {
+                  firstName: need.purchaser.firstName,
+                  lastName: need.purchaser.lastName,
+                  avatarUrl: need.purchaser.avatarUrl,
+                  flaskUserId: need.purchaser.contributions.find(
+                    (c) => c.flaskUserId == need.purchaser.flaskUserId,
+                  ).flaskUserId,
+                  birthDate:
+                    need.purchaser.birthDate &&
+                    new Date(need.purchaser.birthDate),
+                  panelRole: need.purchaser.contributions.find(
+                    (c) => c.flaskUserId == need.purchaser.flaskUserId,
+                  ).panelRole,
+                  need,
+                };
+                await this.userService.updateContributor(
+                  need.purchaser.id,
+                  purchaserDetails,
+                );
+                return { signature: purchaserSignature };
+              } else if (purchaserSignature) {
+                throw new WalletExceptionFilter(
+                  403,
+                  'Purchaser has already signed!',
+                );
+              }
             } else {
               throw new WalletExceptionFilter(
                 403,
-                'This need is not signed by auditor!',
+                'could not find your role in this need !',
               );
             }
           } else {
             throw new WalletExceptionFilter(
               403,
-              'could not find your role in this need !',
+              'could not find initial signature !',
             );
           }
-        } else {
-          throw new WalletExceptionFilter(
-            401,
-            'Social worker signature is needed.',
-          );
         }
       } else {
         throw new WalletExceptionFilter(403, 'Bad request!');

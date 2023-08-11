@@ -3,13 +3,17 @@ import { Cron, CronExpression, Timeout } from '@nestjs/schedule';
 import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { FamilyService } from '../family/family.service';
+import { AnalyticService } from '../analytic/analytic.service';
 
 @Injectable()
 export class ScheduleService {
-  constructor(private familyService: FamilyService) {}
+  constructor(
+    private familyService: FamilyService,
+    private analyticService: AnalyticService,
+  ) {}
   private readonly logger = new Logger(ScheduleService.name);
 
-  async helper() {
+  async completePays() {
     const father = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.FATHER,
       0,
@@ -77,24 +81,35 @@ export class ScheduleService {
   }
 
   @Timeout(2000)
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCronOnce() {
     this.logger.debug(
-      'Called only once after 10 seconds of the server initiation',
+      'Called only once after 10 minutes of the server initiation',
     );
-    // this.helper();
-    // this.rolesCount();
+    this.completePays();
+    this.rolesCount();
   }
 
   @Cron(CronExpression.EVERY_WEEK)
-  async handleCron() {
+  async handleWeeklyCron() {
     this.logger.debug('Called every Week');
     const data = config().dataCache.fetchFamilyAll();
     if (!data) {
-      this.helper();
+      this.completePays();
     } else {
       this.logger.debug('Reading from cache');
-      console.log(data);
+    }
+  }
+
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  async handleMonthlyCron() {
+    this.logger.debug('Called every Month');
+    let actives = config().dataCache.fetchActiveFamilies();
+    if (!actives) {
+      actives = await this.analyticService.getChildFamilyAnalytic();
+      config().dataCache.storeActiveFamilies(actives);
+    } else {
+      this.logger.debug('Reading from cache');
     }
   }
 }

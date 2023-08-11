@@ -1,8 +1,5 @@
 import { childExistence } from 'src/types/interfaces/interface';
-import {
-  Entity,
-  Column,
-} from 'typeorm';
+import { Entity, Column } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 
 @Entity()
@@ -25,16 +22,16 @@ export class Child extends BaseEntity {
   @Column({ nullable: true })
   adult_avatar_url: string;
 
-  @Column({ type: "hstore", hstoreType: "object" })
+  @Column({ type: 'hstore', hstoreType: 'object' })
   bio_summary_translations: Record<string, string>;
 
-  @Column({ type: "hstore", hstoreType: "object" })
+  @Column({ type: 'hstore', hstoreType: 'object' })
   firstName_translations: Record<string, string>;
 
-  @Column({ type: "hstore", hstoreType: "object" })
+  @Column({ type: 'hstore', hstoreType: 'object' })
   lastName_translations: Record<string, string>;
 
-  @Column({ type: "hstore", hstoreType: "object" })
+  @Column({ type: 'hstore', hstoreType: 'object' })
   bio_translations: Record<string, string>;
 
   @Column({ type: 'timestamptz', nullable: true })
@@ -94,7 +91,7 @@ export class Child extends BaseEntity {
   @Column({ nullable: true })
   sayFamilyCount: number;
 
-  @Column({ type: "hstore", hstoreType: "object" })
+  @Column({ type: 'hstore', hstoreType: 'object' })
   sayname_translations: Record<string, string>;
 
   @Column({ nullable: true })
@@ -105,5 +102,4 @@ export class Child extends BaseEntity {
 
   @Column({ nullable: true })
   voiceUrl: string;
-
 }

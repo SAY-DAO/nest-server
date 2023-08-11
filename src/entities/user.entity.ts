@@ -24,11 +24,10 @@ export class AllUserEntity extends BaseEntity {
   @OneToMany(() => ContributorEntity, (c) => c.user, { eager: true })
   contributions?: ContributorEntity[];
 
-  @OneToOne(() => EthereumAccountEntity, (account) => account.user, {
+  @OneToMany(() => EthereumAccountEntity, (account) => account.user, {
     eager: true,
   })
-  @JoinColumn()
-  wallet?: EthereumAccountEntity;
+  wallets?: EthereumAccountEntity[];
 
   @Column({ nullable: false })
   isContributor?: boolean;

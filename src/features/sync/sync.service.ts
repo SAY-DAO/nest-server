@@ -48,7 +48,7 @@ export class SyncService {
     private statusService: StatusService,
     private locationService: LocationService,
     private providerService: ProviderService,
-  ) { }
+  ) {}
 
   async syncContributorNgo(flaskUser: SocialWorker) {
     console.log('\x1b[36m%s\x1b[0m', 'Syncing NGO and contributor ...');
@@ -85,7 +85,7 @@ export class SyncService {
             stateId: state_id,
             stateCode: state_code,
             stateName: state_name,
-            countryId: country_id,
+            flaskCountryId: country_id,
             countryCode: country_code,
             countryName: country_name,
             latitude,
@@ -97,16 +97,18 @@ export class SyncService {
           ...ngoOtherParams,
           registerDate: new Date(ngoOtherParams.registerDate),
           updated: new Date(ngoOtherParams.updated),
-          cityId: flaskCity.id,
-          countryId: flaskCity.country_id,
-          stateId: flaskCity.state_id,
+          flaskCityId: flaskCity.id,
+          flaskCountryId: flaskCity.country_id,
+          flaskStateId: flaskCity.state_id,
           flaskNgoId: FlaskNgoId,
         };
+
         console.log('\x1b[36m%s\x1b[0m', 'Creating an NGO ...\n');
         nestNgo = await this.ngoService.createNgo(
           callerNgoDetails,
           nestCallerNgoCity,
         );
+
         console.log('\x1b[36m%s\x1b[0m', 'Created an NGO ...\n');
       } else if (nestNgo) {
         await this.ngoService
@@ -314,7 +316,7 @@ export class SyncService {
           purchaserId = 31; // Nyaz
         }
         if (
-          new Date(flaskNeed.doneAt).getFullYear() >= 2023 &&
+          new Date(flaskNeed.doneAt).getFullYear() === 2023 &&
           new Date(flaskNeed.doneAt).getMonth() <= 3
         ) {
           purchaserId = 21; // Neda
@@ -399,13 +401,13 @@ export class SyncService {
       familyCount: flaskChild.familyCount,
       sayFamilyCount: flaskChild.sayFamilyCount,
       education: flaskChild.education,
-      status: flaskChild.status,
       created: flaskChild.created,
       updated: flaskChild.updated,
       isDeleted: flaskChild.isDeleted,
       isConfirmed: flaskChild.isConfirmed,
       flaskConfirmUser: flaskChild.confirmUser,
       confirmDate: flaskChild.confirmDate,
+      existenceStatus: flaskChild.existence_status,
       generatedCode: flaskChild.generatedCode,
       isMigrated: flaskChild.isMigrated,
       migratedId: flaskChild.migratedId,
@@ -414,9 +416,10 @@ export class SyncService {
     };
 
     if (!nestChild) {
-      console.log(nestSocialWorker);
       // Create Child
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
+      console.log(nestSocialWorker);
+      
       if (!nestSocialWorker || !nestSocialWorker.contributions) {
         throw new ObjectNotFound(
           'Something went wrong while trying to create a child!',
@@ -542,7 +545,6 @@ export class SyncService {
           await this.userService
             .updateFamily(nestFamilyMember.id, {
               flaskUserId: payments[p].id_user,
-              panelRole: PanelContributors.NO_ROLE,
             })
             .then();
           nestFamilyMember = await this.userService.getFamilyByFlaskId(

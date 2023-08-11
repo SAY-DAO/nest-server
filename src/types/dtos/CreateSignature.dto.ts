@@ -45,9 +45,11 @@ export class SwGenerateSignatureDto {
 
 export class CreateSignatureDto {
   @IsNotEmpty()
-  sayRole: SAYPlatformRoles;
+  sayRoles: SAYPlatformRoles[];
   @IsNotEmpty()
   flaskNeedId: number;
+  @IsNotEmpty()
+  verifyVoucherAddress: string;
 }
 
 

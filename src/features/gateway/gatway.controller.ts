@@ -57,6 +57,8 @@ export class GateWayController implements OnModuleInit {
       this.server.on('connection', (socket) => {
         this.socket = socket;
         console.log('check connection', socket.connected);
+        this.checkConnection();
+
         console.log('\x1b[36m%s\x1b[0m', 'Connected ...');
         console.log(
           '\x1b[33m%s\x1b[0m',

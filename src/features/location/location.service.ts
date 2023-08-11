@@ -52,7 +52,7 @@ export class LocationService {
 
     createCity(cityDetails: CityParams): Promise<CityEntity> {
         const newNgo = this.cityRepository.create({
-            flaskCityId: cityDetails,
+            flaskCityId: cityDetails.flaskCityId,
             ...cityDetails,
         });
         return this.cityRepository.save(newNgo);

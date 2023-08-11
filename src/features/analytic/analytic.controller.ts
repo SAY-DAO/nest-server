@@ -28,17 +28,53 @@ export class AnalyticController {
     private readonly analyticService: AnalyticService,
   ) {}
 
-  @Get('ecosystem')
-  @ApiOperation({ description: 'get SAY ecosystem analytics' })
-  async getEcosystemAnalytic() {
-    return await this.analyticService.getEcosystemAnalytic();
-    return;
+  @Get('ecosystem/children')
+  @ApiOperation({ description: 'get SAY children ecosystem analytics' })
+  async getChildrenEcosystemAnalytic() {
+    let result: {
+      meanNeedsPerChild: number;
+      meanConfirmedPerChild: number;
+      meanUnConfirmedPerChild: number;
+      meanConfirmedNotPaidPerChild: number;
+      meanCompletePayPerChild: number;
+      meanPartialPayPerChild: number;
+      meanPurchasedPerChild: number;
+      meanMoneyToNgoPerChild: number;
+      meanDeliveredNgoPerChild: number;
+      meanDeliveredChildPerChild: number;
+      totalFamiliesCount: number;
+      totalFamilyMembersCount: number;
+      meanFamilyMembers: number;
+      childrenList: any;
+    };
+    result = config().dataCache.fetchChildrenEcosystem();
+    if (!result) {
+      result = await this.analyticService.getChildrenEcosystemAnalytic();
+      config().dataCache.storeChildrenEcosystem({
+        meanNeedsPerChild: result.meanNeedsPerChild,
+        meanConfirmedPerChild: result.meanConfirmedPerChild,
+        meanUnConfirmedPerChild: result.meanUnConfirmedPerChild,
+        meanConfirmedNotPaidPerChild: result.meanConfirmedNotPaidPerChild,
+        meanCompletePayPerChild: result.meanCompletePayPerChild,
+        meanPartialPayPerChild: result.meanPartialPayPerChild,
+        meanPurchasedPerChild: result.meanPurchasedPerChild,
+        meanMoneyToNgoPerChild: result.meanMoneyToNgoPerChild,
+        meanDeliveredNgoPerChild: result.meanDeliveredNgoPerChild,
+        meanDeliveredChildPerChild: result.meanDeliveredChildPerChild,
+        totalFamilies: result.totalFamiliesCount,
+        totalFamilyMembers: result.totalFamilyMembersCount,
+        meanFamilyMembers: result.meanFamilyMembers,
+        childrenList: result.childrenList,
+      });
+    }
+
+    return result;
   }
 
-  @Get(`needs/:typeId`)
-  @ApiOperation({ description: 'Get all needs from flask' })
+  @Get(`needs/delivered/:typeId`)
+  @ApiOperation({ description: 'Get all delivered needs from flask' })
   async getNeedsAnalytic(@Param('typeId') typeId: NeedTypeEnum) {
-    return await this.analyticService.getNeedsAnalytic(typeId);
+    return await this.analyticService.getDeliveredNeedsAnalytic(typeId);
   }
 
   @Get(`children`)
@@ -54,16 +90,25 @@ export class AnalyticController {
   }
 
   @Get(`child/needs/:childId`)
-  @ApiOperation({ description: 'Get all needs from flask' })
+  @ApiOperation({
+    description:
+      'Get child needs count (confirmed,unConfirmed, confirmedNotPaid,...) from flask',
+  })
   async getChildNeedsAnalytic(@Param('childId') childId: number) {
     return await this.analyticService.getChildNeedsAnalytic(childId);
   }
 
-  @Get(`child/family/:childId`)
+  @Get(`child/active/family`)
   @ApiOperation({ description: 'Get all needs from flask' })
-  async getChildFamilyAnalytic(@Param('childId') childId: number) {
-    return await this.analyticService.getChildFamilyAnalytic(childId);
+  async getChildFamilyAnalytic() {
+    let activesList = config().dataCache.fetchActiveFamilies();
+    if (!activesList) {
+      activesList = await this.analyticService.getChildFamilyAnalytic();
+      config().dataCache.storeActiveFamilies(activesList);
+    }
+    return activesList
   }
+
 
   @Get(`family/:userId`)
   @ApiOperation({ description: 'Get all family role analysis for a user' })
@@ -121,7 +166,6 @@ export class AnalyticController {
       };
       childrenList.push(childrenStatus);
     }
-    console.log(childrenList);
 
     const calculatedResult = findQuertileBonus(
       {
@@ -176,11 +220,6 @@ export class AnalyticController {
           ecoCompletePayAsRole.ammesData.length,
         ecoCompletePayMedian,
       },
-      // paidNeed: father[0][0],
-      // minedCount: amooFinal,
-      // difficultyRatio: 0,
-      // distanceRatio: 0,
-      // needRatio: 0,
     };
   }
 

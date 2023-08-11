@@ -117,6 +117,7 @@ export class NeedService {
       },
       relations: {
         verifiedPayments: true,
+        signatures: true,
       },
     });
     return user;
@@ -757,5 +758,4 @@ export class NeedService {
 
     return accurateCount;
   }
-
 }

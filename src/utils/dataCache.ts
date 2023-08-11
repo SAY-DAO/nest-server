@@ -1,13 +1,38 @@
 import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
-import { removeDuplicates } from './helpers';
+import { getScattered, removeDuplicates } from './helpers';
 
 export default class DataCache {
+  childrenEcosystem = null;
   flaskAccessToken = {};
   familyData = null;
   familyRolesCount = null;
+  childActiveFamilies = null;
   medianList = [];
   midjourneyList = [];
+
+  storeActiveFamilies = (activesList) => {
+    this.childActiveFamilies = { actives: activesList, created: new Date() };
+  };
+  // panel analytic bar chart
+  storeChildrenEcosystem = (result: {
+    meanNeedsPerChild: number;
+    meanConfirmedPerChild: number;
+    meanUnConfirmedPerChild: number;
+    meanConfirmedNotPaidPerChild: number;
+    meanCompletePayPerChild: number;
+    meanPartialPayPerChild: number;
+    meanPurchasedPerChild: number;
+    meanMoneyToNgoPerChild: number;
+    meanDeliveredNgoPerChild: number;
+    meanDeliveredChildPerChild: number;
+    totalFamilies: number;
+    totalFamilyMembers: number;
+    meanFamilyMembers: number;
+    childrenList: any[];
+  }) => {
+    this.childrenEcosystem = { ...result, created: new Date() };
+  };
 
   storeAccessToken = (token: string, swFlaskId: number) => {
     this.flaskAccessToken[swFlaskId] = token;
@@ -17,6 +42,7 @@ export default class DataCache {
     list.forEach((e) => this.midjourneyList.push(e));
   };
 
+  // dApp user ratio in different roles / distance ratio
   storeFamilyData = ({
     fathersData,
     mothersData,
@@ -32,11 +58,13 @@ export default class DataCache {
       khalehsData,
       daeisData,
       ammesData,
+      created: new Date(),
     };
     this.roleScatteredData();
     this.theMedian();
   };
 
+  // dApp user ratio in different roles / distance ratio
   storeRolesCount = ({
     fathersCount,
     mothersCount,
@@ -52,85 +80,52 @@ export default class DataCache {
       khalehsCount,
       daeisCount,
       ammesCount,
+      created: new Date(),
     };
-  };
-
-  customFilter = (vFamilyRole: VirtualFamilyRole) => {
-    const result = this.familyData[vFamilyRole];
-    return result;
   };
 
   fetchMidjourney = () =>
     (this.midjourneyList = removeDuplicates(this.midjourneyList));
 
+  fetchChildrenEcosystem = () => this.childrenEcosystem;
   fetchFamilyAll = () => this.familyData;
   fetchFamilyCount = () => this.familyRolesCount;
+  fetchActiveFamilies = () => this.childActiveFamilies;
   fetchAccessToken = () => this.flaskAccessToken;
   deleteAnAccessToken = (flaskSwId: number) => this.flaskAccessToken[flaskSwId];
-  getScattered(data: any[], vRole: VirtualFamilyRole) {
-    const series = [];
-    const usersPays = [];
-    if (data) {
-      data.forEach((n) => {
-        n.participants.forEach((partic) => {
-          // get the payment of the participant
-          const payment = n.payments.find((p) => p.id_user === partic.id_user);
-          if (payment && payment.id_user) {
-            usersPays.push({
-              userId: payment.id_user,
-              created: payment.created,
-            });
-          }
-        });
-      });
-    }
-    const listOfIds = [];
-    usersPays.forEach((u) => {
-      const onlyThisUserPays = usersPays.filter((p) => p.userId === u.userId);
-      if (!listOfIds.find((item) => item.userId === u.userId)) {
-        listOfIds.push({ userId: u.userId });
-        series.push({ userId: u.userId, total: onlyThisUserPays.length });
-      }
-    });
 
-    // {userId: 126, total: 101}
-    const sorted = series.sort((a, b) => a.total - b.total);
-
-    // const listOfIds2 = [];
-    const scatteredData = sorted.map((s) => {
-      return [s.total, sorted.filter((o) => o.total === s.total).length];
-    });
-    // [[1,162],[4, 5], ...]
-
-    this.medianList.push({ [vRole]: scatteredData.map((el) => el[0]) });
-    return scatteredData;
-  }
-
+  // panel analytic scatter chart
   roleScatteredData() {
     return {
-      father: this.getScattered(
+      father: getScattered(
         this.familyData.fathersData,
         VirtualFamilyRole.FATHER,
+        this.medianList,
       ),
-      mother: this.getScattered(
+      mother: getScattered(
         this.familyData.mothersData,
         VirtualFamilyRole.MOTHER,
+        this.medianList,
       ),
-      amoo: this.getScattered(
+      amoo: getScattered(
         this.familyData.amoosData,
         VirtualFamilyRole.AMOO,
+        this.medianList,
       ),
-      khaleh: this.getScattered(
+      khaleh: getScattered(
         this.familyData.khalehsData,
         VirtualFamilyRole.KHALEH,
+        this.medianList,
       ),
-      daei: this.getScattered(
+      daei: getScattered(
         this.familyData.daeisData,
         VirtualFamilyRole.DAEI,
+        this.medianList,
       ),
-      amme: this.getScattered(
+      amme: getScattered(
         this.familyData.ammesData,
         VirtualFamilyRole.AMME,
+        this.medianList,
       ),
     };
   }
@@ -183,7 +178,6 @@ export default class DataCache {
         amme: 0,
       },
     };
-    console.log(this.medianList);
     this.medianList.forEach((item) => {
       if (item[VirtualFamilyRole.FATHER]) {
         medianObject.father = median(item[VirtualFamilyRole.FATHER]);

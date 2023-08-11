@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, OneToOne } from 'typeorm'
+import { Entity, Column, OneToMany,  ManyToOne } from 'typeorm'
 import { BaseEntity } from './BaseEntity'
 import { EthereumTransaction } from './ethereum.transaction.entity'
 import { AllUserEntity } from './user.entity'
@@ -14,6 +14,6 @@ export class EthereumAccountEntity extends BaseEntity {
   @OneToMany(() => EthereumTransaction, (tx) => tx.ethereumAccount)
   ethereumTransactions: EthereumTransaction
 
-  @OneToOne(() => AllUserEntity, (user) => user.wallet, { eager: false })
+  @ManyToOne(() => AllUserEntity, (user) => user.wallets, { eager: false })
   user: AllUserEntity;
 }

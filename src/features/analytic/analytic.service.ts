@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { mean, round } from 'mathjs';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
@@ -12,7 +13,12 @@ import {
   SAYPlatformRoles,
   childExistence,
 } from 'src/types/interfaces/interface';
-import { getNeedsTimeLine, timeDifferenceWithComment } from 'src/utils/helpers';
+import {
+  daysDifference,
+  getNeedsTimeLine,
+  removeDuplicates,
+  timeDifferenceWithComment,
+} from 'src/utils/helpers';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -36,7 +42,7 @@ export class AnalyticService {
     private flaskNeedRepository: Repository<Need>,
   ) {}
 
-  async getNeedsAnalytic(type: NeedTypeEnum) {
+  async getDeliveredNeedsAnalytic(type: NeedTypeEnum) {
     return await this.flaskNeedRepository
       .createQueryBuilder('need')
       .select([
@@ -56,7 +62,7 @@ export class AnalyticService {
       // .andWhere("need.child_delivery_date < :endDate", { endDate: new Date(2023, 1, 3) })
       .andWhere('need.child_delivery_date IS NOT NULL')
       // .orderBy("need.created", "ASC")
-      .limit(10)
+      // .limit(10)
       .getManyAndCount();
   }
 
@@ -199,75 +205,113 @@ export class AnalyticService {
       .where('child.id = :childId', { childId: childId })
       .getOne();
 
-    const all = await this.flaskNeedRepository
+    const allCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select(['need.id', 'need.child_id', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const confirmed = await this.flaskNeedRepository
+    const confirmedCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select(['need.id', 'need.child_id', 'isConfirmed', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const unConfirmed = await this.flaskNeedRepository
+    const unConfirmedCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select(['need.id', 'need.child_id', 'isConfirmed', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: false })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const confirmedNotPaid = await this.flaskNeedRepository
+    const confirmedNotPaidCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select([
+        'need.id',
+        'need.child_id',
+        'need.status',
+        'isConfirmed',
+        'isDeleted',
+      ])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('need.status = 0')
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const partialPay = await this.flaskNeedRepository
+    const completePayCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select(['need.id', 'need.child_id', 'need.status', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.status = 1')
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const completePay = await this.flaskNeedRepository
+    const partialPayCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select(['need.id', 'need.child_id', 'need.status', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.status = 2')
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const purchased = await this.flaskNeedRepository
+    const purchasedCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select([
+        'need.id',
+        'need.child_id',
+        'need.status',
+        'need.type',
+        'isDeleted',
+      ])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.type = :type', { type: 1 })
       .andWhere('need.status = 3')
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const moneyToNgo = await this.flaskNeedRepository
+    const moneyToNgoCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select([
+        'need.id',
+        'need.child_id',
+        'need.status',
+        'need.type',
+        'isDeleted',
+      ])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.type = :type', { type: 0 })
       .andWhere('need.status = 3')
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const deliveredNgo = await this.flaskNeedRepository
+    const deliveredNgoCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
+      .select([
+        'need.id',
+        'need.child_id',
+        'need.status',
+        'need.type',
+        'isDeleted',
+      ])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.type = :type', { type: 1 })
       .andWhere('need.status = 4')
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
-    const deliveredChild = await this.flaskNeedRepository
+    const deliveredChildCount = await this.flaskNeedRepository
       .createQueryBuilder('need')
-      .select(['need.id', 'need.child_id', 'need.child_delivery_date'])
+      .select([
+        'need.id',
+        'need.child_id',
+        'need.child_delivery_date',
+        'isDeleted',
+      ])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.child_delivery_date IS NOT NULL')
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
@@ -286,94 +330,113 @@ export class AnalyticService {
     return {
       child,
       childNeedsStats: {
-        all,
-        confirmed,
-        unConfirmed,
-        confirmedNotPaid,
-        completePay,
-        partialPay,
-        purchased,
-        moneyToNgo,
-        deliveredNgo,
-        deliveredChild,
+        allCount,
+        confirmedCount,
+        unConfirmedCount,
+        confirmedNotPaidCount,
+        completePayCount,
+        partialPayCount,
+        purchasedCount,
+        moneyToNgoCount,
+        deliveredNgoCount,
+        deliveredChildCount,
       },
     };
   }
 
-  async getChildFamilyAnalytic(childId: number) {
-    const family = await this.flaskFamilyRepository
-      .createQueryBuilder('family')
-      .leftJoinAndSelect(
-        UserFamily,
-        'userFamily',
-        'userFamily.id_family = family.id',
-      )
-      .where('family.Id_child = :childId', { childId: childId })
-      .getOne();
+  async getChildFamilyAnalytic() {
+    const childrenList = [];
+    const children = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: childExistence.AlivePresent,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .getMany();
 
-    const familyMembers = await this.flaskUserFamilyRepository
-      .createQueryBuilder('userFamily')
-      .leftJoinAndSelect(Family, 'family', 'family.id = userFamily.id_family')
-      .where('userFamily.id_family = :familyId', { familyId: family.id })
-      .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
-      .getCount();
+    for await (const child of children) {
+      const paidNeeds = await this.flaskNeedRepository
+        .createQueryBuilder('need')
+        .select(['need.id'])
+        .where('need.child_id = :childId', { childId: child.id })
+        .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
+        .andWhere('need.status > 0')
+        .getMany()
+        .then((needs) => {
+          return needs.map((n) => n.id);
+        });
 
-    // const sayFamilyCount = await this.flaskChildRepository
-    //   .createQueryBuilder('child')
-    //   .leftJoinAndSelect(Family, "family", "family.id_child = child.id")
-    //   .where("child.id = :childId", { childId: childId })
-    //   .getOne()
-    //   .then((c) => c.sayFamilyCount);
+      // const d = new Date();
+      // d.setMonth(d.getMonth() - 3); // three months ago
 
-    const paidNeeds = await this.flaskNeedRepository
-      .createQueryBuilder('need')
-      .select(['need.id'])
-      .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('need.status > 0')
-      .getMany()
-      .then((needs) => {
-        return needs.map((n) => n.id);
-      });
-
-    const activeUsersId = [];
-    await this.flaskUserFamilyRepository
-      .createQueryBuilder('userFamily')
-      .leftJoinAndSelect(Family, 'family', 'family.id = userFamily.id_family')
-      .where('userFamily.id_family = :familyId', { familyId: family.id })
-      .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
-      .getMany()
-      .then(async (members) => {
-        let payments: Payment[];
-        for await (const user of members) {
-          await this.flaskPaymentRepository
-            .createQueryBuilder('payment')
-            .where('payment.id_user = :userId', { userId: user.id_user })
-            .getMany()
-            .then((userPayments) => {
-              userPayments.map((p) => {
-                if (p.verified && paidNeeds.includes(p.id_need)) {
-                  if (!activeUsersId.includes(p.id_user)) {
-                    // ✅ only runs if value not in array
-                    activeUsersId.push(p.id_user);
+      let familyId: number;
+      let familyCount = 0;
+      const activeUsersId = [];
+      const activeUsersIdInOneMonths = [];
+      const activeUsersIdInThreeMonths = [];
+      await this.flaskUserFamilyRepository
+        .createQueryBuilder('userFamily')
+        .leftJoinAndSelect(Family, 'family', 'family.id = userFamily.id_family')
+        .where('family.Id_child = :childId', { childId: child.id })
+        .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
+        .getMany()
+        .then(async (members) => {
+          familyCount = members.length;
+          familyId = members[0].id_family;
+          for await (const user of members) {
+            await this.flaskPaymentRepository
+              .createQueryBuilder('payment')
+              .where('payment.id_user = :userId', { userId: user.id_user })
+              .andWhere('payment.id IS NOT NULL')
+              .andWhere('payment.verified IS NOT NULL')
+              .andWhere('payment.order_id IS NOT NULL')
+              .andWhere('payment.id_need IS NOT NULL')
+              // .andWhere('payment.created > :startDate', {
+              //   startDate: d.toLocaleDateString(),
+              // })
+              // .andWhere('payment.created < :endDate', { endDate: new Date() })
+              .getMany()
+              .then((userPayments) => {
+                userPayments.map((p) => {
+                  if (p.verified && paidNeeds.includes(p.id_need)) {
+                    activeUsersId.push({ id: p.id_user });
+                    if (daysDifference(p.created, new Date()) <= 30) {
+                      activeUsersIdInOneMonths.push({ id: p.id_user });
+                    }
+                    if (daysDifference(p.created, new Date()) <= 90) {
+                      activeUsersIdInThreeMonths.push({ id: p.id_user });
+                    }
                   }
-                }
+                });
               });
-            });
-        }
-        return payments;
-      });
+          }
+        });
 
-    return {
-      family: {
-        familyId: family.id,
-        activeUsers: activeUsersId.length,
-        familyMembers,
-      },
-    };
+      childrenList.push({
+        child: child.id,
+        childSayName: child.sayname_translations.en,
+        family: {
+          familyId: familyId,
+          activeUsers: removeDuplicates(activeUsersId).length,
+          activeUsersInOneMonths: removeDuplicates(activeUsersIdInOneMonths).length,
+          activeUsersInThreeMonths: removeDuplicates(activeUsersIdInThreeMonths).length,
+          familyCount: familyCount,
+        },
+      });
+    }
+    return childrenList;
   }
 
-  async getEcosystemAnalytic() {
+  async getChildrenEcosystemAnalytic() {
     let listAll = [];
     let listConfirmed = [];
     let listUnConfirmed = [];
@@ -388,58 +451,70 @@ export class AnalyticService {
     await this.flaskChildRepository
       .createQueryBuilder('child')
       .select(['child.id'])
-      .andWhere('child.id_ngo != 3')
-      .andWhere('child.id_ngo != 14')
+      .andWhere('child.existence_status = :existence_status', {
+        existence_status: childExistence.AlivePresent,
+      })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .getMany()
       .then(async (children) => {
         for await (const c of children) {
+          // 1- count child needs in every status
           const {
             child,
             childNeedsStats: {
-              all,
-              confirmed,
-              unConfirmed,
-              confirmedNotPaid,
-              completePay,
-              partialPay,
-              purchased,
-              moneyToNgo,
-              deliveredNgo,
-              deliveredChild,
+              allCount,
+              confirmedCount,
+              unConfirmedCount,
+              confirmedNotPaidCount,
+              completePayCount,
+              partialPayCount,
+              purchasedCount,
+              moneyToNgoCount,
+              deliveredNgoCount,
+              deliveredChildCount,
             },
           } = await this.getChildNeedsAnalytic(c.id);
 
           childrenList.push({
             child,
             childNeedsStats: {
-              all,
-              confirmed,
-              unConfirmed,
-              confirmedNotPaid,
-              completePay,
-              partialPay,
-              purchased,
-              moneyToNgo,
-              deliveredNgo,
-              deliveredChild,
+              allCount,
+              confirmedCount,
+              unConfirmedCount,
+              confirmedNotPaidCount,
+              completePayCount,
+              partialPayCount,
+              purchasedCount,
+              moneyToNgoCount,
+              deliveredNgoCount,
+              deliveredChildCount,
             },
           });
 
-          listAll = [...listAll, all];
-          listConfirmed = [...listConfirmed, confirmed];
-          listUnConfirmed = [...listUnConfirmed, unConfirmed];
-          listConfirmedNotPaid = [...listConfirmedNotPaid, confirmedNotPaid];
-          listCompletePay = [...listCompletePay, completePay];
-          listPartialPay = [...listPartialPay, partialPay];
-          listPurchased = [...listPurchased, purchased];
-          listMoneyToNgo = [...listMoneyToNgo, moneyToNgo];
-          listDeliveredNgo = [...listDeliveredNgo, deliveredNgo];
-          listDeliveredChild = [...listDeliveredChild, deliveredChild];
+          // 2- add all children stats to one array
+          listAll = [...listAll, allCount];
+          listConfirmed = [...listConfirmed, confirmedCount];
+          listUnConfirmed = [...listUnConfirmed, unConfirmedCount];
+          listConfirmedNotPaid = [
+            ...listConfirmedNotPaid,
+            confirmedNotPaidCount,
+          ];
+          listCompletePay = [...listCompletePay, completePayCount];
+          listPartialPay = [...listPartialPay, partialPayCount];
+          listPurchased = [...listPurchased, purchasedCount];
+          listMoneyToNgo = [...listMoneyToNgo, moneyToNgoCount];
+          listDeliveredNgo = [...listDeliveredNgo, deliveredNgoCount];
+          listDeliveredChild = [...listDeliveredChild, deliveredChildCount];
         }
       });
 
-    const totalFamilies = await this.flaskFamilyRepository
+    const totalFamiliesCount = await this.flaskFamilyRepository
       .createQueryBuilder('family')
       .leftJoinAndSelect(
         UserFamily,
@@ -449,55 +524,28 @@ export class AnalyticService {
       .andWhere('family.isDeleted = :isDeleted', { isDeleted: false })
       .getCount();
 
-    const totalFamilyMembers = await this.flaskUserFamilyRepository
+    const totalFamilyMembersCount = await this.flaskUserFamilyRepository
       .createQueryBuilder('userFamily')
       .leftJoinAndSelect(Family, 'family', 'family.id = userFamily.id_family')
       .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
       .getCount();
 
     return {
-      meanNeedsPerChild: Math.round(
-        listAll.reduce((partialSum, a) => partialSum + a, 0) / listAll.length,
+      meanNeedsPerChild: round(mean(listAll)),
+      meanConfirmedPerChild: round(mean(listConfirmed)),
+      meanUnConfirmedPerChild: round(mean(listUnConfirmed)),
+      meanConfirmedNotPaidPerChild: round(mean(listConfirmedNotPaid)),
+      meanCompletePayPerChild: round(mean(listCompletePay)),
+      meanPartialPayPerChild: round(mean(listPartialPay)),
+      meanPurchasedPerChild: round(mean(listPurchased)),
+      meanMoneyToNgoPerChild: round(mean(listMoneyToNgo)),
+      meanDeliveredNgoPerChild: round(mean(listDeliveredNgo)),
+      meanDeliveredChildPerChild: round(mean(listDeliveredChild)),
+      totalFamiliesCount,
+      totalFamilyMembersCount,
+      meanFamilyMembers: Math.round(
+        totalFamilyMembersCount / totalFamiliesCount,
       ),
-      meanConfirmedPerChild: Math.round(
-        listConfirmed.reduce((partialSum, a) => partialSum + a, 0) /
-          listConfirmed.length,
-      ),
-      meanUnConfirmedPerChild: Math.round(
-        listUnConfirmed.reduce((partialSum, a) => partialSum + a, 0) /
-          listUnConfirmed.length,
-      ),
-      meanConfirmedNotPaidPerChild: Math.round(
-        listConfirmedNotPaid.reduce((partialSum, a) => partialSum + a, 0) /
-          listConfirmedNotPaid.length,
-      ),
-      meanCompletePayPerChild: Math.round(
-        listCompletePay.reduce((partialSum, a) => partialSum + a, 0) /
-          listCompletePay.length,
-      ),
-      meanPartialPayPerChild: Math.round(
-        listPartialPay.reduce((partialSum, a) => partialSum + a, 0) /
-          listPartialPay.length,
-      ),
-      meanPurchasedPerChild: Math.round(
-        listPurchased.reduce((partialSum, a) => partialSum + a, 0) /
-          listPurchased.length,
-      ),
-      meanMoneyToNgoPerChild: Math.round(
-        listMoneyToNgo.reduce((partialSum, a) => partialSum + a, 0) /
-          listMoneyToNgo.length,
-      ),
-      meanDeliveredNgoPerChild: Math.round(
-        listDeliveredNgo.reduce((partialSum, a) => partialSum + a, 0) /
-          listDeliveredNgo.length,
-      ),
-      meanDeliveredChildPerChild: Math.round(
-        listDeliveredChild.reduce((partialSum, a) => partialSum + a, 0) /
-          listDeliveredChild.length,
-      ),
-      totalFamilies,
-      totalFamilyMembers,
-      meanFamilyMembers: Math.round(totalFamilyMembers / totalFamilies),
       childrenList,
     };
   }
@@ -558,5 +606,4 @@ export class AnalyticService {
 
     return { summary, inMonth, count: needs[1], swIds };
   }
-  
 }

@@ -19,7 +19,7 @@ export type UserParams = {
     avatarUrl?: string;
     created?: Date;
     updated?: Date;
-    panelRole: PanelContributors,
+    panelRole?: PanelContributors,
     need?: NeedEntity
 }
 

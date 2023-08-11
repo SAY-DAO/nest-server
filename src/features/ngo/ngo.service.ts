@@ -23,35 +23,37 @@ export class NgoService {
     private ngoFlaskRepository: Repository<NGO>,
     @InjectRepository(Need, 'flaskPostgres')
     private needFlaskRepository: Repository<Need>,
-  ) { }
+  ) {}
 
   getNgos(): Promise<NgoEntity[]> {
     return this.ngoRepository.find();
   }
 
-  async updateNgoArrivals(ngo: NgoEntity, deliveryCode: string, arrivalCode: string): Promise<NgoArrivalEntity | UpdateResult> {
+  async updateNgoArrivals(
+    ngo: NgoEntity,
+    deliveryCode: string,
+    arrivalCode: string,
+  ): Promise<NgoArrivalEntity | UpdateResult> {
     const nestNgoArrival = await this.ngoArrivalRepository.findOne({
       where: {
-        deliveryCode
-      }
-    })
+        deliveryCode,
+      },
+    });
     if (!nestNgoArrival) {
-      console.log('Creating NgoArrivals...\n')
+      console.log('Creating NgoArrivals...\n');
       const ngoArrival = this.ngoArrivalRepository.create({
         arrivalCode,
         deliveryCode,
-        ngo
-      })
-      return this.ngoArrivalRepository.save(ngoArrival)
-    }
-    else {
-      console.log('Updating NgoArrivals...\n')
+        ngo,
+      });
+      return this.ngoArrivalRepository.save(ngoArrival);
+    } else {
+      console.log('Updating NgoArrivals...\n');
       return this.ngoArrivalRepository.update(nestNgoArrival.id, {
         id: nestNgoArrival.id,
-        arrivalCode
-      })
+        arrivalCode,
+      });
     }
-
   }
 
   async getNgoArrivals(socialWorker: number, swIds: number[]) {
@@ -106,14 +108,14 @@ export class NgoService {
     );
     const uniqueCodes = Array.from(new Set(codesArray));
 
-    const arrivalCodes = []
+    const arrivalCodes = [];
     for await (const c of uniqueCodes) {
       const arrival = await this.ngoArrivalRepository.findOne({
         where: {
-          deliveryCode: c
-        }
-      })
-      arrivalCodes.push(arrival)
+          deliveryCode: c,
+        },
+      });
+      arrivalCodes.push(arrival);
     }
     // we get the max date to ignore codes with wrong date / help find same codes with different dates
     const arrivals = uniqueCodes.map((c) => {
@@ -132,29 +134,31 @@ export class NgoService {
           .filter((n) => n.deliveryCode === c)
           .map((n: any) => n.child.ngo.name)[0],
 
-        arrivalCode: arrivalCodes
-          .find((a) => a && a.deliveryCode === c) ? arrivalCodes
-            .find((a) => a && a.deliveryCode === c).arrivalCode : '',
+        arrivalCode: arrivalCodes.find((a) => a && a.deliveryCode === c)
+          ? arrivalCodes.find((a) => a && a.deliveryCode === c).arrivalCode
+          : '',
 
-        itemCount: needs
-          .filter((n) => n.deliveryCode === c).length
+        itemCount: needs.filter((n) => n.deliveryCode === c).length,
       };
-    })
+    });
 
-    arrivals.sort(function (a, b) { return b.maxDate - a.maxDate });
+    arrivals.sort(function (a, b) {
+      return b.maxDate - a.maxDate;
+    });
 
     return [...arrivals];
   }
 
   getFlaskNgos(): Promise<NGO[]> {
-    return this.ngoFlaskRepository.createQueryBuilder('ngo')
-    .andWhere('ngo.id NOT IN (:...testNgoIds)', {
-      testNgoIds: [3, 14],
-    })
-    .cache(10000)
-    .getMany();
+    return this.ngoFlaskRepository
+      .createQueryBuilder('ngo')
+      .andWhere('ngo.id NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .cache(10000)
+      .getMany();
   }
-  
+
   getFlaskNgo(flaskNgoId: number): Promise<NGO> {
     return this.ngoFlaskRepository.findOne({
       where: { id: flaskNgoId },
@@ -171,10 +175,16 @@ export class NgoService {
   }
 
   createNgo(ngoDetails: NgoParams, city: CityEntity): Promise<NgoEntity> {
+    console.log(city);
+    console.log(ngoDetails);
     const newNgo = this.ngoRepository.create({
       ...ngoDetails,
+      flaskCityId: ngoDetails.flaskCityId,
       city: city,
     });
+
+    console.log(newNgo);
+
     return this.ngoRepository.save({ id: newNgo.id, ...newNgo });
   }
 

@@ -8,16 +8,20 @@ import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { NeedEntity } from 'src/entities/need.entity';
 import { FamilyService } from '../family/family.service';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { AnalyticService } from '../analytic/analytic.service';
+import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, SocialWorker, Child, User, Family],
+      [Need, SocialWorker, Child, User, Family, NGO, Payment, UserFamily],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([NeedEntity]),
   ],
   controllers: [],
-  providers: [ScheduleService, NeedService, FamilyService],
+  providers: [ScheduleService, NeedService, FamilyService, AnalyticService],
 })
 export class ScheduleTaskModule {}
