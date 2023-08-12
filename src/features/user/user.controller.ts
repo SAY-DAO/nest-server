@@ -38,7 +38,7 @@ import { IpfsEntity } from 'src/entities/ipfs.entity';
 @ApiTags('Users')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })

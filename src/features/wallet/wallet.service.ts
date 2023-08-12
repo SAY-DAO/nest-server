@@ -14,7 +14,7 @@ import {
 } from '../../types/interfaces/interface';
 import { NeedService } from '../need/need.service';
 import VerifyVoucherContract from '../../contracts/needModule/VerifyVoucher.sol/VerifyVoucher.json';
-import { sepolia } from '../../contracts/network-settings.json';
+import { mainnet } from '../../contracts/network-settings.json';
 import { ChildrenEntity } from '../../entities/children.entity';
 import {
   EthersContract,
@@ -87,6 +87,7 @@ export class WalletService {
     const SIGNING_DOMAIN_NAME = 'SAY-DAO';
     const SIGNING_DOMAIN_VERSION = '1';
 
+    // https://docs.ethers.org/v5/api/signer/#VoidSigner
     const wallet = this.ethersSigner.createVoidSigner(signerAddress);
 
     const verifyingContract = this.ethersContract.create(
@@ -224,14 +225,14 @@ export class WalletService {
     let domain: Domain;
     try {
       domain = await this.designDomain(
-        sepolia.verifyVoucherAddress,
+        mainnet.verifyVoucherAddress,
         signerAddress,
       );
     } catch (e) {
       throw new WalletExceptionFilter(e.status, e.message);
     }
     console.log('\x1b[36m%s\x1b[0m', 'Prepared the domain! ...\n');
-   
+
     return {
       message: productVoucher || serviceVoucher,
       types,
@@ -245,7 +246,7 @@ export class WalletService {
     flaskNeedId: number,
     role: SAYPlatformRoles,
     flaskUserId: number,
-    verifyingContract:string
+    verifyingContract: string,
   ): Promise<SignatureEntity> {
     const user = await this.userService.getUserByFlaskId(flaskUserId);
     let theNeed: NeedEntity;

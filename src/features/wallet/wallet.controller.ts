@@ -23,10 +23,11 @@ import {
   PanelContributors,
   SAYPlatformRoles,
   SwSignatureResult,
+  eEthereumNetworkChainId,
 } from '../../types/interfaces/interface';
 import {
   CreateSignatureDto,
-  SwGenerateSignatureDto,
+  PrepareSignatureDto,
   VerifyWalletDto,
 } from '../../types/dtos/CreateSignature.dto';
 import { ValidateSignaturePipe } from './pipes/validate-wallet.pipe';
@@ -49,12 +50,13 @@ import {
   SocialWorkerAPIApi,
 } from 'src/generated-sources/openapi';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @UseInterceptors(WalletInterceptor)
 @ApiTags('Wallet')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })
@@ -275,9 +277,12 @@ export class SignatureController {
   @Post(`signature/prepare`)
   @UsePipes(new ValidationPipe()) // validation for dto files
   async prepareSignature(
-    @Body(ValidateSignaturePipe) body: SwGenerateSignatureDto,
+    @Body(ValidateSignaturePipe) body: PrepareSignatureDto,
     @Session() session: Record<string, any>,
   ) {
+    if (body.chainId !== eEthereumNetworkChainId.mainnet) {
+      throw new ServerError('Please connect to Mainnet!', 500);
+    }
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }

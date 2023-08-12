@@ -15,7 +15,7 @@ import { FamilyService } from '../family/family.service';
 @ApiTags('Analytic')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })
@@ -106,9 +106,8 @@ export class AnalyticController {
       activesList = await this.analyticService.getChildFamilyAnalytic();
       config().dataCache.storeActiveFamilies(activesList);
     }
-    return activesList
+    return activesList;
   }
-
 
   @Get(`family/:userId`)
   @ApiOperation({ description: 'Get all family role analysis for a user' })

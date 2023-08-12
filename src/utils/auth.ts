@@ -1,6 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 import config from 'src/config';
-import { SocialWorkerAPIApi } from 'src/generated-sources/openapi';
+import { ServerError } from 'src/filters/server-exception.filter';
+import { SocialWorkerAPIApi, UserAPIApi } from 'src/generated-sources/openapi';
 
 export async function checkFlaskCacheAuthentication(
   req: {
@@ -11,45 +12,78 @@ export async function checkFlaskCacheAuthentication(
   logger.warn('Passing through MiddleWare...');
 
   const accessToken = req.headers['authorization'];
-  const flaskSwId = Number(req.headers['flaskswid']);
+  const flaskId = req.headers['flaskid'];
 
-  if (!accessToken || !flaskSwId) {
+  if (!accessToken || !flaskId) {
     throw new ForbiddenException('Access Token and the ID is required!');
   }
-  logger.log('fetching cache token...');
-  const fetchedToken = config().dataCache.fetchAccessToken();
-  if (fetchedToken[flaskSwId]) {
-    logger.log('Got the cache token!...');
-  }
-  if (!fetchedToken[flaskSwId] || fetchedToken[flaskSwId] !== accessToken) {
-    try {
-      logger.warn('No token at cache, Authenticating from Flask Api...');
-      const flaskApi = new SocialWorkerAPIApi();
-      const socialWorker = await flaskApi.apiV2SocialworkersIdGet(
-        accessToken,
-        flaskSwId,
-      );
-
-      if (!socialWorker) {
-        throw new ForbiddenException('You Do not have Access!');
+  try {
+    // for Dapp
+    if (String(flaskId) === 'me') {
+      logger.log('fetching dapp cache token...');
+      const fetchedToken = config().dataCache.fetchDappAccessToken();
+      if (fetchedToken[flaskId]) {
+        logger.log('Got the cache token!...');
       }
-      if (fetchedToken[flaskSwId]) {
-        console.log([flaskSwId]);
-        console.log(fetchedToken[flaskSwId]);
-        
-        logger.warn('removing old user token...');
-        config().dataCache.deleteAnAccessToken(flaskSwId);
-      }
-      config().dataCache.storeAccessToken(accessToken, socialWorker.id);
+      if (!fetchedToken[flaskId] || fetchedToken[flaskId] !== accessToken) {
+        logger.warn(
+          'No token at cache, Authenticating from Family Flask Api...',
+        );
+        const userFlaskApi = new UserAPIApi();
+        const familyMember = await userFlaskApi.apiV2UserUserIduserIdGet(
+          accessToken,
+          flaskId,
+        );
+        if (!familyMember) {
+          throw new ForbiddenException('You Do not have Access!');
+        }
+        if (fetchedToken[flaskId]) {
+          logger.warn('removing old user token...');
+          config().dataCache.deleteDappAccessToken(flaskId);
+        }
+        config().dataCache.storeDappAccessToken(accessToken, familyMember.id);
 
-      logger.log('saved token...');
-    } catch (e) {
-      throw new ForbiddenException({
-        status: e.status,
-        message: e.statusText,
-        hint: 'access token in middleware!',
-      });
+        logger.log('saved token...');
+        logger.log('Authenticated...');
+      }
     }
+    // for panel
+    else if (Number(flaskId) > 0) {
+      logger.log('fetching panel cache token...');
+      const fetchedToken = config().dataCache.fetchPanelAccessToken();
+      if (fetchedToken[flaskId]) {
+        logger.log('Got the cache token!...');
+      }
+      if (!fetchedToken[flaskId] || fetchedToken[flaskId] !== accessToken) {
+        logger.warn(
+          'No token at cache, Authenticating from Social worker Flask Api...',
+        );
+        const flaskApi = new SocialWorkerAPIApi();
+        const socialWorker = await flaskApi.apiV2SocialworkersIdGet(
+          accessToken,
+          Number(flaskId),
+        );
+
+        if (!socialWorker) {
+          throw new ForbiddenException('You Do not have Access!');
+        }
+        if (fetchedToken[flaskId]) {
+          logger.warn('removing old user token...');
+          config().dataCache.deletePanelAccessToken(flaskId);
+        }
+        config().dataCache.storePanelAccessToken(accessToken, socialWorker.id);
+
+        logger.log('saved token...');
+        logger.log('Authenticated...');
+      }
+    } else {
+      throw new ServerError('Hmmm, something is not right!', 500);
+    }
+  } catch (e) {
+    throw new ForbiddenException({
+      status: e.status,
+      message: e.statusText || e.response,
+      hint: 'access token in middleware!',
+    });
   }
-  logger.log('Authenticated...');
 }

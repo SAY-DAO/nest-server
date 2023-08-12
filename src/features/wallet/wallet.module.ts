@@ -47,7 +47,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
       maxRedirects: 5,
     }),
     EthersModule.forRoot({
-      network: 'sepolia',
+      network: 1,
       alchemy: process.env.ALCHEMY_KEY_SEPOLIA,
       cloudflare: true,
       //  * Optional parameter the number of backends that must agree. default: 2 for mainnet, 1 for testnets)
@@ -105,6 +105,6 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 })
 export class WalletModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply( WalletMiddleware).forRoutes('wallet');
+    consumer.apply(WalletMiddleware).forRoutes('wallet');
   }
 }

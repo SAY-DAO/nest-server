@@ -10,7 +10,7 @@ import { NgoService } from './ngo.service';
 @ApiTags('Ngo')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })

@@ -5,7 +5,7 @@ import { ReceiptService } from './receipt.service';
 @ApiTags('Receipts')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })

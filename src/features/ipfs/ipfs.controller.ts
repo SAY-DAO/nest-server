@@ -5,7 +5,7 @@ import { IpfsService } from './ipfs.service';
 @ApiTags('IPFS')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })

@@ -41,7 +41,7 @@ export class ProviderController {
   @Get(`all`)
   @ApiSecurity('flask-access-token')
   @ApiHeader({
-    name: 'flaskSwId',
+    name: 'flaskId',
     description: 'to use cache and flask authentication',
     required: true,
   })
@@ -53,7 +53,7 @@ export class ProviderController {
   @Get(`:id`)
   @ApiSecurity('flask-access-token')
   @ApiHeader({
-    name: 'flaskSwId',
+    name: 'flaskId',
     description: 'to use cache and flask authentication',
     required: true,
   })
@@ -75,7 +75,7 @@ export class ProviderController {
   @Post('join')
   @ApiSecurity('flask-access-token')
   @ApiHeader({
-    name: 'flaskSwId',
+    name: 'flaskId',
     description: 'to use cache and flask authentication',
     required: true,
   })
@@ -99,7 +99,7 @@ export class ProviderController {
   @Post('add')
   @ApiSecurity('flask-access-token')
   @ApiHeader({
-    name: 'flaskSwId',
+    name: 'flaskId',
     description: 'to use cache and flask authentication',
     required: true,
   })
@@ -142,7 +142,7 @@ export class ProviderController {
   @Patch('update/:id')
   @ApiSecurity('flask-access-token')
   @ApiHeader({
-    name: 'flaskSwId',
+    name: 'flaskId',
     description: 'to use cache and flask authentication',
     required: true,
   })
@@ -179,7 +179,7 @@ export class ProviderController {
   @Delete(':id')
   @ApiSecurity('flask-access-token')
   @ApiHeader({
-    name: 'flaskSwId',
+    name: 'flaskId',
     description: 'to use cache and flask authentication',
     required: true,
   })

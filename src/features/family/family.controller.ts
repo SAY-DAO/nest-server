@@ -4,7 +4,7 @@ import { ApiHeader, ApiSecurity } from '@nestjs/swagger';
 
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })

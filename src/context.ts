@@ -16,12 +16,11 @@ export const ApplicationContext = async () => {
       .addServer(config().documentUrl, 'The Server')
       .addBearerAuth(
         { 
-          // I was also testing it without prefix 'Bearer ' before the JWT
           description: `[just text field] Please enter token in following format: Bearer <JWT>`,
           name: 'authorization',
-          bearerFormat: 'Bearer', // I`ve tested not to use this field, but the result was the same
+          bearerFormat: 'Bearer',
           scheme: 'Bearer',
-          type: 'http', // I`ve attempted type: 'apiKey' too
+          type: 'http', 
           in: 'Header'
         },
         'flask-access-token', // This name here is important for matching up with @ApiBearerAuth() in your controller!

@@ -6,7 +6,7 @@ import { NeedService } from './need.service';
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })

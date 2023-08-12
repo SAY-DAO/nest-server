@@ -5,7 +5,7 @@ import { LocationService } from './location.service';
 @ApiTags('Location')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })

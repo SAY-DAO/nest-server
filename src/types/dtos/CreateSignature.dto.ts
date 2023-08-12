@@ -22,9 +22,8 @@ export class NeedSignatureMessage {
   nonce: string;
 }
 export class VerifyWalletDto {
-  message: NeedSignatureMessage
-  signature: string
-
+  message: NeedSignatureMessage;
+  signature: string;
 }
 
 export class VerifySignatureDto {
@@ -34,13 +33,15 @@ export class VerifySignatureDto {
   message: string;
 }
 
-export class SwGenerateSignatureDto {
+export class PrepareSignatureDto {
+  @IsNotEmpty()
+  chainId: number;
   @IsNotEmpty()
   flaskNeedId: number;
-  statuses?: CreateStatusDto[]
-  receipts?: CreateReceiptDto[]
+  statuses?: CreateStatusDto[];
+  receipts?: CreateReceiptDto[];
   @IsNotEmpty()
-  payments?: CreatePaymentDto[]
+  payments?: CreatePaymentDto[];
 }
 
 export class CreateSignatureDto {
@@ -51,7 +52,6 @@ export class CreateSignatureDto {
   @IsNotEmpty()
   verifyVoucherAddress: string;
 }
-
 
 export class FamilyCreateSwSignatureDto {
   userId: number;

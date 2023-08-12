@@ -38,7 +38,7 @@ import { UserService } from '../user/user.service';
 @ApiTags('Tickets')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })

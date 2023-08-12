@@ -1,5 +1,10 @@
 import { TypedDataField } from 'ethers';
 
+export enum eEthereumNetworkChainId {
+  mainnet = 1,
+  goerli = 5,
+  sepolia = 11155111,
+}
 export enum VirtualFamilyRole {
   FATHER = 0,
   MOTHER = 1,

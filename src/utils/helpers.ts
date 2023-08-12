@@ -28,11 +28,15 @@ export function getAllFilesFromFolder(dir: string) {
   fs.readdirSync(dir).forEach(function (file) {
     file = dir + '/' + file;
     const stat = fs.statSync(file);
-
+    console.log(file);
+    console.log(dir);
     if (stat && stat.isDirectory()) {
       results = results.concat(getAllFilesFromFolder(file));
     } else results.push(file);
   });
+
+  console.log(results);
+
   return results;
 }
 
@@ -143,7 +147,7 @@ export function getSAYRoleString(sayRole: number) {
 }
 
 export function getSAYRolePersian(sayRole: number) {
-    let roleString: string;
+  let roleString: string;
   if (sayRole === SAYPlatformRoles.AUDITOR) {
     roleString = 'شاهد';
   } else if (sayRole === SAYPlatformRoles.SOCIAL_WORKER) {

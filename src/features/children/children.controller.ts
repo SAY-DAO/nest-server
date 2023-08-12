@@ -5,7 +5,7 @@ import { ChildrenService } from './children.service';
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskSwId',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })
@@ -24,7 +24,6 @@ export class ChildrenController {
   async getActiveChildren() {
     return await this.childrenService.getFlaskActiveChildren();
   }
-
 
   @Get(`flask/all`)
   @ApiOperation({ description: 'Get all flask children from db' })

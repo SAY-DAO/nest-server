@@ -4,7 +4,8 @@ import { getScattered, removeDuplicates } from './helpers';
 
 export default class DataCache {
   childrenEcosystem = null;
-  flaskAccessToken = {};
+  panelAccessToken = {};
+  dappAccessToken = {};
   familyData = null;
   familyRolesCount = null;
   childActiveFamilies = null;
@@ -34,10 +35,14 @@ export default class DataCache {
     this.childrenEcosystem = { ...result, created: new Date() };
   };
 
-  storeAccessToken = (token: string, swFlaskId: number) => {
-    this.flaskAccessToken[swFlaskId] = token;
+  storePanelAccessToken = (token: string, flaskSwId: number) => {
+    this.panelAccessToken[flaskSwId] = token;
   };
 
+  storeDappAccessToken = (token: string, flaskFamilyId: number) => {
+    this.dappAccessToken[flaskFamilyId] = token;
+  };
+  
   storeMidjourny = (list: any[]) => {
     list.forEach((e) => this.midjourneyList.push(e));
   };
@@ -91,8 +96,10 @@ export default class DataCache {
   fetchFamilyAll = () => this.familyData;
   fetchFamilyCount = () => this.familyRolesCount;
   fetchActiveFamilies = () => this.childActiveFamilies;
-  fetchAccessToken = () => this.flaskAccessToken;
-  deleteAnAccessToken = (flaskSwId: number) => this.flaskAccessToken[flaskSwId];
+  fetchPanelAccessToken = () => this.panelAccessToken;
+  fetchDappAccessToken = () => this.dappAccessToken;
+  deletePanelAccessToken = (flaskSwId: number) => this.panelAccessToken[flaskSwId];
+  deleteDappAccessToken = (flaskFamilyId: number) => this.dappAccessToken[flaskFamilyId];
 
   // panel analytic scatter chart
   roleScatteredData() {
