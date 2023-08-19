@@ -4,12 +4,12 @@ import { UserService } from '../user/user.service';
 import { NeedService } from './need.service';
 
 @ApiTags('Needs')
-@ApiSecurity('flask-access-token')
-@ApiHeader({
-  name: 'flaskId',
-  description: 'to use cache and flask authentication',
-  required: true,
-})
+// @ApiSecurity('flask-access-token')
+// @ApiHeader({
+//   name: 'flaskId',
+//   description: 'to use cache and flask authentication',
+//   required: true,
+// })
 @Controller('needs')
 export class NeedController {
   constructor(
@@ -80,4 +80,5 @@ export class NeedController {
   ) {
     return await this.needService.getDuplicateNeeds(flaskChildId, flaskNeedId);
   }
+  
 }

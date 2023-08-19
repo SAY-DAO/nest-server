@@ -31,8 +31,6 @@ import { TypedDataField } from 'ethers';
 @Injectable()
 export class WalletService {
   constructor(
-    @InjectRepository(NeedEntity)
-    private needRepository: Repository<NeedEntity>,
     @InjectRepository(SignatureEntity)
     private signatureRepository: Repository<SignatureEntity>,
     private needService: NeedService,
@@ -266,39 +264,6 @@ export class WalletService {
     return await this.signatureRepository.save(theSignature);
   }
 
-  async getFamilyReadyToSignNeeds(
-    familyMemberId: number,
-  ): Promise<NeedEntity[]> {
-    const needs = this.needRepository.find({
-      relations: {
-        verifiedPayments: true,
-        signatures: true,
-      },
-      where: {
-        verifiedPayments: {
-          flaskUserId: familyMemberId,
-        },
-        signatures: {
-          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
-        },
-      },
-    });
-    return needs;
-  }
-
-  async getAllFamilyReadyToSignNeeds(): Promise<NeedEntity[]> {
-    const needs = this.needRepository.find({
-      relations: {
-        signatures: true,
-      },
-      where: {
-        signatures: {
-          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
-        },
-      },
-    });
-    return needs;
-  }
 
   async deleteOne(signatureId): Promise<Observable<any>> {
     return from(this.signatureRepository.delete(signatureId));

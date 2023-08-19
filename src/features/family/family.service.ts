@@ -1,26 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import {
-  NeedTypeEnum,
   PaymentStatusEnum,
-  ProductStatusEnum,
-  ServiceStatusEnum,
+  SAYPlatformRoles,
   VirtualFamilyRole,
-  childExistence,
 } from 'src/types/interfaces/interface';
 import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
-import { number } from 'mathjs';
+import { NeedEntity } from 'src/entities/need.entity';
 
 @Injectable()
 export class FamilyService {
   constructor(
+    @InjectRepository(NeedEntity)
+    private needRepository: Repository<NeedEntity>,
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(User, 'flaskPostgres')
@@ -206,7 +205,7 @@ export class FamilyService {
         //<------- to here
         .andWhere('payment.id IS NOT NULL')
         .andWhere('payment.verified IS NOT NULL')
-        .andWhere('payment.order_id IS NOT NULL')
+        // .andWhere('payment.order_id IS NOT NULL')
         .andWhere('payment.id_need IS NOT NULL')
         .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
           testNgoIds: [3, 14],
@@ -229,5 +228,56 @@ export class FamilyService {
         .cache(10000)
         .getManyAndCount()
     );
+  }
+
+  async getFamilyReadyToSignNeeds(
+    familyMemberId: number,
+  ): Promise<NeedEntity[]> {
+    const needs = this.needRepository.find({
+      relations: {
+        verifiedPayments: true,
+        signatures: true,
+      },
+      where: {
+        verifiedPayments: {
+          flaskUserId: familyMemberId,
+        },
+        signatures: {
+          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
+        },
+      },
+    });
+    return needs;
+  }
+
+  async getFamilyReadyToSignOneNeed(needId: string): Promise<NeedEntity> {
+    const needs = this.needRepository.findOne({
+      relations: {
+        verifiedPayments: true,
+        signatures: true,
+      },
+      where: {
+        signatures: {
+          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
+          need: {
+            id: needId,
+          },
+        },
+      },
+    });
+    return needs;
+  }
+  async getAllFamilyReadyToSignNeeds(): Promise<NeedEntity[]> {
+    const needs = this.needRepository.find({
+      relations: {
+        signatures: true,
+      },
+      where: {
+        signatures: {
+          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
+        },
+      },
+    });
+    return needs;
   }
 }

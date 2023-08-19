@@ -20,17 +20,17 @@ export class UserService {
     @InjectRepository(EthereumAccountEntity)
     private ethereumWalletRepository: Repository<EthereumAccountEntity>,
     @InjectRepository(SocialWorker, 'flaskPostgres')
-    private flaskSocialWorker: Repository<SocialWorker>,
+    private flaskSocialWorkerRepository: Repository<SocialWorker>,
     @InjectRepository(User, 'flaskPostgres')
-    private flaskUser: Repository<User>,
+    private flaskUserRepository: Repository<User>,
   ) {}
 
   getFlaskSws(): Promise<SocialWorker[]> {
-    return this.flaskSocialWorker.find();
+    return this.flaskSocialWorkerRepository.find();
   }
 
   getFlaskSwIds(): Promise<SocialWorker[]> {
-    return this.flaskSocialWorker.find({
+    return this.flaskSocialWorkerRepository.find({
       select: {
         id: true,
       },
@@ -38,13 +38,13 @@ export class UserService {
   }
 
   getFlaskSocialWorker(id: number): Promise<SocialWorker> {
-    return this.flaskSocialWorker.findOne({
+    return this.flaskSocialWorkerRepository.findOne({
       where: { id: id },
     });
   }
 
   getFlaskSocialWorkerByNgo(ngoId: number): Promise<SocialWorker[]> {
-    return this.flaskSocialWorker.find({
+    return this.flaskSocialWorkerRepository.find({
       where: { ngo_id: ngoId },
     });
   }
@@ -54,7 +54,7 @@ export class UserService {
   }
 
   getFlaskUsers(): Promise<User[]> {
-    return this.flaskUser.find();
+    return this.flaskUserRepository.find();
   }
 
   getContributors(): Promise<AllUserEntity[]> {
@@ -107,7 +107,7 @@ export class UserService {
         await this.contributorRepository.save(newContribution);
         console.log('\x1b[33m%s\x1b[0m', 'Saved a contribution ...\n');
       }
-      return  await this.getUserByFlaskId(userDetails.flaskUserId);
+      return await this.getUserByFlaskId(userDetails.flaskUserId);
     } else if (
       theUser &&
       userDetails.panelRole >= PanelContributors.NO_ROLE &&
@@ -168,10 +168,27 @@ export class UserService {
     }
   }
 
-  createFamily(userDetails: UserParams): Promise<AllUserEntity> {
+  async createFamily(flaskUserId: number): Promise<AllUserEntity> {
+    const flaskUser = await this.flaskUserRepository
+      .createQueryBuilder('user')
+      .where('user.id = :userId', { userId: flaskUserId })
+      .getOne();
+
+    const userDetails: UserParams = {
+      birthDate: flaskUser.birthDate,
+      flaskUserId: flaskUser.flaskUserId,
+      isActive: flaskUser.isActive,
+      wallet: flaskUser.wallet,
+      firstName: flaskUser.firstName,
+      lastName: flaskUser.lastName,
+      avatarUrl: flaskUser.avatarUrl,
+      created: flaskUser.created,
+      updated: flaskUser.updated,
+      userName: flaskUser.userName,
+    };
     const newUser = this.allUserRepository.create({
       ...userDetails,
-      flaskUserId: userDetails.flaskUserId,
+      flaskUserId: flaskUserId,
       isContributor: false,
     });
     return this.allUserRepository.save({ id: newUser.id, ...newUser });
@@ -179,8 +196,25 @@ export class UserService {
 
   async updateFamily(
     userId: string,
-    userDetails: UserParams,
+    flaskUserId: number,
   ): Promise<UpdateResult> {
+    const flaskUser = await this.flaskUserRepository
+      .createQueryBuilder('user')
+      .where('user.id = :userId', { userId: flaskUserId })
+      .getOne();
+
+    const userDetails: UserParams = {
+      birthDate: flaskUser.birthDate,
+      flaskUserId: flaskUser.flaskUserId,
+      isActive: flaskUser.isActive,
+      wallet: flaskUser.wallet,
+      firstName: flaskUser.firstName,
+      lastName: flaskUser.lastName,
+      avatarUrl: flaskUser.avatarUrl,
+      created: flaskUser.created,
+      updated: flaskUser.updated,
+      userName: flaskUser.userName,
+    };
     return this.allUserRepository.update(userId, {
       ...userDetails,
       flaskUserId: userDetails.flaskUserId,

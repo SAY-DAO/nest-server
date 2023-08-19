@@ -3,8 +3,6 @@ import {
   Column,
   ManyToMany,
   OneToMany,
-  OneToOne,
-  JoinColumn,
 } from 'typeorm';
 import { PaymentEntity } from './payment.entity';
 import { BaseEntity } from './BaseEntity';
@@ -31,6 +29,9 @@ export class AllUserEntity extends BaseEntity {
 
   @Column({ nullable: false })
   isContributor?: boolean;
+
+  @Column({ nullable: true })
+  userName?: string;
 
   @Column({ nullable: true })
   firstName?: string;

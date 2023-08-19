@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -49,17 +48,16 @@ import {
   FamilyAPIApi,
   SocialWorkerAPIApi,
 } from 'src/generated-sources/openapi';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 import { ServerError } from 'src/filters/server-exception.filter';
 
 @UseInterceptors(WalletInterceptor)
 @ApiTags('Wallet')
-@ApiSecurity('flask-access-token')
-@ApiHeader({
-  name: 'flaskId',
-  description: 'to use cache and flask authentication',
-  required: true,
-})
+// @ApiSecurity('flask-access-token')
+// @ApiHeader({
+//   name: 'flaskId',
+//   description: 'to use cache and flask authentication',
+//   required: true,
+// })
 @Controller('wallet')
 export class SignatureController {
   private readonly logger = new Logger(SignatureController.name);
@@ -207,6 +205,7 @@ export class SignatureController {
             birthDate:
               flaskCaller.birth_date && new Date(flaskCaller.birth_date),
             panelRole: convertFlaskToSayPanelRoles(flaskCaller.type_id),
+            userName: flaskCaller.userName,
           };
           console.log('\x1b[36m%s\x1b[0m', 'Creating a user ...\n');
           nestContributor = await this.userService.createContributor(
@@ -401,6 +400,7 @@ export class SignatureController {
               (c) => c.flaskUserId == need.socialWorker.flaskUserId,
             ).panelRole,
             need,
+            userName: need.socialWorker.userName,
           };
           await this.userService.updateContributor(
             need.socialWorker.id,
@@ -504,6 +504,7 @@ export class SignatureController {
                     (c) => c.flaskUserId == need.auditor.flaskUserId,
                   ).panelRole,
                   need,
+                  userName: need.auditor.userName,
                 };
                 await this.userService.updateContributor(
                   need.auditor.id,
@@ -577,6 +578,7 @@ export class SignatureController {
                     (c) => c.flaskUserId == need.purchaser.flaskUserId,
                   ).panelRole,
                   need,
+                  userName: need.purchaser.userName,
                 };
                 await this.userService.updateContributor(
                   need.purchaser.id,
@@ -626,26 +628,10 @@ export class SignatureController {
     return await this.walletService.getUserSignatures(flaskUserId);
   }
 
-  @Get(`signatures/ready/:flaskUserId`)
-  @ApiOperation({ description: 'Get virtual family member signatures' })
-  async getFamilyMemberSignatures(@Param('flaskUserId') flaskUserId: number) {
-    return await this.walletService.getUserSignatures(flaskUserId);
-  }
   @Delete(`signature/:signature`)
   @ApiOperation({ description: 'Delete a signatures' })
   async deleteSignature(@Param('signature') signature: string) {
     const theSignature = await this.walletService.getSignature(signature);
     return await this.walletService.deleteOne(theSignature.id);
-  }
-
-  @Get(`family/signatures/ready/:userId`)
-  @ApiOperation({
-    description: 'Get all signed needs for virtual family member',
-  })
-  async getReadyNeeds(@Param('userId') userId: number) {
-    if (!userId) {
-      throw new ObjectNotFound('We need the user ID!');
-    }
-    return await this.walletService.getFamilyReadyToSignNeeds(Number(userId));
   }
 }

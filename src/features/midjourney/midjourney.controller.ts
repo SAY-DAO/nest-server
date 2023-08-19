@@ -8,6 +8,8 @@ import { NeedService } from '../need/need.service';
 import { ApiFileResponse } from '../download/api-file-response.decorator';
 import { Response as expressResponse } from 'express';
 import { getAllFilesFromFolder } from 'src/utils/helpers';
+import { MessageBody } from '@nestjs/websockets';
+import { FamilyService } from '../family/family.service';
 
 @ApiTags('Midjourney')
 // @ApiSecurity('flask-access-token')
@@ -22,6 +24,7 @@ export class MidjourneyController {
     private readonly midjourneyService: MidjourneyService,
     private readonly downloadService: DownloadService,
     private readonly needService: NeedService,
+    private readonly familyService: FamilyService,
   ) {}
 
   @Get(`db/all`)
@@ -50,7 +53,21 @@ export class MidjourneyController {
   @Get(`local/all`)
   @ApiOperation({ description: 'Get all IPFS' })
   async getLocalImages() {
-    return getAllFilesFromFolder('../midjourney-bot');
+    const list = [];
+    const needWithSignatures =
+      await this.familyService.getAllFamilyReadyToSignNeeds();
+    for await (const need of needWithSignatures) {
+      const allImages = getAllFilesFromFolder(
+        `../midjourney-bot/main/need-images/need-${need.flaskId}`,
+      );
+      list.push({
+        needFlaskId: need.flaskId,
+        originalImage: need.needRetailerImg,
+        midjourneyImages: allImages,
+        selectedImage: need.midjourneyImage,
+      });
+    }
+    return list;
   }
 
   @ApiFileResponse('image/png')
@@ -70,5 +87,30 @@ export class MidjourneyController {
   async preparePrompts() {
     const promptList = this.midjourneyService.preparePrompts();
     return promptList;
+  }
+
+  @Post('select/:flaskNeedId')
+  @ApiOperation({ description: 'Get all signed' })
+  async selectFinalImage(
+    @Param('flaskNeedId') flaskNeedId: number,
+    @MessageBody() body,
+  ) {
+    const promptList = this.midjourneyService.selectImage(
+      flaskNeedId,
+      body.selectedImage,
+    );
+    return promptList;
+  }
+
+  @Get('images/:flaskNeedId/:index')
+  async serveAvatar(
+    @Param('flaskNeedId') flaskNeedId: number,
+    @Param('index') index: number,
+    @Res() res: any,
+  ): Promise<any> {
+    const fileName = `${flaskNeedId}_${index}.png`;
+    res.sendFile(fileName, {
+      root: `../midjourney-bot/main/need-images/need-${flaskNeedId}`,
+    });
   }
 }

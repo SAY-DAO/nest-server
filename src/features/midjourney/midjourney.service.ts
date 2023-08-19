@@ -3,17 +3,19 @@ import { MidjourneyEntity } from '../../entities/midjourney.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from 'src/entities/need.entity';
-import { WalletService } from '../wallet/wallet.service';
 import fs from 'fs';
 import config from 'src/config';
 import { checkIfFileOrDirectoryExists, deleteFile } from 'src/utils/file';
+import { NeedService } from '../need/need.service';
+import { FamilyService } from '../family/family.service';
 
 @Injectable()
 export class MidjourneyService {
   constructor(
     @InjectRepository(MidjourneyEntity)
     private readonly midjourneyRepository: Repository<MidjourneyEntity>,
-    private readonly walletService: WalletService,
+    private readonly familyService: FamilyService,
+    private readonly needService: NeedService,
   ) {}
 
   async getAllImages(): Promise<MidjourneyEntity[]> {
@@ -41,7 +43,7 @@ export class MidjourneyService {
 
   async preparePrompts(): Promise<any> {
     const needWithSignatures =
-      await this.walletService.getAllFamilyReadyToSignNeeds();
+      await this.familyService.getAllFamilyReadyToSignNeeds();
     const list = [];
     const listOfIds = [];
     needWithSignatures.forEach((n) => {
@@ -51,9 +53,9 @@ export class MidjourneyService {
           flaskId: n.flaskId,
           link: n.needRetailerImg,
           prompt:
-            'only one ' +
+          'write word "SAY" over an unbearably cute, 3d isometric ' +
             n.nameTranslations.en +
-            ', with white background, drawn in manga style, borderless stickers, no graininess, vector, minimal style',
+            ',cartoon soft pastel colors illustration, clay render, blender 3d, physically based rendering, soft and light background, pastel background, colorful, toy like proportions --fast',
         };
         list.push(data);
         listOfIds.push(n.id);
@@ -77,5 +79,10 @@ export class MidjourneyService {
       },
     );
     return list;
+  }
+
+  async selectImage(flaskNeedId: number, selectedImage: string) {
+    const need = await this.needService.getNeedByFlaskId(flaskNeedId);
+    return await this.needService.updateNeedMidjourney(need.id, selectedImage);
   }
 }

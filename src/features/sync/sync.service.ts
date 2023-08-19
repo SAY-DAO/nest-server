@@ -155,6 +155,7 @@ export class SyncService {
       flaskUserId: callerFlaskId,
       birthDate: flaskCaller.birth_date && new Date(flaskCaller.birth_date),
       panelRole: convertFlaskToSayPanelRoles(flaskCaller.type_id),
+      userName: flaskCaller.userName,
     };
     if (!nestCaller) {
       console.log(
@@ -214,6 +215,7 @@ export class SyncService {
       birthDate:
         flaskSocialWorker.birth_date && new Date(flaskSocialWorker.birth_date),
       panelRole: PanelContributors.SOCIAL_WORKER,
+      userName: flaskSocialWorker.userName,
     };
     if (!nestSocialWorker) {
       swNgo = await this.syncContributorNgo(flaskSocialWorker);
@@ -270,6 +272,7 @@ export class SyncService {
           birthDate:
             flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
           panelRole: PanelContributors.AUDITOR,
+          userName: flaskAuditor.userName,
         };
         if (!nestAuditor) {
           const auditorNgo = await this.syncContributorNgo(flaskAuditor);
@@ -350,6 +353,7 @@ export class SyncService {
         birthDate:
           flaskPurchaser.birth_date && new Date(flaskPurchaser.birth_date),
         panelRole: PanelContributors.PURCHASER,
+        userName: flaskPurchaser.userName,
       };
       if (!nestPurchaser) {
         const purchaserNgo = await this.syncContributorNgo(flaskPurchaser);
@@ -419,7 +423,7 @@ export class SyncService {
       // Create Child
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
       console.log(nestSocialWorker);
-      
+
       if (!nestSocialWorker || !nestSocialWorker.contributions) {
         throw new ObjectNotFound(
           'Something went wrong while trying to create a child!',
@@ -537,15 +541,12 @@ export class SyncService {
         if (!nestFamilyMember) {
           // Create Family
           console.log('\x1b[36m%s\x1b[0m', 'Creating a Family ...\n');
-          nestFamilyMember = await this.userService.createFamily({
-            flaskUserId: payments[p].id_user,
-            panelRole: PanelContributors.NO_ROLE,
-          });
+          nestFamilyMember = await this.userService.createFamily(
+            payments[p].id_user,
+          );
         } else if (nestFamilyMember) {
           await this.userService
-            .updateFamily(nestFamilyMember.id, {
-              flaskUserId: payments[p].id_user,
-            })
+            .updateFamily(nestFamilyMember.id, payments[p].id_user)
             .then();
           nestFamilyMember = await this.userService.getFamilyByFlaskId(
             payments[p].id_user,

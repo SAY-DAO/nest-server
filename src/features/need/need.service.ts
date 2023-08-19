@@ -142,6 +142,17 @@ export class NeedService {
     });
   }
 
+  updateNeedMidjourney(
+    needId: string,
+    selectedImage: string,
+  ): Promise<UpdateResult> {
+    console.log(needId, selectedImage);
+
+    return this.needRepository.update(needId, {
+      midjourneyImage: selectedImage,
+    });
+  }
+
   createNeed(
     theChild: ChildrenEntity,
     theNgo: NgoEntity,

@@ -71,6 +71,9 @@ export class NeedEntity extends BaseEntity {
   needRetailerImg: string;
 
   @Column({ nullable: true })
+  midjourneyImage: string;
+
+  @Column({ nullable: true })
   isConfirmed: boolean;
 
   @Column({ nullable: true })

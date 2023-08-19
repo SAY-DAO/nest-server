@@ -99,8 +99,8 @@ export class SocialWorker  extends BaseEntity {
   @Column({ nullable: true })
   passport_url?: string;
 
-  @Column({ nullable: true })
-  username?: string;
+  @Column({ nullable: true,  name: 'username'  })
+  userName?: string;
 
   @Column({ nullable: true })
   created?: Date;

@@ -42,7 +42,7 @@ export default class DataCache {
   storeDappAccessToken = (token: string, flaskFamilyId: number) => {
     this.dappAccessToken[flaskFamilyId] = token;
   };
-  
+
   storeMidjourny = (list: any[]) => {
     list.forEach((e) => this.midjourneyList.push(e));
   };
@@ -98,8 +98,10 @@ export default class DataCache {
   fetchActiveFamilies = () => this.childActiveFamilies;
   fetchPanelAccessToken = () => this.panelAccessToken;
   fetchDappAccessToken = () => this.dappAccessToken;
-  deletePanelAccessToken = (flaskSwId: number) => this.panelAccessToken[flaskSwId];
-  deleteDappAccessToken = (flaskFamilyId: number) => this.dappAccessToken[flaskFamilyId];
+  deletePanelAccessToken = (flaskSwId: number) =>
+    this.panelAccessToken[flaskSwId];
+  deleteDappAccessToken = (flaskFamilyId: number) =>
+    this.dappAccessToken[flaskFamilyId];
 
   // panel analytic scatter chart
   roleScatteredData() {
@@ -186,82 +188,54 @@ export default class DataCache {
       },
     };
     this.medianList.forEach((item) => {
-      if (item[VirtualFamilyRole.FATHER]) {
-        medianObject.father = median(item[VirtualFamilyRole.FATHER]);
-        IQRObject.Q1.father = Number(
-          quantileSeq(item[VirtualFamilyRole.FATHER], 0),
-        );
-        IQRObject.Q2.father = Number(
-          quantileSeq(item[VirtualFamilyRole.FATHER], 0.5),
-        );
-        IQRObject.Q3.father = Number(
-          quantileSeq(item[VirtualFamilyRole.FATHER], 0.75),
-        );
+      console.log(item);
+      const father = item[VirtualFamilyRole.FATHER];
+      const mother = item[VirtualFamilyRole.MOTHER];
+      const amoo = item[VirtualFamilyRole.AMOO];
+      const khaleh = item[VirtualFamilyRole.KHALEH];
+      const daei = item[VirtualFamilyRole.DAEI];
+      const amme = item[VirtualFamilyRole.AMME];
+
+      if (father && father[0]) {
+        medianObject.father = median(father);
+        IQRObject.Q1.father = Number(quantileSeq(father, 0));
+        IQRObject.Q2.father = Number(quantileSeq(father, 0.5));
+        IQRObject.Q3.father = Number(quantileSeq(father, 0.75));
         IQRObject.IQR.father = IQRObject.Q3.father - IQRObject.Q1.father;
       }
-      if (item[VirtualFamilyRole.MOTHER]) {
-        medianObject.mother = median(item[VirtualFamilyRole.MOTHER]);
-        IQRObject.Q1.mother = Number(
-          quantileSeq(item[VirtualFamilyRole.MOTHER], 0),
-        );
-        IQRObject.Q2.mother = Number(
-          quantileSeq(item[VirtualFamilyRole.MOTHER], 0.5),
-        );
-        IQRObject.Q3.mother = Number(
-          quantileSeq(item[VirtualFamilyRole.MOTHER], 0.75),
-        );
+      if (mother && mother[0]) {
+        medianObject.mother = median(mother);
+        IQRObject.Q1.mother = Number(quantileSeq(mother, 0));
+        IQRObject.Q2.mother = Number(quantileSeq(mother, 0.5));
+        IQRObject.Q3.mother = Number(quantileSeq(mother, 0.75));
         IQRObject.IQR.mother = IQRObject.Q3.mother - IQRObject.Q1.mother;
       }
-      if (item[VirtualFamilyRole.AMOO]) {
-        medianObject.amoo = median(item[VirtualFamilyRole.AMOO]);
-        IQRObject.Q1.amoo = Number(
-          quantileSeq(item[VirtualFamilyRole.AMOO], 0),
-        );
-        IQRObject.Q2.amoo = Number(
-          quantileSeq(item[VirtualFamilyRole.AMOO], 0.5),
-        );
-        IQRObject.Q3.amoo = Number(
-          quantileSeq(item[VirtualFamilyRole.AMOO], 0.75),
-        );
+      if (amoo && amoo[0]) {
+        medianObject.amoo = median(amoo);
+        IQRObject.Q1.amoo = Number(quantileSeq(amoo, 0));
+        IQRObject.Q2.amoo = Number(quantileSeq(amoo, 0.5));
+        IQRObject.Q3.amoo = Number(quantileSeq(amoo, 0.75));
         IQRObject.IQR.amoo = IQRObject.Q3.amoo - IQRObject.Q1.amoo;
       }
-      if (item[VirtualFamilyRole.KHALEH]) {
-        medianObject.khaleh = median(item[VirtualFamilyRole.KHALEH]);
-        IQRObject.Q1.khaleh = Number(
-          quantileSeq(item[VirtualFamilyRole.KHALEH], 0),
-        );
-        IQRObject.Q2.khaleh = Number(
-          quantileSeq(item[VirtualFamilyRole.KHALEH], 0.5),
-        );
-        IQRObject.Q3.khaleh = Number(
-          quantileSeq(item[VirtualFamilyRole.KHALEH], 0.75),
-        );
+      if (khaleh && khaleh[0]) {
+        medianObject.khaleh = median(khaleh);
+        IQRObject.Q1.khaleh = Number(quantileSeq(khaleh, 0));
+        IQRObject.Q2.khaleh = Number(quantileSeq(khaleh, 0.5));
+        IQRObject.Q3.khaleh = Number(quantileSeq(khaleh, 0.75));
         IQRObject.IQR.khaleh = IQRObject.Q3.khaleh - IQRObject.Q1.khaleh;
       }
-      if (item[VirtualFamilyRole.DAEI]) {
-        medianObject.daei = median(item[VirtualFamilyRole.DAEI]);
-        IQRObject.Q1.daei = Number(
-          quantileSeq(item[VirtualFamilyRole.DAEI], 0),
-        );
-        IQRObject.Q2.daei = Number(
-          quantileSeq(item[VirtualFamilyRole.DAEI], 0.5),
-        );
-        IQRObject.Q3.daei = Number(
-          quantileSeq(item[VirtualFamilyRole.DAEI], 0.75),
-        );
+      if (daei && daei[0]) {
+        medianObject.daei = median(daei);
+        IQRObject.Q1.daei = Number(quantileSeq(daei, 0));
+        IQRObject.Q2.daei = Number(quantileSeq(daei, 0.5));
+        IQRObject.Q3.daei = Number(quantileSeq(daei, 0.75));
         IQRObject.IQR.daei = IQRObject.Q3.daei - IQRObject.Q1.daei;
       }
-      if (item[VirtualFamilyRole.AMME]) {
-        medianObject.amme = median(item[VirtualFamilyRole.AMME]);
-        IQRObject.Q1.amme = Number(
-          quantileSeq(item[VirtualFamilyRole.AMME], 0),
-        );
-        IQRObject.Q2.amme = Number(
-          quantileSeq(item[VirtualFamilyRole.AMME], 0.5),
-        );
-        IQRObject.Q3.amme = Number(
-          quantileSeq(item[VirtualFamilyRole.AMME], 0.75),
-        );
+      if (amme && amme[0]) {
+        medianObject.amme = median(amme);
+        IQRObject.Q1.amme = Number(quantileSeq(amme, 0));
+        IQRObject.Q2.amme = Number(quantileSeq(amme, 0.5));
+        IQRObject.Q3.amme = Number(quantileSeq(amme, 0.75));
         IQRObject.IQR.amme = IQRObject.Q3.amme - IQRObject.Q1.amme;
       }
     });

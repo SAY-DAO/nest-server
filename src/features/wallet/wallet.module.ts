@@ -49,9 +49,9 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
     EthersModule.forRoot({
       network: 1,
       alchemy: process.env.ALCHEMY_KEY_SEPOLIA,
-      cloudflare: true,
+      cloudflare: false,
       //  * Optional parameter the number of backends that must agree. default: 2 for mainnet, 1 for testnets)
-      quorum: 1,
+      quorum: 2,
       useDefaultProvider: true,
     }),
     TypeOrmModule.forFeature(

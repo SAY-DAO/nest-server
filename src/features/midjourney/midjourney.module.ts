@@ -17,12 +17,14 @@ import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { MidjourneyMiddleware } from './middlewares/midjourney.middleware';
 import { DownloadService } from '../download/download.service';
 import { HttpModule } from '@nestjs/axios';
+import { FamilyService } from '../family/family.service';
+import { Family } from 'src/entities/flaskEntities/family.entity';
 
 @Module({
   imports: [
     HttpModule,
     TypeOrmModule.forFeature(
-      [Child, Need, SocialWorker, User],
+      [Child, Need, SocialWorker, User, Family],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -41,6 +43,7 @@ import { HttpModule } from '@nestjs/axios';
     NeedService,
     UserService,
     DownloadService,
+    FamilyService,
   ],
 })
 export class MidjourneyModule implements NestModule {

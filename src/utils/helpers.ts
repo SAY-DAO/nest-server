@@ -15,6 +15,7 @@ import {
   AppContributors,
 } from 'src/types/interfaces/interface';
 import fs from 'fs';
+import { checkIfFileOrDirectoryExists } from './file';
 
 export const Q1_LOWER_COEFFICIENT = 1;
 export const Q1_TO_Q2_COEFFICIENT = 1.25;
@@ -25,17 +26,15 @@ const RELETIVES_DELIVERED_RANGE = 3;
 
 export function getAllFilesFromFolder(dir: string) {
   let results = [];
-  fs.readdirSync(dir).forEach(function (file) {
-    file = dir + '/' + file;
-    const stat = fs.statSync(file);
-    console.log(file);
-    console.log(dir);
-    if (stat && stat.isDirectory()) {
-      results = results.concat(getAllFilesFromFolder(file));
-    } else results.push(file);
-  });
-
-  console.log(results);
+  if (checkIfFileOrDirectoryExists(dir)) {
+    fs.readdirSync(dir).forEach(function (file) {
+      file = dir + '/' + file;
+      const stat = fs.statSync(file);
+      if (stat && stat.isDirectory()) {
+        results = results.concat(getAllFilesFromFolder(file));
+      } else results.push(file);
+    });
+  }
 
   return results;
 }

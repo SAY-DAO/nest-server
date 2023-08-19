@@ -1,11 +1,12 @@
 import { TypedDataField } from 'ethers';
-
+export const SAY_DAPP_ID = 208;
 export enum eEthereumNetworkChainId {
   mainnet = 1,
   goerli = 5,
   sepolia = 11155111,
 }
 export enum VirtualFamilyRole {
+  SAY = -2,
   FATHER = 0,
   MOTHER = 1,
   AMOO = 2,
