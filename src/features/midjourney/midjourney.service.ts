@@ -42,19 +42,20 @@ export class MidjourneyService {
   }
 
   async preparePrompts(): Promise<any> {
-    const needWithSignatures =
-      await this.familyService.getAllFamilyReadyToSignNeeds();
+    // const needWithSignatures =
+    //   await this.familyService.getAllFamilyReadyToSignNeeds();
+    const deliveredNeeds = await this.needService.getMidjourneyNeeds();
+    await this.familyService.getAllFamilyReadyToSignNeeds();
     const list = [];
     const listOfIds = [];
-    needWithSignatures.forEach((n) => {
+    deliveredNeeds.forEach((n) => {
       if (!listOfIds.find((i) => i === n.id)) {
         const data = {
-          id: n.id,
-          flaskId: n.flaskId,
-          link: n.needRetailerImg,
+          flaskId: n.id,
+          link: n.link,
           prompt:
-          'write word "SAY" over an unbearably cute, 3d isometric ' +
-            n.nameTranslations.en +
+            'write word "SAY" over an unbearably cute, 3d isometric ' +
+            n.name_translations.en +
             ',cartoon soft pastel colors illustration, clay render, blender 3d, physically based rendering, soft and light background, pastel background, colorful, toy like proportions --fast',
         };
         list.push(data);
@@ -64,21 +65,21 @@ export class MidjourneyService {
       }
     });
     config().dataCache.storeMidjourny(list);
-    if (checkIfFileOrDirectoryExists('../midjourney-bot/midJourney.json')) {
-      deleteFile('../midjourney-bot/midJourney.json');
+    if (checkIfFileOrDirectoryExists('../midjourney-bot/midjourney.json')) {
+      deleteFile('../midjourney-bot/midjourney.json');
     }
-    fs.appendFile(
-      '../midjourney-bot/midJourney.json',
-      JSON.stringify(config().dataCache.fetchMidjourney()),
-      function (err) {
-        if (err) {
-          // append failed
-        } else {
-          // done
-        }
-      },
-    );
-    return list;
+    // fs.appendFile(
+    //   '../midjourney-bot/midjourney.json',
+    //   JSON.stringify(config().dataCache.fetchMidjourney()),
+    //   function (err) {
+    //     if (err) {
+    //       // append failed
+    //     } else {
+    //       // done
+    //     }
+    //   },
+    // );
+    return { total: deliveredNeeds.length, list };
   }
 
   async selectImage(flaskNeedId: number, selectedImage: string) {

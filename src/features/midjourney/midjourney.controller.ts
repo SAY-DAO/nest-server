@@ -1,6 +1,13 @@
-import { Controller, Get, Post, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { MidjourneyService } from './midjourney.service';
-import { WalletService } from '../wallet/wallet.service';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { DownloadService } from '../download/download.service';
@@ -10,6 +17,9 @@ import { Response as expressResponse } from 'express';
 import { getAllFilesFromFolder } from 'src/utils/helpers';
 import { MessageBody } from '@nestjs/websockets';
 import { FamilyService } from '../family/family.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { midjourneyStorage } from '../../storage/midjourneyStorage';
+import fs, { readFileSync } from 'fs';
 
 @ApiTags('Midjourney')
 // @ApiSecurity('flask-access-token')
@@ -51,22 +61,34 @@ export class MidjourneyController {
   }
 
   @Get(`local/all`)
-  @ApiOperation({ description: 'Get all IPFS' })
+  @ApiOperation({
+    description: 'Get all images from local json created by prompts',
+  })
   async getLocalImages() {
     const list = [];
-    const needWithSignatures =
-      await this.familyService.getAllFamilyReadyToSignNeeds();
-    for await (const need of needWithSignatures) {
-      const allImages = getAllFilesFromFolder(
-        `../midjourney-bot/main/need-images/need-${need.flaskId}`,
-      );
-      list.push({
-        needFlaskId: need.flaskId,
-        originalImage: need.needRetailerImg,
-        midjourneyImages: allImages,
-        selectedImage: need.midjourneyImage,
-      });
+    let result;
+
+    if (process.env.NODE_ENV === 'development') {
+      const data = readFileSync('../midjourney-bot/midjourney.json', 'utf8');
+      result = JSON.parse(data);
+    } else {
+      result = await this.familyService.getAllFamilyReadyToSignNeeds();
     }
+
+    result.forEach((d) => {
+      const allImages = getAllFilesFromFolder(
+        `../midjourney-bot/main/need-images/need-${d.flaskId}`,
+      );
+
+      list.push({
+        needFlaskId: d.flaskId,
+        originalImage: d.link,
+        midjourneyImages: allImages,
+        selectedImage: d.midjourneyImage,
+      });
+    });
+    console.log(list);
+
     return list;
   }
 
@@ -85,15 +107,17 @@ export class MidjourneyController {
   @Get('prepare/prompts')
   @ApiOperation({ description: 'Get all signed' })
   async preparePrompts() {
-    const promptList = this.midjourneyService.preparePrompts();
+    const promptList = await this.midjourneyService.preparePrompts();
     return promptList;
   }
 
   @Post('select/:flaskNeedId')
+  @UseInterceptors(FileInterceptor('file', midjourneyStorage))
   @ApiOperation({ description: 'Get all signed' })
   async selectFinalImage(
     @Param('flaskNeedId') flaskNeedId: number,
     @MessageBody() body,
+    @UploadedFile() file,
   ) {
     const promptList = this.midjourneyService.selectImage(
       flaskNeedId,

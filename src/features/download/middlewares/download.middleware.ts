@@ -16,11 +16,11 @@ export class DownloadMiddleware implements NestMiddleware {
   private readonly logger = new Logger(DownloadMiddleware.name);
 
   async use(@Request() req, @Response() res, next: NextFunction) {
-    try {
-      await checkFlaskCacheAuthentication(req, this.logger);
-    } catch (e) {
-      throw new ServerError(e);
-    }
+    // try {
+    //   await checkFlaskCacheAuthentication(req, this.logger);
+    // } catch (e) {
+    //   throw new ServerError(e);
+    // }
 
     const { host, origin } = req.headers;
     const origins = [

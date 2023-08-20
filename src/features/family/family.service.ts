@@ -68,68 +68,6 @@ export class FamilyService {
       .getCount();
   }
 
-  //   async getFamilyRoles(
-  //     userId: number,
-  //     vFamilyRole: VirtualFamilyRole,
-  //   ): Promise<any> {
-  //     return await this.flaskUserRepository
-  //       .createQueryBuilder('user')
-  //       .leftJoinAndMapMany(
-  //         'user.payments',
-  //         Payment,
-  //         'payment',
-  //         'payment.id_user = user.id',
-  //       )
-  //       .leftJoinAndMapOne(
-  //         'payment.need',
-  //         Need,
-  //         'need',
-  //         'need.id = payment.id_need',
-  //       )
-  //       .leftJoinAndMapOne(
-  //         'need.child',
-  //         Child,
-  //         'child',
-  //         'child.id = need.child_id',
-  //       )
-  //       .leftJoinAndMapMany(
-  //         'user.user_families',
-  //         UserFamily,
-  //         'userFamily',
-  //         'userFamily.id_user = user.id',
-  //       )
-  //       .leftJoinAndMapOne(
-  //         'userFamily.family',
-  //         Family,
-  //         'family',
-  //         'family.id = userFamily.id_family',
-  //       )
-  //       .where('user.id = :userId', { userId: userId })
-  //       .andWhere('need.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
-  //       .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
-  //       .andWhere('userFamily.flaskFamilyRole = :flaskFamilyRole', {
-  //         flaskFamilyRole: vFamilyRole,
-  //       })
-  //       .andWhere('payment.id_user = :userId', { userId: userId })
-  //       .andWhere('payment.id_need IS NOT NULL')
-  //       .andWhere('payment.id IS NOT NULL')
-  //       .andWhere('payment.verified IS NOT NULL')
-  //       .andWhere('payment.order_id IS NOT NULL')
-  //       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-  //         testNgoIds: [3, 14],
-  //       })
-  //       // .select([
-  //       //   'user.id',
-  //       //   'payment',
-  //       //   'need.id',
-  //       //   'need.child_id',
-  //       //   'user.userName',
-  //       //   'family',
-  //       //   'userFamily',
-  //       // ])
-  //       .getMany();
-  //   }
-
   async isChildCaredOnce(userId: number, childId: number): Promise<boolean> {
     return await this.flaskUserRepository
       .createQueryBuilder('user')

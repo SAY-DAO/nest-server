@@ -24,7 +24,7 @@ import {
 } from '../../types/dtos/CreateProvider.dto';
 import { Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { providerStorage } from '../../providerStorage';
+import { providerStorage } from '../../storage/providerStorage';
 import { UpdateResult } from 'typeorm';
 import {
   NeedTypeDefinitionEnum,

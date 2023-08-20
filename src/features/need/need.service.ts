@@ -769,4 +769,28 @@ export class NeedService {
 
     return accurateCount;
   }
+
+  async getMidjourneyNeeds(): Promise<Need[]> {
+    return await this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.status >= :statusPaid', {
+        statusPaid: PaymentStatusEnum.COMPLETE_PAY,
+      })
+      .select([
+        'need.id',
+        'need.imageUrl',
+        'need.name_translations',
+        'need.title',
+        'need.link',
+        'need.status',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.doneAt',
+      ])
+      .cache(60000)
+      .orderBy('need.created', 'ASC')
+      .getMany();
+  }
 }
