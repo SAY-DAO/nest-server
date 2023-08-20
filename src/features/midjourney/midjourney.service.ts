@@ -68,17 +68,17 @@ export class MidjourneyService {
     if (checkIfFileOrDirectoryExists('../midjourney-bot/midjourney.json')) {
       deleteFile('../midjourney-bot/midjourney.json');
     }
-    // fs.appendFile(
-    //   '../midjourney-bot/midjourney.json',
-    //   JSON.stringify(config().dataCache.fetchMidjourney()),
-    //   function (err) {
-    //     if (err) {
-    //       // append failed
-    //     } else {
-    //       // done
-    //     }
-    //   },
-    // );
+    fs.appendFile(
+      '../midjourney-bot/midjourney.json',
+      JSON.stringify(config().dataCache.fetchMidjourney()),
+      function (err) {
+        if (err) {
+          // append failed
+        } else {
+          // done
+        }
+      },
+    );
     return { total: deliveredNeeds.length, list };
   }
 
