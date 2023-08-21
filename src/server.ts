@@ -32,6 +32,7 @@ async function startServer() {
       'http://localhost:3001',
       'https://panel.saydao.org',
       'https://panel2.saydao.org',
+      'https://beta.sayapp.company',
     ],
     allowedHeaders: [
       'Origin,X-Requested-With,Content-Type ,Accept,X-TAKE, X-SKIP, X-LIMIT, authorization',
