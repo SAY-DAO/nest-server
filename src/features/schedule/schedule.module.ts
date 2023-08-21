@@ -22,6 +22,11 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
     TypeOrmModule.forFeature([NeedEntity]),
   ],
   controllers: [],
-  providers: [ScheduleService, NeedService, FamilyService, AnalyticService],
+  providers: [
+    ScheduleService,
+    NeedService,
+    FamilyService,
+    AnalyticService,
+  ],
 })
 export class ScheduleTaskModule {}

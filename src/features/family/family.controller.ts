@@ -1,25 +1,23 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Req } from '@nestjs/common';
 import { FamilyService } from './family.service';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ChildrenService } from '../children/children.service';
 import { SAY_DAPP_ID, VirtualFamilyRole } from 'src/types/interfaces/interface';
 import config from 'src/config';
-import { findQuertileBonus } from 'src/utils/helpers';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
-import { WalletService } from '../wallet/wallet.service';
+import { findQuartileGrant, getVFamilyRoleString } from 'src/utils/helpers';
 
 @ApiTags('Family')
-// @ApiSecurity('flask-access-token')
-// @ApiHeader({
-//   name: 'flaskId',
-//   description: 'to use cache and flask authentication',
-//   required: true,
-// })
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('family')
 export class FamilyController {
   constructor(
     private readonly familyService: FamilyService,
-    private walletService: WalletService,
     private childrenService: ChildrenService,
   ) {}
 
@@ -32,88 +30,14 @@ export class FamilyController {
     );
   }
 
-  @Get(`payments/:userId`)
+  @Get(`roles/ecosystem/payments`)
   @ApiOperation({ description: 'Get all family role analysis for a user' })
-  async getFamilyMemberCompletePays(@Param('userId') userId: number) {
-    const userAsFather = await this.familyService.getFamilyRoleCompletePay(
-      VirtualFamilyRole.FATHER,
-      Number(userId),
-    );
-    const userAsMother = await this.familyService.getFamilyRoleCompletePay(
-      VirtualFamilyRole.MOTHER,
-      Number(userId),
-    );
-    const userAsAmoo = await this.familyService.getFamilyRoleCompletePay(
-      VirtualFamilyRole.AMOO,
-      Number(userId),
-    );
-    const userAsKhaleh = await this.familyService.getFamilyRoleCompletePay(
-      VirtualFamilyRole.KHALEH,
-      Number(userId),
-    );
-    const userAsDaei = await this.familyService.getFamilyRoleCompletePay(
-      VirtualFamilyRole.DAEI,
-      Number(userId),
-    );
-    const userAsAmme = await this.familyService.getFamilyRoleCompletePay(
-      VirtualFamilyRole.AMME,
-      Number(userId),
-    );
-
-    const ecoCompletePayMedian = config().dataCache.theMedian();
+  async getFamilyRolesCompletePays() {
+    const ecoCompletePayQuartile = config().dataCache.theQuartile();
     const ecoCompletePayAsRole = config().dataCache.fetchFamilyAll();
     const rolesCount = config().dataCache.fetchFamilyCount();
 
-    const myChildren = await this.childrenService.getMyChildren(userId);
-    // Check if paid at least one need for all my children
-    let childrenStatus: {
-      childId: any;
-      caredFor: boolean;
-      status: number;
-      userRole: number;
-    };
-    const childrenList = [];
-    for await (const child of myChildren) {
-      const caredFor = await this.familyService.isChildCaredOnce(
-        userId,
-        child.id,
-      );
-
-      childrenStatus = {
-        childId: child.id,
-        caredFor: caredFor,
-        status: child.existence_status,
-        userRole: child.family.members.find((m) => m.id_user === Number(userId))
-          .flaskFamilyRole,
-      };
-      childrenList.push(childrenStatus);
-    }
-    console.log(ecoCompletePayMedian.IQRObject);
-
-    const calculatedResult = findQuertileBonus(
-      {
-        fatherCompletePay: userAsFather[1],
-        motherCompletePay: userAsMother[1],
-        amooCompletePay: userAsAmoo[1],
-        khalehCompletePay: userAsKhaleh[1],
-        daeiCompletePay: userAsDaei[1],
-        ammeCompletePay: userAsAmme[1],
-      },
-      childrenList,
-      ecoCompletePayMedian.IQRObject,
-    );
-
     return {
-      // be ware that some needs counted more than once (e.g more than 1 participants, amoo, Khaleh paid)
-      theUser: {
-        fatherCompletePay: userAsFather[1],
-        motherCompletePay: userAsMother[1],
-        amooCompletePay: userAsAmoo[1],
-        daeiCompletePay: userAsDaei[1],
-        khalehCompletePay: userAsKhaleh[1],
-        ammeCompletePay: userAsAmme[1],
-        distanceRatio: calculatedResult,
-      },
       ecosystem: {
         rolesCount: {
           fathersCount: rolesCount.fathersCount,
@@ -146,30 +70,148 @@ export class FamilyController {
             ecoCompletePayAsRole.ammesData.length,
         },
 
-        ecoCompletePayMedian,
+        ecoCompletePayQuartile,
       },
     };
   }
 
-  @Get(`signatures/ready/:flaskUserId`)
+  @Get(`distanceRatio`)
+  @ApiOperation({
+    description: 'Get virtual family member"s distance ratio',
+  })
+  async getFamilyDistanceRatio(@Req() req: Request) {
+    const flaskUserId = req.headers['flaskUserId'];
+
+    const userAsFather = await this.familyService.getFamilyRoleCompletePay(
+      VirtualFamilyRole.FATHER,
+      Number(flaskUserId),
+    );
+    const userAsMother = await this.familyService.getFamilyRoleCompletePay(
+      VirtualFamilyRole.MOTHER,
+      Number(flaskUserId),
+    );
+    const userAsAmoo = await this.familyService.getFamilyRoleCompletePay(
+      VirtualFamilyRole.AMOO,
+      Number(flaskUserId),
+    );
+    const userAsKhaleh = await this.familyService.getFamilyRoleCompletePay(
+      VirtualFamilyRole.KHALEH,
+      Number(flaskUserId),
+    );
+    const userAsDaei = await this.familyService.getFamilyRoleCompletePay(
+      VirtualFamilyRole.DAEI,
+      Number(flaskUserId),
+    );
+    const userAsAmme = await this.familyService.getFamilyRoleCompletePay(
+      VirtualFamilyRole.AMME,
+      Number(flaskUserId),
+    );
+
+    const myChildren = await this.childrenService.getMyChildren(flaskUserId);
+    // Check if paid at least one need for all my children
+    let childrenStatus: {
+      childId: any;
+      caredFor: boolean;
+      status: number;
+      userRole: number;
+    };
+    const childrenList = [];
+    for await (const child of myChildren) {
+      const caredFor = await this.familyService.isChildCaredOnce(
+        flaskUserId,
+        child.id,
+      );
+
+      childrenStatus = {
+        childId: child.id,
+        caredFor: caredFor,
+        status: child.existence_status,
+        userRole: child.family.members.find(
+          (m) => m.id_user === Number(flaskUserId),
+        ).flaskFamilyRole,
+      };
+      childrenList.push(childrenStatus);
+    }
+    const ecoCompletePayQuartile = config().dataCache.theQuartile();
+
+    const distanceRatio = findQuartileGrant(
+      {
+        fatherCompletePay: userAsFather[1],
+        motherCompletePay: userAsMother[1],
+        amooCompletePay: userAsAmoo[1],
+        khalehCompletePay: userAsKhaleh[1],
+        daeiCompletePay: userAsDaei[1],
+        ammeCompletePay: userAsAmme[1],
+      },
+      childrenList,
+      ecoCompletePayQuartile.IQRObject,
+    );
+
+    return {
+      // be ware that some needs counted more than once (e.g more than 1 participants, amoo, Khaleh paid)
+      theUser: {
+        fatherCompletePay: userAsFather[1],
+        motherCompletePay: userAsMother[1],
+        amooCompletePay: userAsAmoo[1],
+        daeiCompletePay: userAsDaei[1],
+        khalehCompletePay: userAsKhaleh[1],
+        ammeCompletePay: userAsAmme[1],
+        distanceRatio: distanceRatio,
+      },
+    };
+  }
+
+  @Get(`signatures/ready`)
   @ApiOperation({
     description: 'Get all signed needs for virtual family member',
   })
-  async getReadyNeeds(@Param('flaskUserId') flaskUserId: number) {
+  async getReadyNeeds(@Req() req: Request) {
+    const flaskUserId = req.headers['flaskUserId'];
     if (!flaskUserId) {
       throw new ObjectNotFound('We need the user ID!');
     }
-    return await this.familyService.getFamilyReadyToSignNeeds(Number(flaskUserId));
+    const needs = await this.familyService.getFamilyReadyToSignNeeds(
+      Number(flaskUserId),
+    );
+return needs
+    const list = [];
+    for await (const need of needs) {
+      const members = await this.familyService.getChildFamilyMembers(
+        need.child.flaskId,
+      );
+      list.push({
+        ...need,
+        members,
+      });
+    }
+
+    return list;
   }
 
   @Get(`signature/ready/:needId`)
   @ApiOperation({
     description: 'Get all signed needs for virtual family member',
   })
-  async getReadyOneNeed(@Param('needId') needId: string) {
+  async getReadyOneNeed(@Req() req: Request, @Param('needId') needId: string) {
+    const flaskUserId = req.headers['flaskUserId'];
+
     if (!needId) {
       throw new ObjectNotFound('We need the needId!');
     }
-    return await this.familyService.getFamilyReadyToSignOneNeed(needId);
+    const theNeed = await this.familyService.getFamilyReadyToSignOneNeed(
+      needId,
+    );
+
+    const members = await this.familyService.getChildFamilyMembers(
+      theNeed.child.flaskId,
+    );
+
+    if (!theNeed.verifiedPayments.find((p) => p.flaskUserId === flaskUserId)) {
+      throw new ObjectNotFound('This is not your need!');
+    }
+    return {
+      ...theNeed,
+      members,
+    };
   }
 }

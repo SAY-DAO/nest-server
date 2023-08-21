@@ -17,10 +17,11 @@ import {
 import fs from 'fs';
 import { checkIfFileOrDirectoryExists } from './file';
 
-export const Q1_LOWER_COEFFICIENT = 1;
-export const Q1_TO_Q2_COEFFICIENT = 1.25;
-export const Q2_TO_Q3_COEFFICIENT = 1.5;
-export const Q3_UPPER_COEFFICIENT = 1.75;
+export const Q1_LOWER_COEFFICIENT = 0.75;
+export const Q1_TO_Q2_COEFFICIENT = 1;
+export const Q2_TO_Q3_COEFFICIENT = 1.25;
+export const Q3_UPPER_COEFFICIENT = 1.5;
+export const CONTRIBUTION_COEFFICIENT = 1.2;
 const PARENTS_DELIVERED_RANGE = 1;
 const RELETIVES_DELIVERED_RANGE = 3;
 
@@ -516,26 +517,26 @@ export function isUnpayable(need: Need) {
   );
 }
 
-export function getVFamiliyRoleString(vfamilyRole: number) {
+export function getVFamilyRoleString(vfamilyRole: number) {
   let roleString: string;
   if (vfamilyRole === VirtualFamilyRole.FATHER) {
-    roleString = 'FATHER';
+    roleString = 'Father';
   } else if (vfamilyRole === VirtualFamilyRole.MOTHER) {
-    roleString = 'MOTHER';
+    roleString = 'Mother';
   } else if (vfamilyRole === VirtualFamilyRole.AMOO) {
-    roleString = 'AMOO';
+    roleString = 'Ammo';
   } else if (vfamilyRole === VirtualFamilyRole.KHALEH) {
-    roleString = 'KHALEH';
+    roleString = 'Khaleh';
   } else if (vfamilyRole === VirtualFamilyRole.DAEI) {
-    roleString = 'DAEI';
+    roleString = 'Daei';
   } else if (vfamilyRole === VirtualFamilyRole.AMME) {
-    roleString = 'AMME';
+    roleString = 'Amme';
   }
   return roleString;
 }
 
 // https://en.wikipedia.org/wiki/File:Boxplot_vs_PDF.svg
-export function findQuertileBonus(
+export function findQuartileGrant(
   userValues: {
     fatherCompletePay: any;
     motherCompletePay: any;
@@ -581,14 +582,14 @@ export function findQuertileBonus(
   },
 ) {
   // delivered <= Q1, Q1 < delivered <= Q2 , Q2 < delivered <= Q3,  delivered > Q3
-  let fatherQBonus: number | null;
-  let motherQBonus: number | null;
-  let amooQBonus: number | null;
-  let khalehQBonus: number | null;
-  let daeiQBonus: number | null;
-  let ammeQBonus: number | null;
+  let fatherQGrant: number;
+  let motherQGrant: number;
+  let amooQGrant: number;
+  let khalehQGrant: number;
+  let daeiQGrant: number;
+  let ammeQGrant: number;
 
-  // do not add bonus when even one child has no payment => user need to pay at least one need per child or leave family to gain bonus
+  // do not add Grant when even one child has no payment => user need to pay at least one need per child or leave family to gain Grant
   if (
     childrenList.find(
       (c) => c.caredFor === false && c.status === childExistence.AlivePresent,
@@ -596,165 +597,165 @@ export function findQuertileBonus(
   ) {
     return {
       allChildrenCaredFor: false,
-      fatherQBonus: null,
-      motherQBonus: null,
-      amooQBonus: null,
-      khalehQBonus: null,
-      daeiQBonus: null,
-      ammeQBonus: null,
-      avg: null,
+      fatherQGrant: 0,
+      motherQGrant: 0,
+      amooQGrant: 0,
+      khalehQGrant: 0,
+      daeiQGrant: 0,
+      ammeQGrant: 0,
+      avg: 0,
     };
   }
   if (
     0 < userValues.fatherCompletePay &&
     userValues.fatherCompletePay <= Qs.Q1.father
   ) {
-    fatherQBonus = Q1_LOWER_COEFFICIENT;
+    fatherQGrant = Q1_LOWER_COEFFICIENT;
   } else if (
     Qs.Q1.father < userValues.fatherCompletePay &&
     userValues.fatherCompletePay <= Qs.Q2.father
   ) {
-    fatherQBonus = Q1_TO_Q2_COEFFICIENT;
+    fatherQGrant = Q1_TO_Q2_COEFFICIENT;
   } else if (
     Qs.Q2.father < userValues.fatherCompletePay &&
     userValues.fatherCompletePay <= Qs.Q3.father
   ) {
-    fatherQBonus = Q2_TO_Q3_COEFFICIENT;
+    fatherQGrant = Q2_TO_Q3_COEFFICIENT;
   } else if (userValues.fatherCompletePay > Qs.Q3.father) {
-    fatherQBonus = Q3_UPPER_COEFFICIENT;
+    fatherQGrant = Q3_UPPER_COEFFICIENT;
   } else {
-    fatherQBonus = null;
+    fatherQGrant = 0;
   }
   // Mother
   if (
     0 < userValues.motherCompletePay &&
     userValues.motherCompletePay <= Qs.Q1.mother
   ) {
-    motherQBonus = Q1_LOWER_COEFFICIENT;
+    motherQGrant = Q1_LOWER_COEFFICIENT;
   } else if (
     Qs.Q1.mother < userValues.motherCompletePay &&
     userValues.motherCompletePay <= Qs.Q2.mother
   ) {
-    motherQBonus = Q1_TO_Q2_COEFFICIENT;
+    motherQGrant = Q1_TO_Q2_COEFFICIENT;
   } else if (
     Qs.Q2.mother < userValues.motherCompletePay &&
     userValues.motherCompletePay <= Qs.Q3.mother
   ) {
-    motherQBonus = Q2_TO_Q3_COEFFICIENT;
+    motherQGrant = Q2_TO_Q3_COEFFICIENT;
   } else if (userValues.motherCompletePay > Qs.Q3.mother) {
-    motherQBonus = Q3_UPPER_COEFFICIENT;
+    motherQGrant = Q3_UPPER_COEFFICIENT;
   } else {
-    motherQBonus = null;
+    motherQGrant = 0;
   }
   // Amoo
   if (
     0 < userValues.amooCompletePay &&
     userValues.amooCompletePay <= Qs.Q1.amoo
   ) {
-    amooQBonus = Q1_LOWER_COEFFICIENT;
+    amooQGrant = Q1_LOWER_COEFFICIENT;
   } else if (
     Qs.Q1.amoo < userValues.amooCompletePay &&
     userValues.amooCompletePay <= Qs.Q2.amoo
   ) {
-    amooQBonus = Q1_TO_Q2_COEFFICIENT;
+    amooQGrant = Q1_TO_Q2_COEFFICIENT;
   } else if (
     Qs.Q2.amoo < userValues.amooCompletePay &&
     userValues.amooCompletePay <= Qs.Q3.amoo
   ) {
-    amooQBonus = Q2_TO_Q3_COEFFICIENT;
+    amooQGrant = Q2_TO_Q3_COEFFICIENT;
   } else if (userValues.amooCompletePay > Qs.Q3.amoo) {
-    amooQBonus = Q3_UPPER_COEFFICIENT;
+    amooQGrant = Q3_UPPER_COEFFICIENT;
   } else {
-    amooQBonus = null;
+    amooQGrant = 0;
   }
   // Khaleh
   if (
     0 < userValues.khalehCompletePay &&
     userValues.khalehCompletePay <= Qs.Q1.khaleh
   ) {
-    khalehQBonus = Q1_LOWER_COEFFICIENT;
+    khalehQGrant = Q1_LOWER_COEFFICIENT;
   } else if (
     Qs.Q1.khaleh < userValues.khalehCompletePay &&
     userValues.khalehCompletePay <= Qs.Q2.khaleh
   ) {
-    khalehQBonus = Q1_TO_Q2_COEFFICIENT;
+    khalehQGrant = Q1_TO_Q2_COEFFICIENT;
   } else if (
     Qs.Q2.khaleh < userValues.khalehCompletePay &&
     userValues.khalehCompletePay <= Qs.Q3.khaleh
   ) {
-    khalehQBonus = Q2_TO_Q3_COEFFICIENT;
+    khalehQGrant = Q2_TO_Q3_COEFFICIENT;
   } else if (userValues.khalehCompletePay > Qs.Q3.khaleh) {
-    khalehQBonus = Q3_UPPER_COEFFICIENT;
+    khalehQGrant = Q3_UPPER_COEFFICIENT;
   } else {
-    khalehQBonus = null;
+    khalehQGrant = 0;
   }
   // Daie
   if (
     0 < userValues.daeiCompletePay &&
     userValues.daeiCompletePay <= Qs.Q1.daei
   ) {
-    daeiQBonus = Q1_LOWER_COEFFICIENT;
+    daeiQGrant = Q1_LOWER_COEFFICIENT;
   } else if (
     Qs.Q1.daei < userValues.daeiCompletePay &&
     userValues.daeiCompletePay <= Qs.Q2.daei
   ) {
-    daeiQBonus = Q1_TO_Q2_COEFFICIENT;
+    daeiQGrant = Q1_TO_Q2_COEFFICIENT;
   } else if (
     Qs.Q2.daei < userValues.daeiCompletePay &&
     userValues.daeiCompletePay <= Qs.Q3.daei
   ) {
-    daeiQBonus = Q2_TO_Q3_COEFFICIENT;
+    daeiQGrant = Q2_TO_Q3_COEFFICIENT;
   } else if (userValues.daeiCompletePay > Qs.Q3.daei) {
-    daeiQBonus = Q3_UPPER_COEFFICIENT;
+    daeiQGrant = Q3_UPPER_COEFFICIENT;
   } else {
-    daeiQBonus = null;
+    daeiQGrant = 0;
   }
   // Amme
   if (
     0 < userValues.ammeCompletePay &&
     userValues.ammeCompletePay <= Qs.Q1.amme
   ) {
-    ammeQBonus = Q1_LOWER_COEFFICIENT;
+    ammeQGrant = Q1_LOWER_COEFFICIENT;
   } else if (
     Qs.Q1.amme < userValues.ammeCompletePay &&
     userValues.ammeCompletePay <= Qs.Q2.amme
   ) {
-    ammeQBonus = Q1_TO_Q2_COEFFICIENT;
+    ammeQGrant = Q1_TO_Q2_COEFFICIENT;
   } else if (
     Qs.Q2.amme < userValues.ammeCompletePay &&
     userValues.ammeCompletePay <= Qs.Q3.amme
   ) {
-    ammeQBonus = Q2_TO_Q3_COEFFICIENT;
+    ammeQGrant = Q2_TO_Q3_COEFFICIENT;
   } else if (userValues.ammeCompletePay > Qs.Q3.amme) {
-    ammeQBonus = Q3_UPPER_COEFFICIENT;
+    ammeQGrant = Q3_UPPER_COEFFICIENT;
   } else {
-    ammeQBonus = null;
+    ammeQGrant = 0;
   }
   let total = 0;
-  if (fatherQBonus > 0) total++;
-  if (motherQBonus > 0) total++;
-  if (amooQBonus > 0) total++;
-  if (khalehQBonus > 0) total++;
-  if (daeiQBonus > 0) total++;
-  if (ammeQBonus > 0) total++;
+  if (fatherQGrant > 0) total++;
+  if (motherQGrant > 0) total++;
+  if (amooQGrant > 0) total++;
+  if (khalehQGrant > 0) total++;
+  if (daeiQGrant > 0) total++;
+  if (ammeQGrant > 0) total++;
 
   const avg =
-    (fatherQBonus +
-      motherQBonus +
-      amooQBonus +
-      khalehQBonus +
-      daeiQBonus +
-      ammeQBonus) /
+    (fatherQGrant +
+      motherQGrant +
+      amooQGrant +
+      khalehQGrant +
+      daeiQGrant +
+      ammeQGrant) /
     total;
 
   return {
     allChildrenCaredFor: true,
-    fatherQBonus,
-    motherQBonus,
-    amooQBonus,
-    khalehQBonus,
-    daeiQBonus,
-    ammeQBonus,
+    fatherQGrant,
+    motherQGrant,
+    amooQGrant,
+    khalehQGrant,
+    daeiQGrant,
+    ammeQGrant,
     avg,
   };
 }

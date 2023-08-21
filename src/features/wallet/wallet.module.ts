@@ -52,7 +52,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
       cloudflare: false,
       //  * Optional parameter the number of backends that must agree. default: 2 for mainnet, 1 for testnets)
       quorum: 2,
-      useDefaultProvider: true,
+      useDefaultProvider: false,
     }),
     TypeOrmModule.forFeature(
       [

@@ -15,12 +15,12 @@ import { HttpService } from '@nestjs/axios';
 
 @UseInterceptors(DownloadInterceptor)
 @ApiTags('Download')
-// @ApiSecurity('flask-access-token')
-// @ApiHeader({
-//   name: 'flaskId',
-//   description: 'to use cache and flask authentication',
-//   required: true,
-// })
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('download')
 export class DownloadController {
   constructor(

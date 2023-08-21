@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Req } from '@nestjs/common';
 import {
   PaymentStatusEnum,
   SAYPlatformRoles,
   VirtualFamilyRole,
 } from 'src/types/interfaces/interface';
-import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { Repository } from 'typeorm';
@@ -14,6 +13,7 @@ import { User } from 'src/entities/flaskEntities/user.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { NeedEntity } from 'src/entities/need.entity';
+import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 
 @Injectable()
 export class FamilyService {
@@ -26,6 +26,8 @@ export class FamilyService {
     private flaskUserRepository: Repository<User>,
     @InjectRepository(Family, 'flaskPostgres')
     private flaskFamilyRepository: Repository<Family>,
+    @InjectRepository(UserFamily, 'flaskPostgres')
+    private flaskUserFamilyRepository: Repository<UserFamily>,
   ) {}
 
   async getFamilyMembers(familyId: number): Promise<any> {
@@ -205,6 +207,7 @@ export class FamilyService {
     });
     return needs;
   }
+
   async getAllFamilyReadyToSignNeeds(): Promise<NeedEntity[]> {
     const needs = this.needRepository.find({
       relations: {
@@ -217,5 +220,21 @@ export class FamilyService {
       },
     });
     return needs;
+  }
+
+  async getChildFamilyMembers(childFlaskId: number): Promise<UserFamily[]> {
+    return this.flaskUserFamilyRepository
+      .createQueryBuilder('userFamily')
+      .leftJoinAndMapOne(
+        'userFamily.members',
+        Family,
+        'family',
+        'family.id = userFamily.id_family',
+      )
+      .andWhere(`family.id_child = :childFlaskId`, {
+        childFlaskId: childFlaskId,
+      })
+      .cache(10000)
+      .getMany();
   }
 }

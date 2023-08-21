@@ -17,11 +17,12 @@ import { UserService } from '../user/user.service';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, Family, User, Child, SocialWorker],
+      [Need, Family, User, Child, SocialWorker, UserFamily],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([

@@ -6,6 +6,7 @@ import { BaseEntity } from './BaseEntity'
 
 @Entity()
 export class Payment extends BaseEntity {
+    [x: string]: any; // when mapping need tp payment and we do not have payment.need => p.need.created
     @Column({ nullable: true })
     id_need: number;
 

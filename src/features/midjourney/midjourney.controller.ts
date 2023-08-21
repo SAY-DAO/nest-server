@@ -19,15 +19,9 @@ import { MessageBody } from '@nestjs/websockets';
 import { FamilyService } from '../family/family.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { midjourneyStorage } from '../../storage/midjourneyStorage';
-import fs, { readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 
 @ApiTags('Midjourney')
-// @ApiSecurity('flask-access-token')
-// @ApiHeader({
-//   name: 'flaskId',
-//   description: 'to use cache and flask authentication',
-//   required: true,
-// })
 @Controller('midjourney')
 export class MidjourneyController {
   constructor(
@@ -38,12 +32,24 @@ export class MidjourneyController {
   ) {}
 
   @Get(`db/all`)
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @ApiOperation({ description: 'Get all IPFS' })
   async getImages() {
     return await this.midjourneyService.getAllImages();
   }
 
   @Post('db/store/:flaskNeedId')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @ApiOperation({ description: 'Storing images' })
   async storeImages(@Param('flaskNeedId') flaskNeedId: number): Promise<any> {
     let theImage;
@@ -61,6 +67,12 @@ export class MidjourneyController {
   }
 
   @Get(`local/all`)
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @ApiOperation({
     description: 'Get all images from local json created by prompts',
   })
@@ -68,7 +80,7 @@ export class MidjourneyController {
     const list = [];
     let result;
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development4') {
       const data = readFileSync('../midjourney-bot/midjourney.json', 'utf8');
       result = JSON.parse(data);
     } else {
@@ -82,17 +94,21 @@ export class MidjourneyController {
 
       list.push({
         needFlaskId: d.flaskId,
-        originalImage: d.link,
+        originalImage: d.needRetailerImg,
         midjourneyImages: allImages,
         selectedImage: d.midjourneyImage,
       });
     });
-    console.log(list);
-
     return list;
   }
 
   @ApiFileResponse('image/png')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @Get('buffer/:flaskNeedId')
   async buffer(
     @Param('flaskNeedId') flaskNeedId: number,
@@ -105,6 +121,12 @@ export class MidjourneyController {
   }
 
   @Get('prepare/prompts')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @ApiOperation({ description: 'Get all signed' })
   async preparePrompts() {
     const promptList = await this.midjourneyService.preparePrompts();
@@ -112,6 +134,12 @@ export class MidjourneyController {
   }
 
   @Post('select/:flaskNeedId')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
   @UseInterceptors(FileInterceptor('file', midjourneyStorage))
   @ApiOperation({ description: 'Get all signed' })
   async selectFinalImage(

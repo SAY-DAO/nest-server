@@ -17,7 +17,6 @@ import { PaymentService } from '../payment/payment.service';
 import { AllUserEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
 import { GetNeedMiddleware } from './middlewares/get-need.middleware';
-import { PostNeedMiddleware } from './middlewares/post-need.middleware';
 import { NgoArrivalEntity, NgoEntity } from '../../entities/ngo.entity';
 import { NgoService } from '../ngo/ngo.service';
 import { StatusEntity } from 'src/entities/status.entity';
@@ -33,6 +32,7 @@ import { TicketEntity } from 'src/entities/ticket.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
+import { FamilyService } from '../family/family.service';
 
 @Module({
   imports: [
@@ -74,6 +74,7 @@ import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
     PaymentService,
     UserService,
     NgoService,
+    FamilyService,
   ],
 })
 export class NeedModule implements NestModule {

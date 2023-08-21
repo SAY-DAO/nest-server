@@ -52,12 +52,12 @@ import { ServerError } from 'src/filters/server-exception.filter';
 
 @UseInterceptors(WalletInterceptor)
 @ApiTags('Wallet')
-// @ApiSecurity('flask-access-token')
-// @ApiHeader({
-//   name: 'flaskId',
-//   description: 'to use cache and flask authentication',
-//   required: true,
-// })
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('wallet')
 export class SignatureController {
   private readonly logger = new Logger(SignatureController.name);

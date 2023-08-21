@@ -66,7 +66,7 @@ export default class DataCache {
       created: new Date(),
     };
     this.roleScatteredData();
-    this.theMedian();
+    this.theQuartile();
   };
 
   // dApp user ratio in different roles / distance ratio
@@ -139,7 +139,7 @@ export default class DataCache {
     };
   }
 
-  theMedian() {
+  theQuartile() {
     const medianObject = {
       father: 0,
       mother: 0,
@@ -188,7 +188,6 @@ export default class DataCache {
       },
     };
     this.medianList.forEach((item) => {
-      console.log(item);
       const father = item[VirtualFamilyRole.FATHER];
       const mother = item[VirtualFamilyRole.MOTHER];
       const amoo = item[VirtualFamilyRole.AMOO];

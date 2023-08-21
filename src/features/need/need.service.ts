@@ -782,6 +782,7 @@ export class NeedService {
         'need.imageUrl',
         'need.name_translations',
         'need.title',
+        'need.img',
         'need.link',
         'need.status',
         'need.created',
@@ -790,7 +791,34 @@ export class NeedService {
         'need.doneAt',
       ])
       .cache(60000)
-      .orderBy('need.created', 'ASC')
+      .orderBy('need.created', 'DESC')
       .getMany();
+  }
+
+  async getConfirmsInRange(
+    confirmDate: Date,
+    needCategory: number,
+    needType: number,
+    month: number,
+  ): Promise<[Need[], number]> {
+    const d = new Date(confirmDate);
+    d.setMonth(d.getMonth() - month); // 1 months ago
+
+    const d2 = new Date(confirmDate);
+    d2.setMonth(d2.getMonth() + month); // 1 months after
+
+    return await this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .where('need.category = :needCategory', { needCategory })
+      .andWhere('need.type = :needType', { needType })
+      .andWhere('need.confirmDate > :startDate', {
+        startDate: new Date(d),
+      })
+      .andWhere('need.confirmDate <= :endDate', {
+        endDate: new Date(d2),
+      })
+      .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
+      .getManyAndCount();
   }
 }

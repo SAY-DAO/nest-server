@@ -19,12 +19,13 @@ import { DownloadService } from '../download/download.service';
 import { HttpModule } from '@nestjs/axios';
 import { FamilyService } from '../family/family.service';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 
 @Module({
   imports: [
     HttpModule,
     TypeOrmModule.forFeature(
-      [Child, Need, SocialWorker, User, Family],
+      [Child, Need, SocialWorker, User, Family, UserFamily],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -48,6 +49,9 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 })
 export class MidjourneyModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(MidjourneyMiddleware).forRoutes('midjourney');
+    consumer
+      .apply(MidjourneyMiddleware)
+      .exclude('midjourney/images/:flaskNeedId/:index')
+      .forRoutes(MidjourneyController);
   }
 }

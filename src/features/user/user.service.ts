@@ -182,8 +182,6 @@ export class UserService {
       firstName: flaskUser.firstName,
       lastName: flaskUser.lastName,
       avatarUrl: flaskUser.avatarUrl,
-      created: flaskUser.created,
-      updated: flaskUser.updated,
       userName: flaskUser.userName,
     };
     const newUser = this.allUserRepository.create({
@@ -211,8 +209,6 @@ export class UserService {
       firstName: flaskUser.firstName,
       lastName: flaskUser.lastName,
       avatarUrl: flaskUser.avatarUrl,
-      created: flaskUser.created,
-      updated: flaskUser.updated,
       userName: flaskUser.userName,
     };
     return this.allUserRepository.update(userId, {

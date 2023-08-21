@@ -42,12 +42,6 @@ export class AllUserEntity extends BaseEntity {
   @Column({ nullable: true })
   avatarUrl?: string;
 
-  @Column({ nullable: true })
-  created?: Date;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  updated?: Date;
-
   @Column({ type: 'timestamptz', nullable: true })
   birthDate?: Date;
 

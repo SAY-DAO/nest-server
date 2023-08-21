@@ -52,7 +52,7 @@ export class MidjourneyService {
       if (!listOfIds.find((i) => i === n.id)) {
         const data = {
           flaskId: n.id,
-          link: n.link,
+          needRetailerImg: n.img,
           prompt:
             'write word "SAY" over an unbearably cute, 3d isometric ' +
             n.name_translations.en +
