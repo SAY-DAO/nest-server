@@ -297,7 +297,7 @@ export class SignatureController {
       const flaskUserId = session.siwe.flaskUserId;
       const userTickets = await this.ticketService.getUserTickets(flaskUserId);
       let counter = 0;
-      const announcedArrival = userTickets.map((t) => {
+      userTickets.forEach((t) => {
         if (
           (t.need.type === NeedTypeEnum.PRODUCT &&
             t.need.status === ProductStatusEnum.PURCHASED_PRODUCT) ||
@@ -307,6 +307,11 @@ export class SignatureController {
               (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
             ).length > 0)
         ) {
+          console.log('inja-----------------');
+          console.log(t.need.flaskId)
+          console.log(t.need.nameTranslations.fa)
+          console.log(t.need.status)
+          console.log(t.need.type)
           counter++;
         }
       });
