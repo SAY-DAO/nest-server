@@ -303,10 +303,9 @@ export class SignatureController {
           (t.need.type === NeedTypeEnum.SERVICE &&
             t.need.status === ServiceStatusEnum.MONEY_TO_NGO)
         ) {
-          t.ticketHistories.filter(
+          return t.ticketHistories.filter(
             (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
           );
-          return t;
         }
       });
 
