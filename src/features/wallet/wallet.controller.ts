@@ -311,7 +311,7 @@ export class SignatureController {
         }
       });
 
-      if (announcedArrival.length - body.arrivedColumnNumber !== 0) {
+      if (counter - body.arrivedColumnNumber !== 0) {
         throw new WalletExceptionFilter(
           418,
           'You have to announce arrivals first!',
