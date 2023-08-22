@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
+  AnnouncementEnum,
   AppContributors,
   FlaskUserTypesEnum,
   PanelContributors,
@@ -49,6 +50,7 @@ import {
   SocialWorkerAPIApi,
 } from 'src/generated-sources/openapi';
 import { ServerError } from 'src/filters/server-exception.filter';
+import { TicketService } from '../ticket/ticket.service';
 
 @UseInterceptors(WalletInterceptor)
 @ApiTags('Wallet')
@@ -68,6 +70,7 @@ export class SignatureController {
     private ipfsService: IpfsService,
     private userService: UserService,
     private needService: NeedService,
+    private ticketService: TicketService,
   ) {}
 
   @Get('nonce/:userId/:typeId')
@@ -285,10 +288,20 @@ export class SignatureController {
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
+
     let transaction: SwSignatureResult;
     try {
       const flaskUserId = session.siwe.flaskUserId;
+      const userTickets = await this.ticketService.getUserTickets(flaskUserId);
+      const announcedArrival = userTickets.map((t) =>
+        t.ticketHistories.filter(
+          (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+        ),
+      );
 
+      if (announcedArrival.length - body.arrivedColumnNumber !== 0) {
+        throw new WalletExceptionFilter(418, 'You have to announce arrivals first!');
+      }
       const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
       const { need, child } = await this.syncService.syncNeed(
         flaskNeed,
@@ -308,8 +321,7 @@ export class SignatureController {
       );
       return transaction;
     } catch (e) {
-      console.log(e);
-      throw new AllExceptionsFilter(e);
+      throw new ServerError(e);
     }
   }
 

@@ -41,6 +41,8 @@ export class PrepareSignatureDto {
   statuses?: CreateStatusDto[];
   receipts?: CreateReceiptDto[];
   @IsNotEmpty()
+  arrivedColumnNumber: number;
+  @IsNotEmpty()
   payments?: CreatePaymentDto[];
 }
 

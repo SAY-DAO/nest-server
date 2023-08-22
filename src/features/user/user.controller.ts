@@ -7,10 +7,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth,
   ApiHeader,
   ApiOperation,
-  ApiProperty,
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';

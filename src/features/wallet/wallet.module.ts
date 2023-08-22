@@ -39,6 +39,10 @@ import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity'
 import { DownloadService } from '../download/download.service';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { TicketService } from '../ticket/ticket.service';
+import { TicketEntity } from 'src/entities/ticket.entity';
+import { TicketContentEntity } from 'src/entities/ticketContent.entity';
+import { TicketViewEntity } from 'src/entities/ticketView.entity';
 
 @Module({
   imports: [
@@ -84,6 +88,9 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
       EthereumAccountEntity,
       ProviderJoinNeedEntity,
       ProviderEntity,
+      TicketEntity,
+      TicketContentEntity,
+      TicketViewEntity
     ]),
   ],
   controllers: [SignatureController],
@@ -101,6 +108,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
     IpfsService,
     ProviderService,
     DownloadService,
+    TicketService,
   ],
 })
 export class WalletModule {

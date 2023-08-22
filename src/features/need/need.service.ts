@@ -564,7 +564,7 @@ export class NeedService {
       ])
       .cache(60000);
     return await nestPaginate<Need>(options, queryBuilder, {
-      sortableColumns: ['id', 'ngo_delivery_date'],
+      sortableColumns: ['id'],
       defaultSortBy: [['updated', 'DESC']],
       nullSort: 'last',
     });
