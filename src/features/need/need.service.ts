@@ -822,9 +822,7 @@ export class NeedService {
       .getManyAndCount();
   }
 
-  async getPurchasedNeedsCOunt(
-    socialWorker: number,
-  ): Promise<Need[]> {
+  async getPurchasedNeedsCOunt(socialWorker: number): Promise<Need[]> {
     return this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -866,6 +864,7 @@ export class NeedService {
             });
         }),
       )
+      .select(['need.id'])
       .getMany();
   }
 }

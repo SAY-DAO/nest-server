@@ -175,8 +175,8 @@ export class FamilyService {
   ): Promise<NeedEntity[]> {
     const needs = this.needRepository.find({
       relations: {
-        verifiedPayments: true,
         signatures: true,
+        child: true,
       },
       where: {
         verifiedPayments: {
@@ -186,12 +186,31 @@ export class FamilyService {
           role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
         },
       },
+      select: {
+        name: true,
+        id: true,
+        flaskId: true,
+        midjourneyImage: true,
+        nameTranslations: {
+          fa: true,
+          en: true,
+        },
+        child: {
+          awakeAvatarUrl: true,
+          sleptAvatarUrl: true,
+          adultAvatarUrl: true,
+          sayNameTranslations: {
+            en: true,
+            fa: true,
+          },
+        },
+      },
     });
     return needs;
   }
 
   async getFamilyReadyToSignOneNeed(needId: string): Promise<NeedEntity> {
-    const needs = this.needRepository.findOne({
+    const need = await this.needRepository.findOne({
       relations: {
         verifiedPayments: true,
         signatures: true,
@@ -205,7 +224,12 @@ export class FamilyService {
         },
       },
     });
-    return needs;
+    const { verifiedPayments, ...others } = need;
+    const modifiedNeed = {
+      verifiedPayments: verifiedPayments.filter((p) => p.verified !== null),
+      ...others,
+    };
+    return modifiedNeed;
   }
 
   async getAllFamilyReadyToSignNeeds(): Promise<NeedEntity[]> {

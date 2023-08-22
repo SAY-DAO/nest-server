@@ -173,19 +173,7 @@ export class FamilyController {
     const needs = await this.familyService.getFamilyReadyToSignNeeds(
       Number(flaskUserId),
     );
-return needs
-    const list = [];
-    for await (const need of needs) {
-      const members = await this.familyService.getChildFamilyMembers(
-        need.child.flaskId,
-      );
-      list.push({
-        ...need,
-        members,
-      });
-    }
-
-    return list;
+    return needs;
   }
 
   @Get(`signature/ready/:needId`)
