@@ -62,6 +62,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { Session } from './entities/session.entity';
+import { CommentEntity } from './entities/comment.entity';
+import { CommentModule } from './features/comment/comment.module';
 
 const imports = [
   HttpModule,
@@ -93,6 +95,7 @@ const imports = [
       EthereumTransaction,
       IpfsEntity,
       MidjourneyEntity,
+      CommentEntity,
     ],
   }),
   TypeOrmModule.forRoot({
@@ -138,6 +141,7 @@ const imports = [
   DownloadModule,
   FamilyModule,
   MidjourneyModule,
+  CommentModule,
 ];
 
 @Module({

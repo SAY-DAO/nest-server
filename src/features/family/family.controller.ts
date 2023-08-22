@@ -5,7 +5,7 @@ import { ChildrenService } from '../children/children.service';
 import { SAY_DAPP_ID, VirtualFamilyRole } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
-import { findQuartileGrant, getVFamilyRoleString } from 'src/utils/helpers';
+import { findQuartileGrant } from 'src/utils/helpers';
 
 @ApiTags('Family')
 @ApiSecurity('flask-access-token')

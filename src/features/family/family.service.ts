@@ -6,7 +6,7 @@ import {
 } from 'src/types/interfaces/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Raw, Repository } from 'typeorm';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
@@ -14,12 +14,15 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { NeedEntity } from 'src/entities/need.entity';
 import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
+import { PaymentEntity } from 'src/entities/payment.entity';
 
 @Injectable()
 export class FamilyService {
   constructor(
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
+    @InjectRepository(PaymentEntity)
+    private paymentRepository: Repository<PaymentEntity>,
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(User, 'flaskPostgres')
@@ -172,52 +175,12 @@ export class FamilyService {
 
   async getFamilyReadyToSignNeeds(
     familyMemberId: number,
-  ): Promise<NeedEntity[]> {
-    const list = [];
-    const needs = await this.needRepository.find({
-      relations: {
-        signatures: true,
-        verifiedPayments: true,
-        child: true,
-      },
-      where: {
-        verifiedPayments: {
-          flaskUserId: familyMemberId,
-        },
-        signatures: {
-          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
-        },
-      },
-      select: {
-        name: true,
-        id: true,
-        flaskId: true,
-        midjourneyImage: true,
-        nameTranslations: {
-          fa: true,
-          en: true,
-        },
-        child: {
-          awakeAvatarUrl: true,
-          sleptAvatarUrl: true,
-          adultAvatarUrl: true,
-          sayNameTranslations: {
-            en: true,
-            fa: true,
-          },
-        },
-      },
+  ): Promise<PaymentEntity[]> {
+    const payments = await this.paymentRepository.findBy({
+      verified: Not(IsNull()),
+      flaskUserId: familyMemberId,
     });
-
-    for (let i = 0; i < needs.length; i++) {
-      const { verifiedPayments, ...others } = needs[i];
-      const modifiedNeed = {
-        verifiedPayments: verifiedPayments.filter((p) => p.verified !== null),
-        ...others,
-      };
-      list.push(modifiedNeed);
-    }
-    return list;
+    return payments;
   }
 
   async getFamilyReadyToSignOneNeed(needId: string): Promise<NeedEntity> {

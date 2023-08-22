@@ -19,6 +19,7 @@ import { ChildrenService } from '../children/children.service';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { FamilyService } from '../family/family.service';
 import { AnalyticMiddleware } from './middlewares/analytic.middleware';
+import { PaymentEntity } from 'src/entities/payment.entity';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AnalyticMiddleware } from './middlewares/analytic.middleware';
       EthereumAccountEntity,
       NeedEntity,
       ChildrenEntity,
+      PaymentEntity,
     ]),
   ],
 
@@ -44,7 +46,7 @@ import { AnalyticMiddleware } from './middlewares/analytic.middleware';
     FamilyService,
   ],
 })
-export class AnalyticModule  implements NestModule {
+export class AnalyticModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AnalyticMiddleware).forRoutes('analytic');
   }

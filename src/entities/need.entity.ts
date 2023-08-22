@@ -12,6 +12,7 @@ import { IpfsEntity } from './ipfs.entity';
 import { AllUserEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
 import { MidjourneyEntity } from './midjourney.entity';
+import { CommentEntity } from './comment.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
@@ -138,6 +139,12 @@ export class NeedEntity extends BaseEntity {
 
   @OneToMany(() => TicketEntity, (t) => t.need)
   tickets?: TicketEntity[];
+
+  @OneToMany(() => CommentEntity, (t) => t.need)
+  comments?: CommentEntity[];
+
+  @Column({ nullable: true })
+  isResolved: boolean;
 
   @OneToMany(() => SignatureEntity, (s) => s.need)
   signatures?: SignatureEntity[];

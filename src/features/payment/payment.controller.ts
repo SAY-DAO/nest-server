@@ -19,8 +19,14 @@ export class PaymentController {
     return await this.paymentService.getPayments();
   }
 
+  @Get(`all/:flaskNeedId`)
+  @ApiOperation({ description: 'Get all need payments' })
+  async getNeedPayments(@Param('flaskNeedId') flaskNeedId: number) {
+    return await this.paymentService.getNeedPayments(flaskNeedId);
+  }
+
   @Get(`flask/all/:flaskNeedId`)
-  @ApiOperation({ description: 'Get all needs from flask' })
+  @ApiOperation({ description: 'Get all need payments from flask' })
   async getFlaskNeedPayments(@Param('flaskNeedId') flaskNeedId: number) {
     return await this.paymentService.getFlaskNeedPayments(flaskNeedId);
   }

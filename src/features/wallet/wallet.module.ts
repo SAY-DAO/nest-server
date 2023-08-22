@@ -56,7 +56,7 @@ import { TicketViewEntity } from 'src/entities/ticketView.entity';
       cloudflare: false,
       //  * Optional parameter the number of backends that must agree. default: 2 for mainnet, 1 for testnets)
       quorum: 2,
-      useDefaultProvider: process.env.ALCHEMY_KEY_SEPOLIA ? false : true,
+      useDefaultProvider: process.env.ALCHEMY_KEY_SEPOLIA ? true : true,
     }),
     TypeOrmModule.forFeature(
       [

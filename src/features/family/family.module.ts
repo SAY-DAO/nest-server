@@ -18,6 +18,7 @@ import { ContributorEntity } from 'src/entities/contributor.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { PaymentEntity } from 'src/entities/payment.entity';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
+      PaymentEntity
     ]),
   ],
   controllers: [FamilyController],

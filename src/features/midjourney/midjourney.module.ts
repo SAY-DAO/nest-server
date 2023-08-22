@@ -20,6 +20,7 @@ import { HttpModule } from '@nestjs/axios';
 import { FamilyService } from '../family/family.service';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { PaymentEntity } from 'src/entities/payment.entity';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
+      PaymentEntity
     ]),
   ],
   controllers: [MidjourneyController],

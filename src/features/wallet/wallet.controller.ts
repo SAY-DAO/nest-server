@@ -312,9 +312,8 @@ export class SignatureController {
           )
         ) {
           console.log('-------------Announced-----------------');
-          // console.log(t.need.nameTranslations.fa);
-          // console.log(t.need.status);
-          // console.log(t.need.type);
+          console.log(need.status);
+          console.log(need.type);
           counter++;
         }
       });
