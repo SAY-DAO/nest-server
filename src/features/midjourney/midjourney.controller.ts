@@ -71,6 +71,8 @@ export class MidjourneyController {
 
     const data = readFileSync('../midjourney-bot/midjourney.json', 'utf8');
     const result = JSON.parse(data);
+    const needsWithSignatures =
+      await this.familyService.getAllFamilyReadyToSignNeeds();
 
     result.forEach((d) => {
       const allImages = getAllFilesFromFolder(
@@ -81,7 +83,10 @@ export class MidjourneyController {
         needFlaskId: d.flaskId,
         originalImage: d.needRetailerImg,
         midjourneyImages: allImages,
-        selectedImage: d.midjourneyImage,
+        selectedImage:
+          needsWithSignatures.find((n) => n.flaskId === d.flaskId) &&
+          needsWithSignatures.find((n) => n.flaskId === d.flaskId)
+            .midjourneyImage,
       });
     });
     return list;

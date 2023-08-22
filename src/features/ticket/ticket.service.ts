@@ -6,7 +6,7 @@ import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
-import { AnnouncementEnum, Colors } from 'src/types/interfaces/interface';
+import { AnnouncementEnum, Colors, ProductStatusEnum } from 'src/types/interfaces/interface';
 import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
 import { Repository, UpdateResult } from 'typeorm';
@@ -197,6 +197,19 @@ export class TicketService {
       },
       where: {
         contributors: { flaskUserId: flaskUserId },
+      },
+    });
+  }
+  getUserOnlyArrivalTickets(flaskUserId: number): Promise<TicketEntity[]> {
+    return this.ticketRepository.find({
+      relations: {
+        need: true,
+      },
+      where: {
+        contributors: { flaskUserId: flaskUserId },
+        need:{
+          status: ProductStatusEnum.PURCHASED_PRODUCT
+        }
       },
     });
   }

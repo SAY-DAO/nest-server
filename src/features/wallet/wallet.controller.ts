@@ -20,8 +20,11 @@ import {
   AnnouncementEnum,
   AppContributors,
   FlaskUserTypesEnum,
+  NeedTypeEnum,
   PanelContributors,
+  ProductStatusEnum,
   SAYPlatformRoles,
+  ServiceStatusEnum,
   SwSignatureResult,
   eEthereumNetworkChainId,
 } from '../../types/interfaces/interface';
@@ -293,11 +296,19 @@ export class SignatureController {
     try {
       const flaskUserId = session.siwe.flaskUserId;
       const userTickets = await this.ticketService.getUserTickets(flaskUserId);
-      const announcedArrival = userTickets.map((t) =>
-        t.ticketHistories.filter(
-          (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
-        ),
-      );
+      const announcedArrival = userTickets.map((t) => {
+        if (
+          (t.need.type === NeedTypeEnum.PRODUCT &&
+            t.need.status === ProductStatusEnum.PURCHASED_PRODUCT) ||
+          (t.need.type === NeedTypeEnum.SERVICE &&
+            t.need.status === ServiceStatusEnum.MONEY_TO_NGO)
+        ) {
+          t.ticketHistories.filter(
+            (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+          );
+          return t;
+        }
+      });
 
       if (announcedArrival.length - body.arrivedColumnNumber !== 0) {
         console.log(announcedArrival);
