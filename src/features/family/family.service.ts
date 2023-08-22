@@ -6,7 +6,7 @@ import {
 } from 'src/types/interfaces/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { IsNull, Not, Raw, Repository } from 'typeorm';
+import { IsNull, MoreThan, Not, Raw, Repository } from 'typeorm';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
@@ -179,6 +179,7 @@ export class FamilyService {
     const payments = await this.paymentRepository.findBy({
       verified: Not(IsNull()),
       flaskUserId: familyMemberId,
+      needAmount: MoreThan(0)
     });
     return payments;
   }
