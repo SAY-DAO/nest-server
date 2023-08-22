@@ -298,18 +298,20 @@ export class SignatureController {
       const userTickets = await this.ticketService.getUserTickets(flaskUserId);
       let counter = 0;
 
-      userTickets.forEach((t) => {
+      const purchasedNeeds = await this.needService.getPurchasedNeedsCOunt(
+        flaskUserId,
+      );
+      purchasedNeeds.forEach((need) => {
         if (
-          ((t.need.type === NeedTypeEnum.PRODUCT &&
-            t.need.status === ProductStatusEnum.PURCHASED_PRODUCT) ||
-            (t.need.type === NeedTypeEnum.SERVICE &&
-              t.need.status === ServiceStatusEnum.MONEY_TO_NGO)) &&
-          t.ticketHistories.find(
-            (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+          userTickets.find(
+            (t) =>
+              t.need.flaskId === need.id &&
+              t.ticketHistories.find(
+                (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+              ),
           )
         ) {
           console.log('-------------Announced-----------------');
-          console.log(t.need);
           // console.log(t.need.nameTranslations.fa);
           // console.log(t.need.status);
           // console.log(t.need.type);

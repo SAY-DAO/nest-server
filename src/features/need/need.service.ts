@@ -821,4 +821,51 @@ export class NeedService {
       .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
       .getManyAndCount();
   }
+
+  async getPurchasedNeedsCOunt(
+    socialWorker: number,
+  ): Promise<Need[]> {
+    return this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: [socialWorker],
+      })
+      .where(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
+            .andWhere('need.status = :productStatus', {
+              productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
+            })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
+            .andWhere('need.status = :serviceStatus', {
+              serviceStatus: ServiceStatusEnum.MONEY_TO_NGO,
+            });
+        }),
+      )
+      .getMany();
+  }
 }
