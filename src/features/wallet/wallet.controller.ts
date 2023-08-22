@@ -297,21 +297,22 @@ export class SignatureController {
       const flaskUserId = session.siwe.flaskUserId;
       const userTickets = await this.ticketService.getUserTickets(flaskUserId);
       let counter = 0;
+
       userTickets.forEach((t) => {
         if (
-          (t.need.type === NeedTypeEnum.PRODUCT &&
+          ((t.need.type === NeedTypeEnum.PRODUCT &&
             t.need.status === ProductStatusEnum.PURCHASED_PRODUCT) ||
-          (t.need.type === NeedTypeEnum.SERVICE &&
-            t.need.status === ServiceStatusEnum.MONEY_TO_NGO &&
-            t.ticketHistories.filter(
-              (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
-            ).length > 0)
+            (t.need.type === NeedTypeEnum.SERVICE &&
+              t.need.status === ServiceStatusEnum.MONEY_TO_NGO)) &&
+          t.ticketHistories.find(
+            (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+          )
         ) {
-          console.log('inja-----------------');
-          console.log(t.need.flaskId)
-          console.log(t.need.nameTranslations.fa)
-          console.log(t.need.status)
-          console.log(t.need.type)
+          console.log('-------------Announced-----------------');
+          console.log(t.need.flaskId);
+          console.log(t.need.nameTranslations.fa);
+          console.log(t.need.status);
+          console.log(t.need.type);
           counter++;
         }
       });
