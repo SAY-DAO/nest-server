@@ -309,7 +309,7 @@ export class SignatureController {
         }
       });
 
-      if (announcedArrival.length - body.arrivedColumnNumber !== 0) {
+      if (announcedArrival.length - body.arrivedColumnNumber > 0) {
         console.log(announcedArrival);
         throw new WalletExceptionFilter(
           418,
