@@ -173,7 +173,8 @@ export class FamilyService {
   async getFamilyReadyToSignNeeds(
     familyMemberId: number,
   ): Promise<NeedEntity[]> {
-    const needs = this.needRepository.find({
+    const list = [];
+    const needs = await this.needRepository.find({
       relations: {
         signatures: true,
         verifiedPayments: true,
@@ -207,7 +208,16 @@ export class FamilyService {
         },
       },
     });
-    return needs;
+
+    for (let i = 0; i < needs.length; i++) {
+      const { verifiedPayments, ...others } = needs[i];
+      const modifiedNeed = {
+        verifiedPayments: verifiedPayments.filter((p) => p.verified !== null),
+        ...others,
+      };
+      list.push(modifiedNeed);
+    }
+    return list;
   }
 
   async getFamilyReadyToSignOneNeed(needId: string): Promise<NeedEntity> {
