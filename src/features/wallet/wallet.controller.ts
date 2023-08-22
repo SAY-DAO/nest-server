@@ -296,21 +296,22 @@ export class SignatureController {
     try {
       const flaskUserId = session.siwe.flaskUserId;
       const userTickets = await this.ticketService.getUserTickets(flaskUserId);
+      let counter = 0;
       const announcedArrival = userTickets.map((t) => {
         if (
           (t.need.type === NeedTypeEnum.PRODUCT &&
             t.need.status === ProductStatusEnum.PURCHASED_PRODUCT) ||
           (t.need.type === NeedTypeEnum.SERVICE &&
-            t.need.status === ServiceStatusEnum.MONEY_TO_NGO)
+            t.need.status === ServiceStatusEnum.MONEY_TO_NGO &&
+            t.ticketHistories.filter(
+              (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+            ).length > 0)
         ) {
-          return t.ticketHistories.filter(
-            (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
-          );
+          counter++;
         }
       });
 
-      if (announcedArrival.length - body.arrivedColumnNumber > 0) {
-        console.log(announcedArrival);
+      if (announcedArrival.length - body.arrivedColumnNumber !== 0) {
         throw new WalletExceptionFilter(
           418,
           'You have to announce arrivals first!',
