@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Res,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Res } from '@nestjs/common';
 import { MidjourneyService } from './midjourney.service';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ServerError } from 'src/filters/server-exception.filter';
@@ -17,8 +9,6 @@ import { Response as expressResponse } from 'express';
 import { getAllFilesFromFolder } from 'src/utils/helpers';
 import { MessageBody } from '@nestjs/websockets';
 import { FamilyService } from '../family/family.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { midjourneyStorage } from '../../storage/midjourneyStorage';
 import { readFileSync } from 'fs';
 
 @ApiTags('Midjourney')
@@ -78,14 +68,9 @@ export class MidjourneyController {
   })
   async getLocalImages() {
     const list = [];
-    let result;
 
-    if (process.env.NODE_ENV === 'development4') {
-      const data = readFileSync('../midjourney-bot/midjourney.json', 'utf8');
-      result = JSON.parse(data);
-    } else {
-      result = await this.familyService.getAllFamilyReadyToSignNeeds();
-    }
+    const data = readFileSync('../midjourney-bot/midjourney.json', 'utf8');
+    const result = JSON.parse(data);
 
     result.forEach((d) => {
       const allImages = getAllFilesFromFolder(
@@ -140,12 +125,10 @@ export class MidjourneyController {
     description: 'to use cache and flask authentication',
     required: true,
   })
-  @UseInterceptors(FileInterceptor('file', midjourneyStorage))
   @ApiOperation({ description: 'Get all signed' })
   async selectFinalImage(
     @Param('flaskNeedId') flaskNeedId: number,
     @MessageBody() body,
-    @UploadedFile() file,
   ) {
     const promptList = this.midjourneyService.selectImage(
       flaskNeedId,

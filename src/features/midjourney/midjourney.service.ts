@@ -84,6 +84,7 @@ export class MidjourneyService {
 
   async selectImage(flaskNeedId: number, selectedImage: string) {
     const need = await this.needService.getNeedByFlaskId(flaskNeedId);
-    return await this.needService.updateNeedMidjourney(need.id, selectedImage);
+    await this.needService.updateNeedMidjourney(need.id, selectedImage);
+    return await this.needService.getNeedByFlaskId(flaskNeedId);
   }
 }
