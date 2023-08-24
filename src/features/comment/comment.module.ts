@@ -1,20 +1,38 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CommentController } from './comment.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentEntity } from 'src/entities/comment.entity';
 import { NeedService } from '../need/need.service';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { NeedEntity } from 'src/entities/need.entity';
+import { CommentMiddleware } from './middlewares/comment.middleware';
+import { UserService } from '../user/user.service';
+import { ContributorEntity } from 'src/entities/contributor.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Need, SocialWorker, Child], 'flaskPostgres'),
-    TypeOrmModule.forFeature([CommentEntity, NeedEntity]),
+    TypeOrmModule.forFeature(
+      [User, Need, SocialWorker, Child],
+      'flaskPostgres',
+    ),
+    TypeOrmModule.forFeature([
+      CommentEntity,
+      NeedEntity,
+      ContributorEntity,
+      AllUserEntity,
+      EthereumAccountEntity,
+    ]),
   ],
   controllers: [CommentController],
-  providers: [CommentService, NeedService],
+  providers: [CommentService, NeedService, UserService],
 })
-export class CommentModule {}
+export class CommentModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CommentMiddleware).forRoutes('comment');
+  }
+}

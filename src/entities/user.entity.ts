@@ -1,15 +1,11 @@
-import {
-  Entity,
-  Column,
-  ManyToMany,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, ManyToMany, OneToMany } from 'typeorm';
 import { PaymentEntity } from './payment.entity';
 import { BaseEntity } from './BaseEntity';
 import { EthereumAccountEntity } from './ethereum.account.entity';
 import { TicketEntity } from './ticket.entity';
 import { ContributorEntity } from './contributor.entity';
 import { SignatureEntity } from './signature.entity';
+import { CommentEntity } from './comment.entity';
 
 @Entity()
 export class AllUserEntity extends BaseEntity {
@@ -26,6 +22,11 @@ export class AllUserEntity extends BaseEntity {
     eager: true,
   })
   wallets?: EthereumAccountEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.user, {
+    eager: false,
+  })
+  comments: CommentEntity[];
 
   @Column({ nullable: false })
   isContributor?: boolean;

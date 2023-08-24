@@ -52,11 +52,11 @@ import { TicketViewEntity } from 'src/entities/ticketView.entity';
     }),
     EthersModule.forRoot({
       network: 1,
-      alchemy: process.env.ALCHEMY_KEY_SEPOLIA,
+      infura: process.env.INFURA_KEY_MAIN,
       cloudflare: false,
       //  * Optional parameter the number of backends that must agree. default: 2 for mainnet, 1 for testnets)
       quorum: 2,
-      useDefaultProvider: process.env.ALCHEMY_KEY_SEPOLIA ? true : true,
+      useDefaultProvider: process.env.INFURA_KEY_MAIN ? false : false,
     }),
     TypeOrmModule.forFeature(
       [

@@ -80,7 +80,7 @@ export class FamilyController {
     description: 'Get virtual family member"s distance ratio',
   })
   async getFamilyDistanceRatio(@Req() req: Request) {
-    const flaskUserId = req.headers['flaskUserId'];
+    const flaskUserId = req.headers['authenticatedFlaskUserId'];
 
     const userAsFather = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.FATHER,
@@ -166,14 +166,15 @@ export class FamilyController {
     description: 'Get all signed needs for virtual family member',
   })
   async getReadyNeeds(@Req() req: Request) {
-    const flaskUserId = req.headers['flaskUserId'];
+    const flaskUserId = req.headers['authenticatedFlaskUserId'];
     if (!flaskUserId) {
       throw new ObjectNotFound('We need the user ID!');
     }
-    const needs = await this.familyService.getFamilyReadyToSignNeeds(
+    const payments = await this.familyService.getFamilyReadyToSignNeeds(
       Number(flaskUserId),
     );
-    return needs;
+
+    return payments.filter(p=>p.need.midjourneyImage !== null);
   }
 
   @Get(`signature/ready/:needId`)
@@ -181,7 +182,7 @@ export class FamilyController {
     description: 'Get all signed needs for virtual family member',
   })
   async getReadyOneNeed(@Req() req: Request, @Param('needId') needId: string) {
-    const flaskUserId = req.headers['flaskUserId'];
+    const flaskUserId = req.headers['authenticatedFlaskUserId'];
 
     if (!needId) {
       throw new ObjectNotFound('We need the needId!');

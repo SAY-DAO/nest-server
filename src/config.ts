@@ -11,16 +11,19 @@ const Environments = {
 };
 
 function loadConfig() {
-  const NODE_ENV = process.env.NODE_ENV ?? Environments.development;  
+  const NODE_ENV = process.env.NODE_ENV ?? Environments.development;
 
   const configs = {
     serverPort: process.env.PORT || 8002,
     host:
-      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === undefined
         ? 'localHost'
         : process.env.NODE_ENV === 'docker-local'
-          ? 'localHost'
-          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_HOST_STAGING : process.env.NEST_SERVER_PROD,
+        ? 'localHost'
+        : process.env.NODE_ENV === 'staging'
+        ? process.env.AUTHORIZED_HOST_STAGING
+        : process.env.NEST_SERVER_PROD,
     logLevel: 'debug',
     documentUrl: '',
     db1: {
@@ -31,7 +34,7 @@ function loadConfig() {
       password: process.env.DB_PASS ?? 'postgres',
       database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
-      synchronize:NODE_ENV === 'development' ? true: false, // true shouldn't be used in production - otherwise you can lose production data.
+      synchronize: NODE_ENV === 'development' ? true : true, // true shouldn't be used in production - otherwise you can lose production data.
       logging: true,
       dropSchema: false,
       autoLoadEntities: true,
@@ -55,7 +58,6 @@ function loadConfig() {
     },
     logPretty: 'LOG_PRETTY_PRINT',
     dataCache: new DataCache(),
-
   };
 
   configs.documentUrl =
@@ -75,4 +77,4 @@ export default function config(): ConfigType {
   return configObject;
 }
 
-export const PRODUCT_UNPAYABLE_PERIOD = 24
+export const PRODUCT_UNPAYABLE_PERIOD = 24;

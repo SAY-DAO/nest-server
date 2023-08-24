@@ -37,7 +37,7 @@ export async function checkFlaskCacheAuthentication(
         if (!familyMember) {
           throw new ForbiddenException('You Do not have Access!');
         }
-        req.headers['flaskUserId'] = familyMember.id;
+        req.headers['authenticatedFlaskUserId'] = familyMember.id;
         if (fetchedToken[flaskId]) {
           logger.warn('removing old user token...');
           config().dataCache.deleteDappAccessToken(flaskId);
@@ -81,6 +81,9 @@ export async function checkFlaskCacheAuthentication(
       throw new ServerError('Hmmm, something is not right!', 500);
     }
   } catch (e) {
+    console.log(accessToken);
+    console.log(flaskId);
+    
     throw new ForbiddenException({
       status: e.status,
       message: e.statusText || e.response,

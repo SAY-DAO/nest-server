@@ -142,6 +142,12 @@ export class NeedService {
     });
   }
 
+  async updateIsResolved(needId: string, isResolved: boolean) {
+    return this.needRepository.update(needId, {
+      isResolved: isResolved,
+    });
+  }
+
   updateNeedMidjourney(
     needId: string,
     selectedImage: string,

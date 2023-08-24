@@ -75,19 +75,18 @@ export class MidjourneyController {
       await this.familyService.getAllFamilyReadyToSignNeeds();
 
     result.forEach((d) => {
-      const allImages = getAllFilesFromFolder(
+      const localImages = getAllFilesFromFolder(
         `../midjourney-bot/main/need-images/need-${d.flaskId}`,
       );
-
-      list.push({
-        needFlaskId: d.flaskId,
-        originalImage: d.needRetailerImg,
-        midjourneyImages: allImages,
-        selectedImage:
-          needsWithSignatures.find((n) => n.flaskId === d.flaskId) &&
-          needsWithSignatures.find((n) => n.flaskId === d.flaskId)
-            .midjourneyImage,
-      });
+      const theNeed = needsWithSignatures.find((n) => n.flaskId === d.flaskId);
+      if (theNeed) {
+        list.push({
+          needFlaskId: theNeed.flaskId,
+          originalImage: theNeed.needRetailerImg,
+          midjourneyImages: localImages,
+          selectedImage: theNeed.midjourneyImage,
+        });
+      }
     });
     return list;
   }
@@ -135,6 +134,8 @@ export class MidjourneyController {
     @Param('flaskNeedId') flaskNeedId: number,
     @MessageBody() body,
   ) {
+    console.log(body);
+
     const promptList = this.midjourneyService.selectImage(
       flaskNeedId,
       body.selectedImage,

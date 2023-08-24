@@ -179,7 +179,7 @@ export class FamilyService {
     const payments = await this.paymentRepository.findBy({
       verified: Not(IsNull()),
       flaskUserId: familyMemberId,
-      needAmount: MoreThan(0)
+      needAmount: MoreThan(0),
     });
     return payments;
   }
@@ -189,6 +189,9 @@ export class FamilyService {
       relations: {
         verifiedPayments: true,
         signatures: true,
+        comments: {
+          user: true,
+        },
       },
       where: {
         signatures: {

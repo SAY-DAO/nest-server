@@ -82,14 +82,14 @@ export class TicketController {
   @UsePipes(new ValidationPipe()) // validation for dto files
   async createTicketMsg(
     @Req() req: Request,
-    @Body(ValidateTicketPipe) request: CreateTicketContentDto,
+    @Body(ValidateTicketPipe) body: CreateTicketContentDto,
   ) {
     const { ticket } = await this.ticketService.getTicketById(
-      request.ticketId,
-      request.from,
+      body.ticketId,
+      body.from,
     );
-    const msg = request.message;
-    const from = request.from;
+    const msg = body.message;
+    const from = body.from;
 
     const contentDetails = {
       message: msg,

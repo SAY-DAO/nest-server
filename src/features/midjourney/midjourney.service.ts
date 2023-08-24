@@ -29,6 +29,7 @@ export class MidjourneyService {
       },
     });
   }
+  
   async createImage(values: {
     flaskNeedId: number;
     need: NeedEntity;

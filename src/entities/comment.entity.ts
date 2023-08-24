@@ -2,6 +2,7 @@ import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { NeedEntity } from './need.entity';
+import { AllUserEntity } from './user.entity';
 @Entity()
 export class CommentEntity extends BaseEntity {
   @Column({ nullable: true })
@@ -12,7 +13,7 @@ export class CommentEntity extends BaseEntity {
 
   @Column()
   flaskUserId: number;
-  
+
   @Column()
   flaskNeedId: number;
 
@@ -21,4 +22,10 @@ export class CommentEntity extends BaseEntity {
     nullable: false,
   })
   need: NeedEntity;
+
+  @ManyToOne(() => AllUserEntity, (n) => n.comments, {
+    eager: false,
+    nullable: true,
+  })
+  user: AllUserEntity;
 }
