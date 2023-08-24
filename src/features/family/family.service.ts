@@ -214,6 +214,8 @@ export class FamilyService {
     const needs = this.needRepository.find({
       relations: {
         signatures: true,
+        verifiedPayments: true,
+        ngo: true,
       },
       where: {
         signatures: {

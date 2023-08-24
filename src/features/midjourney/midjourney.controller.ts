@@ -82,6 +82,9 @@ export class MidjourneyController {
       if (theNeed) {
         list.push({
           needFlaskId: theNeed.flaskId,
+          childFlaskId: theNeed.flaskChildId,
+          ngoName: theNeed.ngo.name,
+          usersFlaskId: theNeed.verifiedPayments.map((v) => v.flaskUserId),
           originalImage: theNeed.needRetailerImg,
           midjourneyImages: localImages,
           selectedImage: theNeed.midjourneyImage,
