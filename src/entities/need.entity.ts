@@ -143,7 +143,7 @@ export class NeedEntity extends BaseEntity {
   @OneToMany(() => CommentEntity, (t) => t.need)
   comments?: CommentEntity[];
 
-  @Column({ default: true ,nullable:true})
+  @Column({ default: true }) // only for family comment/report usage
   isResolved: boolean;
 
   @OneToMany(() => SignatureEntity, (s) => s.need)

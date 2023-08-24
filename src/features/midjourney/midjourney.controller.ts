@@ -69,16 +69,10 @@ export class MidjourneyController {
   async getLocalImages() {
     const list = [];
 
-    const data = readFileSync('../midjourney-bot/midjourney.json', 'utf8');
-    const result = JSON.parse(data);
     const needsWithSignatures =
       await this.familyService.getAllFamilyReadyToSignNeeds();
 
-    result.forEach((d) => {
-      const localImages = getAllFilesFromFolder(
-        `../midjourney-bot/main/need-images/need-${d.flaskId}`,
-      );
-      const theNeed = needsWithSignatures.find((n) => n.flaskId === d.flaskId);
+    needsWithSignatures.forEach((theNeed) => {
       if (theNeed) {
         list.push({
           needFlaskId: theNeed.flaskId,
@@ -86,7 +80,6 @@ export class MidjourneyController {
           ngoName: theNeed.ngo.name,
           usersFlaskId: theNeed.verifiedPayments.map((v) => v.flaskUserId),
           originalImage: theNeed.needRetailerImg,
-          midjourneyImages: localImages,
           selectedImage: theNeed.midjourneyImage,
         });
       }
