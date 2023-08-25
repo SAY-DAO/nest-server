@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
-import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { NeedService } from '../need/need.service';
 import { NeedEntity } from 'src/entities/need.entity';
@@ -20,6 +19,8 @@ import { AllUserEntity } from 'src/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { ValidateCommentPipe } from './pipes/validate-ticket.pipe';
 import { CreateCommentDto } from 'src/types/dtos/CreateComment.dto';
+import { CommentEntity } from 'src/entities/comment.entity';
+import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 
 @ApiTags('Comment')
 @ApiSecurity('flask-access-token')
@@ -55,40 +56,73 @@ export class CommentController {
     @Body(ValidateCommentPipe)
     body: CreateCommentDto,
   ) {
-    const flaskUserId = req.headers['authenticatedFlaskUserId'];
+    const flaskAppUserId = Number(req.headers['appFlaskUserId']);
+    const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
+
     let theNeed: NeedEntity;
     let theUser: AllUserEntity;
+    let comment: CommentEntity;
     try {
+      if (!flaskPanelUserId && !flaskAppUserId) {
+        throw new ServerError('We need the user Id!');
+      }
       theNeed = await this.needService.getNeedByFlaskId(body.flaskNeedId);
-      theUser = await this.userService.getUserByFlaskId(flaskUserId);
+      if (flaskAppUserId) {
+        theUser = await this.userService.getUserByFlaskId(flaskAppUserId);
+        comment = await this.commentService.createComment(
+          theUser,
+          theNeed,
+          flaskAppUserId,
+          {
+            vRole: body.vRole,
+            message: body.message,
+            flaskNeedId: body.flaskNeedId,
+          },
+        );
+        await this.needService.updateIsResolved(theNeed.id, false);
+      }
+      if (flaskPanelUserId) {
+        theUser = await this.userService.getUserByFlaskId(flaskPanelUserId);
+        comment = await this.commentService.createComment(
+          theUser,
+          theNeed,
+          flaskPanelUserId,
+          {
+            vRole: VirtualFamilyRole.SAY,
+            message: body.message,
+            flaskNeedId: body.flaskNeedId,
+          },
+        );
+      }
     } catch (e) {
-      throw new ServerError('Could not find need!');
+      throw new ServerError(e);
     }
-
-    const comment = await this.commentService.createComment(
-      theUser,
-      theNeed,
-      flaskUserId,
-      {
-        vRole: body.vRole,
-        message: body.message,
-        flaskNeedId: body.flaskNeedId,
-      },
-    );
-    await this.needService.updateIsResolved(theNeed.id, false);
 
     return comment;
   }
 
   @Delete(`:commentId`)
   @ApiOperation({ description: 'Delete a comment' })
-  async deleteComment(@Param('commentId') commentId: string) {
-    const theComment = await this.commentService.getComment(commentId);
+  async deleteComment(
+    @Req() req: Request,
+    @Param('commentId') commentId: string,
+  ) {
+    try {
+      const theComment = await this.commentService.getComment(commentId);
+      const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
+      console.log(theComment);
+      console.log(flaskPanelUserId);
 
-    await this.commentService.deleteOne(theComment.id);
-    const theNeed = await this.needService.getNeedById(theComment.need.id);
-    if (theNeed.comments.length === 0) {
-      await this.needService.updateIsResolved(theNeed.id, true);
+      if (theComment.flaskUserId !== flaskPanelUserId) {
+        throw new ServerError('You can not delete users comment!');
+      }
+      await this.commentService.deleteOne(theComment.id);
+      const theNeed = await this.needService.getNeedById(theComment.need.id);
+      if (theNeed.comments.length === 0) {
+        await this.needService.updateIsResolved(theNeed.id, true);
+      }
+    } catch (e) {
+      throw new ServerError(e);
     }
   }
 
@@ -103,6 +137,6 @@ export class CommentController {
       isResolved = true;
     }
     await this.needService.updateIsResolved(needId, isResolved);
-    return isResolved;
+    return { isResolved, needId };
   }
 }

@@ -1,5 +1,6 @@
 import { TypedDataField } from 'ethers';
 export const SAY_DAPP_ID = 208;
+export const SUPER_ADMIN = 25;
 export enum eEthereumNetworkChainId {
   mainnet = 1,
   goerli = 5,
@@ -52,6 +53,8 @@ export enum AppContributors {
   RELATIVE = 8,
 }
 export enum SAYPlatformRoles {
+  NGO = -2,
+  CHILD = -1,
   NO_ROLE = 0,
   SOCIAL_WORKER = PanelContributors.SOCIAL_WORKER,
   NGO_SUPERVISOR = PanelContributors.NGO_SUPERVISOR,

@@ -222,6 +222,9 @@ export class FamilyService {
           role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
         },
       },
+      order: {
+        createdAt: 'DESC',
+      },
     });
     return needs;
   }

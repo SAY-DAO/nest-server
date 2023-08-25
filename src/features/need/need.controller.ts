@@ -100,7 +100,7 @@ export class NeedController {
     @Param('needId') needId: string,
     @Req() req: Request,
   ) {
-    const flaskUserId = req.headers['authenticatedFlaskUserId'];
+    const flaskUserId = req.headers['appFlaskUserId'];
     const need = await this.needService.getNeedById(needId);
 
     if (!need.verifiedPayments.find((p) => p.flaskUserId === flaskUserId)) {

@@ -113,7 +113,6 @@ export class WalletService {
     child: ChildrenEntity,
     flaskUserId: number,
   ): Promise<SwSignatureResult> {
-    const impacts = 4;
     let productVoucher: SwProductVoucher;
     let serviceVoucher: SwServiceVoucher;
     let types: Record<string, Array<TypedDataField>>;
@@ -167,7 +166,7 @@ export class WalletService {
         receipts: need.receipts.length,
         signer: signerAddress,
         role: role, // string human readable
-        content: `Your ${impacts} impacts will be ready for a RELATIVE to mint!`,
+        content: ` با امضای دیجیتال این نیاز امکان ذخیره غیر متمرکز و ثبت این نیاز بر روی بلاکچین را فراهم می‌کنید.  نیازی که دارای امضای دیجیتال مددکار، شاهد، میانجی و خانواده مجازی باشد نه تنها به شفافیت تراکنش‌ها کمک می‌کند، بلکه امکان تولید ارز دیجیتال (توکن / سهام) را به خویش‌آوندان می‌دهد تا سِی در جهت تبدیل شدن به مجموعه‌ای خودمختار و غیر متمرکز گام بردارد. توکن های تولید شده از هر نیاز به افرادی که در برطرف شدن نیاز مشارکت داشته‌اند ارسال می‌شود، که می‌توانند از آن برای رای دادن، ارتقا کیفیت کودکان و سِی استفاده کنند.`,
       } as const;
 
       types = {
@@ -178,7 +177,6 @@ export class WalletService {
           { name: 'child', type: 'string' },
           { name: 'bankTrackId', type: 'string' },
           { name: 'receipts', type: 'uint256' },
-          { name: 'signer', type: 'address' },
           { name: 'role', type: 'string' },
           { name: 'content', type: 'string' },
         ],
@@ -212,7 +210,6 @@ export class WalletService {
           { name: 'paid', type: 'uint256' },
           { name: 'deliveryCode', type: 'string' },
           { name: 'child', type: 'string' },
-          // { name: 'signer', type: 'address' },
           { name: 'role', type: 'string' },
           { name: 'content', type: 'string' },
         ],

@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SignatureController } from './wallet.controller';
+import { WalletController } from './wallet.controller';
 import { SignatureEntity } from '../../entities/signature.entity';
 import { WalletService } from './wallet.service';
 import { NeedService } from '../need/need.service';
@@ -90,10 +90,10 @@ import { TicketViewEntity } from 'src/entities/ticketView.entity';
       ProviderEntity,
       TicketEntity,
       TicketContentEntity,
-      TicketViewEntity
+      TicketViewEntity,
     ]),
   ],
-  controllers: [SignatureController],
+  controllers: [WalletController],
   providers: [
     LocationService,
     WalletService,

@@ -33,7 +33,7 @@ export class VerifySignatureDto {
   message: string;
 }
 
-export class PrepareSignatureDto {
+export class PreparePanelSignatureDto {
   @IsNotEmpty()
   chainId: number;
   @IsNotEmpty()
@@ -44,6 +44,13 @@ export class PrepareSignatureDto {
   arrivedColumnNumber: number;
   @IsNotEmpty()
   payments?: CreatePaymentDto[];
+}
+
+export class PrepareDappSignatureDto {
+  @IsNotEmpty()
+  chainId: number;
+  @IsNotEmpty()
+  needId: string;
 }
 
 export class CreateSignatureDto {

@@ -25,7 +25,7 @@ export class CommentEntity extends BaseEntity {
 
   @ManyToOne(() => AllUserEntity, (n) => n.comments, {
     eager: false,
-    nullable: true,
+    nullable: false,
   })
   user: AllUserEntity;
 }

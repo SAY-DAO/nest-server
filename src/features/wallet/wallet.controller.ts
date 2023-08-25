@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Req,
   Request,
   Res,
   Session,
@@ -20,17 +21,16 @@ import {
   AnnouncementEnum,
   AppContributors,
   FlaskUserTypesEnum,
-  NeedTypeEnum,
   PanelContributors,
-  ProductStatusEnum,
   SAYPlatformRoles,
-  ServiceStatusEnum,
+  SUPER_ADMIN,
   SwSignatureResult,
   eEthereumNetworkChainId,
 } from '../../types/interfaces/interface';
 import {
   CreateSignatureDto,
-  PrepareSignatureDto,
+  PrepareDappSignatureDto,
+  PreparePanelSignatureDto,
   VerifyWalletDto,
 } from '../../types/dtos/CreateSignature.dto';
 import { ValidateSignaturePipe } from './pipes/validate-wallet.pipe';
@@ -38,7 +38,6 @@ import { WalletService } from './wallet.service';
 import { SyncService } from '../sync/sync.service';
 import { generateNonce, SiweErrorType, SiweMessage } from 'siwe';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
-import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { WalletInterceptor } from './interceptors/wallet.interceptors';
 import { UserService } from '../user/user.service';
@@ -48,24 +47,21 @@ import {
   convertFlaskToSayRoles,
 } from 'src/utils/helpers';
 import { NeedService } from '../need/need.service';
-import {
-  FamilyAPIApi,
-  SocialWorkerAPIApi,
-} from 'src/generated-sources/openapi';
+import { SocialWorkerAPIApi, UserAPIApi } from 'src/generated-sources/openapi';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { TicketService } from '../ticket/ticket.service';
 
 @UseInterceptors(WalletInterceptor)
-@ApiTags('Wallet')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
   name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })
+@ApiTags('Wallet')
 @Controller('wallet')
-export class SignatureController {
-  private readonly logger = new Logger(SignatureController.name);
+export class WalletController {
+  private readonly logger = new Logger(WalletController.name);
 
   constructor(
     private walletService: WalletService,
@@ -83,10 +79,12 @@ export class SignatureController {
     @Request() req,
     @Session() session: Record<string, any>,
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('typeId', ParseIntPipe) typeId: number,
+    @Param('typeId', ParseIntPipe) typeId: SAYPlatformRoles,
   ) {
     const accessToken = req.headers['authorization'];
     const role = convertFlaskToSayRoles(typeId);
+    console.log(role);
+    console.log('llllllllllllllllll');
 
     try {
       if (
@@ -113,12 +111,12 @@ export class SignatureController {
         }
       }
       if (role === SAYPlatformRoles.FAMILY) {
-        const flaskApi = new FamilyAPIApi();
-        const familyMember = await flaskApi.apiV2FamilyFamilyIdfamilyIdGet(
+        const flaskApi = new UserAPIApi();
+        const familyMember = await flaskApi.apiV2UserUserIduserIdGet(
           accessToken,
-          userId,
+          'me',
         );
-        if (familyMember.userId === userId) {
+        if (familyMember.id === userId) {
           if (!session.nonce) {
             session.nonce = generateNonce();
             session.save();
@@ -132,7 +130,7 @@ export class SignatureController {
       }
     } catch (e) {
       req.session.destroy();
-      throw new WalletExceptionFilter(e.status, e.message);
+      throw new ServerError(e);
     }
   }
 
@@ -154,7 +152,6 @@ export class SignatureController {
       }
 
       const message = new SiweMessage(body.message);
-      console.log(session);
 
       const fields = await message.validate(body.signature);
       if (fields.nonce !== session.nonce) {
@@ -275,14 +272,25 @@ export class SignatureController {
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all signatures' })
-  async getSignatures() {
+  async getSignatures(
+    @Req() req: Request,
+    @Session() session: Record<string, any>,
+  ) {
+    const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
+
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
+    if (session.siwe.flaskUserId !== flaskPanelUserId) {
+      throw new WalletExceptionFilter(401, 'You only can get your signatures');
+    }
     return await this.walletService.getSignatures();
   }
 
-  @Post(`signature/prepare`)
+  @Post(`signature/panel/prepare`)
   @UsePipes(new ValidationPipe()) // validation for dto files
-  async prepareSignature(
-    @Body(ValidateSignaturePipe) body: PrepareSignatureDto,
+  async preparePanelSignature(
+    @Body(ValidateSignaturePipe) body: PreparePanelSignatureDto,
     @Session() session: Record<string, any>,
   ) {
     if (body.chainId !== eEthereumNetworkChainId.mainnet) {
@@ -311,9 +319,6 @@ export class SignatureController {
               ),
           )
         ) {
-          console.log('-------------Announced-----------------');
-          console.log(need.status);
-          console.log(need.type);
           counter++;
         }
       });
@@ -339,6 +344,51 @@ export class SignatureController {
         session.siwe.address,
         need,
         child,
+        flaskUserId,
+      );
+      return transaction;
+    } catch (e) {
+      throw new ServerError(e);
+    }
+  }
+
+  @Post(`signature/dapp/prepare`)
+  @UsePipes(new ValidationPipe()) // validation for dto files
+  async prepareDappSignature(
+    @Body(ValidateSignaturePipe) body: PrepareDappSignatureDto,
+    @Session() session: Record<string, any>,
+  ) {
+    if (body.chainId !== eEthereumNetworkChainId.mainnet) {
+      throw new ServerError('Please connect to Mainnet!', 500);
+    }
+    console.log(session);
+
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
+
+    let transaction: SwSignatureResult;
+    try {
+      const flaskUserId = session.siwe.flaskUserId;
+
+      const need = await this.needService.getNeedById(body.needId);
+      const socialWorker = need.signatures.find(
+        (s) => s.flaskUserId !== need.socialWorker.flaskUserId,
+      );
+
+      if (!socialWorker) {
+        throw new WalletExceptionFilter(
+          403,
+          'Hmmm, could not find social worker',
+        );
+      }
+
+      console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
+
+      transaction = await this.walletService.prepareSignature(
+        session.siwe.address,
+        need,
+        need.child,
         flaskUserId,
       );
       return transaction;
@@ -642,7 +692,7 @@ export class SignatureController {
         throw new WalletExceptionFilter(403, 'Bad request!');
       }
     } catch (e) {
-      const theSignature = await this.getSignature(signature);
+      const theSignature = await this.walletService.getSignature(signature);
       if (theSignature) {
         await this.walletService.deleteOne(theSignature);
       }
@@ -652,19 +702,45 @@ export class SignatureController {
 
   @Get(`signature/:signature`)
   @ApiOperation({ description: 'Get all signature' })
-  async getSignature(@Param('signature') signature: string) {
+  async getSignature(
+    @Session() session: Record<string, any>,
+    @Param('signature') signature: string,
+  ) {
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
     return await this.walletService.getSignature(signature);
   }
 
   @Get(`signatures/:flaskUserId`)
   @ApiOperation({ description: 'Get contributors signatures' })
-  async getContributorSignatures(@Param('flaskUserId') flaskUserId: number) {
-    return await this.walletService.getUserSignatures(flaskUserId);
+  async getContributorSignatures(
+    @Req() req: Request,
+    @Param('flaskUserId') flaskUserId: number,
+  ) {
+    const panelUserId = Number(req.headers['panelFlaskUserId']);
+
+    if (panelUserId !== Number(flaskUserId)) {
+      throw new WalletExceptionFilter(401, 'You only can get your signatures');
+    }
+    return await this.walletService.getUserSignatures(panelUserId);
   }
 
   @Delete(`signature/:signature`)
   @ApiOperation({ description: 'Delete a signatures' })
-  async deleteSignature(@Param('signature') signature: string) {
+  async deleteSignature(
+    @Session() session: Record<string, any>,
+    @Param('signature') signature: string,
+  ) {
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
+    if (
+      session.siwe.flaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN &&
+      session.siwe.flaskUserId !== SUPER_ADMIN
+    ) {
+      throw new WalletExceptionFilter(401, 'You Are not the Super admin');
+    }
     const theSignature = await this.walletService.getSignature(signature);
     return await this.walletService.deleteOne(theSignature.id);
   }

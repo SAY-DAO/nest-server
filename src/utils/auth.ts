@@ -24,6 +24,7 @@ export async function checkFlaskCacheAuthentication(
       const fetchedToken = config().dataCache.fetchDappAccessToken();
       if (fetchedToken[flaskId]) {
         logger.log('Got the cache token!...');
+        req.headers['appFlaskUserId'] = flaskId;
       }
       if (!fetchedToken[flaskId] || fetchedToken[flaskId] !== accessToken) {
         logger.warn(
@@ -37,11 +38,12 @@ export async function checkFlaskCacheAuthentication(
         if (!familyMember) {
           throw new ForbiddenException('You Do not have Access!');
         }
-        req.headers['authenticatedFlaskUserId'] = familyMember.id;
-        if (fetchedToken[flaskId]) {
-          logger.warn('removing old user token...');
-          config().dataCache.deleteDappAccessToken(flaskId);
-        }
+        req.headers['appFlaskUserId'] = familyMember.id;
+
+        // if (fetchedToken[flaskId]) {
+        //   logger.warn('removing old user token...');
+        //   config().dataCache.deleteDappAccessToken(flaskId);
+        // }
         config().dataCache.storeDappAccessToken(accessToken, familyMember.id);
 
         logger.log('saved token...');
@@ -54,6 +56,7 @@ export async function checkFlaskCacheAuthentication(
       const fetchedToken = config().dataCache.fetchPanelAccessToken();
       if (fetchedToken[flaskId]) {
         logger.log('Got the cache token!...');
+        req.headers['panelFlaskUserId'] = flaskId;
       }
       if (!fetchedToken[flaskId] || fetchedToken[flaskId] !== accessToken) {
         logger.warn(
@@ -64,14 +67,15 @@ export async function checkFlaskCacheAuthentication(
           accessToken,
           Number(flaskId),
         );
-
         if (!socialWorker) {
           throw new ForbiddenException('You Do not have Access!');
         }
-        if (fetchedToken[flaskId]) {
-          logger.warn('removing old user token...');
-          config().dataCache.deletePanelAccessToken(flaskId);
-        }
+        req.headers['panelFlaskUserId'] = socialWorker.id;
+
+        // if (fetchedToken[flaskId]) {
+        //   logger.warn('removing old user token...');
+        //   config().dataCache.deletePanelAccessToken(flaskId);
+        // }
         config().dataCache.storePanelAccessToken(accessToken, socialWorker.id);
 
         logger.log('saved token...');
@@ -83,7 +87,7 @@ export async function checkFlaskCacheAuthentication(
   } catch (e) {
     console.log(accessToken);
     console.log(flaskId);
-    
+
     throw new ForbiddenException({
       status: e.status,
       message: e.statusText || e.response,

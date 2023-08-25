@@ -64,7 +64,7 @@ export class MidjourneyController {
     required: true,
   })
   @ApiOperation({
-    description: 'Get all images from local json created by prompts',
+    description: 'Get all needs ready to be signed by family',
   })
   async getLocalImages() {
     const list = [];

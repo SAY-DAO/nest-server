@@ -59,6 +59,8 @@ export class CommentService {
       content: details.message,
       flaskNeedId: details.flaskNeedId,
     });
+    console.log('theNeed.id');
+    console.log(theComment);
     theComment.need = theNeed;
     theComment.user = theUser;
     return await this.commentRepository.save(theComment);
