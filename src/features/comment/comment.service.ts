@@ -16,13 +16,14 @@ export class CommentService {
     private needRepository: Repository<NeedEntity>,
   ) {}
 
-  async getComment(signature: string): Promise<CommentEntity> {
+  async getComment(commentId: string): Promise<CommentEntity> {
     return await this.commentRepository.findOne({
       where: {
-        id: signature,
+        id: commentId,
       },
     });
   }
+
   async getNeedComments(needId: string): Promise<CommentEntity[]> {
     return this.commentRepository.find({
       relations: {

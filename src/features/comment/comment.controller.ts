@@ -110,9 +110,6 @@ export class CommentController {
     try {
       const theComment = await this.commentService.getComment(commentId);
       const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
-      console.log(theComment);
-      console.log(flaskPanelUserId);
-
       if (theComment.flaskUserId !== flaskPanelUserId) {
         throw new ServerError('You can not delete users comment!');
       }

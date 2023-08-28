@@ -11,6 +11,7 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
 import { childExistence } from 'src/types/interfaces/interface';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { User } from 'src/entities/flaskEntities/user.entity';
 
 @Injectable()
 export class ChildrenService {
@@ -96,7 +97,6 @@ export class ChildrenService {
   async getFlaskActiveChildren(): Promise<Child[]> {
     return await this.flaskChildRepository
       .createQueryBuilder('child')
-      .where('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
       .where('child.existence_status = :existence_status', {
         existence_status: childExistence.AlivePresent,
@@ -141,6 +141,51 @@ export class ChildrenService {
       // })
       .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
       .select(['child', 'family', 'userFamily'])
+      .getMany();
+  }
+
+  async gtTheNetwork(): Promise<any> {
+    return this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne(
+        'child.family',
+        Family,
+        'family',
+        'family.id_child = child.id',
+      )
+      .leftJoinAndMapMany(
+        'family.currentMembers',
+        UserFamily,
+        'userFamily',
+        'userFamily.id_family = family.id',
+      )
+      .innerJoinAndMapOne(
+        'userFamily.user',
+        User,
+        'user',
+        'user.id = userFamily.id_user',
+      )
+
+      .where('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.existence_status = :existence_status', {
+        existence_status: childExistence.AlivePresent,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select([
+        'child.id',
+        'child.awakeAvatarUrl',
+        'family.id',
+        'userFamily.id',
+        'user.id',
+        'user.avatarUrl',
+      ])
+      .cache(10000)
       .getMany();
   }
 }

@@ -27,7 +27,7 @@ export class SignatureEntity extends BaseEntity {
   @Column({ unique: true })
   hash: string;
 
-  @Column({ type: 'enum', enum: SAYPlatformRoles, nullable: true })
+  @Column({ type: 'enum', enum: SAYPlatformRoles, nullable: false })
   role: SAYPlatformRoles;
 
   @ManyToOne(() => NeedEntity, (n) => n.signatures, {

@@ -116,32 +116,34 @@ export class WalletService {
     let productVoucher: SwProductVoucher;
     let serviceVoucher: SwServiceVoucher;
     let types: Record<string, Array<TypedDataField>>;
-    const socialWorkerId =
-      need.socialWorker.contributions &&
-      need.socialWorker.contributions.find(
-        (c) => c.flaskUserId == need.socialWorker.flaskUserId,
-      ).flaskUserId;
-    const auditorId =
-      need.auditor.contributions &&
-      need.auditor.contributions.find(
-        (c) => c.flaskUserId == need.auditor.flaskUserId,
-      ).flaskUserId;
-    const purchaserId =
-      need.purchaser.contributions &&
-      need.purchaser.contributions.find(
-        (c) => c.flaskUserId == need.purchaser.flaskUserId,
-      ).flaskUserId;
 
-    const allUserRoles = [];
-    flaskUserId === socialWorkerId &&
-      allUserRoles.push(SAYPlatformRoles.SOCIAL_WORKER);
-    flaskUserId === auditorId && allUserRoles.push(SAYPlatformRoles.AUDITOR);
-    flaskUserId === purchaserId &&
-      allUserRoles.push(SAYPlatformRoles.PURCHASER);
+    const needRoles = {
+      socialWorker: need.socialWorker.flaskUserId,
+      auditor: need.auditor.flaskUserId,
+      purchaser: need.purchaser.flaskUserId,
+      familyMembers: need.verifiedPayments.map((p) => p.flaskUserId),
+    };
+    let role;
+    const allRoles = [];
 
-    const role = allUserRoles.map((r) => getSAYRolePersian(r)).toString();
-
-    if (allUserRoles.length <= 0) {
+    // could have multiple roles e.g. [Auditor, SocialWorker]
+    if (needRoles.socialWorker === flaskUserId) {
+      role = getSAYRolePersian(SAYPlatformRoles.SOCIAL_WORKER).toString();
+      allRoles.push(SAYPlatformRoles.SOCIAL_WORKER);
+    }
+    if (needRoles.socialWorker === flaskUserId) {
+      role = getSAYRolePersian(SAYPlatformRoles.AUDITOR).toString();
+      allRoles.push(SAYPlatformRoles.AUDITOR);
+    }
+    if (needRoles.socialWorker === flaskUserId) {
+      role = getSAYRolePersian(SAYPlatformRoles.PURCHASER).toString();
+      allRoles.push(SAYPlatformRoles.PURCHASER);
+    }
+    if (needRoles.familyMembers.includes(flaskUserId)) {
+      role = getSAYRolePersian(SAYPlatformRoles.FAMILY).toString();
+      allRoles.push(SAYPlatformRoles.FAMILY);
+    }
+    if (!role) {
       throw new WalletExceptionFilter(
         403,
         'could not find your role in this need !',
@@ -232,7 +234,7 @@ export class WalletService {
       message: productVoucher || serviceVoucher,
       types,
       domain,
-      sayRoles: allUserRoles,
+      sayRoles: allRoles,
     };
   }
 
@@ -260,7 +262,6 @@ export class WalletService {
 
     return await this.signatureRepository.save(theSignature);
   }
-
 
   async deleteOne(signatureId): Promise<Observable<any>> {
     return from(this.signatureRepository.delete(signatureId));

@@ -43,4 +43,9 @@ export class ChildrenController {
       childId,
     );
   }
+
+  @Get('/network')
+  getAvailableContributions() {
+    return this.childrenService.gtTheNetwork();
+  }
 }

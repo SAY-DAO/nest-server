@@ -13,15 +13,15 @@ export class AllUserEntity extends BaseEntity {
   flaskUserId: number;
 
   @Column({ nullable: true })
-  typeId?: number; // for contributors
+  typeId: number; // for contributors
 
   @OneToMany(() => ContributorEntity, (c) => c.user, { eager: true })
-  contributions?: ContributorEntity[];
+  contributions: ContributorEntity[];
 
   @OneToMany(() => EthereumAccountEntity, (account) => account.user, {
     eager: true,
   })
-  wallets?: EthereumAccountEntity[];
+  wallets: EthereumAccountEntity[];
 
   @OneToMany(() => CommentEntity, (comment) => comment.user, {
     eager: false,
@@ -29,27 +29,27 @@ export class AllUserEntity extends BaseEntity {
   comments: CommentEntity[];
 
   @Column({ nullable: false })
-  isContributor?: boolean;
+  isContributor: boolean;
 
   @Column({ nullable: true })
-  userName?: string;
+  userName: string;
 
   @Column({ nullable: true })
-  firstName?: string;
+  firstName: string;
 
   @Column({ nullable: true })
-  lastName?: string;
+  lastName: string;
 
   @Column({ nullable: true })
-  avatarUrl?: string;
+  avatarUrl: string;
 
   @Column({ type: 'timestamptz', nullable: true })
-  birthDate?: Date;
+  birthDate: Date;
 
   @ManyToMany(() => TicketEntity, (ticket) => ticket.contributors, {
     eager: false,
   })
-  tickets?: TicketEntity[];
+  tickets: TicketEntity[];
 
   @OneToMany(() => PaymentEntity, (payment) => payment.familyMember, {
     eager: false,

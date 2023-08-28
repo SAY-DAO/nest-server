@@ -58,12 +58,11 @@ import { ScheduleTaskModule } from './features/schedule/schedule.module';
 import { FamilyModule } from './features/family/family.module';
 import { MidjourneyModule } from './features/midjourney/midjourney.module';
 import { MidjourneyEntity } from './entities/midjourney.entity';
-import { MulterModule } from '@nestjs/platform-express';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { Session } from './entities/session.entity';
 import { CommentEntity } from './entities/comment.entity';
 import { CommentModule } from './features/comment/comment.module';
+import { MineModule } from './features/mine/mine.module';
+import { ContributionModule } from './features/contribution/contribution.module';
 
 const imports = [
   HttpModule,
@@ -142,6 +141,8 @@ const imports = [
   FamilyModule,
   MidjourneyModule,
   CommentModule,
+  MineModule,
+  ContributionModule,
 ];
 
 @Module({

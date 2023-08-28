@@ -15,9 +15,7 @@ import {
   NeedTypeEnum,
   PaymentStatusEnum,
   ProductStatusEnum,
-  SAYPlatformRoles,
   ServiceStatusEnum,
-  VirtualFamilyRole,
 } from 'src/types/interfaces/interface';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { NeedParams } from 'src/types/parameters/NeedParameters';
@@ -34,7 +32,6 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 import {
   Paginated,
   PaginateQuery,
@@ -44,12 +41,8 @@ import {
 @Injectable()
 export class NeedService {
   constructor(
-    @InjectRepository(Child, 'flaskPostgres')
-    private flaskChildRepository: Repository<Child>,
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
-    @InjectRepository(SocialWorker, 'flaskPostgres')
-    private flaskSocialWorker: Repository<SocialWorker>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
   ) {}
@@ -105,6 +98,7 @@ export class NeedService {
       },
       relations: {
         verifiedPayments: true,
+        signatures: true,
       },
     });
     return user;
@@ -828,7 +822,7 @@ export class NeedService {
       .getManyAndCount();
   }
 
-  async getPurchasedNeedsCOunt(socialWorker: number): Promise<Need[]> {
+  async getPurchasedNeedsCount(socialWorker: number): Promise<Need[]> {
     return this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(

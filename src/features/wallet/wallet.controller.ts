@@ -83,8 +83,6 @@ export class WalletController {
   ) {
     const accessToken = req.headers['authorization'];
     const role = convertFlaskToSayRoles(typeId);
-    console.log(role);
-    console.log('llllllllllllllllll');
 
     try {
       if (
@@ -306,7 +304,7 @@ export class WalletController {
       const userTickets = await this.ticketService.getUserTickets(flaskUserId);
       let counter = 0;
 
-      const purchasedNeeds = await this.needService.getPurchasedNeedsCOunt(
+      const purchasedNeeds = await this.needService.getPurchasedNeedsCount(
         flaskUserId,
       );
       purchasedNeeds.forEach((need) => {
@@ -370,10 +368,10 @@ export class WalletController {
     let transaction: SwSignatureResult;
     try {
       const flaskUserId = session.siwe.flaskUserId;
-
       const need = await this.needService.getNeedById(body.needId);
+
       const socialWorker = need.signatures.find(
-        (s) => s.flaskUserId !== need.socialWorker.flaskUserId,
+        (s) => s.flaskUserId === need.socialWorker.flaskUserId,
       );
 
       if (!socialWorker) {
@@ -413,22 +411,10 @@ export class WalletController {
       const sessionFlaskUserId = session.siwe.flaskUserId;
       const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
 
-      const foundSw = need.socialWorker.contributions.find(
-        (c) => c.flaskUserId == need.socialWorker.flaskUserId,
-      );
-      const foundSwId = foundSw && foundSw.flaskUserId;
-
+      const foundSwId = need.socialWorker.flaskUserId;
+      const foundAuditorId = need.auditor.flaskUserId;
+      const foundPurchaserId = need.purchaser.flaskUserId;
       const foundPayments = need.verifiedPayments.length > 0;
-
-      const foundAuditor = need.auditor.contributions.find(
-        (c) => c.flaskUserId == need.auditor.flaskUserId,
-      );
-      const foundAuditorId = foundAuditor && foundAuditor.flaskUserId;
-
-      const foundPurchaser = need.purchaser.contributions.find(
-        (c) => c.flaskUserId == need.purchaser.flaskUserId,
-      );
-      const foundPurchaserId = foundPurchaser && foundPurchaser.flaskUserId;
 
       if (
         !foundSwId ||
@@ -511,9 +497,15 @@ export class WalletController {
           if (initialSignature && initialSignature.flaskUserId === foundSwId) {
             if (body.sayRoles.includes(SAYPlatformRoles.FAMILY)) {
               this.logger.log('This is the family signature creation');
-              const foundFamilyId = need.verifiedPayments.find(
+              const foundFamily = need.verifiedPayments.find(
                 (p) => p.flaskUserId === Number(sessionFlaskUserId),
-              ).flaskUserId;
+              );
+
+              const foundFamilyId = foundFamily
+                ? foundFamily.flaskUserId
+                : null;
+              console.log(need);
+              console.log(sessionFlaskUserId);
 
               if (foundFamilyId !== Number(sessionFlaskUserId)) {
                 throw new WalletExceptionFilter(
@@ -719,7 +711,6 @@ export class WalletController {
     @Param('flaskUserId') flaskUserId: number,
   ) {
     const panelUserId = Number(req.headers['panelFlaskUserId']);
-
     if (panelUserId !== Number(flaskUserId)) {
       throw new WalletExceptionFilter(401, 'You only can get your signatures');
     }
