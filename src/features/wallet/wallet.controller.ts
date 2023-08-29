@@ -31,6 +31,7 @@ import {
   CreateSignatureDto,
   PrepareDappSignatureDto,
   PreparePanelSignatureDto,
+  VerifySignatureDto,
   VerifyWalletDto,
 } from '../../types/dtos/CreateSignature.dto';
 import { ValidateSignaturePipe } from './pipes/validate-wallet.pipe';
@@ -268,20 +269,22 @@ export class WalletController {
     return session.siwe;
   }
 
-  @Get(`all`)
+  @Get(`all/signatures`)
   @ApiOperation({ description: 'Get all signatures' })
-  async getSignatures(
-    @Req() req: Request,
-    @Session() session: Record<string, any>,
-  ) {
+  async getSignatures(@Req() req: Request) {
     const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
+    const flaskPanelTypeId = Number(req.headers['panelFlaskTypeId']);
+    console.log(flaskPanelUserId);
+    console.log(flaskPanelTypeId);
 
-    if (!session.siwe) {
-      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    if (
+      (flaskPanelTypeId !== FlaskUserTypesEnum.ADMIN &&
+        flaskPanelTypeId !== FlaskUserTypesEnum.SUPER_ADMIN) ||
+      !flaskPanelUserId
+    ) {
+      throw new WalletExceptionFilter(401, 'You are not the admin');
     }
-    if (session.siwe.flaskUserId !== flaskPanelUserId) {
-      throw new WalletExceptionFilter(401, 'You only can get your signatures');
-    }
+
     return await this.walletService.getSignatures();
   }
 
@@ -321,12 +324,12 @@ export class WalletController {
         }
       });
 
-      if (counter - body.arrivedColumnNumber !== 0) {
-        throw new WalletExceptionFilter(
-          418,
-          'You have to announce arrivals first!',
-        );
-      }
+      // if (counter - body.arrivedColumnNumber !== 0) {
+      //   throw new WalletExceptionFilter(
+      //     418,
+      //     'You have to announce arrivals first!',
+      //   );
+      // }
       const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
       const { need, child } = await this.syncService.syncNeed(
         flaskNeed,
@@ -734,5 +737,37 @@ export class WalletController {
     }
     const theSignature = await this.walletService.getSignature(signature);
     return await this.walletService.deleteOne(theSignature.id);
+  }
+
+  @Post(`signature/verify`)
+  @UsePipes(new ValidationPipe()) // validation for dto files
+  async verifySignature(
+    @Body(ValidateSignaturePipe) body: VerifySignatureDto,
+    @Session() session: Record<string, any>,
+  ) {
+    if (body.chainId !== eEthereumNetworkChainId.mainnet) {
+      throw new ServerError('Please connect to Mainnet!', 500);
+    }
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
+
+    let transaction: SwSignatureResult;
+    try {
+      const flaskUserId = session.siwe.flaskUserId;
+      const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
+
+      console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
+
+      transaction = await this.walletService.prepareSignature(
+        session.siwe.address,
+        need,
+        need.child,
+        flaskUserId,
+      );
+      return transaction;
+    } catch (e) {
+      throw new ServerError(e);
+    }
   }
 }

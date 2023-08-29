@@ -26,12 +26,12 @@ export class VerifyWalletDto {
   signature: string;
 }
 
-export class VerifySignatureDto {
-  @IsNotEmpty()
-  signature: string;
-  @IsNotEmpty()
-  message: string;
-}
+// export class VerifySignatureDto {
+//   @IsNotEmpty()
+//   signature: string;
+//   @IsNotEmpty()
+//   message: string;
+// }
 
 export class PreparePanelSignatureDto {
   @IsNotEmpty()
@@ -42,6 +42,17 @@ export class PreparePanelSignatureDto {
   receipts?: CreateReceiptDto[];
   @IsNotEmpty()
   arrivedColumnNumber: number;
+  @IsNotEmpty()
+  payments?: CreatePaymentDto[];
+}
+
+export class VerifySignatureDto {
+  @IsNotEmpty()
+  chainId: number;
+  @IsNotEmpty()
+  flaskNeedId: number;
+  statuses?: CreateStatusDto[];
+  receipts?: CreateReceiptDto[];
   @IsNotEmpty()
   payments?: CreatePaymentDto[];
 }

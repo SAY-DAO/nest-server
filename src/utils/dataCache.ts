@@ -1,4 +1,7 @@
-import { VirtualFamilyRole } from 'src/types/interfaces/interface';
+import {
+  FlaskUserTypesEnum,
+  VirtualFamilyRole,
+} from 'src/types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
 import { getScattered, removeDuplicates } from './helpers';
 
@@ -35,8 +38,12 @@ export default class DataCache {
     this.childrenEcosystem = { ...result, created: new Date() };
   };
 
-  storePanelAccessToken = (token: string, flaskSwId: number) => {
-    this.panelAccessToken[flaskSwId] = token;
+  storePanelAccessToken = (
+    token: string,
+    flaskSwId: number,
+    flaskTypeId: FlaskUserTypesEnum,
+  ) => {
+    this.panelAccessToken[flaskSwId] = { token, flaskTypeId };
   };
 
   storeDappAccessToken = (token: string, flaskFamilyId: number) => {

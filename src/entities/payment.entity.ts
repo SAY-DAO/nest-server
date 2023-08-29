@@ -53,7 +53,7 @@ export class PaymentEntity extends BaseEntity {
     @Column()
     flaskUserId: number;
 
-    @ManyToOne(() => NeedEntity, (need) => need.verifiedPayments, { eager: true, nullable: true  })
+    @ManyToOne(() => NeedEntity, (need) => need.verifiedPayments, { eager: false, nullable: true  })
     need: NeedEntity;
 
     @ManyToOne(() => AllUserEntity, (family) => family.payments, { eager: true })

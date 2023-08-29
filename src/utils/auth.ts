@@ -12,28 +12,31 @@ export async function checkFlaskCacheAuthentication(
   logger.warn('Passing through MiddleWare...');
 
   const accessToken = req.headers['authorization'];
-  const flaskId = req.headers['flaskid'];
+  const requestFlaskId = req.headers['flaskid'];
 
-  if (!accessToken || !flaskId) {
+  if (!accessToken || !requestFlaskId) {
     throw new ForbiddenException('Access Token and the ID is required!');
   }
   try {
     // for Dapp
-    if (String(flaskId) === 'me') {
+    if (String(requestFlaskId) === 'me') {
       logger.log('fetching dapp cache token...');
       const fetchedToken = config().dataCache.fetchDappAccessToken();
-      if (fetchedToken[flaskId]) {
+      if (fetchedToken[requestFlaskId]) {
         logger.log('Got the cache token!...');
-        req.headers['appFlaskUserId'] = flaskId;
+        req.headers['appFlaskUserId'] = requestFlaskId;
       }
-      if (!fetchedToken[flaskId] || fetchedToken[flaskId] !== accessToken) {
+      if (
+        !fetchedToken[requestFlaskId] ||
+        fetchedToken[requestFlaskId] !== accessToken
+      ) {
         logger.warn(
           'No token at cache, Authenticating from Family Flask Api...',
         );
         const userFlaskApi = new UserAPIApi();
         const familyMember = await userFlaskApi.apiV2UserUserIduserIdGet(
           accessToken,
-          flaskId,
+          requestFlaskId,
         );
         if (!familyMember) {
           throw new ForbiddenException('You Do not have Access!');
@@ -51,32 +54,44 @@ export async function checkFlaskCacheAuthentication(
       }
     }
     // for panel
-    else if (Number(flaskId) > 0) {
+    else if (Number(requestFlaskId) > 0) {
       logger.log('fetching panel cache token...');
       const fetchedToken = config().dataCache.fetchPanelAccessToken();
-      if (fetchedToken[flaskId]) {
+      if (fetchedToken[requestFlaskId]) {
         logger.log('Got the cache token!...');
-        req.headers['panelFlaskUserId'] = flaskId;
+        req.headers['panelFlaskUserId'] = requestFlaskId;
+        req.headers['panelFlaskTypeId'] =
+          fetchedToken[requestFlaskId].flaskTypeId;
       }
-      if (!fetchedToken[flaskId] || fetchedToken[flaskId] !== accessToken) {
+      if (
+        !fetchedToken[requestFlaskId] ||
+        fetchedToken[requestFlaskId].token !== accessToken
+      ) {
         logger.warn(
           'No token at cache, Authenticating from Social worker Flask Api...',
         );
         const flaskApi = new SocialWorkerAPIApi();
         const socialWorker = await flaskApi.apiV2SocialworkersIdGet(
           accessToken,
-          Number(flaskId),
+          Number(requestFlaskId),
         );
         if (!socialWorker) {
           throw new ForbiddenException('You Do not have Access!');
         }
+        console.log(socialWorker);
+
         req.headers['panelFlaskUserId'] = socialWorker.id;
+        req.headers['panelFlaskTypeId'] = socialWorker.typeId;
 
         // if (fetchedToken[flaskId]) {
         //   logger.warn('removing old user token...');
         //   config().dataCache.deletePanelAccessToken(flaskId);
         // }
-        config().dataCache.storePanelAccessToken(accessToken, socialWorker.id);
+        config().dataCache.storePanelAccessToken(
+          accessToken,
+          socialWorker.id,
+          socialWorker.typeId,
+        );
 
         logger.log('saved token...');
         logger.log('Authenticated...');
@@ -85,9 +100,6 @@ export async function checkFlaskCacheAuthentication(
       throw new ServerError('Hmmm, something is not right!', 500);
     }
   } catch (e) {
-    console.log(accessToken);
-    console.log(flaskId);
-
     throw new ForbiddenException({
       status: e.status,
       message: e.statusText || e.response,

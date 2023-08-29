@@ -52,9 +52,11 @@ export class WalletService {
     return await this.signatureRepository.find({
       where: {
         flaskUserId,
+        role: SAYPlatformRoles.SOCIAL_WORKER,
       },
       relations: {
         user: true,
+        need: true,
       },
     });
   }
@@ -73,7 +75,14 @@ export class WalletService {
   async getSignatures(): Promise<SignatureEntity[]> {
     return await this.signatureRepository.find({
       relations: {
-        need: false,
+        need: {
+          verifiedPayments: true,
+          statusUpdates: true,
+          receipts: true,
+        },
+      },
+      where: {
+        role: SAYPlatformRoles.SOCIAL_WORKER,
       },
     });
   }
