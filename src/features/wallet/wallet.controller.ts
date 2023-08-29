@@ -216,11 +216,12 @@ export class WalletController {
           );
           console.log('\x1b[36m%s\x1b[0m', 'Created a user ...\n');
         }
+
         if (
           nestContributor &&
-          (!nestContributor.wallets ||
-            nestContributor.wallets.find(
-              (w) => w.address !== body.message.address,
+          (nestContributor.wallets.length === 0 ||
+            !nestContributor.wallets.find(
+              (w) => w.address === body.message.address,
             ))
         ) {
           await this.userService.createUserWallet(
@@ -267,25 +268,6 @@ export class WalletController {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
     return session.siwe;
-  }
-
-  @Get(`all/signatures`)
-  @ApiOperation({ description: 'Get all signatures' })
-  async getSignatures(@Req() req: Request) {
-    const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
-    const flaskPanelTypeId = Number(req.headers['panelFlaskTypeId']);
-    console.log(flaskPanelUserId);
-    console.log(flaskPanelTypeId);
-
-    if (
-      (flaskPanelTypeId !== FlaskUserTypesEnum.ADMIN &&
-        flaskPanelTypeId !== FlaskUserTypesEnum.SUPER_ADMIN) ||
-      !flaskPanelUserId
-    ) {
-      throw new WalletExceptionFilter(401, 'You are not the admin');
-    }
-
-    return await this.walletService.getSignatures();
   }
 
   @Post(`signature/panel/prepare`)
@@ -696,7 +678,7 @@ export class WalletController {
   }
 
   @Get(`signature/:signature`)
-  @ApiOperation({ description: 'Get all signature' })
+  @ApiOperation({ description: 'Get a signature' })
   async getSignature(
     @Session() session: Record<string, any>,
     @Param('signature') signature: string,
@@ -705,6 +687,23 @@ export class WalletController {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
     return await this.walletService.getSignature(signature);
+  }
+
+  @Get(`all/signatures`)
+  @ApiOperation({ description: 'Get all signatures' })
+  async getSignatures(@Req() req: Request) {
+    const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
+    const flaskPanelTypeId = Number(req.headers['panelFlaskTypeId']);
+
+    if (
+      (flaskPanelTypeId !== FlaskUserTypesEnum.ADMIN &&
+        flaskPanelTypeId !== FlaskUserTypesEnum.SUPER_ADMIN) ||
+      !flaskPanelUserId
+    ) {
+      throw new WalletExceptionFilter(401, 'You are not the admin');
+    }
+
+    return await this.walletService.getSignatures();
   }
 
   @Get(`signatures/:flaskUserId`)
@@ -754,7 +753,6 @@ export class WalletController {
 
     let transaction: SwSignatureResult;
     try {
-      const flaskUserId = session.siwe.flaskUserId;
       const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
 
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');

@@ -56,7 +56,11 @@ export class WalletService {
       },
       relations: {
         user: true,
-        need: true,
+        need: {
+          socialWorker: {
+            wallets: true,
+          },
+        },
       },
     });
   }
@@ -79,6 +83,9 @@ export class WalletService {
           verifiedPayments: true,
           statusUpdates: true,
           receipts: true,
+          socialWorker: {
+            wallets: true,
+          },
         },
       },
       where: {
