@@ -44,6 +44,10 @@ export class WalletService {
     return await this.signatureRepository.findOne({
       where: {
         hash: signature,
+        user: {
+          wallets: true,
+        },
+        need: true,
       },
     });
   }
@@ -55,12 +59,10 @@ export class WalletService {
         role: SAYPlatformRoles.SOCIAL_WORKER,
       },
       relations: {
-        user: true,
-        need: {
-          socialWorker: {
-            wallets: true,
-          },
+        user: {
+          wallets: true,
         },
+        need: true,
       },
     });
   }
@@ -71,7 +73,10 @@ export class WalletService {
         flaskNeedId,
       },
       relations: {
-        user: true,
+        user: {
+          wallets: true,
+        },
+        need: true,
       },
     });
   }
