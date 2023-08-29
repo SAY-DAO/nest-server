@@ -1,9 +1,9 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 
 @Injectable()
-export class ValidateCommentPipe implements PipeTransform {
+export class ValidateContributionPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
-    console.log("Validating Comment...")
+    console.log('Validating Contribution...');
 
     return value;
   }

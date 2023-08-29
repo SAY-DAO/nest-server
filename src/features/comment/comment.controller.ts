@@ -50,7 +50,7 @@ export class CommentController {
   }
 
   @Post('create')
-  @UsePipes(new ValidationPipe()) // validation for dto files
+  @UsePipes(new ValidationPipe()) 
   async createComment(
     @Req() req: Request,
     @Body(ValidateCommentPipe)

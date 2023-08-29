@@ -131,11 +131,11 @@ export class WalletService {
       role = getSAYRolePersian(SAYPlatformRoles.SOCIAL_WORKER).toString();
       allRoles.push(SAYPlatformRoles.SOCIAL_WORKER);
     }
-    if (needRoles.socialWorker === flaskUserId) {
+    if (needRoles.auditor === flaskUserId) {
       role = getSAYRolePersian(SAYPlatformRoles.AUDITOR).toString();
       allRoles.push(SAYPlatformRoles.AUDITOR);
     }
-    if (needRoles.socialWorker === flaskUserId) {
+    if (needRoles.purchaser === flaskUserId) {
       role = getSAYRolePersian(SAYPlatformRoles.PURCHASER).toString();
       allRoles.push(SAYPlatformRoles.PURCHASER);
     }
@@ -146,9 +146,10 @@ export class WalletService {
     if (!role) {
       throw new WalletExceptionFilter(
         403,
-        'could not find your role in this need !',
+        'could not find your role in this need!',
       );
     }
+    console.log(role);
     // define your data types
     if (need.type === NeedTypeEnum.SERVICE) {
       serviceVoucher = {

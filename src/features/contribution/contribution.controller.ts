@@ -6,10 +6,13 @@ import {
   Param,
   Post,
   Req,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ServerError } from 'src/filters/server-exception.filter';
+import { ValidateContributionPipe } from './pipes/validate-ticket.pipe';
 
 @ApiTags('Contribution')
 @ApiSecurity('flask-access-token')
@@ -27,10 +30,14 @@ export class ContributionController {
     return this.contributionService.getAvailableContributions();
   }
 
-  @Post('/create')
-  createContributions(@Body() body: { title: string; descrition: string }) {
-    return this.contributionService.create(body.title, body.descrition);
-  }
+  // @Post('/create')
+  // @UsePipes(new ValidationPipe()) 
+  // createContributions(
+  //   @Body(ValidateContributionPipe)
+  //   body: CreateContributionDto,
+  // ) {
+  //   return this.contributionService.create(body.title, body.description);
+  // }
 
   @Delete(`:contributionId`)
   @ApiOperation({ description: 'Delete a contribution' })
@@ -43,7 +50,6 @@ export class ContributionController {
         contributionId,
       );
       const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
-      console.log(flaskPanelUserId);
 
       if (flaskPanelUserId !== 25) {
         throw new ServerError('You can not delete users comment!');
