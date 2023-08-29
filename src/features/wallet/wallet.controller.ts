@@ -763,7 +763,7 @@ export class WalletController {
         session.siwe.address,
         need,
         need.child,
-        flaskUserId,
+        need.socialWorker.flaskUserId,
       );
       return transaction;
     } catch (e) {
