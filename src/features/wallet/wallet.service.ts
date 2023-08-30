@@ -294,6 +294,7 @@ export class WalletService {
       flaskUserId,
       flaskNeedId,
       verifyingContract,
+      signerAddress
     });
     theSignature.user = user;
     theSignature.need = theNeed;
