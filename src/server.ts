@@ -32,7 +32,7 @@ async function startServer() {
       'http://localhost:3000',
       'http://localhost:3001',
       'https://panel.saydao.org',
-      'https://panel2.saydao.org',
+      'https://dapp.saydao.org',
       'https://beta.sayapp.company',
     ],
     allowedHeaders: [
