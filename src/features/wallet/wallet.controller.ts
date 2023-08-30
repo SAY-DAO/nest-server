@@ -702,7 +702,6 @@ export class WalletController {
     ) {
       throw new WalletExceptionFilter(401, 'You are not the admin');
     }
-
     return await this.walletService.getSignatures();
   }
 
@@ -756,6 +755,7 @@ export class WalletController {
       const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
 
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
+      console.log(session);
 
       transaction = await this.walletService.prepareSignature(
         session.siwe.address,

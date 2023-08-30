@@ -186,7 +186,6 @@ export class WalletService {
         'could not find your role in this need!',
       );
     }
-    console.log(role);
     // define your data types
     if (need.type === NeedTypeEnum.SERVICE) {
       serviceVoucher = {
