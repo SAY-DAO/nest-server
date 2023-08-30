@@ -71,6 +71,7 @@ export class WalletService {
           },
         },
       },
+      order: { createdAt: 'DESC' },
     });
   }
 
@@ -92,6 +93,7 @@ export class WalletService {
           },
         },
       },
+      order: { createdAt: 'DESC' },
     });
   }
 
