@@ -9,8 +9,11 @@ export class SignatureEntity extends BaseEntity {
   @Column({ nullable: false })
   verifyingContract: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: false })
   isVerified: boolean;
+
+  @Column({ nullable: false })
+  signerAddress: string;
 
   @ManyToOne(() => AllUserEntity, (user) => user.signatures, {
     eager: false,

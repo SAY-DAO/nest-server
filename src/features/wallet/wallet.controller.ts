@@ -217,19 +217,6 @@ export class WalletController {
           console.log('\x1b[36m%s\x1b[0m', 'Created a user ...\n');
         }
 
-        if (
-          nestContributor &&
-          (nestContributor.wallets.length === 0 ||
-            !nestContributor.wallets.find(
-              (w) => w.address === body.message.address,
-            ))
-        ) {
-          await this.userService.createUserWallet(
-            body.message.address,
-            body.message.chainId,
-            nestContributor,
-          );
-        }
         return session.nonce;
       }
 
@@ -329,6 +316,33 @@ export class WalletController {
         child,
         flaskUserId,
       );
+      console.log('\x1b[36m%s\x1b[0m', 'Storing the wallet address ...\n');
+      const flaskTypeId = session.siwe.flaskTypeId;
+
+      const panelRole = convertFlaskToSayPanelRoles(flaskTypeId);
+
+      const nestContributor = await this.userService.getContributorByFlaskId(
+        flaskUserId,
+        panelRole,
+      );
+
+      if (
+        nestContributor.wallets.length === 0 ||
+        !nestContributor.wallets.find((w) => w.address === session.siwe.address)
+      ) {
+        await this.userService.createUserWallet(
+          session.siwe.address,
+          session.siwe.chainId,
+          nestContributor,
+        );
+      }
+
+      const eee = await this.userService.getContributorByFlaskId(
+        flaskUserId,
+        panelRole,
+      );
+      console.log(eee);
+
       return transaction;
     } catch (e) {
       throw new ServerError(e);
@@ -439,6 +453,7 @@ export class WalletController {
             SAYPlatformRoles.SOCIAL_WORKER,
             sessionFlaskUserId,
             body.verifyVoucherAddress,
+            session.siwe.address,
           );
 
           const swDetails = {
@@ -509,6 +524,7 @@ export class WalletController {
                 SAYPlatformRoles.FAMILY,
                 sessionFlaskUserId,
                 body.verifyVoucherAddress,
+                session.siwe.address,
               );
               return { signature: familySignature };
             } else if (body.sayRoles.includes(SAYPlatformRoles.AUDITOR)) {
@@ -550,6 +566,7 @@ export class WalletController {
                     SAYPlatformRoles.AUDITOR,
                     sessionFlaskUserId,
                     body.verifyVoucherAddress,
+                    session.siwe.address,
                   );
 
                 const auditorDetails = {
@@ -623,6 +640,7 @@ export class WalletController {
                     SAYPlatformRoles.PURCHASER,
                     sessionFlaskUserId,
                     body.verifyVoucherAddress,
+                    session.siwe.address,
                   );
 
                 const purchaserDetails = {

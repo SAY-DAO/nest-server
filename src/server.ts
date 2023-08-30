@@ -18,6 +18,7 @@ async function startServer() {
   console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
   console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
+  console.log(__filename);
 
   const app = await ApplicationContext();
 

@@ -52,11 +52,11 @@ import { TicketViewEntity } from 'src/entities/ticketView.entity';
     }),
     EthersModule.forRoot({
       network: 1,
-      infura: process.env.INFURA_KEY_MAIN,
+      infura: process.env.INFURA_KEY,
       cloudflare: false,
       //  * Optional parameter the number of backends that must agree. default: 2 for mainnet, 1 for testnets)
       quorum: 2,
-      useDefaultProvider: process.env.INFURA_KEY_MAIN ? false : true,
+      useDefaultProvider: process.env.INFURA_KEY ? false : true,
     }),
     TypeOrmModule.forFeature(
       [

@@ -422,7 +422,6 @@ export class SyncService {
     if (!nestChild) {
       // Create Child
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
-      console.log(nestSocialWorker);
 
       if (!nestSocialWorker || !nestSocialWorker.contributions) {
         throw new ObjectNotFound(

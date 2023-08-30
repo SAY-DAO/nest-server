@@ -281,6 +281,7 @@ export class WalletService {
     role: SAYPlatformRoles,
     flaskUserId: number,
     verifyingContract: string,
+    signerAddress: string
   ): Promise<SignatureEntity> {
     const user = await this.userService.getUserByFlaskId(flaskUserId);
     let theNeed: NeedEntity;
