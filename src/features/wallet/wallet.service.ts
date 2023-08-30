@@ -59,10 +59,17 @@ export class WalletService {
         role: SAYPlatformRoles.SOCIAL_WORKER,
       },
       relations: {
-        user: {
-          wallets: true,
+        need: {
+          socialWorker: {
+            wallets: true,
+          },
+          purchaser: {
+            wallets: true,
+          },
+          auditor: {
+            wallets: true,
+          },
         },
-        need: true,
       },
     });
   }
@@ -73,10 +80,17 @@ export class WalletService {
         flaskNeedId,
       },
       relations: {
-        user: {
-          wallets: true,
+        need: {
+          socialWorker: {
+            wallets: true,
+          },
+          purchaser: {
+            wallets: true,
+          },
+          auditor: {
+            wallets: true,
+          },
         },
-        need: true,
       },
     });
   }
