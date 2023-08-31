@@ -8,12 +8,14 @@ import {
   Q1_TO_Q2_COEFFICIENT,
   Q2_TO_Q3_COEFFICIENT,
   Q3_UPPER_COEFFICIENT,
+  dateConvertToPersian,
   daysDifference,
 } from 'src/utils/helpers';
 import { PaymentService } from '../payment/payment.service';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 import { mean, quantileSeq, round } from 'mathjs';
 import { SAY_DAPP_ID } from 'src/types/interfaces/interface';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -107,7 +109,7 @@ export class NeedController {
       throw new ObjectNotFound('This is not your need!');
     }
     const userPay = need.verifiedPayments.find(
-      (p) => p.flaskUserId === flaskUserId,
+      (p) => p.flaskUserId === flaskUserId && p.needAmount > 0,
     );
 
     let payAmountQGrant: number;
@@ -275,6 +277,33 @@ export class NeedController {
         ? (payments.length - 1) * CONTRIBUTION_COEFFICIENT
         : 1;
 
+    console.log('-----------------------logic---');
+    console.log(logisticDuration);
+    console.log(logisticDurationQGrant);
+    console.log(dateConvertToPersian(`${userPay.created}`));
+    console.log(dateConvertToPersian(`${need.childDeliveryDate}`));
+
+    console.log('-----------------------logic---');
+    console.log(need);
+
+    console.log(confirmDurationQGrant);
+    console.log(payDurationQGrant);
+    console.log(payAmountQGrant);
+    console.log(
+      logisticDurationQGrant,
+      confirmDurationQGrant,
+      payDurationQGrant,
+      payAmountQGrant,
+    );
+
+    if (
+      !logisticDurationQGrant ||
+      !confirmDurationQGrant ||
+      !payDurationQGrant ||
+      !payAmountQGrant
+    ) {
+      throw new ServerError('Something is not right!');
+    }
     return {
       needLogisticDuration: {
         logisticDurationQGrant,

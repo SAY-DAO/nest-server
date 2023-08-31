@@ -51,10 +51,6 @@ export class VerifySignatureDto {
   chainId: number;
   @IsNotEmpty()
   flaskNeedId: number;
-  statuses?: CreateStatusDto[];
-  receipts?: CreateReceiptDto[];
-  @IsNotEmpty()
-  payments?: CreatePaymentDto[];
 }
 
 export class PrepareDappSignatureDto {

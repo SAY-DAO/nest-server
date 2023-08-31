@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
 import { Need } from '../../entities/flaskEntities/need.entity';
-import { Brackets, Repository, UpdateResult } from 'typeorm';
+import { Brackets, IsNull, Not, Repository, UpdateResult } from 'typeorm';
 import {
   Configuration,
   PreneedAPIApi,
@@ -105,16 +105,17 @@ export class NeedService {
   }
 
   getNeedByFlaskId(flaskId: number): Promise<NeedEntity> {
-    const user = this.needRepository.findOne({
+    const need = this.needRepository.findOne({
       where: {
         flaskId: flaskId,
+        verifiedPayments: { verified: Not(IsNull()) },
       },
       relations: {
         verifiedPayments: true,
         signatures: true,
       },
     });
-    return user;
+    return need;
   }
 
   updateNeed(

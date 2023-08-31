@@ -35,12 +35,12 @@ export class MineController {
       flaskUserId,
     );
 
-    const signedNeeds = await this.familyService.getFamilySignedNeeds(
+    const signedNeedsCount = await this.familyService.countFamilySignedNeeds(
       flaskUserId,
     );
 
     return {
-      signed: signedNeeds,
+      signed: signedNeedsCount,
       readyNeedsList: readyNeeds.filter(
         (need) =>
           need.midjourneyImage !== null || // we need to use panel to assign midjourney images first
@@ -62,7 +62,13 @@ export class MineController {
     }
     const theNeed = await this.familyService.getFamilyReadyToSignOneNeed(
       needId,
+      flaskUserId,
     );
+
+    if (!theNeed) {
+      throw new ObjectNotFound('Could not match this need to you!');
+    }
+
     if (
       !theNeed.signatures.find(
         (s) => s.flaskUserId === theNeed.socialWorker.flaskUserId,

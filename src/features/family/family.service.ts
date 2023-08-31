@@ -6,7 +6,7 @@ import {
 } from 'src/types/interfaces/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { IsNull, MoreThan, Not, Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
@@ -189,6 +189,22 @@ export class FamilyService {
   //   return payments;
   // }
 
+  async getAllFamilyReadyToSignNeeds(): Promise<NeedEntity[]> {
+    const needs = this.needRepository.find({
+      relations: {
+        signatures: true,
+        verifiedPayments: true,
+        ngo: true,
+      },
+      where: {
+        signatures: {
+          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
+        },
+      },
+    });
+    return needs;
+  }
+
   async getFamilyReadyToSignNeeds(flaskUserId: number): Promise<NeedEntity[]> {
     return this.needRepository.find({
       relations: {
@@ -202,12 +218,40 @@ export class FamilyService {
         },
         verifiedPayments: {
           flaskUserId: flaskUserId,
+          verified: Not(IsNull()),
         },
+      },
+      order: {
+        createdAt: 'DESC',
       },
     });
   }
 
-  async getFamilySignedNeeds(flaskUserId: number): Promise<number> {
+  async getFamilyReadyToSignOneNeed(
+    needId: string,
+    flaskUserId: number,
+  ): Promise<NeedEntity> {
+    const need = await this.needRepository.findOne({
+      relations: {
+        verifiedPayments: true,
+        signatures: true,
+        comments: {
+          user: true,
+        },
+      },
+      where: {
+        id: needId,
+        verifiedPayments: {
+          flaskUserId: flaskUserId,
+          verified: Not(IsNull()),
+        },
+      },
+    });
+
+    return need;
+  }
+
+  async countFamilySignedNeeds(flaskUserId: number): Promise<number> {
     return this.needRepository.count({
       relations: {
         signatures: true,
@@ -221,54 +265,10 @@ export class FamilyService {
         },
         verifiedPayments: {
           flaskUserId,
+          verified: Not(IsNull()),
         },
       },
     });
-  }
-
-  async getFamilyReadyToSignOneNeed(needId: string): Promise<NeedEntity> {
-    const need = await this.needRepository.findOne({
-      relations: {
-        verifiedPayments: true,
-        signatures: true,
-        comments: {
-          user: true,
-        },
-      },
-      where: {
-        signatures: {
-          // role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
-          need: {
-            id: needId,
-          },
-        },
-      },
-    });
-    const { verifiedPayments, ...others } = need;
-    const modifiedNeed = {
-      verifiedPayments: verifiedPayments.filter((p) => p.verified !== null),
-      ...others,
-    };
-    return modifiedNeed;
-  }
-
-  async getAllFamilyReadyToSignNeeds(): Promise<NeedEntity[]> {
-    const needs = this.needRepository.find({
-      relations: {
-        signatures: true,
-        verifiedPayments: true,
-        ngo: true,
-      },
-      where: {
-        signatures: {
-          role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
-        },
-      },
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-    return needs;
   }
 
   async getChildFamilyMembers(
