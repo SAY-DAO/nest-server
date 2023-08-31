@@ -115,6 +115,15 @@ export class WalletService {
     });
   }
 
+  async getSignaturesFlaskNeedId() {
+    return await this.signatureRepository.find({
+      select: {
+        id: true,
+        flaskNeedId: true,
+      },
+    });
+  }
+
   async designDomain(
     verifyContractAddress: string,
     signerAddress: string,
@@ -281,7 +290,7 @@ export class WalletService {
     role: SAYPlatformRoles,
     flaskUserId: number,
     verifyingContract: string,
-    signerAddress: string
+    signerAddress: string,
   ): Promise<SignatureEntity> {
     const user = await this.userService.getUserByFlaskId(flaskUserId);
     let theNeed: NeedEntity;
@@ -294,7 +303,7 @@ export class WalletService {
       flaskUserId,
       flaskNeedId,
       verifyingContract,
-      signerAddress
+      signerAddress,
     });
     theSignature.user = user;
     theSignature.need = theNeed;

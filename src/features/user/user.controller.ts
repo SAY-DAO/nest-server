@@ -6,12 +6,7 @@ import {
   Req,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiHeader,
-  ApiOperation,
-  ApiSecurity,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ServerError } from '../../filters/server-exception.filter';
 import { SAYPlatformRoles } from 'src/types/interfaces/interface';
@@ -163,6 +158,10 @@ export class UserController {
         ngoIds = [supervisor.ngo_id];
         children = await this.childrenService.countChildren(ngoIds);
       }
+      const allSignaturesNeedFlaskId =
+        await this.walletService.getSignaturesFlaskNeedId();
+      const needsIdList = allSignaturesNeedFlaskId.map((s) => s.flaskNeedId);
+
       arrivals = await this.ngoService.getNgoArrivals(socialWorkerId, swIds);
       notConfirmedCount = await this.needService.getNotConfirmedNeeds(
         socialWorkerId,
@@ -224,8 +223,9 @@ export class UserController {
         supervisorId,
         swIds,
         ngoIds,
+        needsIdList,
       );
-      // return delivered
+
       allNeeds = [
         [...notPaid.data],
         [...paid.data],
@@ -263,6 +263,8 @@ export class UserController {
             (t) => allNeeds[i][k].id === t.flaskNeedId,
           );
           // signatures only at the my page last column
+          //  UPDATE: we decided to snot show signatures on page reload since they have a dedicated page
+          // If you removing the code, remember need.signatures need to be fixed on front-end side as well
           if (i === 3) {
             signatures = await this.walletService.getNeedSignatures(
               fetchedNeed.id,
@@ -276,6 +278,7 @@ export class UserController {
               ipfs = await this.ipfsService.getNeedIpfs(fetchedNeed.id);
             }
           }
+          // End of UPDATE ------------------------------------------------------
 
           const modifiedNeed = {
             tickets: needTickets,

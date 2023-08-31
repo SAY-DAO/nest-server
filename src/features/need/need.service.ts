@@ -579,6 +579,7 @@ export class NeedService {
     ngoId: number,
     swIds: number[],
     ngoIds: number[],
+    needWithSignatures: number[],
   ): Promise<Paginated<Need>> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
@@ -615,9 +616,13 @@ export class NeedService {
         'receipt',
         'receipt.id = need_receipt.receipt_id',
       )
+      .where('need.id NOT IN (:...needWithSignatures)', {
+        needWithSignatures: [...needWithSignatures],
+      })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-      .where(
+      .andWhere(
         new Brackets((qb) => {
           qb.where('need.type = :typeProduct', {
             typeProduct: NeedTypeEnum.PRODUCT,
