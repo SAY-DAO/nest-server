@@ -11,6 +11,8 @@ import {
   SwProductVoucher,
   SwServiceVoucher,
   SAYPlatformRoles,
+  serviceSignatureTypes,
+  productSignatureTypes,
 } from '../../types/interfaces/interface';
 import { NeedService } from '../need/need.service';
 import VerifyVoucherContract from '../../contracts/needModule/VerifyVoucher.sol/VerifyVoucher.json';
@@ -161,7 +163,8 @@ export class WalletService {
   ): Promise<SwSignatureResult> {
     let productVoucher: SwProductVoucher;
     let serviceVoucher: SwServiceVoucher;
-    let types: Record<string, Array<TypedDataField>>;
+    let serviceTypes: serviceSignatureTypes;
+    let productTypes: productSignatureTypes;
 
     const needRoles = {
       socialWorker: need.socialWorker.flaskUserId,
@@ -217,7 +220,7 @@ export class WalletService {
         content: ` با امضای دیجیتال این نیاز امکان ذخیره غیر متمرکز و ثبت این نیاز بر روی بلاکچین را فراهم می‌کنید.  نیازی که دارای امضای دیجیتال مددکار، شاهد، میانجی و خانواده مجازی باشد نه تنها به شفافیت تراکنش‌ها کمک می‌کند، بلکه امکان تولید ارز دیجیتال (توکن / سهام) را به خویش‌آوندان می‌دهد تا سِی در جهت تبدیل شدن به مجموعه‌ای خودمختار و غیر متمرکز گام بردارد. توکن های تولید شده از هر نیاز به افرادی که در برطرف شدن نیاز مشارکت داشته‌اند ارسال می‌شود، که می‌توانند از آن برای رای دادن، ارتقا کیفیت کودکان و سِی استفاده کنند.`,
       } as const;
 
-      types = {
+      serviceTypes = {
         Voucher: [
           { name: 'title', type: 'string' },
           { name: 'category', type: 'string' },
@@ -228,7 +231,7 @@ export class WalletService {
           { name: 'role', type: 'string' },
           { name: 'content', type: 'string' },
         ],
-      };
+      } as const;
     }
     if (need.type === NeedTypeEnum.PRODUCT) {
       productVoucher = {
@@ -250,7 +253,7 @@ export class WalletService {
         content: ` با امضای دیجیتال این نیاز امکان ذخیره غیر متمرکز و ثبت این نیاز بر روی بلاکچین را فراهم می‌کنید.  نیازی که دارای امضای دیجیتال مددکار، شاهد، میانجی و خانواده مجازی باشد نه تنها به شفافیت تراکنش‌ها کمک می‌کند، بلکه امکان تولید ارز دیجیتال (توکن / سهام) را به خویش‌آوندان می‌دهد تا سِی در جهت تبدیل شدن به مجموعه‌ای خودمختار و غیر متمرکز گام بردارد. توکن های تولید شده از هر نیاز به افرادی که در برطرف شدن نیاز مشارکت داشته‌اند ارسال می‌شود، که می‌توانند از آن برای رای دادن، ارتقا کیفیت کودکان و سِی استفاده کنند.`,
       } as const;
 
-      types = {
+      productTypes = {
         Voucher: [
           { name: 'needId', type: 'uint256' },
           { name: 'title', type: 'string' },
@@ -261,7 +264,7 @@ export class WalletService {
           { name: 'role', type: 'string' },
           { name: 'content', type: 'string' },
         ],
-      };
+      } as const;
     }
 
     console.log('\x1b[36m%s\x1b[0m', 'Preparing domain for signature ...\n');
@@ -278,7 +281,7 @@ export class WalletService {
 
     return {
       message: productVoucher || serviceVoucher,
-      types,
+      types: need.type === NeedTypeEnum.PRODUCT ? productTypes : serviceTypes,
       domain,
       sayRoles: allRoles,
     };

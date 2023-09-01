@@ -114,12 +114,50 @@ export interface Domain {
 
 export interface SwSignatureResult {
   message: SwProductVoucher | SwServiceVoucher;
-  types: Record<string, Array<TypedDataField>>;
+  types: any;
   domain: Domain;
   sayRoles: SAYPlatformRoles[];
 }
 
 export interface SwServiceVoucher {
+  needId: number;
+  title: string;
+  category: CategoryDefinitionPersianEnum;
+  child: string;
+  paid: number;
+  bankTrackId: string;
+  receipts: number;
+  signer: string;
+  role: string;
+  content: string;
+}
+
+export interface serviceSignatureTypes {
+  readonly Voucher: readonly [
+    { readonly name: 'title'; readonly type: 'string' },
+    { readonly name: 'category'; readonly type: 'string' },
+    { readonly name: 'paid'; readonly type: 'uint256' },
+    { readonly name: 'child'; readonly type: 'string' },
+    { readonly name: 'bankTrackId'; readonly type: 'string' },
+    { readonly name: 'receipts'; readonly type: 'uint256' },
+    { readonly name: 'role'; readonly type: 'string' },
+    { readonly name: 'content'; readonly type: 'string' },
+  ];
+}
+
+export interface productSignatureTypes {
+  readonly Voucher: readonly [
+    { readonly name: 'needId'; readonly type: 'uint256' },
+    { readonly name: 'title'; readonly type: 'string' },
+    { readonly name: 'category'; readonly type: 'string' },
+    { readonly name: 'paid'; readonly type: 'uint256' },
+    { readonly name: 'deliveryCode'; readonly type: 'string' },
+    { readonly name: 'child'; readonly type: 'string' },
+    { readonly name: 'role'; readonly type: 'string' },
+    { readonly name: 'content'; readonly type: 'string' },
+  ];
+}
+export interface ServiceSignatureTypes {
   needId: number;
   title: string;
   category: CategoryDefinitionPersianEnum;
