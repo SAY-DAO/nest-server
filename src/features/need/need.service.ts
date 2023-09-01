@@ -617,7 +617,9 @@ export class NeedService {
         'receipt.id = need_receipt.receipt_id',
       )
       .where('need.id NOT IN (:...needWithSignatures)', {
-        needWithSignatures: [...needWithSignatures],
+        needWithSignatures: needWithSignatures[0]
+          ? [...needWithSignatures]
+          : [0],
       })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
 

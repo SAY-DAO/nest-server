@@ -6,7 +6,7 @@ import {
 } from 'src/types/interfaces/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { IsNull, Not, Repository } from 'typeorm';
+import { And, IsNull, Not, Repository } from 'typeorm';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
@@ -201,6 +201,11 @@ export class FamilyService {
           role: SAYPlatformRoles.SOCIAL_WORKER, // must be signed by social worker
         },
       },
+      order: {
+        signatures: {
+          createdAt: 'DESC',
+        },
+      },
     });
     return needs;
   }
@@ -240,11 +245,11 @@ export class FamilyService {
         },
       },
       where: {
-        id: needId,
         verifiedPayments: {
-          flaskUserId: flaskUserId,
-          verified: Not(IsNull()),
+          // flaskUserId: flaskUserId,
+          verified: And(Not(IsNull())),
         },
+        id: needId,
       },
     });
 

@@ -156,13 +156,13 @@ export class NeedEntity extends BaseEntity {
   @OneToOne(() => IpfsEntity, (ipfs) => ipfs.need, { eager: true }) // specify inverse side as a second parameter
   ipfs: IpfsEntity;
 
-  @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: true })
+  @OneToMany(() => PaymentEntity, (payment) => payment.need, { eager: false })
   verifiedPayments?: PaymentEntity[];
 
-  @OneToMany(() => ReceiptEntity, (receipt) => receipt.need, { eager: true })
+  @OneToMany(() => ReceiptEntity, (receipt) => receipt.need, { eager: false })
   receipts?: ReceiptEntity[];
 
-  @OneToMany(() => StatusEntity, (status) => status.need, { eager: true })
+  @OneToMany(() => StatusEntity, (status) => status.need, { eager: false })
   statusUpdates?: StatusEntity[];
 
   @OneToMany(() => EthereumTransaction, (t) => t.need, { eager: true })

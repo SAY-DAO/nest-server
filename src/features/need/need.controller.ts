@@ -284,8 +284,6 @@ export class NeedController {
     console.log(dateConvertToPersian(`${need.childDeliveryDate}`));
 
     console.log('-----------------------logic---');
-    console.log(need);
-
     console.log(confirmDurationQGrant);
     console.log(payDurationQGrant);
     console.log(payAmountQGrant);

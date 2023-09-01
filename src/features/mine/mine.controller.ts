@@ -83,7 +83,11 @@ export class MineController {
       theNeed.verifiedPayments.map((p) => p.flaskUserId),
     );
 
-    if (!theNeed.verifiedPayments.find((p) => p.flaskUserId === flaskUserId)) {
+    if (
+      !theNeed.verifiedPayments.find(
+        (p) => p.flaskUserId === flaskUserId && p.verified,
+      )
+    ) {
       throw new ObjectNotFound('This is not your need!');
     }
     return {
