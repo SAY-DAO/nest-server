@@ -379,6 +379,7 @@ export class WalletController {
       }
 
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
+      console.log('transaction1');
 
       transaction = await this.walletService.prepareSignature(
         session.siwe.address,
@@ -386,6 +387,7 @@ export class WalletController {
         need.child,
         flaskUserId,
       );
+      console.log('transaction2');
 
       console.log(transaction);
 
