@@ -358,8 +358,6 @@ export class WalletController {
     if (body.chainId !== eEthereumNetworkChainId.mainnet) {
       throw new ServerError('Please connect to Mainnet!', 500);
     }
-    console.log(session);
-
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
@@ -388,6 +386,9 @@ export class WalletController {
         need.child,
         flaskUserId,
       );
+
+      console.log(transaction);
+
       return transaction;
     } catch (e) {
       throw new ServerError(e);
