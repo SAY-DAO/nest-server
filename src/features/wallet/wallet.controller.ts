@@ -387,9 +387,6 @@ export class WalletController {
         need.child,
         flaskUserId,
       );
-      console.log('transaction2');
-
-      console.log(transaction);
 
       return transaction;
     } catch (e) {
@@ -507,8 +504,6 @@ export class WalletController {
               const foundFamilyId = foundFamily
                 ? foundFamily.flaskUserId
                 : null;
-              console.log(need);
-              console.log(sessionFlaskUserId);
 
               if (foundFamilyId !== Number(sessionFlaskUserId)) {
                 throw new WalletExceptionFilter(
@@ -698,6 +693,38 @@ export class WalletController {
     }
   }
 
+  @Post(`signature/verify`)
+  @UsePipes(new ValidationPipe()) // validation for dto files
+  async verifySignature(
+    @Body(ValidateSignaturePipe) body: VerifySignatureDto,
+    @Session() session: Record<string, any>,
+  ) {
+    if (body.chainId !== eEthereumNetworkChainId.mainnet) {
+      throw new ServerError('Please connect to Mainnet!', 500);
+    }
+    if (!session.siwe) {
+      throw new WalletExceptionFilter(401, 'You have to first sign_in');
+    }
+
+    let transaction: SwSignatureResult;
+    try {
+      const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
+
+      console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
+      console.log(session);
+
+      transaction = await this.walletService.prepareSignature(
+        session.siwe.address,
+        need,
+        need.child,
+        need.socialWorker.flaskUserId,
+      );
+      return transaction;
+    } catch (e) {
+      throw new ServerError(e);
+    }
+  }
+
   @Get(`signature/:signature`)
   @ApiOperation({ description: 'Get a signature' })
   async getSignature(
@@ -742,51 +769,18 @@ export class WalletController {
   @Delete(`signature/:signature`)
   @ApiOperation({ description: 'Delete a signatures' })
   async deleteSignature(
-    @Session() session: Record<string, any>,
+    @Req() req: Request,
     @Param('signature') signature: string,
   ) {
-    if (!session.siwe) {
-      throw new WalletExceptionFilter(401, 'You have to first sign_in');
-    }
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
-      session.siwe.flaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN &&
-      session.siwe.flaskUserId !== SUPER_ADMIN
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN &&
+      panelFlaskUserId !== SUPER_ADMIN
     ) {
       throw new WalletExceptionFilter(401, 'You Are not the Super admin');
     }
     const theSignature = await this.walletService.getSignature(signature);
     return await this.walletService.deleteOne(theSignature.id);
-  }
-
-  @Post(`signature/verify`)
-  @UsePipes(new ValidationPipe()) // validation for dto files
-  async verifySignature(
-    @Body(ValidateSignaturePipe) body: VerifySignatureDto,
-    @Session() session: Record<string, any>,
-  ) {
-    if (body.chainId !== eEthereumNetworkChainId.mainnet) {
-      throw new ServerError('Please connect to Mainnet!', 500);
-    }
-    if (!session.siwe) {
-      throw new WalletExceptionFilter(401, 'You have to first sign_in');
-    }
-
-    let transaction: SwSignatureResult;
-    try {
-      const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
-
-      console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
-      console.log(session);
-
-      transaction = await this.walletService.prepareSignature(
-        session.siwe.address,
-        need,
-        need.child,
-        need.socialWorker.flaskUserId,
-      );
-      return transaction;
-    } catch (e) {
-      throw new ServerError(e);
-    }
   }
 }
