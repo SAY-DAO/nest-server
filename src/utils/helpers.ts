@@ -25,6 +25,7 @@ export const CONTRIBUTION_COEFFICIENT = 1.2;
 const PARENTS_DELIVERED_RANGE = 1;
 const RELETIVES_DELIVERED_RANGE = 3;
 
+
 export function getAllFilesFromFolder(dir: string) {
   let results = [];
   if (checkIfFileOrDirectoryExists(dir)) {
@@ -581,7 +582,6 @@ export function findQuartileGrant(
     };
   },
 ) {
-  // delivered <= Q1, Q1 < delivered <= Q2 , Q2 < delivered <= Q3,  delivered > Q3
   let fatherQGrant: number;
   let motherQGrant: number;
   let amooQGrant: number;
@@ -606,6 +606,7 @@ export function findQuartileGrant(
       avg: 0,
     };
   }
+  // delivered <= Q1, Q1 < delivered <= Q2 , Q2 < delivered <= Q3,  delivered > Q3
   if (
     0 < userValues.fatherCompletePay &&
     userValues.fatherCompletePay <= Qs.Q1.father

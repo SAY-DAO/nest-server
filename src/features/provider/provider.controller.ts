@@ -2,12 +2,14 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpException,
   HttpStatus,
   Param,
   Patch,
   Post,
+  Req,
   Res,
   UploadedFile,
   UseInterceptors,
@@ -27,11 +29,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { providerStorage } from '../../storage/providerStorage';
 import { UpdateResult } from 'typeorm';
 import {
+  FlaskUserTypesEnum,
   NeedTypeDefinitionEnum,
   NeedTypeEnum,
 } from '../../types/interfaces/interface';
 import { ValidateProviderPipe } from './pipes/validate-provider.pipe';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { isAuthenticated } from 'src/utils/auth';
 
 @ApiTags('Provider')
 @Controller('providers')
@@ -46,7 +50,12 @@ export class ProviderController {
     required: true,
   })
   @ApiOperation({ description: 'Get all providers' })
-  async getProviders() {
+  async getProviders(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
+    }
     return await this.providerService.getProviders();
   }
 
@@ -58,7 +67,12 @@ export class ProviderController {
     required: true,
   })
   @ApiOperation({ description: 'Get one by id' })
-  async getOneProvider(@Param('id') id: string) {
+  async getOneProvider(@Req() req: Request, @Param('id') id: string) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
+    }
     let provider: ProviderEntity;
     if (id) {
       try {
@@ -81,8 +95,14 @@ export class ProviderController {
   })
   @ApiOperation({ description: 'Create one provider' })
   async createRelation(
+    @Req() req: Request,
     @Body() body: CreateProviderJoinNeedDto,
   ): Promise<ProviderJoinNeedEntity> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
+    }
     let relation: ProviderJoinNeedEntity;
     try {
       relation = await this.providerService.createRelation(
@@ -107,9 +127,15 @@ export class ProviderController {
   @UseInterceptors(FileInterceptor('file', providerStorage))
   @ApiOperation({ description: 'Create one provider' })
   async createProvider(
+    @Req() req: Request,
     @UploadedFile() file,
     @Body(ValidateProviderPipe) request: CreateProviderDto,
   ): Promise<ProviderEntity> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
+    }
     let provider: ProviderEntity;
     const newProvider = {
       name: request.name,
@@ -149,10 +175,17 @@ export class ProviderController {
   @UsePipes(new ValidationPipe()) // validation for dto files
   @UseInterceptors(FileInterceptor('file', providerStorage))
   async updateProvider(
+    @Req() req: Request,
     @Param('id') id,
     @UploadedFile() file,
     @Body(ValidateProviderPipe) request: CreateProviderDto,
   ): Promise<UpdateResult> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
+    }
+
     const newProvider = {
       name: request?.name,
       description: request?.description,
@@ -183,7 +216,15 @@ export class ProviderController {
     description: 'to use cache and flask authentication',
     required: true,
   })
-  deleteOne(@Param('id') id: number): Observable<any> {
+  deleteOne(@Req() req: Request, @Param('id') id: number): Observable<any> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     return this.providerService.deleteOne(id);
   }
 

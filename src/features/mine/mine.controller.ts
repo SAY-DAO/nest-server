@@ -1,8 +1,10 @@
-import { Controller, Get, Req, Param } from '@nestjs/common';
+import { Controller, Get, Req, Param, ForbiddenException } from '@nestjs/common';
 import { MineService } from './mine.service';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { FamilyService } from '../family/family.service';
+import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
+import { isAuthenticated } from 'src/utils/auth';
 
 @ApiTags('Mines')
 @ApiSecurity('flask-access-token')
@@ -23,20 +25,17 @@ export class MineController {
     description: 'Get all paid needs for family member',
   })
   async getPaidNeeds(@Req() req: Request) {
-    const flaskUserId = req.headers['appFlaskUserId'];
-    if (!flaskUserId) {
-      throw new ObjectNotFound('We need the user ID!');
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
     }
-    // const payments = await this.familyService.getFamilyPaidNeeds(
-    //   Number(flaskUserId),
-    // );
-
+ 
     const readyNeeds = await this.familyService.getFamilyReadyToSignNeeds(
-      flaskUserId,
+      dappFlaskUserId,
     );
 
     const signedNeedsCount = await this.familyService.countFamilySignedNeeds(
-      flaskUserId,
+      dappFlaskUserId,
     );
 
     return {
@@ -45,7 +44,7 @@ export class MineController {
         (need) =>
           need.midjourneyImage !== null || // we need to use panel to assign midjourney images first
           (need.signatures &&
-            need.signatures.find((s) => s.flaskUserId === Number(flaskUserId))),
+            need.signatures.find((s) => s.flaskUserId === Number(dappFlaskUserId))),
       ),
     };
   }
@@ -55,20 +54,26 @@ export class MineController {
     description: 'Get all signed needs for virtual family member',
   })
   async getReadyOneNeed(@Req() req: Request, @Param('needId') needId: string) {
-    const flaskUserId = req.headers['appFlaskUserId'];
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
+    }
 
     if (!needId) {
       throw new ObjectNotFound('We need the needId!');
     }
     const theNeed = await this.familyService.getFamilyReadyToSignOneNeed(
       needId,
-      flaskUserId,
     );
 
-    if (!theNeed) {
+    if (
+      !theNeed ||
+      !theNeed.verifiedPayments.find(
+        (p) => p.flaskUserId === Number(dappFlaskUserId) && p.verified,
+      )
+    ) {
       throw new ObjectNotFound('Could not match this need to you!');
     }
-
     if (
       !theNeed.signatures.find(
         (s) => s.flaskUserId === theNeed.socialWorker.flaskUserId,
@@ -83,13 +88,6 @@ export class MineController {
       theNeed.verifiedPayments.map((p) => p.flaskUserId),
     );
 
-    if (
-      !theNeed.verifiedPayments.find(
-        (p) => p.flaskUserId === flaskUserId && p.verified,
-      )
-    ) {
-      throw new ObjectNotFound('This is not your need!');
-    }
     return {
       ...theNeed,
       members,
@@ -98,13 +96,13 @@ export class MineController {
 
   @Get('ecosystem/mineables')
   async getEcosystemMineables(@Req() req: Request) {
-    const flaskUserId = req.headers['appFlaskUserId'];
-    if (!flaskUserId) {
-      throw new ObjectNotFound('We need the user ID!');
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
     }
-    const mySignedNeeds = await this.mineService.getMySignedNeeds(flaskUserId);
-    const myReadyToMine = await this.mineService.getMyReadyToMine(flaskUserId);
-    const myMined = await this.mineService.getMyMinedNeeds(flaskUserId);
+    const mySignedNeeds = await this.mineService.getMySignedNeeds(dappFlaskUserId);
+    const myReadyToMine = await this.mineService.getMyReadyToMine(dappFlaskUserId);
+    const myMined = await this.mineService.getMyMinedNeeds(dappFlaskUserId);
 
     const paidNeeds = await this.mineService.getEcosystemPaidNeeds();
     const readyToMine = await this.mineService.getEcosystemReadyToMine();

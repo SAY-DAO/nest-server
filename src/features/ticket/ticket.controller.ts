@@ -5,19 +5,18 @@ import {
   Body,
   Param,
   Delete,
-  HttpException,
-  HttpStatus,
   Req,
   UseInterceptors,
   ValidationPipe,
   UsePipes,
+  ForbiddenException,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from '../../types/dtos/ticket/CreateTicket.dto';
-import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
   AnnouncementEnum,
-  Colors,
+  FlaskUserTypesEnum,
   SAYPlatformRoles,
 } from 'src/types/interfaces/interface';
 import { TicketEntity } from '../../entities/ticket.entity';
@@ -34,6 +33,7 @@ import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters'
 import { NeedService } from '../need/need.service';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { UserService } from '../user/user.service';
+import { isAuthenticated } from 'src/utils/auth';
 
 @ApiTags('Tickets')
 @ApiSecurity('flask-access-token')
@@ -52,28 +52,43 @@ export class TicketController {
   ) {}
 
   @Get('all')
-  async findAll() {
+  async findAll(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     return await this.ticketService.getTickets();
   }
 
-  @Get('all/user/:userId')
-  async getUserTickets(@Param('userId') userId: number) {
-    const user = await this.userService.getFlaskSocialWorker(userId);
+  @Get('all/user')
+  async getUserTickets(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized!');
+    }
+    const user = await this.userService.getFlaskSocialWorker(panelFlaskUserId);
     if (convertFlaskToSayRoles(user.type_id) === SAYPlatformRoles.AUDITOR) {
       return await this.ticketService.getTickets();
     } else {
-      return await this.ticketService.getUserTickets(userId);
+      return await this.ticketService.getUserTickets(panelFlaskUserId);
     }
   }
 
   @Get('ticket/:id/:userId')
-  async getTicketById(
-    @Param('id') id: string,
-    @Param('userId') flaskUserId: string,
-  ) {
+  async getTicketById(@Req() req: Request, @Param('id') id: string) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized!');
+    }
     const { ticket } = await this.ticketService.getTicketById(
       id,
-      Number(flaskUserId),
+      Number(panelFlaskTypeId),
     );
     return ticket;
   }
@@ -84,6 +99,11 @@ export class TicketController {
     @Req() req: Request,
     @Body(ValidateTicketPipe) body: CreateTicketContentDto,
   ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized!');
+    }
     const { ticket } = await this.ticketService.getTicketById(
       body.ticketId,
       body.from,
@@ -106,6 +126,11 @@ export class TicketController {
     @Req() req: Request,
     @Body(ValidateTicketPipe) body: CreateTicketDto,
   ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized!');
+    }
     const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
 
     console.log('\x1b[36m%s\x1b[0m', 'Syncing ...\n');
@@ -236,7 +261,15 @@ export class TicketController {
   }
 
   @Delete(':id')
-  async DeleteTicket(@Param('id') id: string) {
+  async DeleteTicket(@Req() req: Request, @Param('id') id: string) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     return await this.ticketService.DeleteTicket(id);
   }
 

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Res,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { MidjourneyService } from './midjourney.service';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ServerError } from 'src/filters/server-exception.filter';
@@ -10,6 +18,8 @@ import { getAllFilesFromFolder } from 'src/utils/helpers';
 import { MessageBody } from '@nestjs/websockets';
 import { FamilyService } from '../family/family.service';
 import { readFileSync } from 'fs';
+import { isAuthenticated } from 'src/utils/auth';
+import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 
 @ApiTags('Midjourney')
 @Controller('midjourney')
@@ -29,7 +39,15 @@ export class MidjourneyController {
     required: true,
   })
   @ApiOperation({ description: 'Get all IPFS' })
-  async getImages() {
+  async getImages(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     return await this.midjourneyService.getAllImages();
   }
 
@@ -41,7 +59,18 @@ export class MidjourneyController {
     required: true,
   })
   @ApiOperation({ description: 'Storing images' })
-  async storeImages(@Param('flaskNeedId') flaskNeedId: number): Promise<any> {
+  async storeImages(
+    @Req() req: Request,
+    @Param('flaskNeedId') flaskNeedId: number,
+  ): Promise<any> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     let theImage;
     try {
       const need = await this.needService.getNeedByFlaskId(flaskNeedId);
@@ -66,7 +95,15 @@ export class MidjourneyController {
   @ApiOperation({
     description: 'Get all needs ready to be signed by family',
   })
-  async getLocalImages() {
+  async getLocalImages(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     const list = [];
 
     const needsWithSignatures =
@@ -96,9 +133,18 @@ export class MidjourneyController {
   })
   @Get('buffer/:flaskNeedId')
   async buffer(
+    @Req() req: Request,
     @Param('flaskNeedId') flaskNeedId: number,
     @Res() response: expressResponse,
   ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     const theImage = await this.midjourneyService.getImage(flaskNeedId);
     const file = await this.downloadService.imageBuffer(theImage.fileName);
     response.contentType('image/png');
@@ -113,7 +159,15 @@ export class MidjourneyController {
     required: true,
   })
   @ApiOperation({ description: 'Get all signed' })
-  async preparePrompts() {
+  async preparePrompts(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     const promptList = await this.midjourneyService.preparePrompts();
     return promptList;
   }
@@ -127,11 +181,18 @@ export class MidjourneyController {
   })
   @ApiOperation({ description: 'Get all signed' })
   async selectFinalImage(
+    @Req() req: Request,
     @Param('flaskNeedId') flaskNeedId: number,
     @MessageBody() body,
   ) {
-    console.log(body);
-
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     const promptList = this.midjourneyService.selectImage(
       flaskNeedId,
       body.selectedImage,

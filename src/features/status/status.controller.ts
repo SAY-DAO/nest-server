@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Delete } from '@nestjs/common';
+import { Controller} from '@nestjs/common';
 import { StatusService } from './status.service';
 import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
 
@@ -13,13 +13,4 @@ import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
 export class StatusController {
   constructor(private readonly statusService: StatusService) {}
 
-  @Get()
-  findAll() {
-    return this.statusService.findAll();
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.statusService.remove(+id);
-  }
 }

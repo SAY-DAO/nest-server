@@ -1,6 +1,6 @@
 import { TypedDataField } from 'ethers';
 export const SAY_DAPP_ID = 208;
-export const SUPER_ADMIN = 25;
+export const SUPER_ADMIN_ID = 25;
 export enum eEthereumNetworkChainId {
   mainnet = 1,
   goerli = 5,
@@ -75,6 +75,14 @@ export enum childConfirmation {
   NOT_CONFIRMED = 0,
   CONFIRMED = 1,
   BOTH = 2,
+}
+
+export interface AuthenticationType {
+  token: string;
+  sayRole: SAYPlatformRoles;
+  flaskUserType: FlaskUserTypesEnum;
+  createdAt: Date;
+  isExpired: boolean;
 }
 
 export interface HeaderOptions {

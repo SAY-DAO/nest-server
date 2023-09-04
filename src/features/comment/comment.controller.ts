@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -20,7 +21,11 @@ import { UserService } from '../user/user.service';
 import { ValidateCommentPipe } from './pipes/validate-ticket.pipe';
 import { CreateCommentDto } from 'src/types/dtos/CreateComment.dto';
 import { CommentEntity } from 'src/entities/comment.entity';
-import { VirtualFamilyRole } from 'src/types/interfaces/interface';
+import {
+  FlaskUserTypesEnum,
+  VirtualFamilyRole,
+} from 'src/types/interfaces/interface';
+import { isAuthenticated } from 'src/utils/auth';
 
 @ApiTags('Comment')
 @ApiSecurity('flask-access-token')
@@ -39,40 +44,56 @@ export class CommentController {
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all comments' })
-  async getComments() {
+  async getComments(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     return await this.commentService.getComments();
   }
 
   @Get(`need/:needId`)
   @ApiOperation({ description: 'Get the Need comments' })
-  async getNeedComments(@Param('needId') needId: string) {
+  async getNeedComments(@Req() req: Request, @Param('needId') needId: string) {
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+      throw new ForbiddenException(403, 'You Are not authorized');
+    }
     return await this.commentService.getNeedComments(needId);
   }
 
   @Post('create')
-  @UsePipes(new ValidationPipe()) 
+  @UsePipes(new ValidationPipe())
   async createComment(
     @Req() req: Request,
     @Body(ValidateCommentPipe)
     body: CreateCommentDto,
   ) {
-    const flaskAppUserId = Number(req.headers['appFlaskUserId']);
-    const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
+    const dappFlaskUserId = Number(req.headers['dappFlaskUserId']);
+    const panelFlaskUserId = Number(req.headers['panelFlaskUserId']);
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
 
     let theNeed: NeedEntity;
     let theUser: AllUserEntity;
     let comment: CommentEntity;
     try {
-      if (!flaskPanelUserId && !flaskAppUserId) {
+      if (!panelFlaskUserId && !dappFlaskUserId) {
         throw new ServerError('We need the user Id!');
       }
       theNeed = await this.needService.getNeedByFlaskId(body.flaskNeedId);
-      if (flaskAppUserId) {
-        theUser = await this.userService.getUserByFlaskId(flaskAppUserId);
+      if (dappFlaskUserId) {
+        if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+          throw new ForbiddenException(403, 'You Are not authorized');
+        }
+        theUser = await this.userService.getUserByFlaskId(dappFlaskUserId);
         comment = await this.commentService.createComment(
           theUser,
           theNeed,
-          flaskAppUserId,
+          dappFlaskUserId,
           {
             vRole: body.vRole,
             message: body.message,
@@ -81,12 +102,15 @@ export class CommentController {
         );
         await this.needService.updateIsResolved(theNeed.id, false);
       }
-      if (flaskPanelUserId) {
-        theUser = await this.userService.getUserByFlaskId(flaskPanelUserId);
+      if (panelFlaskUserId) {
+        if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+          throw new ForbiddenException(403, 'You Are not authorized');
+        }
+        theUser = await this.userService.getUserByFlaskId(panelFlaskUserId);
         comment = await this.commentService.createComment(
           theUser,
           theNeed,
-          flaskPanelUserId,
+          panelFlaskUserId,
           {
             vRole: VirtualFamilyRole.SAY,
             message: body.message,
@@ -107,6 +131,14 @@ export class CommentController {
     @Req() req: Request,
     @Param('commentId') commentId: string,
   ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     try {
       const theComment = await this.commentService.getComment(commentId);
       const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
@@ -125,7 +157,15 @@ export class CommentController {
 
   @Patch(`resolve/:needId`)
   @ApiOperation({ description: 'Delete a comment' })
-  async updateComment(@Param('needId') needId: string) {
+  async updateComment(@Req() req: Request, @Param('needId') needId: string) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     const theNeed = await this.needService.getNeedById(needId);
     let isResolved = theNeed.isResolved;
     if (isResolved) {

@@ -6,7 +6,7 @@ import {
 } from 'src/types/interfaces/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { And, IsNull, Not, Repository } from 'typeorm';
+import { And, ArrayContains, IsNull, Not, Repository } from 'typeorm';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
@@ -232,10 +232,7 @@ export class FamilyService {
     });
   }
 
-  async getFamilyReadyToSignOneNeed(
-    needId: string,
-    flaskUserId: number,
-  ): Promise<NeedEntity> {
+  async getFamilyReadyToSignOneNeed(needId: string): Promise<NeedEntity> {
     const need = await this.needRepository.findOne({
       relations: {
         verifiedPayments: true,
@@ -246,7 +243,6 @@ export class FamilyService {
       },
       where: {
         verifiedPayments: {
-          // flaskUserId: flaskUserId,
           verified: And(Not(IsNull())),
         },
         id: needId,

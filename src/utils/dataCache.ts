@@ -1,5 +1,7 @@
 import {
+  AuthenticationType,
   FlaskUserTypesEnum,
+  SAYPlatformRoles,
   VirtualFamilyRole,
 } from 'src/types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
@@ -7,8 +9,10 @@ import { getScattered, removeDuplicates } from './helpers';
 
 export default class DataCache {
   childrenEcosystem = null;
-  panelAccessToken = {};
-  dappAccessToken = {};
+  authentication: {
+    [flaskId: number]: AuthenticationType;
+  } = {};
+
   familyData = null;
   familyRolesCount = null;
   childActiveFamilies = null;
@@ -41,13 +45,31 @@ export default class DataCache {
   storePanelAccessToken = (
     token: string,
     flaskSwId: number,
-    flaskTypeId: FlaskUserTypesEnum,
+    flaskUserType: FlaskUserTypesEnum,
+    sayRole: SAYPlatformRoles,
+    createdAt: Date,
   ) => {
-    this.panelAccessToken[flaskSwId] = { token, flaskTypeId };
+    this.authentication[flaskSwId] = {
+      token,
+      flaskUserType,
+      sayRole,
+      createdAt,
+      isExpired: false,
+    };
   };
 
-  storeDappAccessToken = (token: string, flaskFamilyId: number) => {
-    this.dappAccessToken[flaskFamilyId] = token;
+  storeDappAccessToken = (
+    token: string,
+    flaskFamilyId: number,
+    createdAt: Date,
+  ) => {
+    this.authentication[flaskFamilyId] = {
+      token,
+      sayRole: SAYPlatformRoles.FAMILY,
+      flaskUserType: FlaskUserTypesEnum.FAMILY,
+      createdAt,
+      isExpired: false,
+    };
   };
 
   storeMidjourny = (list: any[]) => {
@@ -103,12 +125,31 @@ export default class DataCache {
   fetchFamilyAll = () => this.familyData;
   fetchFamilyCount = () => this.familyRolesCount;
   fetchActiveFamilies = () => this.childActiveFamilies;
-  fetchPanelAccessToken = () => this.panelAccessToken;
-  fetchDappAccessToken = () => this.dappAccessToken;
+  fetchPanelAuthentication = (flaskSwId: number) => {
+    if (this.authentication[String(flaskSwId)]) {
+      return this.authentication[flaskSwId];
+    } else {
+      return null;
+    }
+  };
+  fetchDappAuthentication = (flaskFamilyId: number) => {
+    if (this.authentication[String(flaskFamilyId)]) {
+      return this.authentication[flaskFamilyId];
+    } else {
+      return null;
+    }
+  };
+
   deletePanelAccessToken = (flaskSwId: number) =>
-    this.panelAccessToken[flaskSwId];
+    (this.authentication[String(flaskSwId)] = {
+      ...this.authentication[String(flaskSwId)],
+      isExpired: true,
+    });
   deleteDappAccessToken = (flaskFamilyId: number) =>
-    this.dappAccessToken[flaskFamilyId];
+    (this.authentication[String(flaskFamilyId)] = {
+      ...this.authentication[String(flaskFamilyId)],
+      isExpired: true,
+    });
 
   // panel analytic scatter chart
   roleScatteredData() {

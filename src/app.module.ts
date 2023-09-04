@@ -63,8 +63,14 @@ import { CommentEntity } from './entities/comment.entity';
 import { CommentModule } from './features/comment/comment.module';
 import { MineModule } from './features/mine/mine.module';
 import { ContributionModule } from './features/contribution/contribution.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 const imports = [
+  ThrottlerModule.forRoot({
+    ttl: 60, // time to live,
+    limit: 10, // the maximum number of requests within the ttl
+  }),
+
   HttpModule,
   ScheduleModule.forRoot(),
   LoggerModule.forRoot(),

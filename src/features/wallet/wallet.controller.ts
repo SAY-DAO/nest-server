@@ -23,7 +23,7 @@ import {
   FlaskUserTypesEnum,
   PanelContributors,
   SAYPlatformRoles,
-  SUPER_ADMIN,
+  SUPER_ADMIN_ID,
   SwSignatureResult,
   eEthereumNetworkChainId,
 } from '../../types/interfaces/interface';
@@ -51,6 +51,9 @@ import { NeedService } from '../need/need.service';
 import { SocialWorkerAPIApi, UserAPIApi } from 'src/generated-sources/openapi';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { TicketService } from '../ticket/ticket.service';
+import config from 'src/config';
+import { isAuthenticated } from 'src/utils/auth';
+import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 
 @UseInterceptors(WalletInterceptor)
 @ApiSecurity('flask-access-token')
@@ -73,16 +76,14 @@ export class WalletController {
     private ticketService: TicketService,
   ) {}
 
-  @Get('nonce/:userId/:typeId')
+  @Get('nonce/:typeId')
   @ApiOperation({ description: 'Get SIWE nonce' })
   async getNonce(
     @Res() res,
     @Request() req,
     @Session() session: Record<string, any>,
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('typeId', ParseIntPipe) typeId: SAYPlatformRoles,
+    @Param('typeId', ParseIntPipe) typeId: FlaskUserTypesEnum,
   ) {
-    const accessToken = req.headers['authorization'];
     const role = convertFlaskToSayRoles(typeId);
 
     try {
@@ -92,13 +93,17 @@ export class WalletController {
         role === SAYPlatformRoles.PURCHASER ||
         role === SAYPlatformRoles.NGO_SUPERVISOR
       ) {
+        const panelFlaskUserId = req.headers['panelFlaskUserId'];
+        if (!isAuthenticated(panelFlaskUserId, typeId)) {
+          throw new WalletExceptionFilter(403, 'You are not authenticated!');
+        }
         const flaskApi = new SocialWorkerAPIApi();
         const socialWorker = await flaskApi.apiV2SocialworkersIdGet(
-          accessToken,
-          userId,
+          config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token,
+          panelFlaskUserId,
         );
 
-        if (socialWorker.id === userId) {
+        if (socialWorker.id === panelFlaskUserId) {
           if (!session.nonce) {
             session.nonce = generateNonce();
             session.save();
@@ -110,12 +115,16 @@ export class WalletController {
         }
       }
       if (role === SAYPlatformRoles.FAMILY) {
+        const dappFlaskUserId = req.headers['dappFlaskUserId'];
+        if (!isAuthenticated(dappFlaskUserId, typeId)) {
+          throw new WalletExceptionFilter(403, 'You are not authenticated!');
+        }
         const flaskApi = new UserAPIApi();
         const familyMember = await flaskApi.apiV2UserUserIduserIdGet(
-          accessToken,
+          config().dataCache.fetchDappAuthentication(dappFlaskUserId).token,
           'me',
         );
-        if (familyMember.id === userId) {
+        if (familyMember.id === dappFlaskUserId) {
           if (!session.nonce) {
             session.nonce = generateNonce();
             session.save();
@@ -294,10 +303,10 @@ export class WalletController {
       });
 
       if (counter - body.arrivedColumnNumber !== 0) {
-        throw new WalletExceptionFilter(
-          418,
-          'You have to announce arrivals first!',
-        );
+        // throw new WalletExceptionFilter(
+        //   418,
+        //   'You have to announce arrivals first!',
+        // );
       }
       const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
       const { need, child } = await this.syncService.syncNeed(
@@ -337,12 +346,6 @@ export class WalletController {
         );
       }
 
-      const eee = await this.userService.getContributorByFlaskId(
-        flaskUserId,
-        panelRole,
-      );
-      console.log(eee);
-
       return transaction;
     } catch (e) {
       throw new ServerError(e);
@@ -379,7 +382,6 @@ export class WalletController {
       }
 
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
-      console.log('transaction1');
 
       transaction = await this.walletService.prepareSignature(
         session.siwe.address,
@@ -700,7 +702,7 @@ export class WalletController {
     @Session() session: Record<string, any>,
   ) {
     if (body.chainId !== eEthereumNetworkChainId.mainnet) {
-      throw new ServerError('Please connect to Mainnet!', 500);
+      throw new ServerError('Please connect to Ethereum Mainnet!', 500);
     }
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
@@ -711,7 +713,6 @@ export class WalletController {
       const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
 
       console.log('\x1b[36m%s\x1b[0m', 'Preparing signature data ...\n');
-      console.log(session);
 
       transaction = await this.walletService.prepareSignature(
         session.siwe.address,
@@ -728,25 +729,51 @@ export class WalletController {
   @Get(`signature/:signature`)
   @ApiOperation({ description: 'Get a signature' })
   async getSignature(
+    @Req() req: Request,
     @Session() session: Record<string, any>,
     @Param('signature') signature: string,
   ) {
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+
     if (!session.siwe) {
       throw new WalletExceptionFilter(401, 'You have to first sign_in');
     }
-    return await this.walletService.getSignature(signature);
+    const signatureEntity = await this.walletService.getSignature(signature);
+    // dapp
+    if (
+      signatureEntity &&
+      signatureEntity.role === SAYPlatformRoles.FAMILY &&
+      dappFlaskUserId !== signatureEntity.flaskUserId &&
+      !isAuthenticated(panelFlaskUserId, FlaskUserTypesEnum.FAMILY)
+    ) {
+      throw new ObjectNotFound('Not Your signature');
+    }
+    // panel
+    if (
+      signatureEntity &&
+      signatureEntity.role !== convertFlaskToSayRoles(panelFlaskTypeId) &&
+      panelFlaskUserId !== signatureEntity.flaskUserId &&
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId)
+    ) {
+      throw new ObjectNotFound('Not Your signature');
+    }
+
+    return signatureEntity;
   }
 
   @Get(`all/signatures`)
   @ApiOperation({ description: 'Get all signatures' })
   async getSignatures(@Req() req: Request) {
-    const flaskPanelUserId = Number(req.headers['panelFlaskUserId']);
-    const flaskPanelTypeId = Number(req.headers['panelFlaskTypeId']);
+    const panelFlaskUserId = Number(req.headers['panelFlaskUserId']);
+    const panelFlaskTypeId = Number(req.headers['panelFlaskTypeId']);
 
     if (
-      (flaskPanelTypeId !== FlaskUserTypesEnum.ADMIN &&
-        flaskPanelTypeId !== FlaskUserTypesEnum.SUPER_ADMIN) ||
-      !flaskPanelUserId
+      (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId) &&
+        panelFlaskTypeId !== FlaskUserTypesEnum.ADMIN &&
+        panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN) ||
+      !panelFlaskUserId
     ) {
       throw new WalletExceptionFilter(401, 'You are not the admin');
     }
@@ -759,11 +786,11 @@ export class WalletController {
     @Req() req: Request,
     @Param('flaskUserId') flaskUserId: number,
   ) {
-    const panelUserId = Number(req.headers['panelFlaskUserId']);
-    if (panelUserId !== Number(flaskUserId)) {
+    const panelFlaskUserId = Number(req.headers['panelFlaskUserId']);
+    if (panelFlaskUserId !== Number(flaskUserId)) {
       throw new WalletExceptionFilter(401, 'You only can get your signatures');
     }
-    return await this.walletService.getUserSignatures(panelUserId);
+    return await this.walletService.getUserSignatures(panelFlaskUserId);
   }
 
   @Delete(`signature/:signature`)
@@ -775,10 +802,11 @@ export class WalletController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN &&
-      panelFlaskUserId !== SUPER_ADMIN
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+      panelFlaskUserId !== SUPER_ADMIN_ID
     ) {
-      throw new WalletExceptionFilter(401, 'You Are not the Super admin');
+      throw new WalletExceptionFilter(403, 'You Are not the Super admin');
     }
     const theSignature = await this.walletService.getSignature(signature);
     return await this.walletService.deleteOne(theSignature.id);

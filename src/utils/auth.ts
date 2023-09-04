@@ -1,72 +1,100 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, Logger } from '@nestjs/common';
 import config from 'src/config';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { SocialWorkerAPIApi, UserAPIApi } from 'src/generated-sources/openapi';
+import { convertFlaskToSayRoles, timeDifference } from './helpers';
+import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 
-export async function checkFlaskCacheAuthentication(
-  req: {
-    headers: { [x: string]: any };
-  },
-  logger: { warn: (arg0: string) => void; log: (arg0: string) => void },
-) {
+export async function checkFlaskCacheAuthentication(req, logger: Logger) {
   logger.warn('Passing through MiddleWare...');
 
   const accessToken = req.headers['authorization'];
-  const requestFlaskId = req.headers['flaskid'];
+  const requestFlaskId = Number(req.headers['flaskid']);
 
   if (!accessToken || !requestFlaskId) {
     throw new ForbiddenException('Access Token and the ID is required!');
   }
   try {
     // for Dapp
-    if (String(requestFlaskId) === 'me') {
+    if (
+      String(req.headers.origin) === 'http://localhost:3001' ||
+      String(req.headers.origin) === 'https://dapp.saydao.org' ||
+      String(req.headers.origin) === 'https://beta.sayapp.company'
+    ) {
+      // If in Cache
       logger.log('fetching dapp cache token...');
-      const fetchedToken = config().dataCache.fetchDappAccessToken();
-      if (fetchedToken[requestFlaskId]) {
-        logger.log('Got the cache token!...');
-        req.headers['appFlaskUserId'] = requestFlaskId;
+      let fetched = config().dataCache.fetchDappAuthentication(requestFlaskId);
+      if (fetched) {
+        logger.log('fetched dapp cache token...');
+        if (
+          timeDifference(fetched.createdAt, new Date()).mm >= 1 ||
+          fetched.token !== accessToken
+        ) {
+          logger.warn('removing old user token...');
+          config().dataCache.deleteDappAccessToken(requestFlaskId);
+          req.headers['dappFlaskUserId'] = '';
+          req.headers['flaskId'] = '';
+          fetched = config().dataCache.fetchDappAuthentication(requestFlaskId);
+        } else {
+          logger.log('Got the cache token!...');
+          req.headers['dappFlaskUserId'] = requestFlaskId;
+          return;
+        }
       }
-      if (
-        !fetchedToken[requestFlaskId] ||
-        fetchedToken[requestFlaskId] !== accessToken
-      ) {
+
+      // If not in Cache
+      if (!fetched || fetched.isExpired) {
         logger.warn(
           'No token at cache, Authenticating from Family Flask Api...',
         );
         const userFlaskApi = new UserAPIApi();
         const familyMember = await userFlaskApi.apiV2UserUserIduserIdGet(
           accessToken,
-          requestFlaskId,
+          'me',
         );
         if (!familyMember) {
           throw new ForbiddenException('You Do not have Access!');
+        } else {
+          req.headers['dappFlaskUserId'] = familyMember.id;
+
+          config().dataCache.storeDappAccessToken(
+            accessToken,
+            familyMember.id,
+            new Date(),
+          );
+
+          logger.log('saved token...');
+          logger.log('Authenticated...');
         }
-        req.headers['appFlaskUserId'] = familyMember.id;
-
-        // if (fetchedToken[flaskId]) {
-        //   logger.warn('removing old user token...');
-        //   config().dataCache.deleteDappAccessToken(flaskId);
-        // }
-        config().dataCache.storeDappAccessToken(accessToken, familyMember.id);
-
-        logger.log('saved token...');
-        logger.log('Authenticated...');
       }
     }
     // for panel
-    else if (Number(requestFlaskId) > 0) {
+    else if (
+      String(req.headers.origin) === 'http://localhost:3000' ||
+      String(req.headers.origin) === 'https://panel.saydao.org'
+    ) {
       logger.log('fetching panel cache token...');
-      const fetchedToken = config().dataCache.fetchPanelAccessToken();
-      if (fetchedToken[requestFlaskId]) {
-        logger.log('Got the cache token!...');
-        req.headers['panelFlaskUserId'] = requestFlaskId;
-        req.headers['panelFlaskTypeId'] =
-          fetchedToken[requestFlaskId].flaskTypeId;
+      let fetched = config().dataCache.fetchPanelAuthentication(requestFlaskId);
+      if (fetched) {
+        if (
+          timeDifference(fetched.createdAt, new Date()).mm > 1 ||
+          fetched.token !== accessToken
+        ) {
+          logger.warn('removing old user token...');
+          config().dataCache.deletePanelAccessToken(requestFlaskId);
+          req.headers['panelFlaskTypeId'] = '';
+          req.headers['panelFlaskUserId'] = '';
+          req.headers['flaskId'] = '';
+          fetched = config().dataCache.fetchPanelAuthentication(requestFlaskId);
+        } else {
+          logger.log('Got the cache token!...');
+          req.headers['panelFlaskUserId'] = requestFlaskId;
+          req.headers['panelFlaskTypeId'] = fetched.flaskUserType;
+          return;
+        }
       }
-      if (
-        !fetchedToken[requestFlaskId] ||
-        fetchedToken[requestFlaskId].token !== accessToken
-      ) {
+
+      if (!fetched || fetched.isExpired) {
         logger.warn(
           'No token at cache, Authenticating from Social worker Flask Api...',
         );
@@ -78,32 +106,54 @@ export async function checkFlaskCacheAuthentication(
         if (!socialWorker) {
           throw new ForbiddenException('You Do not have Access!');
         }
-        console.log(socialWorker);
 
         req.headers['panelFlaskUserId'] = socialWorker.id;
         req.headers['panelFlaskTypeId'] = socialWorker.typeId;
 
-        // if (fetchedToken[flaskId]) {
-        //   logger.warn('removing old user token...');
-        //   config().dataCache.deletePanelAccessToken(flaskId);
-        // }
         config().dataCache.storePanelAccessToken(
           accessToken,
           socialWorker.id,
           socialWorker.typeId,
+          convertFlaskToSayRoles(socialWorker.typeId),
+          new Date(),
         );
 
         logger.log('saved token...');
+        console.log(
+          config().dataCache.fetchPanelAuthentication(socialWorker.id),
+        );
         logger.log('Authenticated...');
       }
     } else {
       throw new ServerError('Hmmm, something is not right!', 500);
     }
   } catch (e) {
-    throw new ForbiddenException({
-      status: e.status,
-      message: e.statusText || e.response,
-      hint: 'access token in middleware!',
-    });
+    throw new ForbiddenException(e);
+  }
+}
+
+export function isAuthenticated(
+  flaskUserId: number,
+  userType: FlaskUserTypesEnum,
+): boolean {
+  console.log('checking authentication...');
+  if (userType === FlaskUserTypesEnum.FAMILY) {
+    const dappAuthentication =
+      config().dataCache.fetchDappAuthentication(flaskUserId);
+    if (!dappAuthentication || dappAuthentication.isExpired === true) {
+      return false;
+    } else {
+      return true;
+    }
+  } else {
+    const panelAuthentication =
+      config().dataCache.fetchPanelAuthentication(flaskUserId);
+    console.log(panelAuthentication);
+
+    if (!panelAuthentication || panelAuthentication.isExpired === true) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }

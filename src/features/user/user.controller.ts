@@ -1,5 +1,6 @@
 import {
   Controller,
+  ForbiddenException,
   Get,
   Param,
   ParseIntPipe,
@@ -9,7 +10,10 @@ import {
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ServerError } from '../../filters/server-exception.filter';
-import { SAYPlatformRoles } from 'src/types/interfaces/interface';
+import {
+  FlaskUserTypesEnum,
+  SAYPlatformRoles,
+} from 'src/types/interfaces/interface';
 import {
   convertFlaskToSayRoles,
   getOrganizedNeeds,
@@ -27,6 +31,7 @@ import { NgoService } from '../ngo/ngo.service';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { SignatureEntity } from 'src/entities/signature.entity';
 import { IpfsEntity } from 'src/entities/ipfs.entity';
+import { isAuthenticated } from 'src/utils/auth';
 
 @ApiTags('Users')
 @ApiSecurity('flask-access-token')
@@ -49,13 +54,29 @@ export class UserController {
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all users' })
-  async getUsers() {
+  async getUsers(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     return await this.userService.getUsers();
   }
 
   @Get(`all/contributor`)
   @ApiOperation({ description: 'Get all contributors' })
-  async getContributors() {
+  async getContributors(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     return await this.userService.getContributors();
   }
 
@@ -64,9 +85,13 @@ export class UserController {
   @ApiOperation({ description: 'Get user My page' })
   async fetchMyPage(
     @Req() req: Request,
-    @Param('userId', ParseIntPipe) userId: number,
     @Param('typeId', ParseIntPipe) typeId: number,
   ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not authorized!');
+    }
     const time1 = new Date().getTime();
 
     const X_LIMIT = parseInt(req.headers['x-limit']);
@@ -98,12 +123,12 @@ export class UserController {
           '\x1b[33m%s\x1b[0m',
           `Role for my Page is SOCIAL_WORKER...\n`,
         );
-        socialWorkerId = userId;
+        socialWorkerId = panelFlaskUserId;
         auditorId = null;
         purchaserId = null;
         supervisorId = null;
         const socialWorker = await this.userService.getFlaskSocialWorker(
-          userId,
+          panelFlaskUserId,
         ); // sw ngo
         ngoIds = [socialWorker.ngo_id];
         children = await this.childrenService.countChildren(ngoIds);
@@ -111,7 +136,7 @@ export class UserController {
       if (role === SAYPlatformRoles.AUDITOR) {
         console.log('\x1b[33m%s\x1b[0m', `Role for my Page is AUDITOR...\n`);
         socialWorkerId = null;
-        auditorId = userId;
+        auditorId = panelFlaskUserId;
         purchaserId = null;
         supervisorId = null;
 
@@ -128,7 +153,7 @@ export class UserController {
         console.log('\x1b[33m%s\x1b[0m', `Role for my Page is PURCHASER...\n`);
         socialWorkerId = null;
         auditorId = null;
-        purchaserId = userId;
+        purchaserId = panelFlaskUserId;
         supervisorId = null;
         swIds = await this.userService
           .getFlaskSwIds()
@@ -147,10 +172,10 @@ export class UserController {
         socialWorkerId = null;
         auditorId = null;
         purchaserId = null;
-        supervisorId = userId;
+        supervisorId = panelFlaskUserId;
 
         // for ngo supervisor
-        const supervisor = await this.userService.getFlaskSocialWorker(userId);
+        const supervisor = await this.userService.getFlaskSocialWorker(panelFlaskUserId);
         swIds = await this.userService
           .getFlaskSocialWorkerByNgo(supervisor.ngo_id)
           .then((r) => r.map((s) => s.id));
@@ -249,7 +274,7 @@ export class UserController {
       if (role === SAYPlatformRoles.AUDITOR) {
         tickets = await this.ticketService.getTickets();
       } else {
-        tickets = await this.ticketService.getUserTickets(userId);
+        tickets = await this.ticketService.getUserTickets(panelFlaskUserId);
       }
       console.log(
         '\x1b[33m%s\x1b[0m',
@@ -343,7 +368,7 @@ export class UserController {
           deliveredCount -
           notConfirmedCount,
       },
-      userId,
+      panelFlaskUserId,
       typeId,
       needs: organizedNeeds,
       children,

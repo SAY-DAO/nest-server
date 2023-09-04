@@ -36,6 +36,7 @@
     "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^6.1.0",
     "@nestjs/terminus": "^9.1.1",
+    "@nestjs/throttler": "^4.2.1",
     "@nestjs/typeorm": "^9.0.1",
     "@nestjs/websockets": "^9.3.9",
     "@openapitools/openapi-generator-cli": "^2.5.2",

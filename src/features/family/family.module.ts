@@ -19,11 +19,13 @@ import { AllUserEntity } from 'src/entities/user.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { PaymentEntity } from 'src/entities/payment.entity';
+import { PaymentService } from '../payment/payment.service';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, Family, User, Child, SocialWorker, UserFamily],
+      [Need, Family, User, Child, SocialWorker, UserFamily, Payment],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -33,7 +35,7 @@ import { PaymentEntity } from 'src/entities/payment.entity';
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
-      PaymentEntity
+      PaymentEntity,
     ]),
   ],
   controllers: [FamilyController],
@@ -43,6 +45,7 @@ import { PaymentEntity } from 'src/entities/payment.entity';
     WalletService,
     NeedService,
     UserService,
+    PaymentService,
   ],
 })
 export class FamilyModule implements NestModule {

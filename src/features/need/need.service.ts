@@ -207,7 +207,6 @@ export class NeedService {
       configuration,
       'https://api.s.sayapp.company',
       (url: 'https://api.s.sayapp.company/api'): Promise<Response> => {
-        console.log(url);
         return fetch(url);
       },
     );
