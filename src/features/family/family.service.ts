@@ -97,7 +97,7 @@ export class FamilyService {
       .where('user.id = :userId', { userId: userId })
       .andWhere('child.id = :childId', { childId: childId })
       .andWhere('need.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
-      .andWhere('payment.id_user = :userId', { userId: userId })
+      .andWhere('payment.id_user = :pUserId', { pUserId: userId })
       .andWhere('payment.id_need IS NOT NULL')
       .andWhere('payment.id IS NOT NULL')
       .andWhere('payment.verified IS NOT NULL')
@@ -134,9 +134,9 @@ export class FamilyService {
           statusNotPaid: PaymentStatusEnum.COMPLETE_PAY,
         })
         .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-        .andWhere(userId > 0 && `payment.id_user = :userId`, { userId: userId })
-        .andWhere(userId > 0 && `needFamily.id_user = :userId`, {
-          userId: userId,
+        .andWhere(userId > 0 && `payment.id_user = :pUserId`, { pUserId: userId })
+        .andWhere(userId > 0 && `needFamily.id_user = :nUserId`, {
+          nUserId: userId,
         })
         // -----> From here: diff from what we get on panel delivered column
         .andWhere('needFamily.isDeleted = :needFamilyDeleted', {
@@ -148,13 +148,11 @@ export class FamilyService {
         //<------- to here
         .andWhere('payment.id IS NOT NULL')
         .andWhere('payment.verified IS NOT NULL')
-        // .andWhere('payment.order_id IS NOT NULL')
         .andWhere('payment.id_need IS NOT NULL')
         .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
           testNgoIds: [3, 14],
         })
         .select([
-          // 'need',
           'need.id',
           'need.created',
           'need.child_delivery_date',

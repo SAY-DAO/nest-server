@@ -106,7 +106,7 @@ export class ScheduleService {
     this.logger.debug('Called every Month');
     let actives = config().dataCache.fetchActiveFamilies();
     if (!actives) {
-      actives = await this.analyticService.getChildFamilyAnalytic();
+      actives = await this.analyticService.getChildrenFamilyAnalytic();
       config().dataCache.storeActiveFamilies(actives);
     } else {
       this.logger.debug('Reading from cache');

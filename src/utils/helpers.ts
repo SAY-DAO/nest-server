@@ -25,7 +25,6 @@ export const CONTRIBUTION_COEFFICIENT = 1.2;
 const PARENTS_DELIVERED_RANGE = 1;
 const RELETIVES_DELIVERED_RANGE = 3;
 
-
 export function getAllFilesFromFolder(dir: string) {
   let results = [];
   if (checkIfFileOrDirectoryExists(dir)) {
@@ -606,7 +605,7 @@ export function findQuartileGrant(
       avg: 0,
     };
   }
-  // delivered <= Q1, Q1 < delivered <= Q2 , Q2 < delivered <= Q3,  delivered > Q3
+  // paid <= Q1, Q1 < paid <= Q2 , Q2 < paid <= Q3,  paid > Q3
   if (
     0 < userValues.fatherCompletePay &&
     userValues.fatherCompletePay <= Qs.Q1.father
@@ -690,7 +689,7 @@ export function findQuartileGrant(
   } else {
     khalehQGrant = 0;
   }
-  // Daie
+  // Daei
   if (
     0 < userValues.daeiCompletePay &&
     userValues.daeiCompletePay <= Qs.Q1.daei
@@ -769,10 +768,13 @@ export function getScattered(
   const series = [];
   const usersPays = [];
   if (data) {
+    // 1- go over all needs and seperate users who has paid
     data.forEach((n) => {
       n.participants.forEach((partic) => {
         // get the payment of the participant
-        const payment = n.payments.find((p) => p.id_user === partic.id_user);
+        const payment = n.payments.find(
+          (p) => p.id_user === partic.id_user && p.need_amount > 0,
+        );
         if (payment && payment.id_user) {
           usersPays.push({
             userId: payment.id_user,
@@ -782,7 +784,9 @@ export function getScattered(
       });
     });
   }
+  // 2- count total pays per users
   const listOfIds = [];
+  const finalList=[]
   usersPays.forEach((u) => {
     const onlyThisUserPays = usersPays.filter((p) => p.userId === u.userId);
     if (!listOfIds.find((item) => item.userId === u.userId)) {
@@ -793,13 +797,16 @@ export function getScattered(
 
   // {userId: 126, total: 101}
   const sorted = series.sort((a, b) => a.total - b.total);
-
-  // const listOfIds2 = [];
-  const scatteredData = sorted.map((s) => {
-    return [s.total, sorted.filter((o) => o.total === s.total).length];
-  });
+  const myList = [];
   // [[1,162],[4, 5], ...]
+ sorted.forEach((s) => {
+    if (!myList.find((e) => e === s.total)) {
+      myList.push(s.total);
+      finalList.push( [s.total, sorted.filter((o) => o.total === s.total).length]);
+    }
+  });
 
-  medianList.push({ [vRole]: scatteredData.map((el) => el[0]) });
-  return scatteredData;
+  // for quartile
+  medianList.push({ [vRole]: finalList.map((el) => el[0]) });
+  return finalList;
 }

@@ -344,7 +344,7 @@ export class AnalyticService {
     };
   }
 
-  async getChildFamilyAnalytic() {
+  async getChildrenFamilyAnalytic() {
     const childrenList = [];
     const children = await this.flaskChildRepository
       .createQueryBuilder('child')

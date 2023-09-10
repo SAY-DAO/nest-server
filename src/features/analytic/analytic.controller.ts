@@ -89,7 +89,7 @@ export class AnalyticController {
   @ApiOperation({ description: 'Get all delivered needs from flask' })
   async getNeedsAnalytic(
     @Req() req: Request,
-    @Param('typeId') needType: NeedTypeEnum,
+    @Param('needType') needType: NeedTypeEnum,
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
@@ -163,8 +163,10 @@ export class AnalyticController {
     }
     let activesList = config().dataCache.fetchActiveFamilies();
     if (!activesList) {
-      activesList = await this.analyticService.getChildFamilyAnalytic();
-      config().dataCache.storeActiveFamilies(activesList);
+      const childrenActiveFamilyList =
+        await this.analyticService.getChildrenFamilyAnalytic();
+      activesList = { actives: childrenActiveFamilyList, created: new Date() };
+      config().dataCache.storeActiveFamilies(childrenActiveFamilyList);
     }
     return activesList;
   }

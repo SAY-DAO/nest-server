@@ -368,30 +368,30 @@ export class FamilyController {
     return {
       needLogisticDuration: {
         logisticDurationQGrant,
-        logisticDuration,
-        min_logistic_duration,
-        Q1_logistic_duration,
-        Q2_logistic_duration,
-        Q3_logistic_duration,
-        max_logistic_duration,
+        logisticDuration: round(logisticDuration),
+        min_logistic_duration: round(min_logistic_duration),
+        Q1_logistic_duration: round(Q1_logistic_duration),
+        Q2_logistic_duration: round(Q2_logistic_duration),
+        Q3_logistic_duration: round(Q3_logistic_duration),
+        max_logistic_duration: round(max_logistic_duration),
       },
       needConfirmDuration: {
         confirmDurationQGrant,
-        confirmDuration,
-        min_confirm_duration,
-        Q1_confirm_duration,
-        Q2_confirm_duration,
-        Q3_confirm_duration,
-        max_confirm_duration,
+        confirmDuration: round(confirmDuration),
+        min_confirm_duration: round(min_confirm_duration),
+        Q1_confirm_duration: round(Q1_confirm_duration),
+        Q2_confirm_duration: round(Q2_confirm_duration),
+        Q3_confirm_duration: round(Q3_confirm_duration),
+        max_confirm_duration: round(max_confirm_duration),
       },
       needPaymentDuration: {
         payDurationQGrant,
-        paymentDuration,
-        min_payment_duration,
-        Q1_payment_duration,
-        Q2_payment_duration,
-        Q3_payment_duration,
-        max_payment_duration,
+        paymentDuration: round(paymentDuration),
+        min_payment_duration: round(min_payment_duration),
+        Q1_payment_duration: round(Q1_payment_duration),
+        Q2_payment_duration: round(Q2_payment_duration),
+        Q3_payment_duration: round(Q3_payment_duration),
+        max_payment_duration: round(max_payment_duration),
       },
       needPaymentAmount: {
         payAmountQGrant,
@@ -455,7 +455,9 @@ export class FamilyController {
       Number(dappFlaskUserId),
     );
 
-    const myChildren = await this.childrenService.getMyChildren(dappFlaskUserId);
+    const myChildren = await this.childrenService.getMyChildren(
+      dappFlaskUserId,
+    );
     // Check if paid at least one need for all my children
     let childrenStatus: {
       childId: any;
