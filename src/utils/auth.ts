@@ -71,6 +71,7 @@ export async function checkFlaskCacheAuthentication(req, logger: Logger) {
     // for panel
     else if (
       String(req.headers.origin) === 'http://localhost:3000' ||
+      !req.headers.origin ||
       String(req.headers.origin) === 'https://panel.saydao.org'
     ) {
       logger.log('fetching panel cache token...');

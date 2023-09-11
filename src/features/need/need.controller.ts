@@ -15,7 +15,7 @@ import {
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
-import { convertFlaskToSayRoles } from 'src/utils/helpers';
+import { convertFlaskToSayRoles, daysDifference } from 'src/utils/helpers';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -149,5 +149,20 @@ export class NeedController {
     }
 
     return await this.needService.getDuplicateNeeds(flaskChildId, flaskNeedId);
+  }
+
+  @Get('delete/old')
+  @ApiOperation({ description: 'Get duplicates need for confirming' })
+  async deleteOldNeeds() {
+    // delete old confirmed needs
+    const deleteCandidates = await this.needService.getDeleteCandidates();
+    for await (const need of deleteCandidates[0]) {
+      const daysDiff = daysDifference(need.confirmDate, new Date());
+      if (daysDiff > 90) {
+        const accessToken =
+          config().dataCache.fetchPanelAuthentication(25).token;
+        await this.needService.deleteOneNeed(need.id, accessToken);
+      }
+    }
   }
 }

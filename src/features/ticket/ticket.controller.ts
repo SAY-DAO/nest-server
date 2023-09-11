@@ -79,7 +79,7 @@ export class TicketController {
     }
   }
 
-  @Get('ticket/:id/:userId')
+  @Get('ticket/:id')
   async getTicketById(@Req() req: Request, @Param('id') id: string) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];

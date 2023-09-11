@@ -4,11 +4,13 @@ import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
+import { NeedService } from '../need/need.service';
 
 @Injectable()
 export class ScheduleService {
   constructor(
     private familyService: FamilyService,
+    private needService: NeedService,
     private analyticService: AnalyticService,
   ) {}
   private readonly logger = new Logger(ScheduleService.name);
@@ -80,11 +82,11 @@ export class ScheduleService {
     });
   }
 
-  @Timeout(2000)
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Timeout(15000)
+  // @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCronOnce() {
     this.logger.debug(
-      'Called only once after 10 minutes of the server initiation',
+      'Called only once after 15 seconds of the server initiation',
     );
     this.completePays();
     this.rolesCount();
@@ -104,6 +106,8 @@ export class ScheduleService {
   @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
   async handleMonthlyCron() {
     this.logger.debug('Called every Month');
+
+    // active families
     let actives = config().dataCache.fetchActiveFamilies();
     if (!actives) {
       actives = await this.analyticService.getChildrenFamilyAnalytic();

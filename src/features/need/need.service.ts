@@ -5,6 +5,7 @@ import { Need } from '../../entities/flaskEntities/need.entity';
 import { Brackets, IsNull, Not, Repository, UpdateResult } from 'typeorm';
 import {
   Configuration,
+  NeedAPIApi,
   PreneedAPIApi,
   PreneedSummary,
   PublicAPIApi,
@@ -737,12 +738,12 @@ export class NeedService {
     return await queryBuilder.getMany();
   }
 
-  async getDeleteCandidates(): Promise<any> {
+  async getDeleteCandidates(): Promise<[Need[], number]> {
     const date = new Date();
     date.setMonth(date.getMonth() - 3); // three months ago
     console.log(date);
 
-    const queryBuilder = this.flaskNeedRepository
+    return this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
         'need.child',
@@ -771,10 +772,17 @@ export class NeedService {
       ])
       .cache(60000)
       .limit(500)
-      .orderBy('need.created', 'ASC');
-    const accurateCount = await queryBuilder.getManyAndCount();
+      .orderBy('need.created', 'ASC')
+      .getManyAndCount();
+  }
 
-    return accurateCount;
+  async deleteOneNeed(flaskNeedId: number, accessToken: string) {
+    const needApi = new NeedAPIApi();
+    const deleted = needApi.apiV2NeedDeleteNeedIdneedIdPatch(
+      accessToken,
+      flaskNeedId,
+    );
+    return deleted;
   }
 
   async getMidjourneyNeeds(): Promise<Need[]> {
