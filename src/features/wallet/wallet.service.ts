@@ -172,7 +172,7 @@ export class WalletService {
       purchaser: need.purchaser.flaskUserId,
       familyMembers: need.verifiedPayments.map((p) => p.flaskUserId),
     };
-    let role;
+    let role: string;
     const allRoles = [];
 
     // could have multiple roles e.g. [Auditor, SocialWorker]
@@ -192,6 +192,8 @@ export class WalletService {
       role = getSAYRolePersian(SAYPlatformRoles.FAMILY).toString();
       allRoles.push(SAYPlatformRoles.FAMILY);
     }
+    console.log(need);
+    
     if (!role) {
       throw new WalletExceptionFilter(
         403,

@@ -10,7 +10,6 @@ import {
   FlaskUserTypesEnum,
   NeedTypeEnum,
   SAYPlatformRoles,
-  SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import { convertFlaskToSayRoles } from 'src/utils/helpers';
 import { UserService } from '../user/user.service';
@@ -192,10 +191,8 @@ export class AnalyticController {
   async getUserContribution(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
-    ) {
+
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
     const role = convertFlaskToSayRoles(Number(panelFlaskTypeId));
