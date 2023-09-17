@@ -302,12 +302,12 @@ export class WalletController {
         }
       });
 
-      if (counter - body.arrivedColumnNumber !== 0) {
-        throw new WalletExceptionFilter(
-          418,
-          'You have to announce arrivals first!',
-        );
-      }
+      // if (counter - body.arrivedColumnNumber !== 0) {
+      //   throw new WalletExceptionFilter(
+      //     418,
+      //     'You have to announce arrivals first!',
+      //   );
+      // }
       const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
       const { need, child } = await this.syncService.syncNeed(
         flaskNeed,
@@ -786,7 +786,9 @@ export class WalletController {
     @Req() req: Request,
     @Param('flaskUserId') flaskUserId: number,
   ) {
+    
     const panelFlaskUserId = Number(req.headers['panelFlaskUserId']);
+    console.log(panelFlaskUserId);
     if (panelFlaskUserId !== Number(flaskUserId)) {
       throw new WalletExceptionFilter(401, 'You only can get your signatures');
     }
