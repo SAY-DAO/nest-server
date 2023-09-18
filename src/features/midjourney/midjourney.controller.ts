@@ -136,7 +136,7 @@ export class MidjourneyController {
         });
       }
     });
-    return list;
+    return { total: needsWithSignatures.meta.totalItems, list };
   }
 
   @ApiFileResponse('image/png')
