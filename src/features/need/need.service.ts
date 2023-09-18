@@ -109,7 +109,7 @@ export class NeedService {
     const need = this.needRepository.findOne({
       where: {
         flaskId: flaskId,
-        verifiedPayments: { verified: Not(IsNull()) },
+        // verifiedPayments: { verified: Not(IsNull()) },
       },
       relations: {
         verifiedPayments: true,
