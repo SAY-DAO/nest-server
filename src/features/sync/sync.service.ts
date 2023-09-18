@@ -701,7 +701,7 @@ export class SyncService {
     console.log('----------------------------------');
     console.log(nestNeed);
     console.log(flaskNeed.id);
-return
+
     if (!nestNeed) {
       console.log('\x1b[36m%s\x1b[0m', 'Creating The Need ...\n');
       const needNgo = await this.ngoService.getNgoById(
