@@ -23,7 +23,7 @@ export const checkIfFileOrDirectoryExists = (path: string): boolean => {
  */
 export const getFile = async (
   path: string,
-  encoding: { encoding?: null; flag?: string; },
+  encoding: { encoding?: null; flag?: string },
 ): Promise<string | Buffer> => {
   const readFile = promisify(fs.readFile);
 

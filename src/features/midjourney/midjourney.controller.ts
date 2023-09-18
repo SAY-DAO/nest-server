@@ -252,7 +252,7 @@ export class MidjourneyController {
       return {
         result,
         flaskNeedId,
-        message: `../midjourney-bot/main/need-images/need-${flaskNeedId} is deleted`,
+        message: `${flaskNeedId} is deleted`,
       };
     } else {
       return {
