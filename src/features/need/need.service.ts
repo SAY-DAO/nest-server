@@ -148,8 +148,6 @@ export class NeedService {
     needId: string,
     selectedImage: string,
   ): Promise<UpdateResult> {
-    console.log(needId, selectedImage);
-
     return this.needRepository.update(needId, {
       midjourneyImage: selectedImage,
     });

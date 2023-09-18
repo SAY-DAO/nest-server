@@ -246,6 +246,9 @@ export class MidjourneyController {
     const path = `../midjourney-bot/main/need-images/need-${flaskNeedId}`;
     if (checkIfFileOrDirectoryExists(path)) {
       const result = await rimraf(path);
+      const need = await this.needService.getNeedByFlaskId(flaskNeedId);
+      await this.needService.updateNeedMidjourney(need.id, '');
+
       return {
         result,
         flaskNeedId,
