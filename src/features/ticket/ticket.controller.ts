@@ -143,8 +143,8 @@ export class TicketController {
         body.payments,
         body.statuses,
       );
-return
-    const createTicketDetails: CreateTicketParams = {
+
+      const createTicketDetails: CreateTicketParams = {
       title: body.title,
       flaskNeedId: body.flaskNeedId,
       need: need,
