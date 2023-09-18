@@ -6,6 +6,7 @@ import {
   Res,
   Req,
   ForbiddenException,
+  Delete,
 } from '@nestjs/common';
 import { MidjourneyService } from './midjourney.service';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -17,9 +18,14 @@ import { Response as expressResponse } from 'express';
 import { getAllFilesFromFolder } from 'src/utils/helpers';
 import { MessageBody } from '@nestjs/websockets';
 import { FamilyService } from '../family/family.service';
-import { readFileSync } from 'fs';
+import { rimraf } from 'rimraf';
 import { isAuthenticated } from 'src/utils/auth';
-import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
+import {
+  FlaskUserTypesEnum,
+  SUPER_ADMIN_ID,
+} from 'src/types/interfaces/interface';
+import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
+import { checkIfFileOrDirectoryExists } from 'src/utils/file';
 
 @ApiTags('Midjourney')
 @Controller('midjourney')
@@ -104,12 +110,21 @@ export class MidjourneyController {
     ) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
+
+    const X_LIMIT = parseInt(req.headers['x-limit']);
+    const X_TAKE = parseInt(req.headers['x-take']);
+    const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
+    const page = X_TAKE + 1;
+    const needsWithSignatures =
+      await this.midjourneyService.getReadyToSignNeeds({
+        page: page,
+        limit: limit,
+        path: '',
+      });
+
     const list = [];
 
-    const needsWithSignatures =
-      await this.familyService.getAllFamilyReadyToSignNeeds();
-
-    needsWithSignatures.forEach((theNeed) => {
+    needsWithSignatures.data.forEach((theNeed) => {
       if (theNeed) {
         list.push({
           needFlaskId: theNeed.flaskId,
@@ -210,5 +225,37 @@ export class MidjourneyController {
     res.sendFile(fileName, {
       root: `../midjourney-bot/main/need-images/need-${flaskNeedId}`,
     });
+  }
+
+  @Delete(`images/:flaskNeedId`)
+  @ApiOperation({ description: 'Delete folder of need images' })
+  async deleteSignature(
+    @Req() req: Request,
+    @Param('flaskNeedId') flaskNeedId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+      panelFlaskUserId !== SUPER_ADMIN_ID
+    ) {
+      throw new WalletExceptionFilter(403, 'You Are not the Super admin');
+    }
+
+    const path = `../midjourney-bot/main/need-images/need-${flaskNeedId}`;
+    if (checkIfFileOrDirectoryExists(path)) {
+      const result = await rimraf(path);
+      return {
+        result,
+        flaskNeedId,
+        message: `../midjourney-bot/main/need-images/need-${flaskNeedId} is deleted`,
+      };
+    } else {
+      return {
+        flaskNeedId,
+        message: `Folder does not exist`,
+      };
+    }
   }
 }

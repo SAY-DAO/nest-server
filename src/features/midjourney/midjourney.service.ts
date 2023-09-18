@@ -8,10 +8,21 @@ import config from 'src/config';
 import { checkIfFileOrDirectoryExists, deleteFile } from 'src/utils/file';
 import { NeedService } from '../need/need.service';
 import { FamilyService } from '../family/family.service';
+import { SAYPlatformRoles } from 'src/types/interfaces/interface';
+import {
+  Paginated,
+  PaginateQuery,
+  paginate as nestPaginate,
+} from 'nestjs-paginate';
+import { PaymentEntity } from 'src/entities/payment.entity';
+import { SignatureEntity } from 'src/entities/signature.entity';
+import { NgoEntity } from 'src/entities/ngo.entity';
 
 @Injectable()
 export class MidjourneyService {
   constructor(
+    @InjectRepository(NeedEntity)
+    private needRepository: Repository<NeedEntity>,
     @InjectRepository(MidjourneyEntity)
     private readonly midjourneyRepository: Repository<MidjourneyEntity>,
     private readonly familyService: FamilyService,
@@ -29,7 +40,7 @@ export class MidjourneyService {
       },
     });
   }
-  
+
   async createImage(values: {
     flaskNeedId: number;
     need: NeedEntity;
@@ -87,5 +98,41 @@ export class MidjourneyService {
     const need = await this.needService.getNeedByFlaskId(flaskNeedId);
     await this.needService.updateNeedMidjourney(need.id, selectedImage);
     return await this.needService.getNeedByFlaskId(flaskNeedId);
+  }
+
+  async getReadyToSignNeeds(
+    options: PaginateQuery,
+  ): Promise<Paginated<NeedEntity>> {
+    console.log(options);
+    
+    const queryBuilder = this.needRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.ngo',
+        NgoEntity,
+        'ngo',
+        'ngo.flaskNgoId = need.flaskNgoId',
+      )
+      .leftJoinAndMapMany(
+        'need.verifiedPayments',
+        PaymentEntity,
+        'verifiedPayments',
+        'verifiedPayments.flaskNeedId = need.flaskId',
+      )
+      .leftJoinAndMapMany(
+        'need.signatures',
+        SignatureEntity,
+        'signature',
+        'signature.flaskNeedId = need.flaskId',
+      )
+      .where('signature.role = :role', {
+        role: SAYPlatformRoles.SOCIAL_WORKER,
+      });
+
+    return await nestPaginate<NeedEntity>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['createdAt', 'DESC']],
+      nullSort: 'last',
+    });
   }
 }

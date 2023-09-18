@@ -36,7 +36,7 @@ import { PaymentEntity } from 'src/entities/payment.entity';
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
-      PaymentEntity
+      PaymentEntity,
     ]),
   ],
   controllers: [MidjourneyController],
