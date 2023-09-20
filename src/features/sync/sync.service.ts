@@ -478,7 +478,6 @@ export class SyncService {
           nestReceipts.push(nestReceipt);
           console.log('\x1b[36m%s\x1b[0m', 'Created a Receipt ...\n');
         } else if (nestReceipt) {
-          console.log(receiptDetails);
           await this.receiptService
             .updateReceipt(receiptDetails, nestReceipt)
             .then();
@@ -569,7 +568,6 @@ export class SyncService {
           nestPayment = await this.paymentService.getPaymentById(
             payments[p].id,
           );
-          console.log(nestFamilyMember);
           console.log('\x1b[36m%s\x1b[0m', 'Payment updated ...\n');
         } else {
           console.log('\x1b[36m%s\x1b[0m', 'Skipped Payment updating ...\n');

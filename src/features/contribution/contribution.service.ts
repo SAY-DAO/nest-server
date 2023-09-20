@@ -12,7 +12,11 @@ export class ContributionService {
   ) {}
 
   getAvailableContributions(): Promise<ContributionEntity[]> {
-    return this.contributionRepository.find();
+    return this.contributionRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 
   async getContribution(contributionId: string): Promise<ContributionEntity> {

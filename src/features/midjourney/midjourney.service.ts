@@ -103,8 +103,6 @@ export class MidjourneyService {
   async getReadyToSignNeeds(
     options: PaginateQuery,
   ): Promise<Paginated<NeedEntity>> {
-    console.log(options);
-    
     const queryBuilder = this.needRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(

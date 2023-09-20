@@ -732,15 +732,12 @@ export class NeedService {
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');
-    console.log('need');
     return await queryBuilder.getMany();
   }
 
   async getDeleteCandidates(): Promise<[Need[], number]> {
     const date = new Date();
     date.setMonth(date.getMonth() - 3); // three months ago
-    console.log(date);
-
     return this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(

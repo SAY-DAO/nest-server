@@ -192,7 +192,6 @@ export class WalletService {
       role = getSAYRolePersian(SAYPlatformRoles.FAMILY).toString();
       allRoles.push(SAYPlatformRoles.FAMILY);
     }
-    console.log(need);
     
     if (!role) {
       throw new WalletExceptionFilter(

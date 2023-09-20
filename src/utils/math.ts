@@ -1,6 +1,5 @@
 export function median(values: any[]) {
-    console.log(values);
-    if (values.length === 0) throw new Error('No inputs');
+  if (values.length === 0) throw new Error('No inputs');
   values.sort((a, b) => {
     return a - b;
   });

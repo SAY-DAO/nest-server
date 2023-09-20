@@ -788,7 +788,6 @@ export class WalletController {
   ) {
     
     const panelFlaskUserId = Number(req.headers['panelFlaskUserId']);
-    console.log(panelFlaskUserId);
     if (panelFlaskUserId !== Number(flaskUserId)) {
       throw new WalletExceptionFilter(401, 'You only can get your signatures');
     }

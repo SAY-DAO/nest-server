@@ -33,11 +33,16 @@ export class ContributionController {
   getAvailableContributions(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
-    ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (panelFlaskUserId) {
+      if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+        throw new ForbiddenException(403, 'You Are not authorized');
+      }
+    }
+    if (dappFlaskUserId) {
+      if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+        throw new ForbiddenException(403, 'You Are not authorized');
+      }
     }
     return this.contributionService.getAvailableContributions();
   }

@@ -477,7 +477,6 @@ export function ticketNotifications(
       ),
     );
     // when a user creates a ticket, the participants won't have a view assigned to them
-    // console.log(t.views);
     const myView = t.views.find((v) => v.flaskUserId === flaskUserId);
     const latestView = t.views.find(
       (v) =>

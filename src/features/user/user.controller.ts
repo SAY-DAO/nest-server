@@ -337,11 +337,6 @@ export class UserController {
       purchasedCount,
       deliveredCount,
     );
-    console.log('X_LIMIT2');
-    console.log(X_LIMIT);
-    console.log(X_TAKE);
-    console.log(limit);
-    console.log(page);
 
     return {
       page,
