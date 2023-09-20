@@ -95,7 +95,16 @@ export class NeedController {
     }
     return await this.needService.getFlaskNeed(id);
   }
-
+  @Get(`/:flaskId`)
+  @ApiOperation({ description: 'Get a need from db 2' })
+  async getNeedByFlaskId(@Req() req: Request, @Param('flaskId') flaskId: number) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(401, 'You Are not authorized!');
+    }
+    return await this.needService.getNeedByFlaskId(flaskId);
+  }
   @Get(`preneeds`)
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getPrNeed(@Req() req: Request) {
