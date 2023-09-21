@@ -33,10 +33,13 @@ export class PaymentService {
       },
     });
   }
-  getPaymentById(flaskId: number): Promise<PaymentEntity> {
+  getPaymentByFlaskId(flaskId: number): Promise<PaymentEntity> {
     const user = this.paymentRepository.findOne({
       where: {
         flaskId: flaskId,
+      },
+      relations: {
+        need: true,
       },
     });
     return user;

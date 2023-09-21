@@ -498,7 +498,7 @@ export class SyncService {
     const nestPayments = [];
     if (payments) {
       for (let p = 0; p < payments.length; p++) {
-        nestPayment = await this.paymentService.getPaymentById(payments[p].id);
+        nestPayment = await this.paymentService.getPaymentByFlaskId(payments[p].id);
 
         const {
           id: paymentFlaskId,
@@ -565,7 +565,7 @@ export class SyncService {
           await this.paymentService
             .updatePayment(nestPayment.id, paymentDetails, nestFamilyMember)
             .then();
-          nestPayment = await this.paymentService.getPaymentById(
+          nestPayment = await this.paymentService.getPaymentByFlaskId(
             payments[p].id,
           );
           console.log('\x1b[36m%s\x1b[0m', 'Payment updated ...\n');
