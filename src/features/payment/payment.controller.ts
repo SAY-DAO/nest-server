@@ -35,6 +35,23 @@ export class PaymentController {
     return await this.paymentService.getPayments();
   }
 
+  @Get(`user/all/:flaskUserId`)
+  @ApiOperation({ description: 'Get all needs payments' })
+  async getUserPayments(
+    @Req() req: Request,
+    @Param('flaskUserId') flaskUserId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+    return await this.paymentService.getUserPayments(flaskUserId);
+  }
+
   @Get(`all/:flaskNeedId`)
   @ApiOperation({ description: 'Get all need payments' })
   async getNeedPayments(

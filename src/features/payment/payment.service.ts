@@ -23,9 +23,16 @@ export class PaymentService {
   ) {}
 
   getPayments(): Promise<PaymentEntity[]> {
-    return this.paymentRepository.find({});
+    return this.paymentRepository.find();
   }
 
+  getUserPayments(flaskUserId: number): Promise<PaymentEntity[]> {
+    return this.paymentRepository.find({
+      where: {
+        flaskUserId,
+      },
+    });
+  }
   getPaymentById(flaskId: number): Promise<PaymentEntity> {
     const user = this.paymentRepository.findOne({
       where: {
