@@ -286,7 +286,7 @@ export class NeedController {
           flaskNeed.id,
         );
 
-        if (!statuses) {
+        if (!statuses || !statuses[0]) {
           // we do not have a history of purchaser id before implementing our new features
           if (new Date(flaskNeed.doneAt).getFullYear() < 2023) {
             purchaserId = 31; // Nyaz
