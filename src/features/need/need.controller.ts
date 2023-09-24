@@ -129,6 +129,20 @@ export class NeedController {
     return await this.needService.getNestAuditorNeeds(flaskUserId);
   }
 
+  @Get(`nest/purchasedBy/:flaskUserId`)
+  @ApiOperation({ description: 'Get all done needs from nest' })
+  async getNestPurchaserNeeds(
+    @Req() req: Request,
+    @Param('flaskUserId') flaskUserId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(401, 'You Are not authorized!');
+    }
+    return await this.needService.getNestPurchaserNeeds(flaskUserId);
+  }
+
   @Get(`flask/:id`)
   @ApiOperation({ description: 'Get a need from db 2' })
   async getFlaskNeed(@Req() req: Request, @Param('id') id: number) {

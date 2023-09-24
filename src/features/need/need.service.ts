@@ -84,7 +84,22 @@ export class NeedService {
       },
     });
   }
-
+  async getNestPurchaserNeeds(flaskUserId: number): Promise<NeedEntity[]> {
+    return this.needRepository.find({
+      where: {
+        purchaser: {
+          flaskUserId,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+      },
+      relations: {
+        child: false,
+      },
+    });
+  }
   getFlaskNeedsByDeliveryCode(code: string): Promise<Need[]> {
     return this.flaskNeedRepository.find({
       where: {
