@@ -136,14 +136,18 @@ export class NeedService {
     });
   }
 
-  getNeedsPaidOnly(): Promise<NeedEntity[]> {
+  getNeedsWithSignatures(): Promise<NeedEntity[]> {
     return this.needRepository.find({
       relations: {
         child: true,
         verifiedPayments: true,
+        signatures: true,
       },
       where: {
         status: MoreThan(PaymentStatusEnum.PARTIAL_PAY),
+        signatures: {
+          flaskNeedId: MoreThan(0),
+        },
       },
     });
   }

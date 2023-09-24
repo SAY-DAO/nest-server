@@ -265,7 +265,7 @@ export class NeedController {
     }
     const accessToken = config().dataCache.fetchPanelAuthentication(25).token;
 
-    const allNeeds = await this.needService.getNeedsPaidOnly();
+    const allNeeds = await this.needService.getNeedsWithSignatures();
     const filteredNeeds = allNeeds.filter(
       (n) =>
         !n.purchaser ||
@@ -321,7 +321,7 @@ export class NeedController {
             flaskUserId: flaskPurchaser.id,
             birthDate:
               flaskPurchaser.birth_date && new Date(flaskPurchaser.birth_date),
-            panelRole: PanelContributors.AUDITOR,
+            panelRole: PanelContributors.PURCHASER,
             userName: flaskPurchaser.userName,
           };
           const purchaserNgo = await this.syncService.syncContributorNgo(
@@ -366,6 +366,9 @@ export class NeedController {
           throw new ServerError('huuuuh');
         }
         if (purchaser.flaskUserId === 22) {
+          console.log(purchaser);
+          console.log(purchaserId);
+          console.log(statuses);
           console.log(flaskNeed);
 
           throw new ServerError('huuuuh');
