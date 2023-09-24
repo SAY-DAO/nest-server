@@ -777,7 +777,23 @@ export class WalletController {
     ) {
       throw new WalletExceptionFilter(401, 'You are not the admin');
     }
-    return await this.walletService.getSignatures();
+    try {
+      const X_LIMIT = parseInt(req.headers['x-limit']);
+      const X_TAKE = parseInt(req.headers['x-take']);
+      const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
+      const page = X_TAKE * limit;
+
+      const allSignatures = await this.walletService.getSignatures({
+        skip: page,
+        take: limit,
+      });
+      return {
+        signatures: allSignatures[0],
+        total: allSignatures[1],
+      };
+    } catch (e) {
+      throw new ServerError(e.message);
+    }
   }
 
   @Get(`signatures/:flaskUserId`)
@@ -786,12 +802,28 @@ export class WalletController {
     @Req() req: Request,
     @Param('flaskUserId') flaskUserId: number,
   ) {
-    
     const panelFlaskUserId = Number(req.headers['panelFlaskUserId']);
     if (panelFlaskUserId !== Number(flaskUserId)) {
       throw new WalletExceptionFilter(401, 'You only can get your signatures');
     }
-    return await this.walletService.getUserSignatures(panelFlaskUserId);
+
+    const X_LIMIT = parseInt(req.headers['x-limit']);
+    const X_TAKE = parseInt(req.headers['x-take']);
+    const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
+    const page = X_TAKE * limit;
+
+    const userSignatures = await this.walletService.getUserSignatures(
+      {
+        skip: page,
+        take: limit,
+      },
+      panelFlaskUserId,
+    );
+
+    return {
+      signatures: userSignatures[0],
+      total: userSignatures[1],
+    };
   }
 
   @Delete(`signature/:signature`)

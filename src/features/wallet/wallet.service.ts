@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignatureEntity } from '../../entities/signature.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import {
   Domain,
   SwSignatureResult,
@@ -54,29 +54,6 @@ export class WalletService {
     });
   }
 
-  async getUserSignatures(flaskUserId: number): Promise<SignatureEntity[]> {
-    return await this.signatureRepository.find({
-      where: {
-        flaskUserId,
-        role: SAYPlatformRoles.SOCIAL_WORKER,
-      },
-      relations: {
-        need: {
-          socialWorker: {
-            wallets: true,
-          },
-          purchaser: {
-            wallets: true,
-          },
-          auditor: {
-            wallets: true,
-          },
-        },
-      },
-      order: { createdAt: 'DESC' },
-    });
-  }
-
   async getNeedSignatures(flaskNeedId: number): Promise<SignatureEntity[]> {
     return await this.signatureRepository.find({
       where: {
@@ -98,9 +75,38 @@ export class WalletService {
       order: { createdAt: 'DESC' },
     });
   }
+  async getUserSignatures(
+    options: FindManyOptions<SignatureEntity>,
+    flaskUserId: number,
+  ): Promise<[SignatureEntity[], number]> {
+    return await this.signatureRepository.findAndCount({
+      where: {
+        flaskUserId,
+        role: SAYPlatformRoles.SOCIAL_WORKER,
+      },
+      relations: {
+        need: {
+          socialWorker: {
+            wallets: true,
+          },
+          purchaser: {
+            wallets: true,
+          },
+          auditor: {
+            wallets: true,
+          },
+        },
+      },
+      order: { createdAt: 'DESC' },
+      take: options.take,
+      skip: options.skip,
+    });
+  }
 
-  async getSignatures(): Promise<SignatureEntity[]> {
-    return await this.signatureRepository.find({
+  async getSignatures(
+    options: FindManyOptions<SignatureEntity>,
+  ): Promise<[SignatureEntity[], number]> {
+    return await this.signatureRepository.findAndCount({
       relations: {
         need: {
           verifiedPayments: true,
@@ -109,11 +115,20 @@ export class WalletService {
           socialWorker: {
             wallets: true,
           },
+          purchaser: {
+            wallets: true,
+          },
+          auditor: {
+            wallets: true,
+          },
         },
       },
       where: {
         role: SAYPlatformRoles.SOCIAL_WORKER,
       },
+      order: { createdAt: 'DESC' },
+      take: options.take,
+      skip: options.skip,
     });
   }
 
@@ -192,7 +207,7 @@ export class WalletService {
       role = getSAYRolePersian(SAYPlatformRoles.FAMILY).toString();
       allRoles.push(SAYPlatformRoles.FAMILY);
     }
-    
+
     if (!role) {
       throw new WalletExceptionFilter(
         403,
