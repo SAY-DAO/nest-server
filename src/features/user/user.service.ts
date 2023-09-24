@@ -140,6 +140,17 @@ export class UserService {
       theUser.contributions &&
       theUser.contributions.find((c) => c.panelRole == userDetails.panelRole)
     ) {
+      const theUserDetails = this.allUserRepository.create({
+        typeId: userDetails.typeId,
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+        avatarUrl: userDetails.avatarUrl,
+        flaskUserId: userDetails.flaskUserId,
+        birthDate: userDetails.birthDate,
+        userName: userDetails.userName,
+      });
+
+      await this.updateContributor(theUser.id, theUserDetails);
       return await this.getUserByFlaskId(userDetails.flaskUserId);
     }
   }
