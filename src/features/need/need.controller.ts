@@ -307,11 +307,15 @@ export class NeedController {
         throw new ServerError('huuuh');
       }
       console.log(flaskNeed);
-      await this.needService.updateNeedContributors(
-        need.id,
-        auditor,
-        purchaser,
-      );
+      try {
+        await this.needService.updateNeedContributors(
+          need.id,
+          auditor,
+          purchaser,
+        );
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 }
