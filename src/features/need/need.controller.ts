@@ -21,6 +21,7 @@ import config from 'src/config';
 import { convertFlaskToSayRoles, daysDifference } from 'src/utils/helpers';
 import { NeedStatusUpdatesAPIApi } from 'src/generated-sources/openapi';
 import { SyncService } from '../sync/sync.service';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -326,6 +327,9 @@ export class NeedController {
           auditorDetails,
           auditorNgo,
         );
+      }
+      if (!auditor || !purchaser) {
+        throw new ServerError('huuuuh');
       }
       console.log(flaskNeed);
       try {
