@@ -246,7 +246,7 @@ export class NeedController {
       const daysDiff = daysDifference(need.confirmDate, new Date());
       if (daysDiff > 90) {
         const accessToken =
-          config().dataCache.fetchPanelAuthentication(25).token;
+          config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
         await this.needService.deleteFlaskOneNeed(need.id, accessToken);
       }
     }
@@ -263,7 +263,8 @@ export class NeedController {
     ) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
-    const accessToken = config().dataCache.fetchPanelAuthentication(25).token;
+    const accessToken =
+      config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
 
     const allNeeds = await this.needService.getNeedsWithSignatures();
 
@@ -272,6 +273,8 @@ export class NeedController {
       for await (const need of allNeeds) {
         const flaskNeed = await this.needService.getFlaskNeed(need.flaskId);
         const statusApi = new NeedStatusUpdatesAPIApi();
+        console.log('\x1b[36m%s\x1b[0m', `starting ${need.flaskId} ...\n`);
+
         const statuses = await statusApi.apiV2NeedStatusUpdatesGet(
           accessToken,
           null,
@@ -281,6 +284,8 @@ export class NeedController {
         );
 
         if (!statuses || !statuses[0]) {
+          console.log('\x1b[36m%s\x1b[0m', `status ...\n`);
+
           // we do not have a history of purchaser id before implementing our new features
           if (new Date(flaskNeed.doneAt).getFullYear() < 2023) {
             purchaserId = 31; // Nyaz
@@ -292,6 +297,7 @@ export class NeedController {
             purchaserId = 21; // Neda
           }
         } else {
+          console.log('\x1b[36m%s\x1b[0m', `find ...\n`);
           purchaserId = statuses.find(
             (s) => s.oldStatus === PaymentStatusEnum.COMPLETE_PAY,
           )?.swId;
@@ -347,7 +353,7 @@ export class NeedController {
         if (!auditor || !purchaser) {
           console.log(auditorDetails);
           console.log(auditor);
-          console.log("purchalllllllllllllllllllllllllllllllser");
+          console.log('purchalllllllllllllllllllllllllllllllser');
           console.log(purchaser);
 
           throw new ServerError('whut');
