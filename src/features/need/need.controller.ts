@@ -21,7 +21,6 @@ import config from 'src/config';
 import { convertFlaskToSayRoles, daysDifference } from 'src/utils/helpers';
 import { NeedStatusUpdatesAPIApi } from 'src/generated-sources/openapi';
 import { SyncService } from '../sync/sync.service';
-import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -299,12 +298,34 @@ export class NeedController {
         PanelContributors.PURCHASER,
       );
 
-      const auditor = await this.userService.getContributorByFlaskId(
+      let auditor = await this.userService.getContributorByFlaskId(
         flaskNeed.confirmUser,
         PanelContributors.AUDITOR,
       );
-      if (!auditor || !purchaser) {
-        throw new ServerError('huuuh');
+      if (!auditor) {
+        const flaskAuditor = await this.userService.getFlaskSocialWorker(
+          flaskNeed.confirmUser,
+        );
+
+        const auditorDetails = {
+          typeId: flaskAuditor.type_id,
+          firstName: flaskAuditor.firstName,
+          lastName: flaskAuditor.lastName,
+          avatarUrl: flaskAuditor.avatar_url,
+          flaskUserId: flaskAuditor.id,
+          birthDate:
+            flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
+          panelRole: PanelContributors.AUDITOR,
+          userName: flaskAuditor.userName,
+        };
+        const auditorNgo = await this.syncService.syncContributorNgo(
+          flaskAuditor,
+        );
+        console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
+        auditor = await this.userService.createContributor(
+          auditorDetails,
+          auditorNgo,
+        );
       }
       console.log(flaskNeed);
       try {
