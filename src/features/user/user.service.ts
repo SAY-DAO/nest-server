@@ -136,6 +136,11 @@ export class UserService {
       theUser.contributions = [...theUser.contributions, theContribution];
       await this.allUserRepository.save(theUser);
       return await this.getUserByFlaskId(userDetails.flaskUserId);
+    } else if (
+      theUser.contributions &&
+      theUser.contributions.find((c) => c.panelRole == userDetails.panelRole)
+    ) {
+      return await this.getUserByFlaskId(userDetails.flaskUserId);
     }
   }
 
