@@ -265,7 +265,7 @@ export class NeedController {
     }
     const accessToken = config().dataCache.fetchPanelAuthentication(25).token;
 
-    const allNeeds = await this.needService.getNeeds();
+    const allNeeds = await this.needService.getNeedsPaidOnly();
     const filteredNeeds = allNeeds.filter(
       (n) =>
         !n.purchaser ||
@@ -365,13 +365,18 @@ export class NeedController {
         if (!auditor || !purchaser) {
           throw new ServerError('huuuuh');
         }
-        console.log(flaskNeed);
+        if (purchaser.flaskUserId === 22) {
+          console.log(flaskNeed);
+
+          throw new ServerError('huuuuh');
+        }
         await this.needService.updateNeedContributors(
           need.id,
           auditor,
           purchaser,
         );
       }
+      console.log(allNeeds);
     } catch (e) {
       console.log(e);
     }

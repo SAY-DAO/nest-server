@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
 import { Need } from '../../entities/flaskEntities/need.entity';
-import { Brackets, IsNull, Not, Repository, UpdateResult } from 'typeorm';
+import { Brackets, MoreThan, Not, Repository, UpdateResult } from 'typeorm';
 import {
   Configuration,
   NeedAPIApi,
@@ -132,6 +132,18 @@ export class NeedService {
       relations: {
         child: true,
         verifiedPayments: true,
+      },
+    });
+  }
+
+  getNeedsPaidOnly(): Promise<NeedEntity[]> {
+    return this.needRepository.find({
+      relations: {
+        child: true,
+        verifiedPayments: true,
+      },
+      where: {
+        status: MoreThan(PaymentStatusEnum.PARTIAL_PAY),
       },
     });
   }
