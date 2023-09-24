@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Get,
   Param,
+  Patch,
   Req,
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -11,12 +12,16 @@ import { NeedService } from './need.service';
 import { isAuthenticated } from 'src/utils/auth';
 import {
   FlaskUserTypesEnum,
+  PanelContributors,
+  PaymentStatusEnum,
   SAYPlatformRoles,
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { convertFlaskToSayRoles, daysDifference } from 'src/utils/helpers';
 import { SyncService } from '../sync/sync.service';
+import { NeedStatusUpdatesAPIApi } from 'src/generated-sources/openapi';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -248,127 +253,127 @@ export class NeedController {
   }
 
   // temp
-  // @Patch(`contributors/`)
-  // async updateNeedContributor(@Req() req: Request) {
-  //   const panelFlaskUserId = req.headers['panelFlaskUserId'];
-  //   const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-  //   if (
-  //     !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-  //     panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
-  //   ) {
-  //     throw new ForbiddenException(403, 'You Are not the Super admin');
-  //   }
-  //   const accessToken = config().dataCache.fetchPanelAuthentication(25).token;
+  @Patch(`contributors/`)
+  async updateNeedContributor(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+    const accessToken = config().dataCache.fetchPanelAuthentication(25).token;
 
-  //   const allNeeds = await this.needService.getNeeds();
-  //   const filteredNeeds = allNeeds.filter(
-  //     (n) =>
-  //       !n.purchaser ||
-  //       !n.auditor ||
-  //       n.purchaser.flaskUserId === 28 ||
-  //       n.auditor.flaskUserId === 28,
-  //   );
-  //   let purchaserId: number;
-  //   try {
-  //     for await (const need of filteredNeeds) {
-  //       const flaskNeed = await this.needService.getFlaskNeed(need.flaskId);
-  //       const statusApi = new NeedStatusUpdatesAPIApi();
-  //       const statuses = await statusApi.apiV2NeedStatusUpdatesGet(
-  //         accessToken,
-  //         null,
-  //         null,
-  //         null,
-  //         flaskNeed.id,
-  //       );
+    const allNeeds = await this.needService.getNeeds();
+    const filteredNeeds = allNeeds.filter(
+      (n) =>
+        !n.purchaser ||
+        !n.auditor ||
+        n.purchaser.flaskUserId === 22 ||
+        n.auditor.flaskUserId === 22,
+    );
+    let purchaserId: number;
+    try {
+      for await (const need of filteredNeeds) {
+        const flaskNeed = await this.needService.getFlaskNeed(need.flaskId);
+        const statusApi = new NeedStatusUpdatesAPIApi();
+        const statuses = await statusApi.apiV2NeedStatusUpdatesGet(
+          accessToken,
+          null,
+          null,
+          null,
+          flaskNeed.id,
+        );
 
-  //       if (!statuses) {
-  //         // we do not have a history of purchaser id before implementing our new features
-  //         if (new Date(flaskNeed.doneAt).getFullYear() < 2023) {
-  //           purchaserId = 31; // Nyaz
-  //         }
-  //         if (
-  //           new Date(flaskNeed.doneAt).getFullYear() === 2023 &&
-  //           new Date(flaskNeed.doneAt).getMonth() <= 3
-  //         ) {
-  //           purchaserId = 21; // Neda
-  //         }
-  //       } else {
-  //         purchaserId = statuses.find(
-  //           (s) => s.oldStatus === PaymentStatusEnum.COMPLETE_PAY,
-  //         )?.swId;
-  //       }
+        if (!statuses) {
+          // we do not have a history of purchaser id before implementing our new features
+          if (new Date(flaskNeed.doneAt).getFullYear() < 2023) {
+            purchaserId = 31; // Nyaz
+          }
+          if (
+            new Date(flaskNeed.doneAt).getFullYear() === 2023 &&
+            new Date(flaskNeed.doneAt).getMonth() <= 3
+          ) {
+            purchaserId = 21; // Neda
+          }
+        } else {
+          purchaserId = statuses.find(
+            (s) => s.oldStatus === PaymentStatusEnum.COMPLETE_PAY,
+          )?.swId;
+        }
 
-  //       let purchaser = await this.userService.getContributorByFlaskId(
-  //         purchaserId,
-  //         PanelContributors.PURCHASER,
-  //       );
+        let purchaser = await this.userService.getContributorByFlaskId(
+          purchaserId,
+          PanelContributors.PURCHASER,
+        );
 
-  //       if (!purchaser) {
-  //         const flaskPurchaser = await this.userService.getFlaskSocialWorker(
-  //           purchaserId,
-  //         );
+        if (!purchaser) {
+          const flaskPurchaser = await this.userService.getFlaskSocialWorker(
+            purchaserId,
+          );
 
-  //         const purchaserDetails = {
-  //           typeId: flaskPurchaser.type_id,
-  //           firstName: flaskPurchaser.firstName,
-  //           lastName: flaskPurchaser.lastName,
-  //           avatarUrl: flaskPurchaser.avatar_url,
-  //           flaskUserId: flaskPurchaser.id,
-  //           birthDate:
-  //             flaskPurchaser.birth_date && new Date(flaskPurchaser.birth_date),
-  //           panelRole: PanelContributors.AUDITOR,
-  //           userName: flaskPurchaser.userName,
-  //         };
-  //         const purchaserNgo = await this.syncService.syncContributorNgo(
-  //           flaskPurchaser,
-  //         );
-  //         console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
-  //         purchaser = await this.userService.createContributor(
-  //           purchaserDetails,
-  //           purchaserNgo,
-  //         );
-  //       }
-  //       let auditor = await this.userService.getContributorByFlaskId(
-  //         flaskNeed.confirmUser,
-  //         PanelContributors.AUDITOR,
-  //       );
-  //       if (!auditor) {
-  //         const flaskAuditor = await this.userService.getFlaskSocialWorker(
-  //           flaskNeed.confirmUser,
-  //         );
+          const purchaserDetails = {
+            typeId: flaskPurchaser.type_id,
+            firstName: flaskPurchaser.firstName,
+            lastName: flaskPurchaser.lastName,
+            avatarUrl: flaskPurchaser.avatar_url,
+            flaskUserId: flaskPurchaser.id,
+            birthDate:
+              flaskPurchaser.birth_date && new Date(flaskPurchaser.birth_date),
+            panelRole: PanelContributors.AUDITOR,
+            userName: flaskPurchaser.userName,
+          };
+          const purchaserNgo = await this.syncService.syncContributorNgo(
+            flaskPurchaser,
+          );
+          console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
+          purchaser = await this.userService.createContributor(
+            purchaserDetails,
+            purchaserNgo,
+          );
+        }
+        let auditor = await this.userService.getContributorByFlaskId(
+          flaskNeed.confirmUser,
+          PanelContributors.AUDITOR,
+        );
+        if (!auditor) {
+          const flaskAuditor = await this.userService.getFlaskSocialWorker(
+            flaskNeed.confirmUser,
+          );
 
-  //         const auditorDetails = {
-  //           typeId: flaskAuditor.type_id,
-  //           firstName: flaskAuditor.firstName,
-  //           lastName: flaskAuditor.lastName,
-  //           avatarUrl: flaskAuditor.avatar_url,
-  //           flaskUserId: flaskAuditor.id,
-  //           birthDate:
-  //             flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
-  //           panelRole: PanelContributors.AUDITOR,
-  //           userName: flaskAuditor.userName,
-  //         };
-  //         const auditorNgo = await this.syncService.syncContributorNgo(
-  //           flaskAuditor,
-  //         );
-  //         console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
-  //         auditor = await this.userService.createContributor(
-  //           auditorDetails,
-  //           auditorNgo,
-  //         );
-  //       }
-  //       if (!auditor || !purchaser) {
-  //         throw new ServerError('huuuuh');
-  //       }
-  //       console.log(flaskNeed);
-  //       await this.needService.updateNeedContributors(
-  //         need.id,
-  //         auditor,
-  //         purchaser,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // }
+          const auditorDetails = {
+            typeId: flaskAuditor.type_id,
+            firstName: flaskAuditor.firstName,
+            lastName: flaskAuditor.lastName,
+            avatarUrl: flaskAuditor.avatar_url,
+            flaskUserId: flaskAuditor.id,
+            birthDate:
+              flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
+            panelRole: PanelContributors.AUDITOR,
+            userName: flaskAuditor.userName,
+          };
+          const auditorNgo = await this.syncService.syncContributorNgo(
+            flaskAuditor,
+          );
+          console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
+          auditor = await this.userService.createContributor(
+            auditorDetails,
+            auditorNgo,
+          );
+        }
+        if (!auditor || !purchaser) {
+          throw new ServerError('huuuuh');
+        }
+        console.log(flaskNeed);
+        await this.needService.updateNeedContributors(
+          need.id,
+          auditor,
+          purchaser,
+        );
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }
