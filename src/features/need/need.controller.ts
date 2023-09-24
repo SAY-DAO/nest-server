@@ -304,10 +304,9 @@ export class NeedController {
         PanelContributors.AUDITOR,
       );
       if (!auditor || !purchaser) {
-        console.log(flaskNeed);
-        
         throw new ServerError('huuuh');
       }
+      console.log(flaskNeed);
       await this.needService.updateNeedContributors(
         need.id,
         auditor,
