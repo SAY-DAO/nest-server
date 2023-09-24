@@ -71,6 +71,7 @@ export async function checkFlaskCacheAuthentication(req, logger: Logger) {
     else if (
       String(req.headers.origin) === 'http://localhost:3000' ||
       String(req.headers.origin) === 'http://localhost:8002' ||
+      String(req.headers.origin) === 'https://nest.saydao.org' ||
       !req.headers.origin ||
       String(req.headers.origin) === 'https://panel.saydao.org'
     ) {
