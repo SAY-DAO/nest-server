@@ -13,11 +13,15 @@ import { isAuthenticated } from 'src/utils/auth';
 import {
   FlaskUserTypesEnum,
   PanelContributors,
+  PaymentStatusEnum,
   SAYPlatformRoles,
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { convertFlaskToSayRoles, daysDifference } from 'src/utils/helpers';
+import { NeedStatusUpdatesAPIApi } from 'src/generated-sources/openapi';
+import { SyncService } from '../sync/sync.service';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -31,6 +35,7 @@ export class NeedController {
   constructor(
     private needService: NeedService,
     private userService: UserService,
+    private syncService: SyncService,
   ) {}
 
   @Get(`all`)
@@ -247,11 +252,8 @@ export class NeedController {
   }
 
   // temp
-  @Patch(`contributors/:needId`)
-  async updateNeedContributor(
-    @Req() req: Request,
-    @Param('needId') needId: string,
-  ) {
+  @Patch(`contributors/`)
+  async updateNeedContributor(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
@@ -260,18 +262,55 @@ export class NeedController {
     ) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
-    const auditor = await this.userService.getContributorByFlaskId(
-      25,
-      PanelContributors.AUDITOR,
-    );
-    const purchaser = await this.userService.getContributorByFlaskId(
-      25,
-      PanelContributors.PURCHASER,
-    );
-    return await this.needService.updateNeedContributors(
-      needId,
-      auditor,
-      purchaser,
-    );
+    const accessToken = config().dataCache.fetchPanelAuthentication(25).token;
+
+    const allNeeds = await this.needService.getNeeds();
+    let purchaserId: number;
+    for await (const need of allNeeds) {
+      const flaskNeed = await this.needService.getFlaskNeed(need.flaskId);
+      const statusApi = new NeedStatusUpdatesAPIApi();
+      const statuses = await statusApi.apiV2NeedStatusUpdatesGet(
+        accessToken,
+        null,
+        null,
+        null,
+        flaskNeed.id,
+      );
+
+      if (!statuses) {
+        // we do not have a history of purchaser id before implementing our new features
+        if (new Date(flaskNeed.doneAt).getFullYear() < 2023) {
+          purchaserId = 31; // Nyaz
+        }
+        if (
+          new Date(flaskNeed.doneAt).getFullYear() === 2023 &&
+          new Date(flaskNeed.doneAt).getMonth() <= 3
+        ) {
+          purchaserId = 21; // Neda
+        }
+      } else {
+        purchaserId = statuses.find(
+          (s) => s.oldStatus === PaymentStatusEnum.COMPLETE_PAY,
+        )?.swId;
+      }
+
+      const purchaser = await this.userService.getContributorByFlaskId(
+        purchaserId,
+        PanelContributors.PURCHASER,
+      );
+
+      const auditor = await this.userService.getContributorByFlaskId(
+        flaskNeed.confirmUser,
+        PanelContributors.AUDITOR,
+      );
+      if (!auditor || !purchaser) {
+        throw new ServerError('huuuh');
+      }
+      await this.needService.updateNeedContributors(
+        need.id,
+        auditor,
+        purchaser,
+      );
+    }
   }
 }

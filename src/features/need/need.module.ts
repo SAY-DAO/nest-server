@@ -1,8 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NeedEntity } from '../../entities/need.entity';
@@ -32,6 +28,16 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 import { FamilyService } from '../family/family.service';
+import { SyncService } from '../sync/sync.service';
+import { ReceiptService } from '../receipt/receipt.service';
+import { ReceiptEntity } from 'src/entities/receipt.entity';
+import { StatusService } from '../status/status.service';
+import { LocationService } from '../location/location.service';
+import { ProviderService } from '../provider/provider.service';
+import { CityEntity } from 'src/entities/city.entity';
+import { Cities } from 'src/entities/flaskEntities/cities.entity';
+import { ProviderEntity } from 'src/entities/provider.entity';
+import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 
 @Module({
   imports: [
@@ -48,6 +54,7 @@ import { FamilyService } from '../family/family.service';
         NeedFamily,
         Family,
         User,
+        Cities,
       ],
       'flaskPostgres',
     ),
@@ -62,6 +69,10 @@ import { FamilyService } from '../family/family.service';
       NgoArrivalEntity,
       EthereumAccountEntity,
       TicketEntity,
+      ReceiptEntity,
+      CityEntity,
+      ProviderEntity,
+      ProviderJoinNeedEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -74,6 +85,11 @@ import { FamilyService } from '../family/family.service';
     UserService,
     NgoService,
     FamilyService,
+    ReceiptService,
+    SyncService,
+    StatusService,
+    LocationService,
+    ProviderService,
   ],
 })
 export class NeedModule implements NestModule {
