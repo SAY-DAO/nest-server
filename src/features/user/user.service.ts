@@ -9,6 +9,7 @@ import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { getSAYRoleString } from 'src/utils/helpers';
 import { PanelContributors } from 'src/types/interfaces/interface';
 import { ContributorEntity } from 'src/entities/contributor.entity';
+import { from } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -43,6 +44,11 @@ export class UserService {
     });
   }
 
+  getFlaskUser(id: number): Promise<SocialWorker> {
+    return this.flaskUserRepository.findOne({
+      where: { id: id },
+    });
+  }
   getFlaskSocialWorkerByNgo(ngoId: number): Promise<SocialWorker[]> {
     return this.flaskSocialWorkerRepository.find({
       where: { ngo_id: ngoId },
@@ -70,7 +76,6 @@ export class UserService {
     chainId: number,
     user: AllUserEntity,
   ): Promise<EthereumAccountEntity> {
-    console.log(user);
     const newWallet = this.ethereumWalletRepository.create({
       address,
       chainId,
@@ -87,12 +92,12 @@ export class UserService {
     if (!theUser) {
       console.log('\x1b[36m%s\x1b[0m', 'Creating a user ...');
 
-      const newUser = this.allUserRepository.create({
+      const theUser = await this.allUserRepository.save({
         ...userDetails,
         flaskUserId: userDetails.flaskUserId,
         isContributor: true,
       });
-      const theUser = await this.allUserRepository.save(newUser);
+
       if (userDetails.panelRole >= PanelContributors.NO_ROLE) {
         console.log('\x1b[33m%s\x1b[0m', 'Creating a contribution ...\n');
         const newContribution = this.contributorRepository.create({
@@ -139,13 +144,14 @@ export class UserService {
     userDetails: UserParams,
   ): Promise<UpdateResult> {
     if (userDetails.panelRole >= PanelContributors.NO_ROLE) {
-      const user = this.allUserRepository.create({
-        ...userDetails,
-        isContributor: true,
-      });
-
       const theUSer = await this.allUserRepository.update(userId, {
-        ...user,
+        typeId: userDetails.typeId,
+        birthDate: userDetails.birthDate,
+        flaskUserId: userDetails.flaskUserId,
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+        avatarUrl: userDetails.avatarUrl,
+        userName: userDetails.userName,
       });
       const updatedUser = await this.getUserByFlaskId(userDetails.flaskUserId);
 
@@ -158,7 +164,7 @@ export class UserService {
           flaskUserId: userDetails.flaskUserId,
           panelRole: userDetails.panelRole,
           panelRoleName: getSAYRoleString(userDetails.panelRole),
-          user: user,
+          user: updatedUser,
         });
 
         await this.contributorRepository.save(contribution);
@@ -251,5 +257,12 @@ export class UserService {
       },
     });
     return user;
+  }
+
+  async deleteOneContributor(userId: string, contIds: string[]) {
+    for await (const id of contIds) {
+      from(this.contributorRepository.delete(id));
+    }
+    return from(this.allUserRepository.delete(userId));
   }
 }

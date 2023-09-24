@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   Param,
@@ -13,6 +14,7 @@ import { ServerError } from '../../filters/server-exception.filter';
 import {
   FlaskUserTypesEnum,
   SAYPlatformRoles,
+  SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import {
   convertFlaskToSayRoles,
@@ -78,6 +80,23 @@ export class UserController {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
     return await this.userService.getContributors();
+  }
+
+  @Get(`flaskUser/:flaskUserId`)
+  @ApiOperation({ description: 'Get all contributors' })
+  async getFlaskUser(
+    @Req() req: Request,
+    @Param('flaskUserId', ParseIntPipe) flaskUserId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+    return await this.userService.getFlaskUser(flaskUserId);
   }
 
   @UseInterceptors(MyPageInterceptor)
@@ -175,7 +194,9 @@ export class UserController {
         supervisorId = panelFlaskUserId;
 
         // for ngo supervisor
-        const supervisor = await this.userService.getFlaskSocialWorker(panelFlaskUserId);
+        const supervisor = await this.userService.getFlaskSocialWorker(
+          panelFlaskUserId,
+        );
         swIds = await this.userService
           .getFlaskSocialWorkerByNgo(supervisor.ngo_id)
           .then((r) => r.map((s) => s.id));
@@ -369,5 +390,26 @@ export class UserController {
       children,
       arrivals,
     };
+  }
+
+  @Delete(`contributor/:flaskUserId`)
+  @ApiOperation({ description: 'Delete a contributor' })
+  async deleteSignature(
+    @Req() req: Request,
+    @Param('flaskUserId') flaskUserId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+      panelFlaskUserId !== SUPER_ADMIN_ID
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+    const theUser = await this.userService.getUserByFlaskId(flaskUserId);
+    const list = [];
+    theUser.contributions.forEach((c) => list.push(c.id));
+    return await this.userService.deleteOneContributor(theUser.id, list);
   }
 }

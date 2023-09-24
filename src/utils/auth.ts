@@ -10,7 +10,6 @@ export async function checkFlaskCacheAuthentication(req, logger: Logger) {
 
   const accessToken = req.headers['authorization'];
   const requestFlaskId = Number(req.headers['flaskid']);
-
   if (!accessToken || !requestFlaskId) {
     throw new ForbiddenException('Access Token and the ID is required!');
   }
@@ -71,6 +70,7 @@ export async function checkFlaskCacheAuthentication(req, logger: Logger) {
     // for panel
     else if (
       String(req.headers.origin) === 'http://localhost:3000' ||
+      String(req.headers.origin) === 'http://localhost:8002' ||
       !req.headers.origin ||
       String(req.headers.origin) === 'https://panel.saydao.org'
     ) {

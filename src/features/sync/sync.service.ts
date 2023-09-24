@@ -140,23 +140,17 @@ export class SyncService {
       convertFlaskToSayPanelRoles(flaskCaller.type_id),
     );
 
-    const {
-      id: callerFlaskId,
-      ngo_id: callerFlaskNgoId,
-      ...callerOtherParams
-    } = flaskCaller;
-
     const callerDetails = {
-      ...callerOtherParams,
       typeId: flaskCaller.type_id,
       firstName: flaskCaller.firstName,
       lastName: flaskCaller.lastName,
       avatarUrl: flaskCaller.avatar_url,
-      flaskUserId: callerFlaskId,
+      flaskUserId: flaskCaller.id,
       birthDate: flaskCaller.birth_date && new Date(flaskCaller.birth_date),
       panelRole: convertFlaskToSayPanelRoles(flaskCaller.type_id),
       userName: flaskCaller.userName,
     };
+
     if (!nestCaller) {
       console.log(
         '\x1b[36m%s\x1b[0m',
@@ -199,24 +193,19 @@ export class SyncService {
     const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
       flaskNeed.created_by_id,
     );
-    const {
-      id: swFlaskId,
-      ngo_id: swFlaskNgoId,
-      ...swOtherParams
-    } = flaskSocialWorker;
 
     const swDetails = {
-      ...swOtherParams,
       typeId: flaskSocialWorker.type_id,
       firstName: flaskSocialWorker.firstName,
       lastName: flaskSocialWorker.lastName,
       avatarUrl: flaskSocialWorker.avatar_url,
-      flaskUserId: swFlaskId,
+      flaskUserId: flaskSocialWorker.id,
       birthDate:
         flaskSocialWorker.birth_date && new Date(flaskSocialWorker.birth_date),
       panelRole: PanelContributors.SOCIAL_WORKER,
       userName: flaskSocialWorker.userName,
     };
+
     if (!nestSocialWorker) {
       swNgo = await this.syncContributorNgo(flaskSocialWorker);
       console.log('\x1b[36m%s\x1b[0m', 'Creating a Social Worker ...\n');
@@ -256,19 +245,13 @@ export class SyncService {
         const flaskAuditor = await this.userService.getFlaskSocialWorker(
           flaskNeed.confirmUser,
         );
-        const {
-          id: auditorFlaskId,
-          ngo_id: auditorFlaskNgoId,
-          ...auditorOtherParams
-        } = flaskAuditor;
 
         auditorDetails = {
-          ...auditorOtherParams,
           typeId: flaskAuditor.type_id,
           firstName: flaskAuditor.firstName,
           lastName: flaskAuditor.lastName,
           avatarUrl: flaskAuditor.avatar_url,
-          flaskUserId: auditorFlaskId,
+          flaskUserId: flaskAuditor.id,
           birthDate:
             flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
           panelRole: PanelContributors.AUDITOR,
@@ -337,19 +320,13 @@ export class SyncService {
       const flaskPurchaser = await this.userService.getFlaskSocialWorker(
         purchaserId,
       );
-      const {
-        id: purchaserFlaskId,
-        ngo_id: purchaserFlaskNgoId,
-        ...purchaserOtherParams
-      } = flaskPurchaser;
 
       const purchaserDetails = {
-        ...purchaserOtherParams,
         typeId: flaskPurchaser.type_id,
         firstName: flaskPurchaser.firstName,
         lastName: flaskPurchaser.lastName,
         avatarUrl: flaskPurchaser.avatar_url,
-        flaskUserId: purchaserFlaskId,
+        flaskUserId: flaskPurchaser.id,
         birthDate:
           flaskPurchaser.birth_date && new Date(flaskPurchaser.birth_date),
         panelRole: PanelContributors.PURCHASER,
@@ -498,7 +475,9 @@ export class SyncService {
     const nestPayments = [];
     if (payments) {
       for (let p = 0; p < payments.length; p++) {
-        nestPayment = await this.paymentService.getPaymentByFlaskId(payments[p].id);
+        nestPayment = await this.paymentService.getPaymentByFlaskId(
+          payments[p].id,
+        );
 
         const {
           id: paymentFlaskId,

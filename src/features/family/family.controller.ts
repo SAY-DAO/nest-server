@@ -185,7 +185,7 @@ export class FamilyController {
     const onlyConfirmDurationList = [];
     const onlyLogisticDurationList = [];
 
-    // payment duration
+    // payment duration + amount
     const paymentDuration = daysDifference(need.confirmDate, userPay.created);
     const paymentsInRange = await this.paymentService.getPaymentsInRange(
       userPay.created,

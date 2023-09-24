@@ -38,6 +38,7 @@ import {
   PaginateQuery,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
+import { from } from 'rxjs';
 
 @Injectable()
 export class NeedService {
@@ -52,6 +53,34 @@ export class NeedService {
     return this.flaskNeedRepository.findOne({
       where: {
         id: flaskNeedId,
+      },
+    });
+  }
+
+  async getFlaskAuditorNeeds(flaskUserId: number): Promise<Need[]> {
+    return this.flaskNeedRepository.find({
+      where: {
+        confirmUser: flaskUserId,
+      },
+      select: {
+        id: true,
+        title: true,
+      },
+    });
+  }
+  async getNestAuditorNeeds(flaskUserId: number): Promise<NeedEntity[]> {
+    return this.needRepository.find({
+      where: {
+        auditor: {
+          flaskUserId,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+      },
+      relations: {
+        child: false,
       },
     });
   }
@@ -103,6 +132,17 @@ export class NeedService {
       },
     });
     return user;
+  }
+
+  updateNeedContributors(
+    needId: string,
+    theAuditor: AllUserEntity,
+    thePurchaser: AllUserEntity,
+  ) {
+    return this.needRepository.update(needId, {
+      auditor: theAuditor,
+      purchaser: thePurchaser,
+    });
   }
 
   getNeedByFlaskId(flaskId: number): Promise<NeedEntity> {
@@ -216,34 +256,6 @@ export class NeedService {
       .catch((e) => e);
 
     return need;
-  }
-
-  async getConfirmedNeeds(): Promise<any> {
-    const monthAgo = new Date();
-    monthAgo.setDate(monthAgo.getDate() - 10);
-
-    const queryBuilder = this.flaskNeedRepository
-      .createQueryBuilder('need')
-      .where('need.isConfirmed = :needConfirmed', { needConfirmed: true })
-      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-      .where('need.confirmDate < :startDate', {
-        startDate: monthAgo,
-      })
-      .andWhere('need.status = :statusNotPaid', {
-        statusNotPaid: PaymentStatusEnum.NOT_PAID,
-      })
-      .select([
-        'need.id',
-        'need.isConfirmed',
-        'need.created',
-        'need.updated',
-        'need.confirmDate',
-      ])
-      .cache(60000)
-      .orderBy('need.created', 'ASC');
-    const accurateCount = await queryBuilder.getManyAndCount();
-
-    return accurateCount;
   }
 
   async getNotConfirmedNeeds(
@@ -771,7 +783,11 @@ export class NeedService {
       .getManyAndCount();
   }
 
-  async deleteOneNeed(flaskNeedId: number, accessToken: string) {
+  async deleteOneNeed(id: string) {
+    return from(this.needRepository.delete(id));
+  }
+
+  async deleteFlaskOneNeed(flaskNeedId: number, accessToken: string) {
     const needApi = new NeedAPIApi();
     const deleted = needApi.apiV2NeedDeleteNeedIdneedIdPatch(
       accessToken,
