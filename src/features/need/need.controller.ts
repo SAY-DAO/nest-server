@@ -266,7 +266,11 @@ export class NeedController {
 
     const allNeeds = await this.needService.getNeeds();
     const filteredNeeds = allNeeds.filter(
-      (n) => n.purchaser.flaskUserId === 28 || n.auditor.flaskUserId === 28,
+      (n) =>
+        !n.purchaser ||
+        !n.auditor ||
+        n.purchaser.flaskUserId === 28 ||
+        n.auditor.flaskUserId === 28,
     );
     let purchaserId: number;
     try {
@@ -298,11 +302,36 @@ export class NeedController {
           )?.swId;
         }
 
-        const purchaser = await this.userService.getContributorByFlaskId(
+        let purchaser = await this.userService.getContributorByFlaskId(
           purchaserId,
           PanelContributors.PURCHASER,
         );
 
+        if (!purchaser) {
+          const flaskPurchaser = await this.userService.getFlaskSocialWorker(
+            purchaserId,
+          );
+
+          const purchaserDetails = {
+            typeId: flaskPurchaser.type_id,
+            firstName: flaskPurchaser.firstName,
+            lastName: flaskPurchaser.lastName,
+            avatarUrl: flaskPurchaser.avatar_url,
+            flaskUserId: flaskPurchaser.id,
+            birthDate:
+              flaskPurchaser.birth_date && new Date(flaskPurchaser.birth_date),
+            panelRole: PanelContributors.AUDITOR,
+            userName: flaskPurchaser.userName,
+          };
+          const purchaserNgo = await this.syncService.syncContributorNgo(
+            flaskPurchaser,
+          );
+          console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
+          purchaser = await this.userService.createContributor(
+            purchaserDetails,
+            purchaserNgo,
+          );
+        }
         let auditor = await this.userService.getContributorByFlaskId(
           flaskNeed.confirmUser,
           PanelContributors.AUDITOR,
