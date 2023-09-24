@@ -266,81 +266,81 @@ export class NeedController {
 
     const allNeeds = await this.needService.getNeeds();
     let purchaserId: number;
-    for await (const need of allNeeds) {
-      const flaskNeed = await this.needService.getFlaskNeed(need.flaskId);
-      const statusApi = new NeedStatusUpdatesAPIApi();
-      const statuses = await statusApi.apiV2NeedStatusUpdatesGet(
-        accessToken,
-        null,
-        null,
-        null,
-        flaskNeed.id,
-      );
+    try {
+      for await (const need of allNeeds) {
+        const flaskNeed = await this.needService.getFlaskNeed(need.flaskId);
+        const statusApi = new NeedStatusUpdatesAPIApi();
+        const statuses = await statusApi.apiV2NeedStatusUpdatesGet(
+          accessToken,
+          null,
+          null,
+          null,
+          flaskNeed.id,
+        );
 
-      if (!statuses) {
-        // we do not have a history of purchaser id before implementing our new features
-        if (new Date(flaskNeed.doneAt).getFullYear() < 2023) {
-          purchaserId = 31; // Nyaz
+        if (!statuses) {
+          // we do not have a history of purchaser id before implementing our new features
+          if (new Date(flaskNeed.doneAt).getFullYear() < 2023) {
+            purchaserId = 31; // Nyaz
+          }
+          if (
+            new Date(flaskNeed.doneAt).getFullYear() === 2023 &&
+            new Date(flaskNeed.doneAt).getMonth() <= 3
+          ) {
+            purchaserId = 21; // Neda
+          }
+        } else {
+          purchaserId = statuses.find(
+            (s) => s.oldStatus === PaymentStatusEnum.COMPLETE_PAY,
+          )?.swId;
         }
-        if (
-          new Date(flaskNeed.doneAt).getFullYear() === 2023 &&
-          new Date(flaskNeed.doneAt).getMonth() <= 3
-        ) {
-          purchaserId = 21; // Neda
-        }
-      } else {
-        purchaserId = statuses.find(
-          (s) => s.oldStatus === PaymentStatusEnum.COMPLETE_PAY,
-        )?.swId;
-      }
 
-      const purchaser = await this.userService.getContributorByFlaskId(
-        purchaserId,
-        PanelContributors.PURCHASER,
-      );
+        const purchaser = await this.userService.getContributorByFlaskId(
+          purchaserId,
+          PanelContributors.PURCHASER,
+        );
 
-      let auditor = await this.userService.getContributorByFlaskId(
-        flaskNeed.confirmUser,
-        PanelContributors.AUDITOR,
-      );
-      if (!auditor) {
-        const flaskAuditor = await this.userService.getFlaskSocialWorker(
+        let auditor = await this.userService.getContributorByFlaskId(
           flaskNeed.confirmUser,
+          PanelContributors.AUDITOR,
         );
+        if (!auditor) {
+          const flaskAuditor = await this.userService.getFlaskSocialWorker(
+            flaskNeed.confirmUser,
+          );
 
-        const auditorDetails = {
-          typeId: flaskAuditor.type_id,
-          firstName: flaskAuditor.firstName,
-          lastName: flaskAuditor.lastName,
-          avatarUrl: flaskAuditor.avatar_url,
-          flaskUserId: flaskAuditor.id,
-          birthDate:
-            flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
-          panelRole: PanelContributors.AUDITOR,
-          userName: flaskAuditor.userName,
-        };
-        const auditorNgo = await this.syncService.syncContributorNgo(
-          flaskAuditor,
-        );
-        console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
-        auditor = await this.userService.createContributor(
-          auditorDetails,
-          auditorNgo,
-        );
-      }
-      if (!auditor || !purchaser) {
-        throw new ServerError('huuuuh');
-      }
-      console.log(flaskNeed);
-      try {
+          const auditorDetails = {
+            typeId: flaskAuditor.type_id,
+            firstName: flaskAuditor.firstName,
+            lastName: flaskAuditor.lastName,
+            avatarUrl: flaskAuditor.avatar_url,
+            flaskUserId: flaskAuditor.id,
+            birthDate:
+              flaskAuditor.birth_date && new Date(flaskAuditor.birth_date),
+            panelRole: PanelContributors.AUDITOR,
+            userName: flaskAuditor.userName,
+          };
+          const auditorNgo = await this.syncService.syncContributorNgo(
+            flaskAuditor,
+          );
+          console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
+          auditor = await this.userService.createContributor(
+            auditorDetails,
+            auditorNgo,
+          );
+        }
+        if (!auditor || !purchaser) {
+          throw new ServerError('huuuuh');
+        }
+        console.log(flaskNeed);
         await this.needService.updateNeedContributors(
           need.id,
           auditor,
           purchaser,
         );
-      } catch (e) {
-        console.log(e);
       }
+    } catch (e) {
+      console.log(e);
     }
   }
 }
