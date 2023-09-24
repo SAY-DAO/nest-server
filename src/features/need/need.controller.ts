@@ -265,9 +265,12 @@ export class NeedController {
     const accessToken = config().dataCache.fetchPanelAuthentication(25).token;
 
     const allNeeds = await this.needService.getNeeds();
+    const filteredNeeds = allNeeds.filter(
+      (n) => n.purchaser.flaskUserId === 28 || n.auditor.flaskUserId === 28,
+    );
     let purchaserId: number;
     try {
-      for await (const need of allNeeds) {
+      for await (const need of filteredNeeds) {
         const flaskNeed = await this.needService.getFlaskNeed(need.flaskId);
         const statusApi = new NeedStatusUpdatesAPIApi();
         const statuses = await statusApi.apiV2NeedStatusUpdatesGet(
