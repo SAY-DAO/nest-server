@@ -366,20 +366,13 @@ export class NeedController {
           console.log(purchaser);
           throw new ServerError('whut');
         }
-        if (purchaser.flaskUserId === 22) {
-          console.log(purchaser);
-          console.log(purchaserId);
-          console.log(statuses);
-          console.log(flaskNeed);
-
-          throw new ServerError('huuuuh');
-        }
+ 
         await this.needService.updateNeedContributors(
           need.id,
           auditor,
           purchaser,
         );
-        for (let i = 0; i < counter * 5; i++) {
+        for (let i = 0; i < counter * 10; i++) {
           console.log('wasting time..' + counter);
         }
       }
