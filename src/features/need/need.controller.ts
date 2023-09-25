@@ -270,7 +270,9 @@ export class NeedController {
 
     let purchaserId: number;
     try {
+      let counter = 0;
       for await (const need of allNeeds) {
+        counter++;
         const flaskNeed = await this.needService.getFlaskNeed(need.flaskId);
         const statusApi = new NeedStatusUpdatesAPIApi();
         console.log('\x1b[36m%s\x1b[0m', `starting ${need.flaskId} ...\n`);
@@ -303,6 +305,9 @@ export class NeedController {
           )?.swId;
         }
 
+        if (!purchaserId) {
+          throw new ServerError('No purchaser Id!', 500);
+        }
         const flaskPurchaser = await this.userService.getFlaskSocialWorker(
           purchaserId,
         );
@@ -321,6 +326,10 @@ export class NeedController {
         const purchaserNgo = await this.syncService.syncContributorNgo(
           flaskPurchaser,
         );
+
+        if (!purchaserNgo) {
+          throw new ServerError('No purchaserNgo!', 500);
+        }
         console.log('\x1b[36m%s\x1b[0m', 'Creating an auditor ...\n');
         const purchaser = await this.userService.createContributor(
           purchaserDetails,
@@ -355,7 +364,6 @@ export class NeedController {
           console.log(auditor);
           console.log('purchalllllllllllllllllllllllllllllllser');
           console.log(purchaser);
-
           throw new ServerError('whut');
         }
         if (purchaser.flaskUserId === 22) {
@@ -371,6 +379,9 @@ export class NeedController {
           auditor,
           purchaser,
         );
+        for (let i = 0; i < counter * 5; i++) {
+          console.log('wasting time..' + counter);
+        }
       }
     } catch (e) {
       console.log(e);
