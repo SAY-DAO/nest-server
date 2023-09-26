@@ -4,12 +4,12 @@ import { Repository, UpdateResult } from 'typeorm';
 import { AllUserEntity } from '../../entities/user.entity';
 import { UserParams } from 'src/types/parameters/UserParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
-import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { getSAYRoleString } from 'src/utils/helpers';
 import { PanelContributors } from 'src/types/interfaces/interface';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { from } from 'rxjs';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 
 @Injectable()
 export class UserService {
@@ -49,7 +49,7 @@ export class UserService {
       where: { id: id },
     });
   }
-  
+
   getFlaskSocialWorkerByNgo(ngoId: number): Promise<SocialWorker[]> {
     return this.flaskSocialWorkerRepository.find({
       where: { ngo_id: ngoId },

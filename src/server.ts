@@ -13,12 +13,8 @@ async function startServer() {
   console.log('Port:' + config().serverPort);
   console.log('db Host:' + config().db1.host);
   console.log('db Port:' + config().db1.port);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_DAPP_LOCAL);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_LOCAL);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_PANEL_PRODUCTION);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_HOST_STAGING);
-  console.log('Cors Enabled:' + process.env.AUTHORIZED_DOCS_LOCAL);
   console.log(__filename);
+  console.log(__dirname);
 
   const app = await ApplicationContext();
 

@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToMany, OneToMany } from 'typeorm';
 import { PaymentEntity } from './payment.entity';
 import { BaseEntity } from './BaseEntity';
-import { EthereumAccountEntity } from './ethereum.account.entity';
+import { EthereumAccountEntity } from '../entities/ethereum.account.entity';
 import { TicketEntity } from './ticket.entity';
 import { ContributorEntity } from './contributor.entity';
 import { SignatureEntity } from './signature.entity';

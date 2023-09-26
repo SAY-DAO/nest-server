@@ -19,7 +19,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "codegen": "rm -rf src/generated-sources/openapi; openapi-generator-cli generate -i ./openapi.yaml -o src/generated-sources/openapi -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=6.9.0,typescriptThreePlus=true"
+    "codegen": "rm -rf src/generated-sources/openapi; openapi-generator-cli generate -i ./openapi.yaml -o src/generated-sources/openapi -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=6.9.0,typescriptThreePlus=true",
+    "typeorm": "npm run build && npx typeorm -d dist/db/data-source.js",
+    "typeorm:generate": "npm run typeorm -- migration:generate src/db/migrations/PostRefactoring",
+    "typeorm:run": "npm run typeorm -- migration:run",
+    "typeorm:revert": "npm run typeorm -- migration:revert"
   },
   "dependencies": {
     "@discord-nestjs/common": "*",
@@ -70,7 +74,7 @@
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {
-    "@nestjs/cli": "^9.0.0",
+    "@nestjs/cli": "^10.1.18",
     "@nestjs/schematics": "10.0.1",
     "@nestjs/testing": "^9.0.0",
     "@types/cookie-parser": "^1.4.3",

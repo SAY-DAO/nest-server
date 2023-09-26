@@ -38,8 +38,8 @@ function loadConfig() {
       logging: true,
       dropSchema: false,
       autoLoadEntities: true,
-      // migrationsRun: false
-      // entities: [`${__dirname}/entities/*.js`],
+      migrationsRun: false,
+      migrations: [`dist/db/migrations/*.js`],
     },
     db2: {
       name: 'flaskPostgres',

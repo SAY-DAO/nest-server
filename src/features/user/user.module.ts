@@ -72,6 +72,6 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 })
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply( UserMiddleware).forRoutes('users');
+    consumer.apply(UserMiddleware).forRoutes('users');
   }
 }

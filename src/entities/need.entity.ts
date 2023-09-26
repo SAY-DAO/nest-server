@@ -11,8 +11,8 @@ import { StatusEntity } from './status.entity';
 import { IpfsEntity } from './ipfs.entity';
 import { AllUserEntity } from './user.entity';
 import { SignatureEntity } from './signature.entity';
-import { MidjourneyEntity } from './midjourney.entity';
 import { CommentEntity } from './comment.entity';
+import { VariableEntity } from './variable.entity';
 import { EthereumTransaction } from './ethereum.transaction.entity';
 
 @Entity()
@@ -147,7 +147,7 @@ export class NeedEntity extends BaseEntity {
   @Column({ default: true }) // only for family comment/report usage
   isResolved: boolean;
 
-  @Column({ default: false }) 
+  @Column({ default: false })
   isMined: boolean;
 
   @OneToMany(() => SignatureEntity, (s) => s.need, { eager: true })
@@ -168,4 +168,6 @@ export class NeedEntity extends BaseEntity {
   @OneToMany(() => EthereumTransaction, (t) => t.need, { eager: true })
   ethereumTransactions?: EthereumTransaction[];
 
+  @OneToMany(() => VariableEntity, (v) => v.need, { eager: true })
+  variables?: VariableEntity[];
 }

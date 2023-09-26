@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
-import { EthereumAccountEntity } from './ethereum.account.entity';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { NeedEntity } from './need.entity';
 
 @Entity()
@@ -72,10 +72,10 @@ export class EthereumTransaction extends BaseEntity {
   signedRawTransaction: string;
 
   @Column({ nullable: true })
-  userId: string
+  userId: string;
 
   @Column({ nullable: true })
-  needId: string
+  needId: string;
 
   @ManyToOne(
     () => EthereumAccountEntity,
