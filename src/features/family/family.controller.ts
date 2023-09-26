@@ -22,7 +22,6 @@ import {
   Q1_TO_Q2_COEFFICIENT,
   Q2_TO_Q3_COEFFICIENT,
   Q3_UPPER_COEFFICIENT,
-  dateConvertToPersian,
   daysDifference,
 } from 'src/utils/helpers';
 import { mean, quantileSeq, round } from 'mathjs';
@@ -337,7 +336,7 @@ export class FamilyController {
     );
     const contributionRatio =
       payments.length > 1
-        ? (payments.length - 1) * CONTRIBUTION_COEFFICIENT
+        ? round((payments.length - 1) * CONTRIBUTION_COEFFICIENT, 2)
         : 1;
 
     if (
@@ -351,30 +350,30 @@ export class FamilyController {
     return {
       needLogisticDuration: {
         logisticDurationQGrant,
-        logisticDuration: round(logisticDuration),
-        min_logistic_duration: round(min_logistic_duration),
-        Q1_logistic_duration: round(Q1_logistic_duration),
-        Q2_logistic_duration: round(Q2_logistic_duration),
-        Q3_logistic_duration: round(Q3_logistic_duration),
-        max_logistic_duration: round(max_logistic_duration),
+        logisticDuration: round(logisticDuration, 2),
+        min_logistic_duration: round(min_logistic_duration, 2),
+        Q1_logistic_duration: round(Q1_logistic_duration, 2),
+        Q2_logistic_duration: round(Q2_logistic_duration, 2),
+        Q3_logistic_duration: round(Q3_logistic_duration, 2),
+        max_logistic_duration: round(max_logistic_duration, 2),
       },
       needConfirmDuration: {
         confirmDurationQGrant,
-        confirmDuration: round(confirmDuration),
-        min_confirm_duration: round(min_confirm_duration),
-        Q1_confirm_duration: round(Q1_confirm_duration),
-        Q2_confirm_duration: round(Q2_confirm_duration),
-        Q3_confirm_duration: round(Q3_confirm_duration),
-        max_confirm_duration: round(max_confirm_duration),
+        confirmDuration: round(confirmDuration, 2),
+        min_confirm_duration: round(min_confirm_duration, 2),
+        Q1_confirm_duration: round(Q1_confirm_duration, 2),
+        Q2_confirm_duration: round(Q2_confirm_duration, 2),
+        Q3_confirm_duration: round(Q3_confirm_duration, 2),
+        max_confirm_duration: round(max_confirm_duration, 2),
       },
       needPaymentDuration: {
         payDurationQGrant,
-        paymentDuration: round(paymentDuration),
-        min_payment_duration: round(min_payment_duration),
-        Q1_payment_duration: round(Q1_payment_duration),
-        Q2_payment_duration: round(Q2_payment_duration),
-        Q3_payment_duration: round(Q3_payment_duration),
-        max_payment_duration: round(max_payment_duration),
+        paymentDuration: round(paymentDuration, 2),
+        min_payment_duration: round(min_payment_duration, 2),
+        Q1_payment_duration: round(Q1_payment_duration, 2),
+        Q2_payment_duration: round(Q2_payment_duration, 2),
+        Q3_payment_duration: round(Q3_payment_duration, 2),
+        max_payment_duration: round(max_payment_duration, 2),
       },
       needPaymentAmount: {
         payAmountQGrant,
@@ -385,7 +384,7 @@ export class FamilyController {
         Q3_payment_amount,
         max_payment_amount,
       },
-      avgGrant: round(
+      difficultyRatio: round(
         mean([
           logisticDurationQGrant,
           confirmDurationQGrant,
@@ -481,15 +480,15 @@ export class FamilyController {
     );
 
     return {
+      distanceRatio: distanceRatio,
       // be ware that some needs counted more than once (e.g more than 1 participants, amoo, Khaleh paid)
-      theUser: {
+      paid: {
         fatherCompletePay: userAsFather[1],
         motherCompletePay: userAsMother[1],
         amooCompletePay: userAsAmoo[1],
         daeiCompletePay: userAsDaei[1],
         khalehCompletePay: userAsKhaleh[1],
         ammeCompletePay: userAsAmme[1],
-        distanceRatio: distanceRatio,
       },
     };
   }
