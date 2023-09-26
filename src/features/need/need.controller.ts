@@ -360,10 +360,6 @@ export class NeedController {
           auditorNgo,
         );
         if (!auditor || !purchaser) {
-          console.log(auditorDetails);
-          console.log(auditor);
-          console.log('purchalllllllllllllllllllllllllllllllser');
-          console.log(purchaser);
           throw new ServerError('whut');
         }
  

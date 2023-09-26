@@ -333,29 +333,12 @@ export class FamilyController {
       logisticDurationQGrant = Q3_UPPER_COEFFICIENT;
     }
     const payments = need.verifiedPayments.filter(
-      (p) => p.flaskUserId !== SAY_DAPP_ID && p.needAmount > 0,
+      (p) => p.flaskUserId !== SAY_DAPP_ID && p.needAmount > 0 && p.verified,
     );
     const contributionRatio =
       payments.length > 1
         ? (payments.length - 1) * CONTRIBUTION_COEFFICIENT
         : 1;
-
-    console.log('-----------------------logic---');
-    console.log(logisticDuration);
-    console.log(logisticDurationQGrant);
-    console.log(dateConvertToPersian(`${userPay.created}`));
-    console.log(dateConvertToPersian(`${need.childDeliveryDate}`));
-
-    console.log('-----------------------logic---');
-    console.log(confirmDurationQGrant);
-    console.log(payDurationQGrant);
-    console.log(payAmountQGrant);
-    console.log(
-      logisticDurationQGrant,
-      confirmDurationQGrant,
-      payDurationQGrant,
-      payAmountQGrant,
-    );
 
     if (
       !logisticDurationQGrant ||

@@ -49,6 +49,7 @@ export class UserService {
       where: { id: id },
     });
   }
+  
   getFlaskSocialWorkerByNgo(ngoId: number): Promise<SocialWorker[]> {
     return this.flaskSocialWorkerRepository.find({
       where: { ngo_id: ngoId },
