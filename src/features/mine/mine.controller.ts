@@ -129,7 +129,7 @@ export class MineController {
           n.flaskUserId !== dappFlaskUserId,
       );
 
-      if (othersPayment.length > 0) {
+      if (othersPayment && othersPayment.length > 0) {
         const theNeed = await this.needService.getNeedById(need.id);
         correctedNeeds = mySignedNeeds.filter(
           (n) =>
@@ -157,7 +157,7 @@ export class MineController {
         readyMintNeeds: readyToMine,
       },
       theUser: {
-        waiting: correctedNeeds.length,
+        waiting: correctedNeeds ? correctedNeeds.length : 0,
         ready: myReadyToMine.length,
         mined: myMined,
         readyMintNeeds: myReadyToMine,
