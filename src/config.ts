@@ -38,7 +38,7 @@ function loadConfig() {
       logging: true,
       dropSchema: false,
       autoLoadEntities: true,
-      migrationsRun: false,
+      migrationsRun: true,
       migrations: [`dist/db/migrations/*.js`],
     },
     db2: {
