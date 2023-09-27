@@ -4,6 +4,7 @@ import { SAYPlatformRoles } from '../interfaces/interface';
 import { CreatePaymentDto } from './CreatePayment.dto';
 import { CreateReceiptDto } from './CreateReceipt.dto';
 import { CreateStatusDto } from './CreateStatus.dto';
+import Decimal from 'decimal.js';
 
 export class NeedSignatureMessage {
   @IsNotEmpty()
@@ -53,11 +54,22 @@ export class VerifySignatureDto {
   flaskNeedId: number;
 }
 
+export class VariableCreateDto {
+  @IsNotEmpty()
+  distanceRatio: Decimal;
+  @IsNotEmpty()
+  difficultyRatio: Decimal;
+  @IsNotEmpty()
+  contributionRatio: Decimal;
+}
+
 export class PrepareDappSignatureDto {
   @IsNotEmpty()
   chainId: number;
   @IsNotEmpty()
   needId: string;
+  @IsNotEmpty()
+  variables: VariableCreateDto;
 }
 
 export class CreateSignatureDto {

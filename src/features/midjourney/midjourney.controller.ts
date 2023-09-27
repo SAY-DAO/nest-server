@@ -15,10 +15,9 @@ import { DownloadService } from '../download/download.service';
 import { NeedService } from '../need/need.service';
 import { ApiFileResponse } from '../download/api-file-response.decorator';
 import { Response as expressResponse } from 'express';
-import { getAllFilesFromFolder } from 'src/utils/helpers';
 import { MessageBody } from '@nestjs/websockets';
 import { FamilyService } from '../family/family.service';
-// import { rimraf } from 'rimraf';
+import { rimraf } from 'rimraf';
 import { isAuthenticated } from 'src/utils/auth';
 import {
   FlaskUserTypesEnum,
@@ -245,12 +244,12 @@ export class MidjourneyController {
 
     const path = `../midjourney-bot/main/need-images/need-${flaskNeedId}`;
     if (checkIfFileOrDirectoryExists(path)) {
-      // const result = await rimraf(path);
+      const result = await rimraf(path);
       const need = await this.needService.getNeedByFlaskId(flaskNeedId);
       await this.needService.updateNeedMidjourney(need.id, '');
 
       return {
-        // result,
+        result,
         flaskNeedId,
         message: `${flaskNeedId} is deleted`,
       };

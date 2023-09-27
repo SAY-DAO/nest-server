@@ -24,6 +24,7 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { MileStoneMiddleware } from './middlewares/milestone.middleware';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { MileStoneMiddleware } from './middlewares/milestone.middleware';
     TypeOrmModule.forFeature([
       MileStoneEntity,
       ChildrenEntity,
+      VariableEntity,
       NeedEntity,
       StepEntity,
       ContributorEntity,

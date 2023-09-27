@@ -1,20 +1,47 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { NeedEntity } from './need.entity';
+import {
+  DecimalToString,
+  DecimalTransformer,
+} from '../utils/decimal.transformer';
+import { Transform } from 'class-transformer';
+import Decimal from 'decimal.js';
 
 @Entity()
 export class VariableEntity extends BaseEntity {
   @Column({ nullable: false })
   flaskUserId: number;
 
-  @Column({ nullable: false })
-  distanceRatio: number;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0.0,
+    transformer: new DecimalTransformer(),
+  })
+  @Transform(DecimalToString(), { toPlainOnly: true })
+  public distanceRatio: Decimal;
 
-  @Column({ nullable: false })
-  difficultyRatio: number;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0.0,
+    transformer: new DecimalTransformer(),
+  })
+  @Transform(DecimalToString(), { toPlainOnly: true })
+  public difficultyRatio: Decimal;
 
-  @Column({ nullable: false })
-  contributionRatio: number;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0.0,
+    transformer: new DecimalTransformer(),
+  })
+  @Transform(DecimalToString(), { toPlainOnly: true })
+  public contributionRatio: Decimal;
 
   @Column({ nullable: false })
   needFlaskId: number;

@@ -21,6 +21,7 @@ import { FamilyService } from '../family/family.service';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { PaymentEntity } from 'src/entities/payment.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PaymentEntity } from 'src/entities/payment.entity';
     ),
     TypeOrmModule.forFeature([
       MidjourneyEntity,
+      VariableEntity,
       NeedEntity,
       SignatureEntity,
       ContributorEntity,

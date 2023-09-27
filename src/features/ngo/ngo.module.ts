@@ -32,6 +32,7 @@ import { NgoService } from './ngo.service';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { NgoMiddleware } from './middlewares/ngo.middleware';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { NgoMiddleware } from './middlewares/ngo.middleware';
       NgoEntity,
       NgoArrivalEntity,
       NeedEntity,
+      VariableEntity,
       CityEntity,
       ProviderJoinNeedEntity,
       ProviderEntity,

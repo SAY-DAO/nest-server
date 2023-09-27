@@ -1,10 +1,21 @@
-import { Controller, Get, Req, Param, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Req,
+  Param,
+  ForbiddenException,
+} from '@nestjs/common';
 import { MineService } from './mine.service';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { FamilyService } from '../family/family.service';
-import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
+import {
+  FlaskUserTypesEnum,
+  SAY_DAPP_ID,
+} from 'src/types/interfaces/interface';
 import { isAuthenticated } from 'src/utils/auth';
+import { NeedEntity } from 'src/entities/need.entity';
+import { NeedService } from '../need/need.service';
 
 @ApiTags('Mines')
 @ApiSecurity('flask-access-token')
@@ -18,6 +29,7 @@ export class MineController {
   constructor(
     private readonly mineService: MineService,
     private readonly familyService: FamilyService,
+    private readonly needService: NeedService,
   ) {}
 
   @Get(`needs/paid`)
@@ -29,7 +41,7 @@ export class MineController {
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
       throw new ForbiddenException(403, 'You Are not authorized');
     }
- 
+
     const readyNeeds = await this.familyService.getFamilyReadyToSignNeeds(
       dappFlaskUserId,
     );
@@ -44,7 +56,9 @@ export class MineController {
         (need) =>
           need.midjourneyImage !== null || // we need to use panel to assign midjourney images first
           (need.signatures &&
-            need.signatures.find((s) => s.flaskUserId === Number(dappFlaskUserId))),
+            need.signatures.find(
+              (s) => s.flaskUserId === Number(dappFlaskUserId),
+            )),
       ),
     };
   }
@@ -100,8 +114,36 @@ export class MineController {
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
       throw new ForbiddenException(403, 'You Are not authorized');
     }
-    const mySignedNeeds = await this.mineService.getMySignedNeeds(dappFlaskUserId);
-    const myReadyToMine = await this.mineService.getMyReadyToMine(dappFlaskUserId);
+    // 1 - get my signed needs
+    const mySignedNeeds = await this.mineService.getMySignedNeeds(
+      dappFlaskUserId,
+    );
+    let correctedNeeds: NeedEntity[];
+    for await (const need of mySignedNeeds) {
+      // 2 - if other payments check if payer has signed as well
+      const othersPayment = need.verifiedPayments.filter(
+        (n) =>
+          n.needAmount > 0 &&
+          n.verified &&
+          n.flaskUserId !== SAY_DAPP_ID &&
+          n.flaskUserId !== dappFlaskUserId,
+      );
+
+      if (othersPayment.length > 0) {
+        const theNeed = await this.needService.getNeedById(need.id);
+        correctedNeeds = mySignedNeeds.filter(
+          (n) =>
+            n.verifiedPayments.filter(
+              (p) =>
+                p.needAmount > 0 && p.verified && p.flaskUserId !== SAY_DAPP_ID,
+            ).length ===
+            theNeed.signatures.length - 1,
+        );
+      }
+    }
+    const myReadyToMine = await this.mineService.getMyReadyToMine(
+      dappFlaskUserId,
+    );
     const myMined = await this.mineService.getMyMinedNeeds(dappFlaskUserId);
 
     const paidNeeds = await this.mineService.getEcosystemPaidNeeds();
@@ -115,7 +157,7 @@ export class MineController {
         readyMintNeeds: readyToMine,
       },
       theUser: {
-        waiting: mySignedNeeds - myReadyToMine.length,
+        waiting: correctedNeeds.length,
         ready: myReadyToMine.length,
         mined: myMined,
         readyMintNeeds: myReadyToMine,

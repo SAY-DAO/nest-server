@@ -370,6 +370,16 @@ export class WalletController {
       const flaskUserId = session.siwe.flaskUserId;
       const need = await this.needService.getNeedById(body.needId);
 
+      if (!need.variables.find((v) => v.flaskUserId === flaskUserId)) {
+        this.needService.updateNeedRatios(
+          need,
+          body.variables.distanceRatio,
+          body.variables.difficultyRatio,
+          body.variables.contributionRatio,
+          flaskUserId,
+        );
+      }
+
       const socialWorker = need.signatures.find(
         (s) => s.flaskUserId === need.socialWorker.flaskUserId,
       );
@@ -377,7 +387,7 @@ export class WalletController {
       if (!socialWorker) {
         throw new WalletExceptionFilter(
           403,
-          'Hmmm, could not find social worker',
+          'Hmmm, could not find social worker signature',
         );
       }
 
@@ -814,8 +824,8 @@ export class WalletController {
 
     const userSignatures = await this.walletService.getUserSignatures(
       {
-        skip: page,
-        take: limit,
+        skip: page || 0,
+        take: limit || 10,
       },
       panelFlaskUserId,
     );

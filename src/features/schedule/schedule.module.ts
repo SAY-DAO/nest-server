@@ -13,6 +13,7 @@ import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { PaymentEntity } from 'src/entities/payment.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { PaymentEntity } from 'src/entities/payment.entity';
       [Need, SocialWorker, Child, User, Family, NGO, Payment, UserFamily],
       'flaskPostgres',
     ),
-    TypeOrmModule.forFeature([NeedEntity, PaymentEntity]),
+    TypeOrmModule.forFeature([NeedEntity, VariableEntity, PaymentEntity]),
   ],
   controllers: [],
   providers: [ScheduleService, NeedService, FamilyService, AnalyticService],

@@ -38,6 +38,7 @@ import { CityEntity } from 'src/entities/city.entity';
 import { Cities } from 'src/entities/flaskEntities/cities.entity';
 import { ProviderEntity } from 'src/entities/provider.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity'
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
+      VariableEntity,
       NeedEntity,
       StatusEntity,
       ChildrenEntity,

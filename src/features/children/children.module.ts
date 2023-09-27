@@ -15,6 +15,7 @@ import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { ChildrenMiddleware } from './middlewares/children.middleware';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -22,14 +23,19 @@ import { ChildrenMiddleware } from './middlewares/children.middleware';
       [Need, Child, Payment, SocialWorker, UserFamily, Family, User],
       'flaskPostgres',
     ),
-    TypeOrmModule.forFeature([ChildrenEntity, NeedEntity, NgoEntity]),
+    TypeOrmModule.forFeature([
+      ChildrenEntity,
+      NeedEntity,
+      VariableEntity,
+      NgoEntity,
+    ]),
     ScheduleModule.forRoot(),
     HttpModule,
   ],
   controllers: [ChildrenController],
   providers: [ChildrenService, NeedService, ChildrenService],
 })
-export class ChildrenModule  implements NestModule {
+export class ChildrenModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(ChildrenMiddleware).forRoutes('children');
   }

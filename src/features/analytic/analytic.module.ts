@@ -20,6 +20,7 @@ import { ChildrenEntity } from 'src/entities/children.entity';
 import { FamilyService } from '../family/family.service';
 import { AnalyticMiddleware } from './middlewares/analytic.middleware';
 import { PaymentEntity } from 'src/entities/payment.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PaymentEntity } from 'src/entities/payment.entity';
       ContributorEntity,
       EthereumAccountEntity,
       NeedEntity,
+      VariableEntity,
       ChildrenEntity,
       PaymentEntity,
     ]),

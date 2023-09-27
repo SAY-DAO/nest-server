@@ -43,6 +43,7 @@ import { TicketService } from '../ticket/ticket.service';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { TicketViewEntity } from 'src/entities/ticketView.entity';
     TypeOrmModule.forFeature([
       PaymentEntity,
       SignatureEntity,
+      VariableEntity,
       NeedEntity,
       ChildrenEntity,
       ContributorEntity,

@@ -100,11 +100,11 @@ export class MineService {
       .getMany();
   }
 
-  getMySignedNeeds(flaskUserId: number): Promise<number> {
+  getMySignedNeeds(flaskUserId: number): Promise<NeedEntity[]> {
     return this.needRepository
       .createQueryBuilder('need')
       .leftJoinAndMapMany(
-        'need.payments',
+        'need.verifiedPayments',
         PaymentEntity,
         'payment',
         'payment.flaskNeedId = need.flaskId',
@@ -115,9 +115,6 @@ export class MineService {
         'signature',
         'signature.flaskNeedId = need.flaskId',
       )
-      .where('payment.flaskUserId = :pFlaskUserId', {
-        pFlaskUserId: flaskUserId,
-      })
       .andWhere('signature.flaskUserId = :sFlaskUserId', {
         sFlaskUserId: flaskUserId,
       })
@@ -128,14 +125,14 @@ export class MineService {
         role: SAYPlatformRoles.FAMILY,
       })
       .cache(60000)
-      .getCount();
+      .getMany();
   }
 
   getMyMinedNeeds(flaskUserId: number): Promise<number> {
     return this.needRepository
       .createQueryBuilder('need')
       .leftJoinAndMapMany(
-        'need.payments',
+        'need.verifiedPayments',
         PaymentEntity,
         'payment',
         'payment.flaskNeedId = need.flaskId',
@@ -157,8 +154,7 @@ export class MineService {
         status: PaymentStatusEnum.COMPLETE_PAY,
       })
       .andWhere('signature.role = :role', {
-        role: SAYPlatformRoles.FAMILY
-        ,
+        role: SAYPlatformRoles.FAMILY,
       })
       .cache(60000)
       .getCount();

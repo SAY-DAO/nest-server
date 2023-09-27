@@ -39,6 +39,8 @@ import {
   paginate as nestPaginate,
 } from 'nestjs-paginate';
 import { from } from 'rxjs';
+import { VariableEntity } from 'src/entities/variable.entity';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class NeedService {
@@ -47,6 +49,8 @@ export class NeedService {
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
+    @InjectRepository(VariableEntity)
+    private variableRepository: Repository<VariableEntity>,
   ) {}
 
   async getFlaskNeed(flaskNeedId: number): Promise<Need> {
@@ -163,6 +167,25 @@ export class NeedService {
       },
     });
     return user;
+  }
+
+  async updateNeedRatios(
+    need: NeedEntity,
+    distanceRatio: Decimal,
+    difficultyRatio: Decimal,
+    contributionRatio: Decimal,
+    flaskUserId: number,
+  ) {
+    const variablesObject = this.variableRepository.create({
+      distanceRatio,
+      difficultyRatio,
+      contributionRatio,
+      needFlaskId: need.flaskId,
+      flaskUserId,
+      need,
+    });
+
+    return await this.variableRepository.save(variablesObject);
   }
 
   updateNeedContributors(

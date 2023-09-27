@@ -18,6 +18,7 @@ import { DownloadService } from '../download/download.service';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { IpfsMiddleware } from './middlewares/ipfs.middleware';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { IpfsMiddleware } from './middlewares/ipfs.middleware';
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
+      VariableEntity,
       NeedEntity,
       IpfsEntity,
       ChildrenEntity,
@@ -42,7 +44,7 @@ import { IpfsMiddleware } from './middlewares/ipfs.middleware';
     DownloadService,
   ],
 })
-export class IpfsModule  implements NestModule {
+export class IpfsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(IpfsMiddleware).forRoutes('ipfs');
   }

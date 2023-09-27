@@ -24,7 +24,6 @@ function loadConfig() {
         : process.env.NODE_ENV === 'staging'
         ? process.env.AUTHORIZED_HOST_STAGING
         : process.env.NEST_SERVER_PROD,
-    logLevel: 'debug',
     documentUrl: '',
     db1: {
       type: 'postgres' as const,
@@ -35,7 +34,8 @@ function loadConfig() {
       database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
       synchronize: NODE_ENV === 'development' ? false : false, // true shouldn't be used in production - otherwise you can lose production data.
-      logging: true,
+      logging: false,
+      logLevel: 'error',
       dropSchema: false,
       autoLoadEntities: true,
       migrationsRun: true,
@@ -51,12 +51,13 @@ function loadConfig() {
       database: process.env.DB_FLASK_NAME,
       enabled: true,
       synchronize: false,
-      logging: true,
+      logLevel: 'error',
+      logging: false,
       dropSchema: false,
       autoLoadEntities: true,
       // entities: [`${__dirname}/entities/flaskEntities/*.js`],
     },
-    logPretty: 'LOG_PRETTY_PRINT',
+    // logPretty: 'LOG_PRETTY_PRINT',
     dataCache: new DataCache(),
   };
 

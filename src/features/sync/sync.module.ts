@@ -32,6 +32,7 @@ import { ProviderEntity } from 'src/entities/provider.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
       ChildrenEntity,
       NgoEntity,
       NgoArrivalEntity,
+      VariableEntity,
       NeedEntity,
       PaymentEntity,
       ReceiptEntity,

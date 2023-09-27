@@ -32,6 +32,7 @@ import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { DownloadService } from '../download/download.service';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
       TicketViewEntity,
       TicketContentEntity,
       ContributorEntity,
+      VariableEntity,
       NeedEntity,
       ChildrenEntity,
       PaymentEntity,

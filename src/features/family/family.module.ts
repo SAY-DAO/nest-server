@@ -21,6 +21,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { PaymentEntity } from 'src/entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { Payment } from 'src/entities/flaskEntities/payment.entity';
     ),
     TypeOrmModule.forFeature([
       ChildrenEntity,
+      VariableEntity,
       NeedEntity,
       SignatureEntity,
       ContributorEntity,

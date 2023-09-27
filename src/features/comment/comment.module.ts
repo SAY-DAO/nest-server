@@ -13,6 +13,7 @@ import { UserService } from '../user/user.service';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
     ),
     TypeOrmModule.forFeature([
       CommentEntity,
+      VariableEntity,
       NeedEntity,
       ContributorEntity,
       AllUserEntity,
