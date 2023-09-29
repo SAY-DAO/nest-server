@@ -139,6 +139,8 @@ export class MineController {
             ).length ===
             theNeed.signatures.length - 1,
         );
+      } else {
+        correctedNeeds = mySignedNeeds;
       }
     }
     const myReadyToMine = await this.mineService.getMyReadyToMine(
