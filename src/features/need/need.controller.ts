@@ -3,7 +3,6 @@ import {
   ForbiddenException,
   Get,
   Param,
-  Patch,
   Req,
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -12,16 +11,11 @@ import { NeedService } from './need.service';
 import { isAuthenticated } from 'src/utils/auth';
 import {
   FlaskUserTypesEnum,
-  PanelContributors,
-  PaymentStatusEnum,
-  SAYPlatformRoles,
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
-import { convertFlaskToSayRoles, daysDifference } from 'src/utils/helpers';
+import { daysDifference } from 'src/utils/helpers';
 import { SyncService } from '../sync/sync.service';
-import { NeedStatusUpdatesAPIApi } from 'src/generated-sources/openapi';
-import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -173,7 +167,7 @@ export class NeedController {
     return await this.needService.getNeedByFlaskId(needFlaskId);
   }
 
-  @Get(`preneeds`)
+  @Get(`/flask/preneeds`)
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getPrNeed(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
@@ -181,7 +175,6 @@ export class NeedController {
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException(401, 'You Are not authorized!');
     }
-
     const token =
       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
     const preNeeds = await this.needService.getFlaskPreNeed(token);
