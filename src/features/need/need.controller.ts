@@ -167,7 +167,7 @@ export class NeedController {
     return await this.needService.getNeedByFlaskId(needFlaskId);
   }
 
-  @Get(`/flask/preneeds`)
+  @Get('flask/preneeds/templates')
   @ApiOperation({ description: 'Get all done needs from flask' })
   async getPrNeed(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
