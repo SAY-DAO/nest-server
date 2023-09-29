@@ -197,10 +197,8 @@ export class NeedController {
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      convertFlaskToSayRoles(panelFlaskTypeId) === SAYPlatformRoles.AUDITOR
-    ) {
+
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException(401, 'You Are not authorized!');
     }
 
@@ -251,5 +249,4 @@ export class NeedController {
       }
     }
   }
-
 }

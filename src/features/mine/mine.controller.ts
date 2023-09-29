@@ -122,11 +122,11 @@ export class MineController {
     for await (const need of mySignedNeeds) {
       // 2 - if other payments check if payer has signed as well
       const othersPayment = need.verifiedPayments.filter(
-        (n) =>
-          n.needAmount > 0 &&
-          n.verified &&
-          n.flaskUserId !== SAY_DAPP_ID &&
-          n.flaskUserId !== dappFlaskUserId,
+        (p) =>
+          p.needAmount > 0 &&
+          p.verified &&
+          p.flaskUserId !== SAY_DAPP_ID &&
+          p.flaskUserId !== dappFlaskUserId,
       );
 
       if (othersPayment && othersPayment.length > 0) {
