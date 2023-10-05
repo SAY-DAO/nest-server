@@ -309,7 +309,7 @@ export class WalletController {
         );
       }
       const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
-      const { need, child } = await this.syncService.syncNeed(
+      const { need } = await this.syncService.syncNeed(
         flaskNeed,
         flaskNeed.child_id,
         session.siwe.flaskUserId,
@@ -322,7 +322,6 @@ export class WalletController {
       transaction = await this.walletService.prepareSignature(
         session.siwe.address,
         need,
-        child,
         flaskUserId,
       );
       console.log('\x1b[36m%s\x1b[0m', 'Storing the wallet address ...\n');
@@ -396,7 +395,6 @@ export class WalletController {
       transaction = await this.walletService.prepareSignature(
         session.siwe.address,
         need,
-        need.child,
         flaskUserId,
       );
 
@@ -727,7 +725,6 @@ export class WalletController {
       transaction = await this.walletService.prepareSignature(
         session.siwe.address,
         need,
-        need.child,
         need.socialWorker.flaskUserId,
       );
       return transaction;

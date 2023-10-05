@@ -24,11 +24,16 @@ import {
   EthersSigner,
 } from 'nestjs-ethers';
 import { NeedEntity } from 'src/entities/need.entity';
-import { getSAYRolePersian } from 'src/utils/helpers';
+import { daysDifference, getSAYRolePersian } from 'src/utils/helpers';
 import { UserService } from '../user/user.service';
 import { from, Observable } from 'rxjs';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
-import { TypedDataField } from 'ethers';
+import {
+  fetchProductMessageContent,
+  fetchProductMessageContent_legacy,
+  fetchServiceMessageContent,
+  fetchServiceMessageContent_legacy,
+} from 'src/utils/signatures';
 
 @Injectable()
 export class WalletService {
@@ -175,14 +180,8 @@ export class WalletService {
   async prepareSignature(
     signerAddress: string,
     need: NeedEntity,
-    child: ChildrenEntity,
     flaskUserId: number,
   ): Promise<SwSignatureResult> {
-    let productVoucher: SwProductVoucher;
-    let serviceVoucher: SwServiceVoucher;
-    let serviceTypes: serviceSignatureTypes;
-    let productTypes: productSignatureTypes;
-
     const needRoles = {
       socialWorker: need.socialWorker.flaskUserId,
       auditor: need.auditor.flaskUserId,
@@ -216,73 +215,50 @@ export class WalletService {
         'could not find your role in this need!',
       );
     }
+    let serviceResult: {
+      serviceVoucher: SwServiceVoucher;
+      serviceTypes: serviceSignatureTypes;
+    };
+    let productResult: {
+      productVoucher: SwProductVoucher;
+      productTypes: productSignatureTypes;
+    };
+    const swSignature =
+      need.signatures &&
+      need.signatures.find(
+        (s) => s.flaskUserId === need.socialWorker.flaskUserId,
+      );
+
     // define your data types
-    if (need.type === NeedTypeEnum.SERVICE) {
-      serviceVoucher = {
-        title: need.title || 'No Title',
-        needId: need.flaskId,
-        category:
-          need.category === CategoryEnum.GROWTH
-            ? CategoryDefinitionPersianEnum.GROWTH
-            : need.category === CategoryEnum.HEALTH
-            ? CategoryDefinitionPersianEnum.HEALTH
-            : need.category === CategoryEnum.JOY
-            ? CategoryDefinitionPersianEnum.JOY
-            : CategoryDefinitionPersianEnum.SURROUNDING,
-        paid: need.cost,
-        bankTrackId: need.bankTrackId || 'N/A',
-        child: child.sayNameTranslations.fa,
-        receipts: need.receipts.length,
-        signer: signerAddress,
-        role: role, // string human readable
-        content: `با امضای دیجیتال این نیاز امکان ذخیره غیر متمرکز و ثبت این نیاز بر روی بلاکچین را فراهم می‌کنید.  نیازی که دارای امضای دیجیتال مددکار، شاهد، میانجی و خانواده مجازی باشد نه تنها به شفافیت تراکنش‌ها کمک می‌کند، بلکه امکان تولید ارز دیجیتال (توکن / سهام) را به خویش‌آوندان می‌دهد تا سِی در جهت تبدیل شدن به مجموعه‌ای خودمختار و غیر متمرکز گام بردارد.`,
-      } as const;
-
-      serviceTypes = {
-        Voucher: [
-          { name: 'title', type: 'string' },
-          { name: 'category', type: 'string' },
-          { name: 'paid', type: 'uint256' },
-          { name: 'child', type: 'string' },
-          { name: 'bankTrackId', type: 'string' },
-          { name: 'receipts', type: 'uint256' },
-          { name: 'role', type: 'string' },
-          { name: 'content', type: 'string' },
-        ],
-      } as const;
-    }
     if (need.type === NeedTypeEnum.PRODUCT) {
-      productVoucher = {
-        needId: need.flaskId,
-        title: need.title || 'No Title',
-        category:
-          need.category === CategoryEnum.GROWTH
-            ? CategoryDefinitionPersianEnum.GROWTH
-            : need.category === CategoryEnum.HEALTH
-            ? CategoryDefinitionPersianEnum.HEALTH
-            : need.category === CategoryEnum.JOY
-            ? CategoryDefinitionPersianEnum.JOY
-            : CategoryDefinitionPersianEnum.SURROUNDING,
-        paid: need.cost,
-        deliveryCode: need.deliveryCode,
-        child: child.sayNameTranslations.fa,
-        signer: signerAddress,
-        role: role, // string human readable
-        content: `با امضای دیجیتال این نیاز امکان ذخیره غیر متمرکز و ثبت این نیاز بر روی بلاکچین را فراهم می‌کنید.  نیازی که دارای امضای دیجیتال مددکار، شاهد، میانجی و خانواده مجازی باشد نه تنها به شفافیت تراکنش‌ها کمک می‌کند، بلکه امکان تولید ارز دیجیتال (توکن / سهام) را به خویش‌آوندان می‌دهد تا سِی در جهت تبدیل شدن به مجموعه‌ای خودمختار و غیر متمرکز گام بردارد.`,
-      } as const;
-
-      productTypes = {
-        Voucher: [
-          { name: 'needId', type: 'uint256' },
-          { name: 'title', type: 'string' },
-          { name: 'category', type: 'string' },
-          { name: 'paid', type: 'uint256' },
-          { name: 'deliveryCode', type: 'string' },
-          { name: 'child', type: 'string' },
-          { name: 'role', type: 'string' },
-          { name: 'content', type: 'string' },
-        ],
-      } as const;
+      if (
+        swSignature &&
+        daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0
+      ) {
+        // content of the message was changed, we need this to verify older signatures
+        productResult = fetchProductMessageContent_legacy(
+          need,
+          signerAddress,
+          role,
+        );
+      } else {
+        productResult = fetchProductMessageContent(need, signerAddress, role);
+      }
+    }
+    if (need.type === NeedTypeEnum.SERVICE) {
+      if (
+        swSignature &&
+        daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0
+      ) {
+        // content of the message was changed, we need this to verify older signatures
+        serviceResult = fetchServiceMessageContent_legacy(
+          need,
+          signerAddress,
+          role,
+        );
+      } else {
+        serviceResult = fetchServiceMessageContent(need, signerAddress, role);
+      }
     }
 
     console.log('\x1b[36m%s\x1b[0m', 'Preparing domain for signature ...\n');
@@ -298,8 +274,11 @@ export class WalletService {
     console.log('\x1b[36m%s\x1b[0m', 'Prepared the domain! ...\n');
 
     return {
-      message: productVoucher || serviceVoucher,
-      types: need.type === NeedTypeEnum.PRODUCT ? productTypes : serviceTypes,
+      message: productResult.productVoucher || serviceResult.serviceVoucher,
+      types:
+        need.type === NeedTypeEnum.PRODUCT
+          ? productResult.productTypes
+          : serviceResult.serviceTypes,
       domain,
       sayRoles: allRoles,
     };

@@ -16,7 +16,7 @@ export async function checkFlaskCacheAuthentication(req, logger: Logger) {
   try {
     // for Dapp
     if (
-      String(req.headers.origin) === 'http://localhost:3001' ||
+      String(req.headers.origin) === 'http://localhost:3002' ||
       String(req.headers.origin) === 'https://dapp.saydao.org' ||
       String(req.headers.origin) === 'https://beta.sayapp.company'
     ) {
