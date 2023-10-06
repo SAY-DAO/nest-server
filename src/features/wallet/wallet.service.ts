@@ -245,6 +245,8 @@ export class WalletService {
         signatureVersion = 'v3';
       }
     }
+    console.log(signatureVersion);
+    
     // define your data types
     if (need.type === NeedTypeEnum.PRODUCT) {
       // content of the message was changed, we need this to verify older signatures
