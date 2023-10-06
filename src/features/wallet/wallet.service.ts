@@ -231,6 +231,8 @@ export class WalletService {
 
     // define your data types
     if (need.type === NeedTypeEnum.PRODUCT) {
+      console.log(daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0);
+      
       if (
         swSignature &&
         daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0
