@@ -833,11 +833,11 @@ export class WalletController {
     };
   }
 
-  @Delete(`signature/:signature`)
+  @Delete(`signature/:signatureHash`)
   @ApiOperation({ description: 'Delete a signatures' })
   async deleteSignature(
     @Req() req: Request,
-    @Param('signature') signature: string,
+    @Param('signatureHash') signatureHash: string,
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
@@ -848,7 +848,8 @@ export class WalletController {
     ) {
       throw new WalletExceptionFilter(403, 'You Are not the Super admin');
     }
-    const theSignature = await this.walletService.getSignature(signature);
-    return await this.walletService.deleteOne(theSignature.id);
+    const theSignature = await this.walletService.getSignature(signatureHash);
+    await this.walletService.deleteOne(theSignature.id);
+    return theSignature.id;
   }
 }

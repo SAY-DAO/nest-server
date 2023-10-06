@@ -45,10 +45,10 @@ export class WalletService {
     private readonly ethersContract: EthersContract,
   ) {}
 
-  async getSignature(signature: string): Promise<SignatureEntity> {
+  async getSignature(signatureHash: string): Promise<SignatureEntity> {
     return await this.signatureRepository.findOne({
       where: {
-        hash: signature,
+        hash: signatureHash,
         user: {
           wallets: true,
         },
@@ -227,7 +227,7 @@ export class WalletService {
         (s) => s.flaskUserId === need.socialWorker.flaskUserId,
       );
 
-    let signatureVersion: string;
+    let signatureVersion = 'v3';
     if (swSignature) {
       // created before 2023-09-27
       if (daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0) {
@@ -246,7 +246,7 @@ export class WalletService {
       }
     }
     console.log(signatureVersion);
-    
+
     // define your data types
     if (need.type === NeedTypeEnum.PRODUCT) {
       // content of the message was changed, we need this to verify older signatures
