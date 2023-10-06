@@ -30,9 +30,7 @@ import { from, Observable } from 'rxjs';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
 import {
   fetchProductMessageContent,
-  fetchProductMessageContent_legacy,
   fetchServiceMessageContent,
-  fetchServiceMessageContent_legacy,
 } from 'src/utils/signatures';
 
 @Injectable()
@@ -229,38 +227,42 @@ export class WalletService {
         (s) => s.flaskUserId === need.socialWorker.flaskUserId,
       );
 
-    // define your data types
-    if (need.type === NeedTypeEnum.PRODUCT) {
-      console.log(daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0);
-      
+    let signatureVersion: string;
+    if (swSignature) {
+      // created before 2023-09-27
+      if (daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0) {
+        signatureVersion = 'v1';
+      }
+      // created b/w 2023-09-27 and 2023-10-05
       if (
-        swSignature &&
-        daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0
+        daysDifference(swSignature.createdAt, new Date('2023-09-27')) < 0 &&
+        daysDifference(swSignature.createdAt, new Date('2023-10-05')) >= 0
       ) {
-        // content of the message was changed, we need this to verify older signatures
-        productResult = fetchProductMessageContent_legacy(
-          need,
-          signerAddress,
-          role,
-        );
-      } else {
-        productResult = fetchProductMessageContent(need, signerAddress, role);
+        signatureVersion = 'v2';
+      }
+      // created after 2023-10-05
+      if (daysDifference(swSignature.createdAt, new Date('2023-10-05')) < 0) {
+        signatureVersion = 'v3';
       }
     }
+    // define your data types
+    if (need.type === NeedTypeEnum.PRODUCT) {
+      // content of the message was changed, we need this to verify older signatures
+      productResult = fetchProductMessageContent(
+        need,
+        signerAddress,
+        role,
+        signatureVersion,
+      );
+    }
     if (need.type === NeedTypeEnum.SERVICE) {
-      if (
-        swSignature &&
-        daysDifference(swSignature.createdAt, new Date('2023-09-27')) >= 0
-      ) {
-        // content of the message was changed, we need this to verify older signatures
-        serviceResult = fetchServiceMessageContent_legacy(
-          need,
-          signerAddress,
-          role,
-        );
-      } else {
-        serviceResult = fetchServiceMessageContent(need, signerAddress, role);
-      }
+      // content of the message was changed, we need this to verify older signatures
+      serviceResult = fetchServiceMessageContent(
+        need,
+        signerAddress,
+        role,
+        signatureVersion,
+      );
     }
 
     console.log('\x1b[36m%s\x1b[0m', 'Preparing domain for signature ...\n');
