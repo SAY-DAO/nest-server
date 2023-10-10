@@ -198,7 +198,11 @@ export class FamilyController {
     });
 
     // confirm duration
-    const confirmDuration = daysDifference(need.created, need.confirmDate);
+    let confirmDuration = daysDifference(need.created, need.confirmDate);
+    if (confirmDuration < 0) {
+      // some data from 2019 have wrong confirm dates, such as need 35
+      confirmDuration = 0;
+    }
     const confirmsInRange = await this.needService.getConfirmsInRange(
       need.confirmDate,
       need.category,

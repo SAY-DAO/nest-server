@@ -115,11 +115,12 @@ export class MidjourneyController {
     const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
     const page = X_TAKE + 1;
     const needsWithSignatures =
-      await this.midjourneyService.getReadyToSignNeeds({
+      await this.midjourneyService.getOnlyReadyToMidjourney({
         page: page,
         limit: limit,
         path: '',
       });
+    const count = await this.midjourneyService.countAllNeedJourney();
 
     const list = [];
 
@@ -135,7 +136,11 @@ export class MidjourneyController {
         });
       }
     });
-    return { total: needsWithSignatures.meta.totalItems, list };
+    return {
+      totalReady: needsWithSignatures.meta.totalItems,
+      total: count,
+      list, 
+    };
   }
 
   @ApiFileResponse('image/png')

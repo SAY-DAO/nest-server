@@ -100,7 +100,7 @@ export class MidjourneyService {
     return await this.needService.getNeedByFlaskId(flaskNeedId);
   }
 
-  async getReadyToSignNeeds(
+  async getOnlyReadyToMidjourney(
     options: PaginateQuery,
   ): Promise<Paginated<NeedEntity>> {
     const queryBuilder = this.needRepository
@@ -125,12 +125,40 @@ export class MidjourneyService {
       )
       .where('signature.role = :role', {
         role: SAYPlatformRoles.SOCIAL_WORKER,
-      });
+      })
+      .andWhere('need.midjourneyImage IS NULL');
 
     return await nestPaginate<NeedEntity>(options, queryBuilder, {
       sortableColumns: ['id'],
       defaultSortBy: [['createdAt', 'DESC']],
       nullSort: 'last',
     });
+  }
+
+  async countAllNeedJourney(): Promise<number> {
+    return await this.needRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.ngo',
+        NgoEntity,
+        'ngo',
+        'ngo.flaskNgoId = need.flaskNgoId',
+      )
+      .leftJoinAndMapMany(
+        'need.verifiedPayments',
+        PaymentEntity,
+        'verifiedPayments',
+        'verifiedPayments.flaskNeedId = need.flaskId',
+      )
+      .leftJoinAndMapMany(
+        'need.signatures',
+        SignatureEntity,
+        'signature',
+        'signature.flaskNeedId = need.flaskId',
+      )
+      .where('signature.role = :role', {
+        role: SAYPlatformRoles.SOCIAL_WORKER,
+      })
+      .getCount();
   }
 }
