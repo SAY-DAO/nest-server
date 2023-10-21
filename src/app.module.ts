@@ -43,6 +43,7 @@ import { MineModule } from './features/mine/mine.module';
 import { ContributionModule } from './features/contribution/contribution.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { postgresDataSourceOptions } from './db/data-source';
+import { MailModule } from './features/mail/mail.module';
 
 const imports = [
   ThrottlerModule.forRoot({
@@ -77,6 +78,7 @@ const imports = [
   // ServeStaticModule.forRoot({
   //   rootPath: join(__dirname, '..', 'files'),
   // }),
+  MailModule,
   ScheduleTaskModule,
   GatewayModule,
   LocationModule,
