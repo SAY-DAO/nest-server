@@ -349,10 +349,6 @@ export class FamilyController {
       !payDurationQGrant ||
       !payAmountQGrant
     ) {
-      console.log(logisticDurationQGrant);
-      console.log(confirmDurationQGrant);
-      console.log(payDurationQGrant);
-      console.log(payAmountQGrant);
       throw new ServerError('Something is not right!');
     }
     return {

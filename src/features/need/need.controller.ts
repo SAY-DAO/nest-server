@@ -60,20 +60,6 @@ export class NeedController {
     return await this.needService.getNeedById(needId);
   }
 
-  @Get(`delete/candidates`)
-  @ApiOperation({ description: 'Get all needs from db 1' })
-  async getCandidates(@Req() req: Request) {
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
-    ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
-    }
-    return await this.needService.getDeleteCandidates();
-  }
 
   @Get(`flask/random`)
   @ApiOperation({ description: 'Get a random need from flask' })
@@ -219,6 +205,24 @@ export class NeedController {
     return await this.needService.getDuplicateNeeds(flaskChildId, flaskNeedId);
   }
 
+  @Get('delete/candidates')
+  @ApiOperation({ description: 'Get duplicates need for confirming' })
+  async deleteCandidates(@Req() req: Request) {
+    // delete old confirmed needs
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+      panelFlaskUserId !== SUPER_ADMIN_ID
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+    const deleteCandidates = await this.needService.getDeleteCandidates();
+
+    return { list: deleteCandidates[0], total: deleteCandidates[1] };
+  }
+
   @Get('delete/old')
   @ApiOperation({ description: 'Get duplicates need for confirming' })
   async deleteOldNeeds(@Req() req: Request) {
@@ -241,5 +245,6 @@ export class NeedController {
         await this.needService.deleteFlaskOneNeed(need.id, accessToken);
       }
     }
+    return { deleted: deleteCandidates[1] };
   }
 }

@@ -4,10 +4,13 @@ import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
+import { NeedService } from '../need/need.service';
+import { daysDifference } from 'src/utils/helpers';
 
 @Injectable()
 export class ScheduleService {
   constructor(
+    private needService: NeedService,
     private familyService: FamilyService,
     private analyticService: AnalyticService,
   ) {}
