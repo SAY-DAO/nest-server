@@ -22,6 +22,7 @@ import { PaymentEntity } from 'src/entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { VariableEntity } from 'src/entities/variable.entity';
       AllUserEntity,
       EthereumAccountEntity,
       PaymentEntity,
+      ChildrenPreRegisterEntity,
     ]),
   ],
   controllers: [FamilyController],

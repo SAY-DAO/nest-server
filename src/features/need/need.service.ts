@@ -2,7 +2,14 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
 import { Need } from '../../entities/flaskEntities/need.entity';
-import { Brackets, MoreThan, Not, Repository, UpdateResult } from 'typeorm';
+import {
+  Brackets,
+  LessThan,
+  MoreThan,
+  Not,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import {
   Configuration,
   NeedAPIApi,
@@ -12,7 +19,7 @@ import {
   PublicNeed,
 } from '../../generated-sources/openapi';
 import {
-  childExistence,
+  ChildExistence,
   NeedTypeEnum,
   PaymentStatusEnum,
   ProductStatusEnum,
@@ -108,6 +115,16 @@ export class NeedService {
     return this.flaskNeedRepository.find({
       where: {
         deliveryCode: code,
+      },
+    });
+  }
+
+  getFlaskChildNeeds(flaskChildId): Promise<Need[]> {
+    return this.flaskNeedRepository.find({
+      where: {
+        child_id: flaskChildId,
+        status: LessThan(PaymentStatusEnum.COMPLETE_PAY),
+        isConfirmed: true,
       },
     });
   }
@@ -329,7 +346,7 @@ export class NeedService {
       .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
       .andWhere('child.existence_status IN (:...existenceStatus)', {
-        existenceStatus: [childExistence.AlivePresent],
+        existenceStatus: [ChildExistence.AlivePresent],
       })
       .andWhere('need.isConfirmed = :needConfirmed', { needConfirmed: false })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
@@ -400,7 +417,7 @@ export class NeedService {
       .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
       .andWhere('child.existence_status IN (:...existenceStatus)', {
-        existenceStatus: [childExistence.AlivePresent],
+        existenceStatus: [ChildExistence.AlivePresent],
       })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.created_by_id IN (:...swIds)', {

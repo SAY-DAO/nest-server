@@ -24,6 +24,7 @@ import { EthereumTransaction } from '../entities/ethereum.transaction.entity';
 import { EthereumAccountEntity } from '../entities/ethereum.account.entity';
 import config from '../config';
 import { AllUserEntity } from 'src/entities/user.entity';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 
 export const postgresDataSourceOptions: DataSourceOptions = {
   ...config().db1,
@@ -53,7 +54,8 @@ export const postgresDataSourceOptions: DataSourceOptions = {
     IpfsEntity,
     MidjourneyEntity,
     CommentEntity,
-  ],
+    ChildrenPreRegisterEntity
+    ],
 };
 
 const dataSource = new DataSource(postgresDataSourceOptions);

@@ -4,18 +4,33 @@ import { Repository, UpdateResult } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildAPIApi } from 'src/generated-sources/openapi';
 import { NeedSummary } from 'src/types/interfaces/Need';
-import { ChildParams } from 'src/types/parameters/ChildParameters';
+import {
+  ChildParams,
+  PreRegisterChildParams,
+} from 'src/types/parameters/ChildParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
-import { childExistence } from 'src/types/interfaces/interface';
+import {
+  ChildConfirmation,
+  ChildExistence,
+} from 'src/types/interfaces/interface';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
-
+import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import {
+  Paginated,
+  PaginateQuery,
+  paginate as nestPaginate,
+} from 'nestjs-paginate';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Observable, from } from 'rxjs';
 @Injectable()
 export class ChildrenService {
   constructor(
+    @InjectRepository(ChildrenPreRegisterEntity)
+    private preRegisterChildrenRepository: Repository<ChildrenPreRegisterEntity>,
     @InjectRepository(ChildrenEntity)
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
@@ -32,7 +47,7 @@ export class ChildrenService {
         childIsMigrated: false,
       })
       .andWhere('child.existence_status IN (:...existenceStatus)', {
-        existenceStatus: [childExistence.AlivePresent],
+        existenceStatus: [ChildExistence.AlivePresent],
       })
       .andWhere('child.id_ngo IN (:...ngoIds)', {
         ngoIds: [...ngoIds],
@@ -46,10 +61,46 @@ export class ChildrenService {
     });
   }
 
-  async getFlaskChildren() {
-    return await this.flaskChildRepository
+  async getFlaskChildren(
+    options: PaginateQuery,
+    body: { statuses: ChildExistence[]; isConfirmed: ChildConfirmation },
+    socialWorkerIds: number[],
+  ): Promise<Paginated<Child>> {
+    const queryBuilder = this.flaskChildRepository
       .createQueryBuilder('child')
-      .getMany();
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.isConfirmed IN (:...childConfirmed)', {
+        childConfirmed:
+          body.isConfirmed === ChildConfirmation.CONFIRMED
+            ? [true]
+            : ChildConfirmation.NOT_CONFIRMED
+            ? [false]
+            : ChildConfirmation.BOTH && [true, false],
+      })
+      .andWhere('child.id_social_worker IN (:...socialWorkerIds)', {
+        socialWorkerIds: [...socialWorkerIds],
+      })
+      .andWhere('child.existence_status IN (:...existenceStatuses)', {
+        existenceStatuses: body.statuses[0]
+          ? [...body.statuses]
+          : [
+              ChildExistence.DEAD,
+              ChildExistence.AlivePresent,
+              ChildExistence.AliveGone,
+              ChildExistence.TempGone,
+            ],
+      })
+
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .cache(60000);
+
+    return await nestPaginate<Child>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['isConfirmed', 'ASC']],
+      nullSort: 'last',
+    });
   }
 
   async getChildNeedsSummery(
@@ -62,6 +113,31 @@ export class ChildrenService {
       childId,
     );
     return needs;
+  }
+
+  createPreRegisterChild(
+    awakeUrl: string,
+    sleptUrl: string,
+    sayName: { fa: string; en: string },
+  ): Promise<ChildrenPreRegisterEntity> {
+    const newChild = this.preRegisterChildrenRepository.create({
+      awakeUrl,
+      sleptUrl,
+      sayName: { fa: sayName.fa, en: sayName.en },
+    });
+    console.log(sayName.fa);
+    
+    return this.preRegisterChildrenRepository.save(newChild);
+  }
+
+  updatePreRegisterChild(
+    theId: string,
+    childDetails: PreRegisterChildParams,
+  ): Promise<UpdateResult> {
+    return this.preRegisterChildrenRepository.update(
+      { id: theId },
+      { ...childDetails },
+    );
   }
 
   createChild(
@@ -93,13 +169,16 @@ export class ChildrenService {
   getChildren(): Promise<ChildrenEntity[]> {
     return this.childrenRepository.find();
   }
+  getChildrenPreRegister(): Promise<ChildrenPreRegisterEntity[]> {
+    return this.preRegisterChildrenRepository.find();
+  }
 
   async getFlaskActiveChildren(): Promise<Child[]> {
     return await this.flaskChildRepository
       .createQueryBuilder('child')
       .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
       .where('child.existence_status = :existence_status', {
-        existence_status: childExistence.AlivePresent,
+        existence_status: ChildExistence.AlivePresent,
       })
       .andWhere('child.isMigrated = :childIsMigrated', {
         childIsMigrated: false,
@@ -108,6 +187,22 @@ export class ChildrenService {
         testNgoIds: [3, 14],
       })
       .getMany();
+  }
+
+  async getFlaskChildrenNames(): Promise<Child[]> {
+    return await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .select(['child.sayname_translations'])
+      .getMany();
+  }
+
+  getChildPreRegisterById(id: string): Promise<ChildrenPreRegisterEntity> {
+    const child = this.preRegisterChildrenRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+    return child;
   }
 
   getChildById(flaskId: number): Promise<ChildrenEntity> {
@@ -120,7 +215,7 @@ export class ChildrenService {
     return child;
   }
 
-  async getMyChildren(userId: number): Promise<any> {
+  async getMyChildren(userId: number): Promise<Child[]> {
     return await this.flaskChildRepository
       .createQueryBuilder('child')
       .leftJoinAndMapOne(
@@ -137,7 +232,7 @@ export class ChildrenService {
       )
       .where('userFamily.id_user = :userId', { userId: userId })
       // .andWhere('child.existence_status IN (:...existence_status)', {
-      //   existence_status: [childExistence.AlivePresent],
+      //   existence_status: [ChildExistence.AlivePresent],
       // })
       .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
       .select(['child', 'family', 'userFamily'])
@@ -172,7 +267,7 @@ export class ChildrenService {
         childIsMigrated: false,
       })
       .andWhere('child.existence_status = :existence_status', {
-        existence_status: childExistence.AlivePresent,
+        existence_status: ChildExistence.AlivePresent,
       })
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
         testNgoIds: [3, 14],
@@ -187,5 +282,9 @@ export class ChildrenService {
       ])
       .cache(10000)
       .getMany();
+  }
+
+  async deletePreRegister(id: string): Promise<Observable<any>> {
+    return from(this.preRegisterChildrenRepository.delete(id));
   }
 }

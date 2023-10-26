@@ -1,4 +1,12 @@
+mail-templates
+build_local
+Thumbs.db
+.DS_Store
+npm-debug.log
+yarn-error.log
 # compiled output
+.vscode
+.idea
 /dist
 /node_modules
 /data

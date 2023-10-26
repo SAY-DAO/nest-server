@@ -47,6 +47,24 @@ export class NgoController {
     return await this.ngoService.getNgos();
   }
 
+  @Get(`socialworkers/:flaskNgoId`)
+  @ApiOperation({ description: 'Get all ngos' })
+  async getNgoSws(
+    @Param('flaskNgoId') flaskNgoId: number,
+    @Req() req: Request,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+    return await this.ngoService.getFlaskNGOSws(
+      Number(flaskNgoId),
+      Number(panelFlaskUserId),
+      Number(panelFlaskTypeId),
+    );
+  }
+
   @Get(`arrivals/:swId`)
   async getNgoArrivals(@Req() req: Request, @Param('swId') swId: number) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
@@ -76,7 +94,7 @@ export class NgoController {
     if (roleId === SAYPlatformRoles.NGO_SUPERVISOR) {
       socialWorkerId = null;
       swIds = await this.userService
-        .getFlaskSocialWorkerByNgo(socialWorker.ngo_id)
+        .getFlaskSocialWorkersByNgo(socialWorker.ngo_id)
         .then((r) => r.map((s) => s.id));
     }
     return await this.ngoService.getNgoArrivals(socialWorkerId, swIds);

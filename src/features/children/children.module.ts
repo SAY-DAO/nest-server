@@ -16,6 +16,11 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { ChildrenMiddleware } from './middlewares/children.middleware';
 import { VariableEntity } from 'src/entities/variable.entity';
+import { UserService } from '../user/user.service';
+import { ContributorEntity } from 'src/entities/contributor.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 
 @Module({
   imports: [
@@ -28,12 +33,16 @@ import { VariableEntity } from 'src/entities/variable.entity';
       NeedEntity,
       VariableEntity,
       NgoEntity,
+      ContributorEntity,
+      AllUserEntity,
+      EthereumAccountEntity,
+      ChildrenPreRegisterEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
   ],
   controllers: [ChildrenController],
-  providers: [ChildrenService, NeedService, ChildrenService],
+  providers: [ChildrenService, NeedService, ChildrenService, UserService],
 })
 export class ChildrenModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

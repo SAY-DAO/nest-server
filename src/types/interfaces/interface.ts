@@ -22,6 +22,10 @@ export enum Colors {
   RED = 3,
 }
 
+export enum SexEnum {
+  FEMALE = 0,
+  MALE = 1,
+}
 export enum AnnouncementEnum {
   NONE = 0,
   ARRIVED_AT_NGO = 1,
@@ -63,14 +67,14 @@ export enum SAYPlatformRoles {
   RELATIVE = AppContributors.RELATIVE,
 }
 
-export enum childExistence {
+export enum ChildExistence {
   DEAD = 0,
   AlivePresent = 1,
   AliveGone = 2,
   TempGone = 3,
 }
 
-export enum childConfirmation {
+export enum ChildConfirmation {
   NOT_CONFIRMED = 0,
   CONFIRMED = 1,
   BOTH = 2,

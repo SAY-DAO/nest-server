@@ -11,7 +11,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import {
   NeedTypeEnum,
   SAYPlatformRoles,
-  childExistence,
+  ChildExistence,
 } from 'src/types/interfaces/interface';
 import {
   daysDifference,
@@ -119,7 +119,7 @@ export class AnalyticService {
       .createQueryBuilder('child')
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
       .where('child.existence_status = :existence_status', {
-        existence_status: childExistence.DEAD,
+        existence_status: ChildExistence.DEAD,
       })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
@@ -137,7 +137,7 @@ export class AnalyticService {
       .createQueryBuilder('child')
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
       .where('child.existence_status = :existence_status', {
-        existence_status: childExistence.AlivePresent,
+        existence_status: ChildExistence.AlivePresent,
       })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
@@ -155,7 +155,7 @@ export class AnalyticService {
       .createQueryBuilder('child')
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
       .where('child.existence_status = :existence_status', {
-        existence_status: childExistence.AliveGone,
+        existence_status: ChildExistence.AliveGone,
       })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
@@ -350,7 +350,7 @@ export class AnalyticService {
       .createQueryBuilder('child')
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
       .where('child.existence_status = :existence_status', {
-        existence_status: childExistence.AlivePresent,
+        existence_status: ChildExistence.AlivePresent,
       })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
@@ -427,8 +427,10 @@ export class AnalyticService {
         family: {
           familyId: familyId,
           activeUsers: removeDuplicates(activeUsersId).length,
-          activeUsersInOneMonths: removeDuplicates(activeUsersIdInOneMonths).length,
-          activeUsersInThreeMonths: removeDuplicates(activeUsersIdInThreeMonths).length,
+          activeUsersInOneMonths: removeDuplicates(activeUsersIdInOneMonths)
+            .length,
+          activeUsersInThreeMonths: removeDuplicates(activeUsersIdInThreeMonths)
+            .length,
           familyCount: familyCount,
         },
       });
@@ -452,7 +454,7 @@ export class AnalyticService {
       .createQueryBuilder('child')
       .select(['child.id'])
       .andWhere('child.existence_status = :existence_status', {
-        existence_status: childExistence.AlivePresent,
+        existence_status: ChildExistence.AlivePresent,
       })
       .andWhere('child.isMigrated = :childIsMigrated', {
         childIsMigrated: false,
