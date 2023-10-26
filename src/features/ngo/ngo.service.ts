@@ -4,8 +4,10 @@ import { CityEntity } from 'src/entities/city.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
 import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import {
+  FlaskUserTypesEnum,
   NeedTypeEnum,
   ProductStatusEnum,
 } from 'src/types/interfaces/interface';
@@ -23,6 +25,8 @@ export class NgoService {
     private ngoFlaskRepository: Repository<NGO>,
     @InjectRepository(Need, 'flaskPostgres')
     private needFlaskRepository: Repository<Need>,
+    @InjectRepository(SocialWorker, 'flaskPostgres')
+    private flaskSocialWorkerRepository: Repository<SocialWorker>,
   ) {}
 
   getNgos(): Promise<NgoEntity[]> {
@@ -183,9 +187,40 @@ export class NgoService {
       city: city,
     });
 
-    console.log(newNgo);
-
     return this.ngoRepository.save({ id: newNgo.id, ...newNgo });
+  }
+
+  getFlaskNGOSws(
+    ngoId: number,
+    flaskSwId: number,
+    typeId: FlaskUserTypesEnum,
+  ): Promise<SocialWorker[]> {
+    if (ngoId > 0) {
+      if (
+        typeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
+        typeId === FlaskUserTypesEnum.ADMIN ||
+        typeId === FlaskUserTypesEnum.SUPER_ADMIN
+      ) {
+        return this.flaskSocialWorkerRepository.find({
+          where: {
+            ngo_id: ngoId,
+          },
+        });
+      } else if (ngoId && typeId === FlaskUserTypesEnum.SOCIAL_WORKER) {
+        return this.flaskSocialWorkerRepository.find({
+          where: {
+            id: flaskSwId,
+            ngo_id: ngoId,
+          },
+        });
+      }
+    } else if (
+      ngoId === 0 &&
+      (typeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        typeId === FlaskUserTypesEnum.ADMIN)
+    ) {
+      return this.flaskSocialWorkerRepository.find();
+    }
   }
 
   async updateNgo(

@@ -207,7 +207,7 @@ export class AnalyticController {
         panelFlaskUserId,
       );
       swIds = await this.userService
-        .getFlaskSocialWorkerByNgo(supervisor.ngo_id)
+        .getFlaskSocialWorkersByNgo(supervisor.ngo_id)
         .then((r) => r.map((s) => s.id));
     }
     if (role === SAYPlatformRoles.PURCHASER) {

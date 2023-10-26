@@ -82,9 +82,9 @@ export class UserController {
     return await this.userService.getContributors();
   }
 
-  @Get(`flaskUser/:flaskUserId`)
+  @Get(`flask/sw/:flaskUserId`)
   @ApiOperation({ description: 'Get all contributors' })
-  async getFlaskUser(
+  async getFlaskSw(
     @Req() req: Request,
     @Param('flaskUserId', ParseIntPipe) flaskUserId: number,
   ) {
@@ -96,7 +96,7 @@ export class UserController {
     ) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
-    return await this.userService.getFlaskUser(flaskUserId);
+    return await this.userService.getFlaskSw(flaskUserId);
   }
 
   @UseInterceptors(MyPageInterceptor)
@@ -198,7 +198,7 @@ export class UserController {
           panelFlaskUserId,
         );
         swIds = await this.userService
-          .getFlaskSocialWorkerByNgo(supervisor.ngo_id)
+          .getFlaskSocialWorkersByNgo(supervisor.ngo_id)
           .then((r) => r.map((s) => s.id));
 
         ngoIds = [supervisor.ngo_id];
@@ -394,7 +394,7 @@ export class UserController {
 
   @Delete(`contributor/:flaskUserId`)
   @ApiOperation({ description: 'Delete a contributor' })
-  async deleteSignature(
+  async deleteOneContributor(
     @Req() req: Request,
     @Param('flaskUserId') flaskUserId: number,
   ) {

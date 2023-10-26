@@ -21,6 +21,7 @@ import { FamilyService } from '../family/family.service';
 import { AnalyticMiddleware } from './middlewares/analytic.middleware';
 import { PaymentEntity } from 'src/entities/payment.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { VariableEntity } from 'src/entities/variable.entity';
       VariableEntity,
       ChildrenEntity,
       PaymentEntity,
+      ChildrenPreRegisterEntity,
     ]),
   ],
 

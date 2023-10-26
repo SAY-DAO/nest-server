@@ -11,7 +11,7 @@ import {
   ServiceStatusEnum,
   PanelContributors,
   VirtualFamilyRole,
-  childExistence,
+  ChildExistence,
   AppContributors,
 } from 'src/types/interfaces/interface';
 import fs from 'fs';
@@ -220,6 +220,16 @@ export function daysDifference(time1: Date, time2: Date) {
   const date2 = new Date(time2);
   //calculate days difference by dividing total milliseconds in a day
   return (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
+}
+
+export function prepareUrl(imageUrl: string) {
+  let url: string;
+  if (imageUrl && imageUrl.startsWith('/')) {
+    url = `https://api.sayapp.company/${imageUrl.slice(1)}`;
+  } else {
+    url = `https://api.sayapp.company/${imageUrl}`;
+  }
+  return url;
 }
 
 export function timeDifference(time1: Date, time2: Date) {
@@ -590,7 +600,7 @@ export function findQuartileGrant(
   // do not add Grant when even one child has no payment => user need to pay at least one need per child or leave family to gain Grant
   if (
     childrenList.find(
-      (c) => c.caredFor === false && c.status === childExistence.AlivePresent,
+      (c) => c.caredFor === false && c.status === ChildExistence.AlivePresent,
     )
   ) {
     return {
@@ -785,7 +795,7 @@ export function getScattered(
   }
   // 2- count total pays per users
   const listOfIds = [];
-  const finalList=[]
+  const finalList = [];
   usersPays.forEach((u) => {
     const onlyThisUserPays = usersPays.filter((p) => p.userId === u.userId);
     if (!listOfIds.find((item) => item.userId === u.userId)) {
@@ -798,10 +808,13 @@ export function getScattered(
   const sorted = series.sort((a, b) => a.total - b.total);
   const myList = [];
   // [[1,162],[4, 5], ...]
- sorted.forEach((s) => {
+  sorted.forEach((s) => {
     if (!myList.find((e) => e === s.total)) {
       myList.push(s.total);
-      finalList.push( [s.total, sorted.filter((o) => o.total === s.total).length]);
+      finalList.push([
+        s.total,
+        sorted.filter((o) => o.total === s.total).length,
+      ]);
     }
   });
 

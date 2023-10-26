@@ -4,13 +4,12 @@ import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
-import { NeedService } from '../need/need.service';
-import { daysDifference } from 'src/utils/helpers';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class ScheduleService {
   constructor(
-    private needService: NeedService,
+    private mailService: MailService,
     private familyService: FamilyService,
     private analyticService: AnalyticService,
   ) {}
@@ -116,5 +115,12 @@ export class ScheduleService {
     } else {
       this.logger.debug('Reading from cache');
     }
+  }
+
+  @Timeout(5000)
+  // @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_NOON)
+  async handleSummaryMailCron() {
+    this.logger.debug('Mailing User summaries');
+    // await this.mailService.sendUserSummaries();
   }
 }

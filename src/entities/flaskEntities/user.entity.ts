@@ -1,10 +1,5 @@
-import {
-  Entity,
-  Column,
-  Index,
-} from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
-
 
 @Entity()
 export class User extends BaseEntity {
@@ -21,6 +16,12 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   avatarUrl?: string;
 
+  @Column({ nullable: true })
+  emailAddress?: string;
+
+  @Column({ nullable: true })
+  phone_number?: string;
+
   @Column({ type: 'timestamptz', nullable: true })
   updated?: Date;
 
@@ -28,15 +29,21 @@ export class User extends BaseEntity {
   birthDate?: Date;
 
   @Column()
-  isDeleted: boolean
+  is_email_verified: boolean;
+
+  @Column()
+  is_phonenumber_verified: boolean;
+
+  @Column()
+  isDeleted: boolean;
 }
 
 @Entity() // panel admin, sw, auditor, ...
-export class SocialWorker  extends BaseEntity {
+export class SocialWorker extends BaseEntity {
   @Column({ nullable: true, name: 'first_name' })
   firstName?: string;
 
-  @Column({ nullable: true,  name: 'last_name'  })
+  @Column({ nullable: true, name: 'last_name' })
   lastName?: string;
 
   @Column({ type: 'timestamptz', nullable: true })
@@ -99,7 +106,7 @@ export class SocialWorker  extends BaseEntity {
   @Column({ nullable: true })
   passport_url?: string;
 
-  @Column({ nullable: true,  name: 'username'  })
+  @Column({ nullable: true, name: 'username' })
   userName?: string;
 
   @Column({ nullable: true })
@@ -114,6 +121,8 @@ export class SocialWorker  extends BaseEntity {
   @Column({ nullable: true })
   type_id?: number;
 
+  @Column({ nullable: true })
+  is_active?: boolean;
 }
 
 @Entity()
@@ -121,6 +130,4 @@ export class FamilyEntity extends User {
   @Index({ unique: true })
   @Column({ nullable: false })
   flaskId: number;
-
-
 }

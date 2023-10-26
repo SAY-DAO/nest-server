@@ -1,4 +1,4 @@
-import { childExistence } from 'src/types/interfaces/interface';
+import { ChildExistence } from 'src/types/interfaces/interface';
 import { Entity, Column } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 
@@ -56,7 +56,7 @@ export class Child extends BaseEntity {
   education: number;
 
   @Column({ nullable: true })
-  existence_status: childExistence;
+  existence_status: ChildExistence;
 
   @Column({ nullable: true })
   familyCount: number;
@@ -102,4 +102,6 @@ export class Child extends BaseEntity {
 
   @Column({ nullable: true })
   voiceUrl: string;
+
+  family: any;
 }

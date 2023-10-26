@@ -33,6 +33,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { NgoMiddleware } from './middlewares/ngo.middleware';
 import { VariableEntity } from 'src/entities/variable.entity';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { VariableEntity } from 'src/entities/variable.entity';
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
+      ChildrenPreRegisterEntity
     ]),
   ],
   controllers: [NgoController],

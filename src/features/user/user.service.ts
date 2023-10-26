@@ -26,10 +26,6 @@ export class UserService {
     private flaskUserRepository: Repository<User>,
   ) {}
 
-  getFlaskSws(): Promise<SocialWorker[]> {
-    return this.flaskSocialWorkerRepository.find();
-  }
-
   getFlaskSwIds(): Promise<SocialWorker[]> {
     return this.flaskSocialWorkerRepository.find({
       select: {
@@ -44,13 +40,13 @@ export class UserService {
     });
   }
 
-  getFlaskUser(id: number): Promise<SocialWorker> {
-    return this.flaskUserRepository.findOne({
+  getFlaskSw(id: number): Promise<SocialWorker> {
+    return this.flaskSocialWorkerRepository.findOne({
       where: { id: id },
     });
   }
 
-  getFlaskSocialWorkerByNgo(ngoId: number): Promise<SocialWorker[]> {
+  getFlaskSocialWorkersByNgo(ngoId: number): Promise<SocialWorker[]> {
     return this.flaskSocialWorkerRepository.find({
       where: { ngo_id: ngoId },
     });
