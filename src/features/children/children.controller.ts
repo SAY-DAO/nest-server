@@ -13,7 +13,7 @@ import {
   UploadedFile,
   UploadedFiles,
   Delete,
-  BadRequestException,
+  Res,
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ChildrenService } from './children.service';
@@ -33,6 +33,9 @@ import {
 } from '@nestjs/platform-express';
 import { avatarStorage } from 'src/storage/avatarStorage';
 import { ServerError } from 'src/filters/server-exception.filter';
+import { voiceStorage } from 'src/storage/voiceStorage';
+import { ChildrenInterceptor } from './interceptors/children.interceptors';
+import { LocationService } from '../location/location.service';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -46,6 +49,7 @@ export class ChildrenController {
   constructor(
     private childrenService: ChildrenService,
     private userService: UserService,
+    private locationService: LocationService,
   ) {}
 
   @Delete(`preregister/:id`)
@@ -55,7 +59,10 @@ export class ChildrenController {
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
     ) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
@@ -69,48 +76,6 @@ export class ChildrenController {
     } catch (e) {
       throw new ServerError(e);
     }
-  }
-
-  @Patch(`preregister`)
-  @ApiOperation({ description: 'Get all children from db' })
-  @UsePipes(new ValidationPipe())
-  async preRegisterUpdate(
-    @Req() req: Request,
-    @Body(ValidateChildTsPipe) body: CreatePreRegisterChildDto,
-  ) {
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      !(
-        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
-        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
-        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
-        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
-      )
-    ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
-    }
-
-    return await this.childrenService.updatePreRegisterChild(body.id, {
-      phoneNumber: body.phoneNumber,
-      country: body.country,
-      city: body.city,
-      bioTranslations: body.bio_translations,
-      voiceUrl: body.voiceUrl,
-      birthPlace: body.birthPlaceId,
-      birthDate: body.birthDate,
-      housingStatus: body.housingStatus,
-      familyCount: body.familyCount,
-      education: body.education,
-      flaskNgoId: body.ngoId,
-      flaskSwId: body.swId,
-      lastName: body.lastName_translations,
-      firstName: body.firstName_translations,
-      state: body.state,
-      sex: body.sex,
-      address: body.address,
-    });
   }
 
   @Post(`preregister`)
@@ -133,12 +98,7 @@ export class ChildrenController {
       sleptFile?: Express.Multer.File[];
     },
     @Body()
-    body: {
-      awakeFile: string;
-      sleptFile: string;
-      sayNameFa: string;
-      sayNameEn: string;
-    },
+    body: { sayNameFa: string; sayNameEn: string },
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
@@ -155,26 +115,120 @@ export class ChildrenController {
     }
 
     if (!files) {
-      throw new BadRequestException(400, 'No files were uploaded!');
+      throw new ServerError('No files were uploaded!');
     }
-    console.log(body.sayNameFa);
 
     return await this.childrenService.createPreRegisterChild(
       files.awakeFile[0].filename,
       files.sleptFile[0].filename,
-      { fa: body.sayNameFa, en: body.sayNameFa },
+      { fa: body.sayNameFa, en: body.sayNameEn },
     );
   }
 
-  @Get(`preregister/all`)
+  @Patch(`preregister`)
+  @ApiOperation({
+    description: 'NGO / SW add a child by updating pre register',
+  })
+  @UsePipes(new ValidationPipe())
+  @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
+  async preRegisterUpdate(
+    @Req() req: Request,
+    @UploadedFile() voiceFile,
+    @Body(ValidateChildTsPipe) body: CreatePreRegisterChildDto,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
+        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+    if (!voiceFile) {
+      throw new ServerError('No file was uploaded!');
+    }
+    try {
+      const allPreRegisters = await this.childrenService.getChildrenPreRegister(
+        true,
+      );
+
+      let location = await this.locationService.getCityById(body.city);
+      console.log('\x1b[36m%s\x1b[0m', 'Creating a city ...');
+      if (!location) {
+        const flaskCity = await this.locationService.getFlaskCity(body.city);
+        const {
+          id: flaskId,
+          name,
+          state_id,
+          state_code,
+          state_name,
+          country_id,
+          country_code,
+          country_name,
+          latitude,
+          longitude,
+        } = flaskCity;
+
+        location = await this.locationService.createLocation({
+          flaskCityId: flaskId,
+          name: name,
+          stateId: state_id,
+          stateCode: state_code,
+          stateName: state_name,
+          countryId: country_id,
+          countryCode: country_code,
+          countryName: country_name,
+          latitude,
+          longitude,
+        });
+        console.log('\x1b[36m%s\x1b[0m', 'Created a city ...');
+      }
+      return await this.childrenService.updatePreRegisterChild(
+        allPreRegisters[0].id,
+        {
+          phoneNumber: body.phoneNumber,
+          country: Number(body.country),
+          city: Number(body.city),
+          bio: body.bio,
+          voiceUrl: voiceFile.filename,
+          birthPlace: Number(body.birthPlaceId),
+          birthDate: new Date(body.birthDate),
+          housingStatus: Number(body.housingStatus),
+          familyCount: Number(body.familyCount),
+          education: Number(body.education),
+          flaskNgoId: Number(body.ngoId),
+          flaskSwId: Number(body.swId),
+          lastName: { fa: body.lastName, en: '' },
+          firstName: { fa: body.firstName, en: '' },
+          state: Number(body.state),
+          sex: Number(body.sex),
+          address: body.address,
+        },
+        location,
+      );
+    } catch (e) {
+      throw new ServerError(e);
+    }
+  }
+
+  @UseInterceptors(ChildrenInterceptor)
+  @Get(`preregister/all/:isApproved`)
   @ApiOperation({ description: 'Get all children from db' })
-  async getChildrenPreRegister(@Req() req: Request) {
+  async getChildrenPreRegister(
+    @Param('isApproved') isApproved: boolean,
+    @Req() req: Request,
+  ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
-    return await this.childrenService.getChildrenPreRegister();
+    return await this.childrenService.getChildrenPreRegister(isApproved);
   }
 
   @Get(`all`)
@@ -234,12 +288,17 @@ export class ChildrenController {
     ).length;
   }
 
+  @UseInterceptors(ChildrenInterceptor)
   @Post(`flask/all`)
   @ApiOperation({ description: 'Get all flask children from db' })
   async getFlaskChildren(
     @Req() req: Request,
     @Body()
-    body: { statuses: ChildExistence[]; isConfirmed: ChildConfirmation },
+    body: {
+      isMigrated: boolean;
+      statuses: ChildExistence[];
+      isConfirmed: ChildConfirmation;
+    },
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
@@ -323,5 +382,21 @@ export class ChildrenController {
       throw new ForbiddenException(403, 'You Are not authorized');
     }
     return this.childrenService.gtTheNetwork();
+  }
+
+  @Get('images/:fileName')
+  async serveAvatar(
+    @Param('fileName') fileName: string,
+    @Res() res: any,
+  ): Promise<any> {
+    res.sendFile(fileName, { root: './uploads/children/avatars' });
+  }
+
+  @Get('voices/:fileName')
+  async serveVoice(
+    @Param('fileName') fileName: string,
+    @Res() res: any,
+  ): Promise<any> {
+    res.sendFile(fileName, { root: './uploads/children/voices' });
   }
 }

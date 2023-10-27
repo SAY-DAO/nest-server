@@ -1,5 +1,10 @@
 import { HttpModule } from '@nestjs/axios';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
@@ -21,11 +26,14 @@ import { ContributorEntity } from 'src/entities/contributor.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { LocationService } from '../location/location.service';
+import { LocationEntity } from 'src/entities/location.entity';
+import { Cities } from 'src/entities/flaskEntities/cities.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, Child, Payment, SocialWorker, UserFamily, Family, User],
+      [Need, Child, Payment, SocialWorker, UserFamily, Family, User, Cities],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -36,16 +44,29 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
-      ChildrenPreRegisterEntity
+      ChildrenPreRegisterEntity,
+      LocationEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
   ],
   controllers: [ChildrenController],
-  providers: [ChildrenService, NeedService, ChildrenService, UserService],
+  providers: [
+    ChildrenService,
+    NeedService,
+    ChildrenService,
+    UserService,
+    LocationService,
+  ],
 })
 export class ChildrenModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ChildrenMiddleware).forRoutes('children');
+    consumer
+      .apply(ChildrenMiddleware)
+      .exclude(
+        { path: 'children/images/:fileName', method: RequestMethod.GET },
+        { path: 'children/voices/:fileName', method: RequestMethod.GET },
+      )
+      .forRoutes(ChildrenController);
   }
 }

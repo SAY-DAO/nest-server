@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CityEntity } from 'src/entities/city.entity';
+import { LocationEntity } from 'src/entities/location.entity';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { PaymentEntity } from 'src/entities/payment.entity';
 import { ReceiptEntity } from 'src/entities/receipt.entity';
@@ -55,7 +55,7 @@ export class SyncService {
     try {
       ///--------------------------------------------NGO-------------------------------------
       let nestNgo = await this.ngoService.getNgoById(flaskUser.ngo_id);
-      let nestCallerNgoCity: CityEntity;
+      let nestCallerNgoCity: LocationEntity;
       let callerNgoDetails: NgoParams;
       // Do no update NGOs frequently
 
@@ -79,13 +79,13 @@ export class SyncService {
         nestCallerNgoCity = await this.locationService.getCityById(city_id);
         if (!nestCallerNgoCity) {
           console.log('\x1b[36m%s\x1b[0m', 'Creating a city ...');
-          nestCallerNgoCity = await this.locationService.createCity({
+          nestCallerNgoCity = await this.locationService.createLocation({
             flaskCityId: flaskId,
             name,
             stateId: state_id,
             stateCode: state_code,
             stateName: state_name,
-            flaskCountryId: country_id,
+            countryId: country_id,
             countryCode: country_code,
             countryName: country_name,
             latitude,

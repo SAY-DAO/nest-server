@@ -35,14 +35,12 @@ export type ChildParams = {
 };
 
 export type PreRegisterChildParams = {
-  firstName: string;
-  lastName: string;
   phoneNumber: string;
   address: string;
   country: number;
   state: number;
   city: number;
-  bioTranslations: string;
+  bio: string;
   voiceUrl: string;
   birthPlace: number;
   birthDate: Date;
@@ -52,4 +50,6 @@ export type PreRegisterChildParams = {
   sex: SexEnum;
   flaskNgoId: number;
   flaskSwId: number;
+  firstName: { fa: string; en: string };
+  lastName: { fa: string; en: string };
 };

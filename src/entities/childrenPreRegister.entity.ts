@@ -1,10 +1,11 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import {
   EducationEnum,
   HousingEnum,
   SexEnum,
 } from '../types/interfaces/interface';
+import { LocationEntity } from './location.entity';
 
 @Entity()
 export class ChildrenPreRegisterEntity extends BaseEntity {
@@ -17,8 +18,14 @@ export class ChildrenPreRegisterEntity extends BaseEntity {
   @Column({ type: 'hstore', hstoreType: 'object', nullable: false })
   sayName: Record<string, string>;
 
+  @Column({ type: 'hstore', hstoreType: 'object', nullable: true })
+  firstName: Record<string, string>;
+
+  @Column({ type: 'hstore', hstoreType: 'object', nullable: true })
+  lastName: Record<string, string>;
+
   @Column({ nullable: true })
-  bioTranslations: string;
+  bio: string;
 
   @Column({ type: 'timestamptz', nullable: true })
   birthDate: Date;
@@ -28,6 +35,9 @@ export class ChildrenPreRegisterEntity extends BaseEntity {
 
   @Column({ nullable: true })
   city: number;
+
+  @Column({ nullable: true })
+  state: number;
 
   @Column({ nullable: true })
   country: number;
@@ -48,6 +58,9 @@ export class ChildrenPreRegisterEntity extends BaseEntity {
   address: string;
 
   @Column({ nullable: true })
+  familyCount: number;
+
+  @Column({ nullable: true })
   phoneNumber: string;
 
   @Column({ nullable: true })
@@ -55,4 +68,10 @@ export class ChildrenPreRegisterEntity extends BaseEntity {
 
   @Column({ nullable: true })
   voiceUrl: string;
+
+  @Column({ nullable: true, default: false })
+  isApproved: boolean;
+
+  @ManyToOne(() => LocationEntity, (n) => n.ngos, { eager: true })
+  location: LocationEntity;
 }

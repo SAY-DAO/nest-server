@@ -2,7 +2,7 @@ import { Entity, Column, OneToMany, Index, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { NeedEntity } from './need.entity';
 import { ChildrenEntity } from './children.entity';
-import { CityEntity } from './city.entity';
+import { LocationEntity } from './location.entity';
 import { ContributorEntity } from './contributor.entity';
 
 @Entity()
@@ -62,8 +62,8 @@ export class NgoEntity extends BaseEntity {
   @OneToMany(() => ContributorEntity, (sw) => sw.ngo)
   socialWorkers?: ContributorEntity[];
 
-  @ManyToOne(() => CityEntity, (n) => n.ngos, { eager: true })
-  city: CityEntity;
+  @ManyToOne(() => LocationEntity, (n) => n.ngos, { eager: true })
+  location: LocationEntity;
 }
 
 @Entity()

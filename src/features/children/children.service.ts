@@ -26,6 +26,7 @@ import {
 } from 'nestjs-paginate';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 import { Observable, from } from 'rxjs';
+import { LocationEntity } from 'src/entities/location.entity';
 @Injectable()
 export class ChildrenService {
   constructor(
@@ -63,13 +64,23 @@ export class ChildrenService {
 
   async getFlaskChildren(
     options: PaginateQuery,
-    body: { statuses: ChildExistence[]; isConfirmed: ChildConfirmation },
+    body: {
+      isMigrated: boolean;
+      statuses: ChildExistence[];
+      isConfirmed: ChildConfirmation;
+    },
     socialWorkerIds: number[],
   ): Promise<Paginated<Child>> {
+    console.log(body);
+
     const queryBuilder = this.flaskChildRepository
       .createQueryBuilder('child')
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.isConfirmed IN (:...childConfirmed)', {
+      .where('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: body.isMigrated,
+      })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('child.isConfirmed IN (:...childConfirmed)', {
         childConfirmed:
           body.isConfirmed === ChildConfirmation.CONFIRMED
             ? [true]
@@ -81,14 +92,15 @@ export class ChildrenService {
         socialWorkerIds: [...socialWorkerIds],
       })
       .andWhere('child.existence_status IN (:...existenceStatuses)', {
-        existenceStatuses: body.statuses[0]
-          ? [...body.statuses]
-          : [
-              ChildExistence.DEAD,
-              ChildExistence.AlivePresent,
-              ChildExistence.AliveGone,
-              ChildExistence.TempGone,
-            ],
+        existenceStatuses:
+          body.statuses[0] >= 0
+            ? [...body.statuses]
+            : [
+                ChildExistence.DEAD,
+                ChildExistence.AlivePresent,
+                ChildExistence.AliveGone,
+                ChildExistence.TempGone,
+              ],
       })
 
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
@@ -126,17 +138,18 @@ export class ChildrenService {
       sayName: { fa: sayName.fa, en: sayName.en },
     });
     console.log(sayName.fa);
-    
+
     return this.preRegisterChildrenRepository.save(newChild);
   }
 
   updatePreRegisterChild(
     theId: string,
     childDetails: PreRegisterChildParams,
+    location: LocationEntity,
   ): Promise<UpdateResult> {
     return this.preRegisterChildrenRepository.update(
       { id: theId },
-      { ...childDetails },
+      { ...childDetails, location },
     );
   }
 
@@ -169,8 +182,14 @@ export class ChildrenService {
   getChildren(): Promise<ChildrenEntity[]> {
     return this.childrenRepository.find();
   }
-  getChildrenPreRegister(): Promise<ChildrenPreRegisterEntity[]> {
-    return this.preRegisterChildrenRepository.find();
+  getChildrenPreRegister(
+    isApproved: boolean,
+  ): Promise<ChildrenPreRegisterEntity[]> {
+    return this.preRegisterChildrenRepository.find({
+      // where: {
+      //   isApproved: false,
+      // },
+    });
   }
 
   async getFlaskActiveChildren(): Promise<Child[]> {

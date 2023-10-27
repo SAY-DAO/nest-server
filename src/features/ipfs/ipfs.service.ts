@@ -203,11 +203,11 @@ export class IpfsService {
       //   ngo: {
       //     name: child.ngo.name,
       //     website: child.ngo.website,
-      //     cityId: child.ngo.city.flaskCityId,
-      //     stateId: child.ngo.city.stateId,
-      //     countryId: child.ngo.city.countryId,
-      //     countryName: child.ngo.city.countryName,
-      //     cityName: child.ngo.city.name,
+      //     cityId: child.ngo.location.flaskCityId,
+      //     stateId: child.ngo.location.stateId,
+      //     countryId: child.ngo.location.countryId,
+      //     countryName: child.ngo.location.countryName,
+      //     cityName: child.ngo.location.name,
       //   },
       //   provider: need.provider && {
       //     providerId: need.provider.id,
@@ -259,11 +259,11 @@ export class IpfsService {
         ngo: {
           name: child.ngo.name,
           website: child.ngo.website,
-          cityId: child.ngo.city.flaskCityId,
-          stateId: child.ngo.city.stateId,
-          countryId: child.ngo.city.countryId,
-          countryName: child.ngo.city.countryName,
-          cityName: child.ngo.city.name,
+          cityId: child.ngo.location.flaskCityId,
+          stateId: child.ngo.location.stateId,
+          countryId: child.ngo.location.countryId,
+          countryName: child.ngo.location.countryName,
+          cityName: child.ngo.location.name,
         },
         provider: need.provider && {
           providerId: need.provider.id,

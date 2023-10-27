@@ -15,13 +15,11 @@ export class CreateChildrenDto {
 
 export class CreatePreRegisterChildDto {
   @IsNotEmpty()
-  id: string;
+  bio: string;
   @IsNotEmpty()
-  bio_translations: string;
+  firstName: string;
   @IsNotEmpty()
-  firstName_translations: string;
-  @IsNotEmpty()
-  lastName_translations: string;
+  lastName: string;
   @IsNotEmpty()
   country: number;
   @IsNotEmpty()
@@ -42,8 +40,6 @@ export class CreatePreRegisterChildDto {
   address: string;
   @IsNotEmpty()
   housingStatus: HousingEnum;
-  @IsNotEmpty()
-  voiceUrl: string;
   @IsNotEmpty()
   birthDate: Date;
   @IsNotEmpty()

@@ -208,8 +208,6 @@ export class MailService {
         },
       });
     } catch (e) {
-      console.log(e);
-
       throw new ServerError('Cold not send email!');
     }
   }
