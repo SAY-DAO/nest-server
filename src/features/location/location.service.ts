@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cities } from 'src/entities/flaskEntities/cities.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 import { LocationEntity } from 'src/entities/location.entity';
 import { CityParams } from 'src/types/parameters/CityParameters';
 import { Repository } from 'typeorm';
@@ -12,6 +13,8 @@ export class LocationService {
     private locationRepository: Repository<LocationEntity>,
     @InjectRepository(Cities, 'flaskPostgres')
     private cityFlaskRepository: Repository<Cities>,
+    @InjectRepository(Countries, 'flaskPostgres')
+    private countryFlaskRepository: Repository<Countries>,
   ) {}
 
   getCities(): Promise<LocationEntity[]> {
@@ -22,6 +25,15 @@ export class LocationService {
     const city = this.locationRepository.findOne({
       where: {
         flaskCityId,
+      },
+    });
+    return city;
+  }
+
+  getCityByCountryId(countryId: number): Promise<Countries> {
+    const city = this.countryFlaskRepository.findOne({
+      where: {
+        id: countryId,
       },
     });
     return city;

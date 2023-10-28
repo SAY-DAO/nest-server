@@ -5,10 +5,11 @@ import { Cities } from 'src/entities/flaskEntities/cities.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LocationEntity } from 'src/entities/location.entity';
 import { LocationMiddleware } from './middlewares/location.middleware';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Cities], 'flaskPostgres'),
+    TypeOrmModule.forFeature([Cities, Countries], 'flaskPostgres'),
     TypeOrmModule.forFeature([LocationEntity]),
   ],
   controllers: [LocationController],

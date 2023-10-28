@@ -78,7 +78,7 @@ export class SyncService {
         } = flaskCity;
         nestCallerNgoCity = await this.locationService.getCityById(city_id);
         if (!nestCallerNgoCity) {
-          console.log('\x1b[36m%s\x1b[0m', 'Creating a city ...');
+          console.log('\x1b[36m%s\x1b[0m', 'Creating a Location ...');
           nestCallerNgoCity = await this.locationService.createLocation({
             flaskCityId: flaskId,
             name,
@@ -91,7 +91,7 @@ export class SyncService {
             latitude,
             longitude,
           });
-          console.log('\x1b[36m%s\x1b[0m', 'Created a city ...');
+          console.log('\x1b[36m%s\x1b[0m', 'Created a Location ...');
         }
         callerNgoDetails = {
           ...ngoOtherParams,

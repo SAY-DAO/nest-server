@@ -12,7 +12,7 @@ import { ChildrenEntity } from '../../entities/children.entity';
 import { NeedService } from '../need/need.service';
 import { ChildrenController } from './children.controller';
 import { ChildrenService } from './children.service';
-import { NgoEntity } from '../../entities/ngo.entity';
+import { NgoArrivalEntity, NgoEntity } from '../../entities/ngo.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
@@ -29,11 +29,26 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
 import { LocationService } from '../location/location.service';
 import { LocationEntity } from 'src/entities/location.entity';
 import { Cities } from 'src/entities/flaskEntities/cities.entity';
+import { DownloadService } from '../download/download.service';
+import { NgoService } from '../ngo/ngo.service';
+import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, Child, Payment, SocialWorker, UserFamily, Family, User, Cities],
+      [
+        Need,
+        Child,
+        Payment,
+        SocialWorker,
+        UserFamily,
+        Family,
+        User,
+        Cities,
+        NGO,
+        Countries,
+      ],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -46,6 +61,8 @@ import { Cities } from 'src/entities/flaskEntities/cities.entity';
       EthereumAccountEntity,
       ChildrenPreRegisterEntity,
       LocationEntity,
+      NgoEntity,
+      NgoArrivalEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -57,6 +74,8 @@ import { Cities } from 'src/entities/flaskEntities/cities.entity';
     ChildrenService,
     UserService,
     LocationService,
+    NgoService,
+    DownloadService,
   ],
 })
 export class ChildrenModule implements NestModule {
@@ -66,6 +85,7 @@ export class ChildrenModule implements NestModule {
       .exclude(
         { path: 'children/images/:fileName', method: RequestMethod.GET },
         { path: 'children/voices/:fileName', method: RequestMethod.GET },
+        { path: `children/preregister/old`, method: RequestMethod.GET },
       )
       .forRoutes(ChildrenController);
   }

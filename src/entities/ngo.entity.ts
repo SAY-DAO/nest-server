@@ -4,6 +4,7 @@ import { NeedEntity } from './need.entity';
 import { ChildrenEntity } from './children.entity';
 import { LocationEntity } from './location.entity';
 import { ContributorEntity } from './contributor.entity';
+import { ChildrenPreRegisterEntity } from './childrenPreRegister.entity';
 
 @Entity()
 export class NgoEntity extends BaseEntity {
@@ -64,6 +65,11 @@ export class NgoEntity extends BaseEntity {
 
   @ManyToOne(() => LocationEntity, (n) => n.ngos, { eager: true })
   location: LocationEntity;
+
+  @OneToMany(() => ChildrenPreRegisterEntity, (c) => c.ngo, {
+    eager: false,
+  })
+  preRegisters?: ChildrenPreRegisterEntity[];
 }
 
 @Entity()

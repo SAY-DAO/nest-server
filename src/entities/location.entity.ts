@@ -38,6 +38,9 @@ export class LocationEntity extends BaseEntity {
   @OneToMany(() => NgoEntity, (n) => n.location, { eager: false })
   ngos?: NgoEntity[];
 
+  @OneToMany(() => NgoEntity, (n) => n.location, { eager: false })
+  preRegisters?: NgoEntity[];
+
   @OneToMany(() => ChildrenPreRegisterEntity, (c) => c.location, {
     eager: false,
   })

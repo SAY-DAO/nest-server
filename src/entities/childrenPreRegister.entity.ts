@@ -3,9 +3,13 @@ import { BaseEntity } from './BaseEntity';
 import {
   EducationEnum,
   HousingEnum,
+  PreRegisterStatusEnum,
+  SchoolTypeEnum,
   SexEnum,
 } from '../types/interfaces/interface';
 import { LocationEntity } from './location.entity';
+import { ContributorEntity } from './contributor.entity';
+import { NgoEntity } from './ngo.entity';
 
 @Entity()
 export class ChildrenPreRegisterEntity extends BaseEntity {
@@ -24,14 +28,20 @@ export class ChildrenPreRegisterEntity extends BaseEntity {
   @Column({ type: 'hstore', hstoreType: 'object', nullable: true })
   lastName: Record<string, string>;
 
-  @Column({ nullable: true })
-  bio: string;
+  @Column({ type: 'hstore', hstoreType: 'object', nullable: true })
+  bio: Record<string, string>;
 
   @Column({ type: 'timestamptz', nullable: true })
   birthDate: Date;
 
   @Column({ nullable: true })
-  birthPlace: number;
+  birthPlaceId: number;
+
+  @Column({ nullable: true })
+  flaskChildId: number;
+
+  @Column({ nullable: true })
+  birthPlaceName: string;
 
   @Column({ nullable: true })
   city: number;
@@ -42,11 +52,14 @@ export class ChildrenPreRegisterEntity extends BaseEntity {
   @Column({ nullable: true })
   country: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   sex: SexEnum;
 
   @Column({ nullable: true })
-  education: EducationEnum;
+  educationLevel: EducationEnum;
+
+  @Column({ nullable: true })
+  schoolType: SchoolTypeEnum;
 
   @Column({ nullable: true })
   housingStatus: HousingEnum;
@@ -69,9 +82,15 @@ export class ChildrenPreRegisterEntity extends BaseEntity {
   @Column({ nullable: true })
   voiceUrl: string;
 
-  @Column({ nullable: true, default: false })
-  isApproved: boolean;
+  @Column({ nullable: true, default: PreRegisterStatusEnum.NOT_REGISTERED })
+  status: PreRegisterStatusEnum;
 
-  @ManyToOne(() => LocationEntity, (n) => n.ngos, { eager: true })
+  @ManyToOne(() => LocationEntity, (n) => n.preRegisters, { eager: true })
   location: LocationEntity;
+
+  @ManyToOne(() => ContributorEntity, (s) => s.preRegisters, { eager: true })
+  socialWorker: ContributorEntity;
+
+  @ManyToOne(() => NgoEntity, (n) => n.preRegisters, { eager: true })
+  ngo: NgoEntity;
 }

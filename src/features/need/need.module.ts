@@ -40,6 +40,7 @@ import { ProviderEntity } from 'src/entities/provider.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
         Family,
         User,
         Cities,
+        Countries,
       ],
       'flaskPostgres',
     ),

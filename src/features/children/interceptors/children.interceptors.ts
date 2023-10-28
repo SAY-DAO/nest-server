@@ -13,7 +13,6 @@ export class ChildrenInterceptor implements NestInterceptor {
     console.log('Intercepting Children...');
     console.log('Before...');
     const request = context.getArgByIndex(0);
-    console.log(request);
 
     const now = Date.now();
     return next

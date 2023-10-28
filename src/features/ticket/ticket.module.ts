@@ -38,6 +38,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
         UserFamily,
         Family,
         User,
+        Countries,
       ],
       'flaskPostgres',
     ),

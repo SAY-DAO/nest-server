@@ -5,6 +5,8 @@ import { join } from 'path';
 import { createWriteStream } from 'fs';
 import axios from 'axios';
 import { Readable } from 'stream';
+import { createFile } from 'src/utils/file';
+import { prepareUrl } from 'src/utils/helpers';
 
 @Injectable()
 export class DownloadService {
@@ -27,7 +29,7 @@ export class DownloadService {
     return createReadStream(join(process.cwd(), fileName));
   }
 
-  async downloadFile(fileUrl: string, name: string) {
+  async downloadFile(fileUrl: string, path: string) {
     if (fileUrl.startsWith('/')) {
       fileUrl = fileUrl.slice(1);
     }
@@ -60,16 +62,12 @@ export class DownloadService {
     //       }),
     //     ),
     // );
-    const { data } = await axios.get<Readable>(
-      `https://api.sayapp.company/${fileUrl}`,
-      {
-        responseType: 'stream',
-      },
-    );
+    const { data } = await axios.get<Readable>(prepareUrl(fileUrl), {
+      responseType: 'stream',
+    });
     // now, you can process or transform the data as a Readable type.
-    const writeStream = createWriteStream(name);
+    const writeStream = createWriteStream(path);
     data.pipe(writeStream); // save file to local file system
-
     return new Promise((resolve, reject) => {
       writeStream.on('finish', resolve);
       writeStream.on('error', reject);
