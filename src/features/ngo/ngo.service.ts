@@ -213,7 +213,7 @@ export class NgoService {
         });
       }
     } else if (
-      ngoId === 0 &&
+      !ngoId &&
       (typeId === FlaskUserTypesEnum.SUPER_ADMIN ||
         typeId === FlaskUserTypesEnum.ADMIN)
     ) {
