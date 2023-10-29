@@ -22,9 +22,6 @@ export class New1698344457835 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "children_pre_register_entity" ADD CONSTRAINT "FK_2b2ec4ae41b2b9a3c6a48054d45" FOREIGN KEY ("locationId") REFERENCES "location_entity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "ngo_entity" ADD CONSTRAINT "FK_6ec8a85276e7c6122fbd237210a" FOREIGN KEY ("locationId") REFERENCES "location_entity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
