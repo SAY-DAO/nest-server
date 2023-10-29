@@ -5,11 +5,12 @@ import { SocialWorkerAPIApi, UserAPIApi } from 'src/generated-sources/openapi';
 import { convertFlaskToSayRoles, timeDifference } from './helpers';
 import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 
-export async function checkFlaskCacheAuthentication(req, logger: Logger) {
+export async function updateFlaskCacheAuthentication(req, logger: Logger) {
   logger.warn('Passing through MiddleWare...');
 
   const accessToken = req.headers['authorization'];
   const requestFlaskId = Number(req.headers['flaskid']);
+
   if (!accessToken || !requestFlaskId) {
     throw new ForbiddenException('Access Token and the ID is required!');
   }

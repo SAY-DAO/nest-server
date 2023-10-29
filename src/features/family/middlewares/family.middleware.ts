@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { NextFunction } from 'express';
 import { ServerError } from 'src/filters/server-exception.filter';
-import { checkFlaskCacheAuthentication } from 'src/utils/auth';
+import { updateFlaskCacheAuthentication } from 'src/utils/auth';
 
 @Injectable()
 export class FamilyMiddleware implements NestMiddleware {
@@ -17,7 +17,7 @@ export class FamilyMiddleware implements NestMiddleware {
 
   async use(@Request() req, @Response() res, next: NextFunction) {
     try {
-      await checkFlaskCacheAuthentication(req, this.logger);
+      await updateFlaskCacheAuthentication(req, this.logger);
     } catch (e) {
       throw new ServerError(e);
     }

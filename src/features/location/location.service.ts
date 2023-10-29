@@ -1,62 +1,67 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cities } from 'src/entities/flaskEntities/cities.entity';
-import { CityEntity } from 'src/entities/city.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
+import { LocationEntity } from 'src/entities/location.entity';
 import { CityParams } from 'src/types/parameters/CityParameters';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class LocationService {
-    constructor(
-        @InjectRepository(CityEntity)
-        private cityRepository: Repository<CityEntity>,
-        @InjectRepository(Cities, 'flaskPostgres')
-        private cityFlaskRepository: Repository<Cities>,
-    ) { }
+  constructor(
+    @InjectRepository(LocationEntity)
+    private locationRepository: Repository<LocationEntity>,
+    @InjectRepository(Cities, 'flaskPostgres')
+    private cityFlaskRepository: Repository<Cities>,
+    @InjectRepository(Countries, 'flaskPostgres')
+    private countryFlaskRepository: Repository<Countries>,
+  ) {}
 
+  getCities(): Promise<LocationEntity[]> {
+    return this.locationRepository.find();
+  }
 
-    getCities(): Promise<CityEntity[]> {
-        return this.cityRepository.find();
-    }
+  getCityById(flaskCityId: number): Promise<LocationEntity> {
+    const city = this.locationRepository.findOne({
+      where: {
+        flaskCityId,
+      },
+    });
+    return city;
+  }
 
+  getCityByCountryId(countryId: number): Promise<Countries> {
+    const city = this.countryFlaskRepository.findOne({
+      where: {
+        id: countryId,
+      },
+    });
+    return city;
+  }
 
+  getFlaskCities(): Promise<Cities[]> {
+    return this.cityFlaskRepository.find();
+  }
+  async getFlaskCity(id: number): Promise<Cities> {
+    return this.cityFlaskRepository.findOne({
+      where: { id: id },
+    });
+  }
 
-    getCityById(flaskCityId: number): Promise<CityEntity> {
-        const user = this.cityRepository.findOne({
-            where: {
-                flaskCityId,
-            },
-        });
-        return user;
-    }
+  getCityByFlaskId(flaskCityId: number): Promise<LocationEntity> {
+    const city = this.locationRepository.findOne({
+      where: {
+        flaskCityId: flaskCityId,
+      },
+    });
+    return city;
+  }
 
-    getFlaskCities(): Promise<Cities[]> {
-        return this.cityFlaskRepository.find();
-
-    }
-    async getFlaskCity(id: number): Promise<Cities> {
-        return this.cityFlaskRepository.findOne({
-            where: { id: id }
-        });
-    }
-
-
-    getCityByFlaskId(flaskCityId: number): Promise<CityEntity> {
-        const city = this.cityRepository.findOne({
-            where: {
-                flaskCityId: flaskCityId,
-            },
-        });
-        return city;
-    }
-
-    createCity(cityDetails: CityParams): Promise<CityEntity> {
-        const newNgo = this.cityRepository.create({
-            flaskCityId: cityDetails.flaskCityId,
-            ...cityDetails,
-        });
-        return this.cityRepository.save(newNgo);
-    }
-
-
+  createLocation(cityDetails: CityParams): Promise<LocationEntity> {
+    const location = this.locationRepository.create({
+      flaskCityId: cityDetails.flaskCityId,
+      ...cityDetails,
+    });
+    return this.locationRepository.save(location);
+  }
 }

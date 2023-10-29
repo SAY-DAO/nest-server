@@ -14,6 +14,8 @@ import { Child } from 'src/entities/flaskEntities/child.entity';
 import {
   ChildConfirmation,
   ChildExistence,
+  PreRegisterStatusEnum,
+  SexEnum,
 } from 'src/types/interfaces/interface';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
@@ -26,6 +28,9 @@ import {
 } from 'nestjs-paginate';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 import { Observable, from } from 'rxjs';
+import { LocationEntity } from 'src/entities/location.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
+import { ContributionEntity } from 'src/entities/contribution.entity';
 @Injectable()
 export class ChildrenService {
   constructor(
@@ -61,46 +66,18 @@ export class ChildrenService {
     });
   }
 
-  async getFlaskChildren(
-    options: PaginateQuery,
-    body: { statuses: ChildExistence[]; isConfirmed: ChildConfirmation },
-    socialWorkerIds: number[],
-  ): Promise<Paginated<Child>> {
-    const queryBuilder = this.flaskChildRepository
+  async getFlaskChildrenSimple(): Promise<Child[]> {
+    return this.flaskChildRepository
       .createQueryBuilder('child')
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.isConfirmed IN (:...childConfirmed)', {
-        childConfirmed:
-          body.isConfirmed === ChildConfirmation.CONFIRMED
-            ? [true]
-            : ChildConfirmation.NOT_CONFIRMED
-            ? [false]
-            : ChildConfirmation.BOTH && [true, false],
+      .where('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
       })
-      .andWhere('child.id_social_worker IN (:...socialWorkerIds)', {
-        socialWorkerIds: [...socialWorkerIds],
-      })
-      .andWhere('child.existence_status IN (:...existenceStatuses)', {
-        existenceStatuses: body.statuses[0]
-          ? [...body.statuses]
-          : [
-              ChildExistence.DEAD,
-              ChildExistence.AlivePresent,
-              ChildExistence.AliveGone,
-              ChildExistence.TempGone,
-            ],
-      })
-
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
         testNgoIds: [3, 14],
       })
-      .cache(60000);
-
-    return await nestPaginate<Child>(options, queryBuilder, {
-      sortableColumns: ['id'],
-      defaultSortBy: [['isConfirmed', 'ASC']],
-      nullSort: 'last',
-    });
+      .cache(60000)
+      .getMany();
   }
 
   async getChildNeedsSummery(
@@ -119,24 +96,27 @@ export class ChildrenService {
     awakeUrl: string,
     sleptUrl: string,
     sayName: { fa: string; en: string },
+    sex: SexEnum,
   ): Promise<ChildrenPreRegisterEntity> {
     const newChild = this.preRegisterChildrenRepository.create({
       awakeUrl,
       sleptUrl,
       sayName: { fa: sayName.fa, en: sayName.en },
+      sex,
     });
-    console.log(sayName.fa);
-    
     return this.preRegisterChildrenRepository.save(newChild);
   }
 
   updatePreRegisterChild(
     theId: string,
     childDetails: PreRegisterChildParams,
+    location: LocationEntity,
+    ngo: NgoEntity,
+    sw: AllUserEntity,
   ): Promise<UpdateResult> {
     return this.preRegisterChildrenRepository.update(
       { id: theId },
-      { ...childDetails },
+      { ...childDetails, location, ngo, socialWorker: sw },
     );
   }
 
@@ -169,8 +149,117 @@ export class ChildrenService {
   getChildren(): Promise<ChildrenEntity[]> {
     return this.childrenRepository.find();
   }
-  getChildrenPreRegister(): Promise<ChildrenPreRegisterEntity[]> {
-    return this.preRegisterChildrenRepository.find();
+
+  getChildrenPreRegisterByFlaskId(
+    flaskChildId: number,
+  ): Promise<ChildrenPreRegisterEntity> {
+    return this.preRegisterChildrenRepository.findOne({
+      where: {
+        flaskChildId,
+      },
+    });
+  }
+
+  async getChildrenPreRegisters(
+    options: PaginateQuery,
+    status: PreRegisterStatusEnum,
+  ): Promise<Paginated<ChildrenPreRegisterEntity>> {
+    const queryBuilder = this.preRegisterChildrenRepository
+      .createQueryBuilder('preRegister')
+      .leftJoinAndMapOne(
+        'preRegister.location',
+        LocationEntity,
+        'location',
+        'location.flaskCityId = preRegister.city',
+      )
+      .leftJoinAndMapOne(
+        'preRegister.socialWorker',
+        AllUserEntity,
+        'socialWorker',
+        'socialWorker.flaskUserId = preRegister.flaskSwId',
+      )
+      .leftJoinAndMapOne(
+        'preRegister.ngo',
+        NgoEntity,
+        'ngo',
+        'ngo.flaskNgoId = preRegister.flaskNgoId',
+      )
+      .where('preRegister.status = :status', {
+        status,
+      });
+    // .andWhere('socialWorker.isContributor = :isContributor', { isContributor: true });
+
+    return await nestPaginate<ChildrenPreRegisterEntity>(
+      options,
+      queryBuilder,
+      {
+        sortableColumns: ['id'],
+        nullSort: 'last',
+      },
+    );
+  }
+  //no pagination
+  getChildrenPreRegisterSimple(
+    status: PreRegisterStatusEnum,
+  ): Promise<ChildrenPreRegisterEntity[]> {
+    return this.preRegisterChildrenRepository.find({
+      where: {
+        status: status,
+      },
+    });
+  }
+
+  async getFlaskChildren(
+    options: PaginateQuery,
+    body: {
+      isMigrated: boolean;
+      statuses: ChildExistence[];
+      isConfirmed: ChildConfirmation;
+    },
+    socialWorkerIds: number[],
+  ): Promise<Paginated<Child>> {
+    console.log(body);
+
+    const queryBuilder = this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: body.isMigrated,
+      })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('child.isConfirmed IN (:...childConfirmed)', {
+        childConfirmed:
+          body.isConfirmed === ChildConfirmation.CONFIRMED
+            ? [true]
+            : ChildConfirmation.NOT_CONFIRMED
+            ? [false]
+            : ChildConfirmation.BOTH && [true, false],
+      })
+      .andWhere('child.id_social_worker IN (:...socialWorkerIds)', {
+        socialWorkerIds: [...socialWorkerIds],
+      })
+      .andWhere('child.existence_status IN (:...existenceStatuses)', {
+        existenceStatuses:
+          body.statuses[0] >= 0
+            ? [...body.statuses]
+            : [
+                ChildExistence.DEAD,
+                ChildExistence.AlivePresent,
+                ChildExistence.AliveGone,
+                ChildExistence.TempGone,
+              ],
+      })
+
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .cache(60000);
+
+    return await nestPaginate<Child>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['isConfirmed', 'ASC']],
+      nullSort: 'last',
+    });
   }
 
   async getFlaskActiveChildren(): Promise<Child[]> {

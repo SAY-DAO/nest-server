@@ -41,6 +41,9 @@ export class Child extends BaseEntity {
   birthPlace: string;
 
   @Column({ nullable: true })
+  phoneNumber: string;
+
+  @Column({ nullable: true })
   city: number;
 
   @Column({ type: 'timestamptz', nullable: true })
@@ -96,6 +99,9 @@ export class Child extends BaseEntity {
 
   @Column({ nullable: true })
   status: number;
+
+  @Column({ nullable: true })
+  gender: boolean; // true:male | false:female
 
   @Column({ type: 'timestamptz', nullable: true })
   updated: Date;

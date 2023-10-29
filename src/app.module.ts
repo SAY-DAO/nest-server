@@ -44,6 +44,7 @@ import { ContributionModule } from './features/contribution/contribution.module'
 import { ThrottlerModule } from '@nestjs/throttler';
 import { postgresDataSourceOptions } from './db/data-source';
 import { MailModule } from './features/mail/mail.module';
+import { Countries } from './entities/flaskEntities/countries.entity';
 
 const imports = [
   ThrottlerModule.forRoot({
@@ -59,6 +60,7 @@ const imports = [
   TypeOrmModule.forRoot({
     ...config().db2,
     entities: [
+      Countries,
       Need,
       SocialWorker,
       NGO,

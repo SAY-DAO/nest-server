@@ -34,12 +34,13 @@ import { ReceiptEntity } from 'src/entities/receipt.entity';
 import { StatusService } from '../status/status.service';
 import { LocationService } from '../location/location.service';
 import { ProviderService } from '../provider/provider.service';
-import { CityEntity } from 'src/entities/city.entity';
+import { LocationEntity } from 'src/entities/location.entity';
 import { Cities } from 'src/entities/flaskEntities/cities.entity';
 import { ProviderEntity } from 'src/entities/provider.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
         Family,
         User,
         Cities,
+        Countries,
       ],
       'flaskPostgres',
     ),
@@ -73,10 +75,10 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       EthereumAccountEntity,
       TicketEntity,
       ReceiptEntity,
-      CityEntity,
+      LocationEntity,
       ProviderEntity,
       ProviderJoinNeedEntity,
-    ChildrenPreRegisterEntity
+      ChildrenPreRegisterEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,

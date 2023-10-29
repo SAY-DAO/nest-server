@@ -11,7 +11,7 @@ import { NgoArrivalEntity, NgoEntity } from '../entities/ngo.entity';
 import { TicketEntity } from '../entities/ticket.entity';
 import { TicketContentEntity } from '../entities/ticketContent.entity';
 import { StatusEntity } from '../entities/status.entity';
-import { CityEntity } from '../entities/city.entity';
+import { LocationEntity } from '../entities/location.entity';
 import { TicketViewEntity } from '../entities/ticketView.entity';
 import { IpfsEntity } from '../entities/ipfs.entity';
 import { ContributorEntity } from '../entities/contributor.entity';
@@ -31,7 +31,7 @@ export const postgresDataSourceOptions: DataSourceOptions = {
   entities: [
     Session,
     AllUserEntity,
-    CityEntity,
+    LocationEntity,
     StatusEntity,
     ContributorEntity,
     TicketEntity,
@@ -54,8 +54,8 @@ export const postgresDataSourceOptions: DataSourceOptions = {
     IpfsEntity,
     MidjourneyEntity,
     CommentEntity,
-    ChildrenPreRegisterEntity
-    ],
+    ChildrenPreRegisterEntity,
+  ],
 };
 
 const dataSource = new DataSource(postgresDataSourceOptions);

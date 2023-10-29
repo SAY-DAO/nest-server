@@ -1,4 +1,10 @@
-import { EducationEnum, HousingEnum, SexEnum } from '../interfaces/interface';
+import {
+  EducationEnum,
+  HousingEnum,
+  PreRegisterStatusEnum,
+  SchoolTypeEnum,
+  SexEnum,
+} from '../interfaces/interface';
 
 export type ChildParams = {
   flaskId: number;
@@ -35,21 +41,24 @@ export type ChildParams = {
 };
 
 export type PreRegisterChildParams = {
-  firstName: string;
-  lastName: string;
   phoneNumber: string;
   address: string;
   country: number;
   state: number;
   city: number;
-  bioTranslations: string;
+  status: PreRegisterStatusEnum;
+  bio: { fa: string; en: string };
   voiceUrl: string;
-  birthPlace: number;
+  birthPlaceId: number;
+  flaskChildId?: number;
+  birthPlaceName: string;
   birthDate: Date;
   housingStatus: HousingEnum;
   familyCount: number;
-  education: EducationEnum;
-  sex: SexEnum;
+  educationLevel: EducationEnum;
+  schoolType: SchoolTypeEnum;
   flaskNgoId: number;
   flaskSwId: number;
+  firstName: { fa: string; en: string };
+  lastName: { fa: string; en: string };
 };

@@ -4,7 +4,7 @@ export type CityParams = {
   stateId: number;
   stateCode: string;
   stateName: string;
-  flaskCountryId: number;
+  countryId: number;
   countryCode: string;
   countryName: string;
   latitude: string;

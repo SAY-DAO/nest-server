@@ -20,7 +20,7 @@ import { ReceiptService } from '../receipt/receipt.service';
 import { ReceiptEntity } from 'src/entities/receipt.entity';
 import { StatusEntity } from 'src/entities/status.entity';
 import { StatusService } from '../status/status.service';
-import { CityEntity } from 'src/entities/city.entity';
+import { LocationEntity } from 'src/entities/location.entity';
 import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { HttpModule } from '@nestjs/axios';
 import { Need } from 'src/entities/flaskEntities/need.entity';
@@ -45,6 +45,7 @@ import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
         UserFamily,
         Family,
         User,
+        Countries,
       ],
       'flaskPostgres',
     ),
@@ -86,7 +88,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       NgoArrivalEntity,
       ReceiptEntity,
       StatusEntity,
-      CityEntity,
+      LocationEntity,
       IpfsEntity,
       EthereumAccountEntity,
       ProviderJoinNeedEntity,

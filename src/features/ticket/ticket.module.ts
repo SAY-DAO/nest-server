@@ -20,7 +20,7 @@ import { PaymentService } from '../payment/payment.service';
 import { PaymentEntity } from 'src/entities/payment.entity';
 import { StatusService } from '../status/status.service';
 import { StatusEntity } from 'src/entities/status.entity';
-import { CityEntity } from 'src/entities/city.entity';
+import { LocationEntity } from 'src/entities/location.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { SocialWorker, User } from '../../entities/flaskEntities/user.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
@@ -38,6 +38,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
@@ -52,11 +53,12 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
         UserFamily,
         Family,
         User,
+        Countries,
       ],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
-      CityEntity,
+      LocationEntity,
       AllUserEntity,
       TicketEntity,
       TicketViewEntity,
@@ -73,7 +75,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       EthereumAccountEntity,
       ProviderJoinNeedEntity,
       ProviderEntity,
-      ChildrenPreRegisterEntity
+      ChildrenPreRegisterEntity,
     ]),
   ],
   controllers: [TicketController],

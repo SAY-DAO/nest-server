@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CityEntity } from 'src/entities/city.entity';
+import { LocationEntity } from 'src/entities/location.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
@@ -178,13 +178,11 @@ export class NgoService {
     return ngo;
   }
 
-  createNgo(ngoDetails: NgoParams, city: CityEntity): Promise<NgoEntity> {
-    console.log(city);
-    console.log(ngoDetails);
+  createNgo(ngoDetails: NgoParams, city: LocationEntity): Promise<NgoEntity> {
     const newNgo = this.ngoRepository.create({
       ...ngoDetails,
       flaskCityId: ngoDetails.flaskCityId,
-      city: city,
+      location: city,
     });
 
     return this.ngoRepository.save({ id: newNgo.id, ...newNgo });
@@ -226,11 +224,11 @@ export class NgoService {
   async updateNgo(
     ngoId: string,
     ngoDetails: NgoParams,
-    city: CityEntity,
+    city: LocationEntity,
   ): Promise<UpdateResult> {
     return this.ngoRepository.update(ngoId, {
       ...ngoDetails,
-      city: city,
+      location: city,
     });
   }
 }

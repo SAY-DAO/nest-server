@@ -23,8 +23,8 @@ export enum Colors {
 }
 
 export enum SexEnum {
-  FEMALE = 0,
-  MALE = 1,
+  FEMALE = 1,
+  MALE = 2,
 }
 export enum AnnouncementEnum {
   NONE = 0,
@@ -215,6 +215,12 @@ complete money transfer to NGO for service status = 3
 complete delivery to child for service status = 4
 */
 
+export enum PreRegisterStatusEnum {
+  NOT_REGISTERED = 0,
+  PRE_REGISTERED = 1,
+  CONFIRMED = 2,
+}
+
 export enum PaymentStatusEnum {
   NOT_PAID = 0,
   PARTIAL_PAY = 1,
@@ -241,6 +247,13 @@ export enum CategoryEnum {
   JOY = 1,
   HEALTH = 2,
   SURROUNDING = 3,
+}
+
+export enum SchoolTypeEnum {
+  DEAF = 6,
+  BLIND = 7,
+  DOWN_SYNDROME = 8,
+  PUBLIC = 9,
 }
 
 //  -3:Deprived of education | -2:Kindergarten | -1:Not attending | 0:Pre-school | 1:1st grade | 2:2nd grade | ... | 13:University

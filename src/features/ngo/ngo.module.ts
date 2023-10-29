@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChildrenEntity } from 'src/entities/children.entity';
-import { CityEntity } from 'src/entities/city.entity';
+import { LocationEntity } from 'src/entities/location.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
@@ -34,6 +34,7 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 import { NgoMiddleware } from './middlewares/ngo.middleware';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
         UserFamily,
         Family,
         User,
+        Countries,
       ],
       'flaskPostgres',
     ),
@@ -57,7 +59,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       NgoArrivalEntity,
       NeedEntity,
       VariableEntity,
-      CityEntity,
+      LocationEntity,
       ProviderJoinNeedEntity,
       ProviderEntity,
       StatusEntity,
@@ -67,7 +69,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
-      ChildrenPreRegisterEntity
+      ChildrenPreRegisterEntity,
     ]),
   ],
   controllers: [NgoController],

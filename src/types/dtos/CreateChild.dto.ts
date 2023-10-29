@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { EducationEnum, HousingEnum, SexEnum } from '../interfaces/interface';
+import { EducationEnum, HousingEnum, SchoolTypeEnum, SexEnum } from '../interfaces/interface';
 
 export class CreateChildrenDto {
   /**
@@ -13,15 +13,13 @@ export class CreateChildrenDto {
   awakeAvatarUrl?: string;
 }
 
-export class CreatePreRegisterChildDto {
+export class UpdatePreRegisterChildDto {
   @IsNotEmpty()
-  id: string;
+  bio: string;
   @IsNotEmpty()
-  bio_translations: string;
+  firstName: string;
   @IsNotEmpty()
-  firstName_translations: string;
-  @IsNotEmpty()
-  lastName_translations: string;
+  lastName: string;
   @IsNotEmpty()
   country: number;
   @IsNotEmpty()
@@ -33,7 +31,9 @@ export class CreatePreRegisterChildDto {
   @IsNotEmpty()
   familyCount: number;
   @IsNotEmpty()
-  education: EducationEnum;
+  educationLevel: EducationEnum;
+  @IsNotEmpty()
+  schoolType: SchoolTypeEnum;
   @IsNotEmpty()
   sex: SexEnum;
   @IsNotEmpty()
@@ -42,8 +42,6 @@ export class CreatePreRegisterChildDto {
   address: string;
   @IsNotEmpty()
   housingStatus: HousingEnum;
-  @IsNotEmpty()
-  voiceUrl: string;
   @IsNotEmpty()
   birthDate: Date;
   @IsNotEmpty()

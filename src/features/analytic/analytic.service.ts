@@ -169,19 +169,38 @@ export class AnalyticService {
       .select(['child.id', 'ngo'])
       .getCount();
 
-    const tempGone = await this.flaskChildRepository.count({
-      where: {
-        isConfirmed: true,
-        existence_status: 3,
-        isMigrated: false,
-      },
-    });
-    const confirmed = await this.flaskChildRepository.count({
-      where: {
-        isConfirmed: true,
-        isMigrated: false,
-      },
-    });
+    const tempGone = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: ChildExistence.TempGone,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
+
+    const confirmed = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
 
     return {
       allChildren: allChildren[1],

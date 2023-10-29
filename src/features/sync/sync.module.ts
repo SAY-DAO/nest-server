@@ -17,7 +17,7 @@ import { NgoService } from '../ngo/ngo.service';
 import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { StatusService } from '../status/status.service';
 import { StatusEntity } from 'src/entities/status.entity';
-import { CityEntity } from 'src/entities/city.entity';
+import { LocationEntity } from 'src/entities/location.entity';
 import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
@@ -34,12 +34,14 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
       [
         SocialWorker,
+        Countries,
         Need,
         NGO,
         Cities,
@@ -62,7 +64,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       ContributorEntity,
       AllUserEntity,
       StatusEntity,
-      CityEntity,
+      LocationEntity,
       EthereumAccountEntity,
       ProviderJoinNeedEntity,
       ProviderEntity,
