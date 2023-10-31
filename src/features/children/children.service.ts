@@ -7,6 +7,7 @@ import { NeedSummary } from 'src/types/interfaces/Need';
 import {
   ChildParams,
   PreRegisterChildParams,
+  createFlaskChildParams,
 } from 'src/types/parameters/ChildParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { ContributorEntity } from 'src/entities/contributor.entity';
@@ -30,7 +31,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
 import { Observable, from } from 'rxjs';
 import { LocationEntity } from 'src/entities/location.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
-import { ContributionEntity } from 'src/entities/contribution.entity';
+
 @Injectable()
 export class ChildrenService {
   constructor(
@@ -80,6 +81,39 @@ export class ChildrenService {
       .getMany();
   }
 
+  async addChildToFlask(
+    accessToken: any,
+    childDetails: createFlaskChildParams,
+  ): Promise<any> {
+    const childApi = new ChildAPIApi();
+    const child = childApi.apiV2ChildAddPost(
+      accessToken,
+      childDetails.awakeAvatarUrl,
+      childDetails.sleptAvatarUrl,
+      childDetails.voiceUrl,
+      childDetails.saynameTranslations,
+      childDetails.bioTranslations,
+      childDetails.bioSummaryTranslations,
+      childDetails.phoneNumber,
+      childDetails.country,
+      childDetails.city,
+      childDetails.gender,
+      childDetails.ngoId,
+      childDetails.swId,
+      childDetails.firstNameTranslations,
+      childDetails.lastNameTranslations,
+      childDetails.nationalityId,
+      childDetails.birthPlace,
+      childDetails.birthDate,
+      childDetails.address,
+      childDetails.housingStatus,
+      childDetails.familyCount,
+      childDetails.education,
+      0,
+    );
+    return child;
+  }
+
   async getChildNeedsSummery(
     accessToken: any,
     childId: number,
@@ -107,16 +141,46 @@ export class ChildrenService {
     return this.preRegisterChildrenRepository.save(newChild);
   }
 
+  approvePreregister(
+    preRegister: ChildrenPreRegisterEntity,
+    firstNameEn: string,
+    lastNameEn: string,
+    bioEn: string,
+    flaskChildId: number,
+  ): Promise<UpdateResult> {
+    return this.preRegisterChildrenRepository.update(
+      { id: preRegister.id },
+      {
+        status: PreRegisterStatusEnum.CONFIRMED,
+        flaskChildId,
+        firstName: { fa: preRegister.firstName.fa, en: firstNameEn },
+        lastName: { fa: preRegister.lastName.fa, en: lastNameEn },
+        bio: { fa: preRegister.bio.fa, en: bioEn },
+      },
+    );
+  }
+
   updatePreRegisterChild(
     theId: string,
     childDetails: PreRegisterChildParams,
     location: LocationEntity,
     ngo: NgoEntity,
-    sw: AllUserEntity,
+    sw: ContributorEntity,
   ): Promise<UpdateResult> {
     return this.preRegisterChildrenRepository.update(
       { id: theId },
-      { ...childDetails, location, ngo, socialWorker: sw },
+      {
+        ...childDetails,
+        firstName: {
+          fa: childDetails.firstName.fa,
+          en: childDetails.firstName.en,
+        },
+        lastName: { fa: childDetails.lastName.fa, en: '' },
+        bio: { fa: childDetails.bio.fa, en: '' },
+        location,
+        ngo,
+        socialWorker: sw,
+      },
     );
   }
 
@@ -163,6 +227,7 @@ export class ChildrenService {
   async getChildrenPreRegisters(
     options: PaginateQuery,
     status: PreRegisterStatusEnum,
+    ngoIds: number[],
   ): Promise<Paginated<ChildrenPreRegisterEntity>> {
     const queryBuilder = this.preRegisterChildrenRepository
       .createQueryBuilder('preRegister')
@@ -186,8 +251,13 @@ export class ChildrenService {
       )
       .where('preRegister.status = :status', {
         status,
+      })
+      .andWhere('ngo.flaskNgoId IN (:...ngoIds)', {
+        ngoIds: [...ngoIds],
+      })
+      .andWhere('socialWorker.isContributor = :isContributor', {
+        isContributor: true,
       });
-    // .andWhere('socialWorker.isContributor = :isContributor', { isContributor: true });
 
     return await nestPaginate<ChildrenPreRegisterEntity>(
       options,
@@ -198,6 +268,32 @@ export class ChildrenService {
       },
     );
   }
+
+  async getChildrenPreRegisterNotRegistered(
+    options: PaginateQuery,
+    status: PreRegisterStatusEnum,
+  ): Promise<Paginated<ChildrenPreRegisterEntity>> {
+    const queryBuilder = this.preRegisterChildrenRepository
+      .createQueryBuilder('preRegister')
+      .leftJoinAndMapOne(
+        'preRegister.location',
+        LocationEntity,
+        'location',
+        'location.flaskCityId = preRegister.city',
+      )
+      .where('preRegister.status = :status', {
+        status,
+      });
+    return await nestPaginate<ChildrenPreRegisterEntity>(
+      options,
+      queryBuilder,
+      {
+        sortableColumns: ['id'],
+        nullSort: 'last',
+      },
+    );
+  }
+
   //no pagination
   getChildrenPreRegisterSimple(
     status: PreRegisterStatusEnum,
@@ -218,7 +314,6 @@ export class ChildrenService {
     },
     socialWorkerIds: number[],
   ): Promise<Paginated<Child>> {
-    console.log(body);
 
     const queryBuilder = this.flaskChildRepository
       .createQueryBuilder('child')
@@ -372,7 +467,6 @@ export class ChildrenService {
       .cache(10000)
       .getMany();
   }
-
   async deletePreRegister(id: string): Promise<Observable<any>> {
     return from(this.preRegisterChildrenRepository.delete(id));
   }

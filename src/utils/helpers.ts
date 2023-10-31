@@ -822,3 +822,26 @@ export function getScattered(
   medianList.push({ [vRole]: finalList.map((el) => el[0]) });
   return finalList;
 }
+
+export function truncateString(str: string, num: number) {
+  // If the length of str is less than or equal to num
+  // just return str--don't truncate it.
+  if (str.length <= num) {
+    return str;
+  }
+  // Return str truncated with '...' concatenated to the end of str.
+  return str.slice(0, num) + '...';
+}
+
+// format to yyyy-mm-dd
+export function formatDate(date) {
+  const d = new Date(date);
+  let month = '' + (d.getMonth() + 1);
+  let day = '' + d.getDate();
+  const year = d.getFullYear();
+
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+
+  return [year, month, day].join('-');
+}

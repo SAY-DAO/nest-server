@@ -3,7 +3,6 @@ import {
   HousingEnum,
   PreRegisterStatusEnum,
   SchoolTypeEnum,
-  SexEnum,
 } from '../interfaces/interface';
 
 export type ChildParams = {
@@ -38,6 +37,29 @@ export type ChildParams = {
   isMigrated?: boolean;
   migratedId?: number;
   migrateDate?: Date;
+};
+export type createFlaskChildParams = {
+  awakeAvatarUrl: any;
+  sleptAvatarUrl: any;
+  voiceUrl: any;
+  saynameTranslations: any;
+  bioTranslations: any;
+  bioSummaryTranslations: any;
+  phoneNumber: string;
+  country: number;
+  city: number;
+  gender: boolean;
+  ngoId?: number;
+  swId?: number;
+  firstNameTranslations?: any;
+  lastNameTranslations?: any;
+  nationalityId?: number;
+  birthPlace?: string;
+  birthDate?: string;
+  address?: string;
+  housingStatus?: HousingEnum;
+  familyCount?: number;
+  education?: number;
 };
 
 export type PreRegisterChildParams = {

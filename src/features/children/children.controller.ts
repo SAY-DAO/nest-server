@@ -29,7 +29,10 @@ import {
 import { isAuthenticated } from 'src/utils/auth';
 import config from 'src/config';
 import { UserService } from '../user/user.service';
-import { UpdatePreRegisterChildDto } from 'src/types/dtos/CreateChild.dto';
+import {
+  CreateFlaskChildDto,
+  UpdatePreRegisterChildDto,
+} from 'src/types/dtos/CreateChild.dto';
 import { ValidateChildTsPipe } from './pipes/validate-child.ts/validate-child.ts.pipe';
 import {
   FileFieldsInterceptor,
@@ -41,12 +44,14 @@ import { voiceStorage } from 'src/storage/voiceStorage';
 import { ChildrenInterceptor } from './interceptors/children.interceptors';
 import { LocationService } from '../location/location.service';
 import { DownloadService } from '../download/download.service';
-import { checkIfFileOrDirectoryExists } from 'src/utils/file';
 import { NgoService } from '../ngo/ngo.service';
-import fs from 'fs';
+import { randomUUID } from 'crypto';
+import { NgoEntity } from 'src/entities/ngo.entity';
+import { SyncService } from '../sync/sync.service';
 import { LocationEntity } from 'src/entities/location.entity';
 import { NgoParams } from 'src/types/parameters/NgoParammeters';
-import { randomUUID } from 'crypto';
+import { formatDate, truncateString } from 'src/utils/helpers';
+import axios from 'axios';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -59,15 +64,188 @@ import { randomUUID } from 'crypto';
 export class ChildrenController {
   constructor(
     private childrenService: ChildrenService,
+    private syncService: SyncService,
     private userService: UserService,
     private ngoService: NgoService,
     private locationService: LocationService,
     private downloadService: DownloadService,
   ) {}
 
+  @UsePipes(new ValidationPipe()) // validation for dto files
+  @Patch(`preregister/approve/:id`)
+  @ApiOperation({ description: 'Delete a pre register' })
+  async approvePreregister(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body(ValidateChildTsPipe) body: CreateFlaskChildDto,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+
+    try {
+      const preRegister = await this.childrenService.getChildPreRegisterById(
+        id,
+      );
+
+      const token =
+        config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
+      const awakeFile = await this.downloadService.fileFromPath(
+        `http://localhost:8002/api/dao/children/avatars/images/${preRegister.awakeUrl}`,
+        `${preRegister.awakeUrl}`,
+      );
+      const sleptFile = await this.downloadService.fileFromPath(
+        `http://localhost:8002/api/dao/children/avatars/images/${preRegister.sleptUrl}`,
+        `${preRegister.sleptUrl}`,
+      );
+      const voiceFile = await this.downloadService.fileFromPath(
+        `http://localhost:8002/api/dao/children/voices/${preRegister.voiceUrl}`,
+        `${preRegister.voiceUrl}`,
+      );
+
+      const formData = new FormData();
+      formData.append('ngo_id', String(preRegister.flaskNgoId));
+      formData.append('sw_id', String(preRegister.flaskSwId));
+      formData.append('awakeAvatarUrl', awakeFile);
+      formData.append('sleptAvatarUrl', sleptFile);
+      formData.append('voiceUrl', voiceFile);
+      formData.append(
+        'gender',
+        String(preRegister.sex === SexEnum.MALE ? true : false),
+      );
+      formData.append('city', String(preRegister.city));
+      formData.append('country', String(preRegister.country));
+      formData.append('phoneNumber', preRegister.phoneNumber);
+      formData.append('birthDate', String('2015-05-20'));
+      formData.append(
+        'sayname_translations',
+        JSON.stringify({
+          fa: preRegister.sayName.fa,
+          en: preRegister.sayName.en,
+        }),
+      );
+      formData.append(
+        'bio_translations',
+        JSON.stringify({
+          fa: preRegister.bio.fa,
+          en: body.bioEn,
+        }),
+      );
+      formData.append(
+        'bio_summary_translations',
+        JSON.stringify({
+          fa: truncateString(preRegister.bio.fa, 120),
+          en: truncateString(body.bioEn, 120),
+        }),
+      );
+      formData.append(
+        'firstName_translations',
+        JSON.stringify({
+          fa: preRegister.firstName.fa,
+          en: body.firstNameEn,
+        }),
+      );
+      formData.append(
+        'lastName_translations',
+        JSON.stringify({
+          fa: preRegister.lastName.fa,
+          en: body.lastNameEn,
+        }),
+      );
+      formData.append('nationality', String(preRegister.birthPlaceId));
+      formData.append('birthPlace', String(preRegister.birthPlaceId));
+      formData.append('familyCount', String(preRegister.familyCount));
+      formData.append('education', String(preRegister.educationLevel));
+      formData.append('housingStatus', String(preRegister.housingStatus));
+      formData.append('address', preRegister.address);
+
+      const configs = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: token,
+          processData: false,
+          contentType: false,
+        },
+      };
+
+      const { data } = await axios.post(
+        'https://api.sayapp.company/api/v2/child/add/',
+        formData,
+        configs,
+      );
+
+      // const addedChild = await this.childrenService.addChildToFlask(token, {
+      //   ngoId: preRegister.flaskNgoId,
+      //   swId: preRegister.flaskSwId,
+      //   awakeAvatarUrl: awakeFile,
+      //   sleptAvatarUrl: sleptFile,
+      //   voiceUrl: voiceFile,
+      //   gender: preRegister.sex === SexEnum.MALE ? true : false, //gender: [true]male, [false]female
+      //   city: preRegister.city,
+      //   country: preRegister.country,
+      //   phoneNumber: preRegister.phoneNumber,
+      //   birthDate: String(formatDate(preRegister.birthDate)),
+      //   saynameTranslations: JSON.stringify({
+      //     fa: preRegister.sayName.fa,
+      //     en: preRegister.sayName.en,
+      //   }),
+      //   bioTranslations: JSON.stringify({
+      //     fa: preRegister.bio.fa,
+      //     en: body.bioEn,
+      //   }),
+      //   bioSummaryTranslations: JSON.stringify({
+      //     fa: truncateString(preRegister.bio.fa, 20),
+      //     en: truncateString(body.bioEn, 20),
+      //   }),
+
+      //   firstNameTranslations: JSON.stringify({
+      //     fa: preRegister.firstName.fa,
+      //     en: body.firstNameEn,
+      //   }),
+      //   lastNameTranslations: JSON.stringify({
+      //     fa: preRegister.lastName.fa,
+      //     en: body.lastNameEn,
+      //   }),
+      //   nationalityId: preRegister.birthPlaceId,
+      //   birthPlace: preRegister.birthPlaceName,
+      //   familyCount: preRegister.familyCount,
+      //   // some mess from previous panel => https://github.com/SAY-DAO/panel-legacy/blob/0cfea084fde2a9a23fd90dfd3bcf3256f86dde89/assets/js/child_data_serve_6.1.js#L598
+      //   education: Number(
+      //     String(preRegister.educationLevel) === '-2'
+      //       ? '-' + preRegister.schoolType + '2'
+      //       : `${preRegister.schoolType + preRegister.educationLevel}`,
+      //   ),
+      //   address: preRegister.address,
+      //   housingStatus: preRegister.housingStatus,
+      // });
+
+      const approvedPre = await this.childrenService.approvePreregister(
+        preRegister,
+        body.firstNameEn,
+        body.lastNameEn,
+        body.bioEn,
+        data.id,
+      );
+      return {
+        added: data,
+        approvedPre: approvedPre,
+      };
+    } catch (e) {
+      throw new ServerError('Flask reverted!');
+    }
+  }
+
   @Delete(`preregister/:id`)
   @ApiOperation({ description: 'Delete a pre register' })
-  async deleteContribution(@Req() req: Request, @Param('id') id: string) {
+  async deletePreRegister(@Req() req: Request, @Param('id') id: string) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
@@ -92,7 +270,7 @@ export class ChildrenController {
   }
 
   @Post(`preregister`)
-  @ApiOperation({ description: 'Get all children from db' })
+  @ApiOperation({ description: 'Create children pre register' })
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -187,8 +365,6 @@ export class ChildrenController {
       if (!location) {
         console.log('\x1b[36m%s\x1b[0m', 'Creating a Location ...');
         const flaskCity = await this.locationService.getFlaskCity(body.city);
-        console.log(flaskCity);
-
         const {
           id: flaskId,
           name,
@@ -216,15 +392,11 @@ export class ChildrenController {
         });
         console.log('\x1b[36m%s\x1b[0m', 'Created a Location ...');
       }
-      console.log(location);
-
       const ngo = await this.ngoService.getNgoById(Number(body.ngoId));
       const sw = await this.userService.getContributorByFlaskId(
         Number(body.swId),
         PanelContributors.SOCIAL_WORKER,
       );
-      console.log('location1');
-      console.log(body.birthPlaceId);
 
       return await this.childrenService.updatePreRegisterChild(
         candidate.id,
@@ -251,7 +423,7 @@ export class ChildrenController {
         },
         location,
         ngo,
-        sw,
+        sw.contributions.find((c) => c.flaskUserId === body.swId),
       );
     } catch (e) {
       throw new ServerError(e);
@@ -275,6 +447,27 @@ export class ChildrenController {
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
+    let ngoIds: number[];
+
+    if (
+      panelFlaskTypeId === FlaskUserTypesEnum.ADMIN ||
+      panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      ngoIds = (await this.ngoService.getFlaskNgos()).map((n) => n.id);
+      if (Number(status) === PreRegisterStatusEnum.NOT_REGISTERED) {
+        return await this.childrenService.getChildrenPreRegisterNotRegistered(
+          {
+            page: page,
+            limit: limit,
+            path: '/',
+          },
+          status,
+        );
+      }
+    } else {
+      ngoIds = [(await this.userService.getFlaskSw(panelFlaskUserId)).ngo_id];
+    }
+
     return await this.childrenService.getChildrenPreRegisters(
       {
         page: page,
@@ -282,6 +475,7 @@ export class ChildrenController {
         path: '/',
       },
       status,
+      ngoIds,
     );
   }
 
@@ -442,19 +636,15 @@ export class ChildrenController {
     return this.childrenService.gtTheNetwork();
   }
 
-  @Get('images/:fileName')
-  async serveAvatar(
+  @Get('avatars/images/:fileName')
+  async serveAwakeAvatar(
     @Param('fileName') fileName: string,
     @Res() res: any,
   ): Promise<any> {
-    console.log(fileName);
     try {
       res.sendFile(fileName, { root: './uploads/children/avatars' });
     } catch (e) {
       console.log(e);
-      console.log(
-        '--------------------------------------------inja--------------------',
-      );
     }
   }
 
@@ -608,22 +798,54 @@ export class ChildrenController {
             );
 
             console.log('\x1b[36m%s\x1b[0m', 'Created an NGO ...\n');
-          } else if (nestNgo) {
-            await this.ngoService
-              .updateNgo(nestNgo.id, callerNgoDetails, nestCallerNgoCity)
-              .then();
-            nestNgo = await this.ngoService.getNgoById(nestNgo.flaskNgoId);
-            console.log('\x1b[36m%s\x1b[0m', 'NGO updated ...\n');
-          } else {
-            console.log('\x1b[36m%s\x1b[0m', 'Skipped NGO ...\n');
           }
 
           const ngo = await this.ngoService.getNgoById(Number(child.id_ngo));
-          const sw = await this.userService.getContributorByFlaskId(
+
+          let nestSocialWorker = await this.userService.getContributorByFlaskId(
             Number(child.id_social_worker),
             PanelContributors.SOCIAL_WORKER,
           );
 
+          const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
+            child.id_social_worker,
+          );
+
+          const swDetails = {
+            typeId: flaskSocialWorker.type_id,
+            firstName: flaskSocialWorker.firstName,
+            lastName: flaskSocialWorker.lastName,
+            avatarUrl: flaskSocialWorker.avatar_url,
+            flaskUserId: flaskSocialWorker.id,
+            birthDate:
+              flaskSocialWorker.birth_date &&
+              new Date(flaskSocialWorker.birth_date),
+            panelRole: PanelContributors.SOCIAL_WORKER,
+            userName: flaskSocialWorker.userName,
+          };
+
+          let swNgo: NgoEntity;
+          if (!nestSocialWorker) {
+            swNgo = await this.syncService.syncContributorNgo(
+              flaskSocialWorker,
+            );
+            console.log(
+              `\x1b[36m%s\x1b[0m', 'Creating a Social Worker ...${child.id_social_worker}\n`,
+            );
+            nestSocialWorker = await this.userService.createContributor(
+              swDetails,
+              swNgo,
+            );
+            console.log('\x1b[36m%s\x1b[0m`, `Created a Social Worker ...\n');
+          }
+          console.log(child.id_ngo);
+
+          if (!nestSocialWorker) {
+            throw new ServerError('we need the sw');
+          }
+          if (!ngo) {
+            throw new ServerError('we need the ngo');
+          }
           const list = [];
           const educationSchool = child.education.toString();
           for (let i = 0, len = educationSchool.length; i < len; i += 1) {
@@ -668,7 +890,6 @@ export class ChildrenController {
               continue;
             } else {
               console.log(educationSchool);
-
               console.log('Error');
               break;
             }
@@ -713,8 +934,11 @@ export class ChildrenController {
             },
             location,
             ngo,
-            sw,
+            nestSocialWorker.contributions.find(
+              (c) => c.flaskUserId === child.id_social_worker,
+            ),
           );
+          console.log('done' + child.id);
         } else {
           console.log('skipping...');
         }

@@ -7,6 +7,11 @@ import axios from 'axios';
 import { Readable } from 'stream';
 import { createFile } from 'src/utils/file';
 import { prepareUrl } from 'src/utils/helpers';
+import { ServerError } from 'src/filters/server-exception.filter';
+import mime from 'mime';
+import fs from 'fs';
+import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
+import { File } from '@web-std/file';
 
 @Injectable()
 export class DownloadService {
@@ -62,9 +67,12 @@ export class DownloadService {
     //       }),
     //     ),
     // );
-    const { data } = await axios.get<Readable>(prepareUrl(fileUrl), {
-      responseType: 'stream',
-    });
+    const { data } = await axios.get<Readable>(
+      !fileUrl.startsWith('http') ? prepareUrl(fileUrl) : fileUrl,
+      {
+        responseType: 'stream',
+      },
+    );
     // now, you can process or transform the data as a Readable type.
     const writeStream = createWriteStream(path);
     data.pipe(writeStream); // save file to local file system
@@ -72,5 +80,23 @@ export class DownloadService {
       writeStream.on('finish', resolve);
       writeStream.on('error', reject);
     });
+  }
+
+  async fileFromPath(url: string, name = 'noTitle'): Promise<any> {
+    try {
+      console.log('Downloading ' + name);
+      await this.downloadFile(url, `${name}`);
+      const content = await fs.promises.readFile(`${name}`);
+      if (!content) {
+        throw new ServerError('could not read the file.');
+      }
+      const type = mime.getType(`${name}`);
+
+      const file = new File([content], `${name}`, { type: type });
+      console.log('Downloaded !! ' + name);
+      return file;
+    } catch (e) {
+      throw new WalletExceptionFilter(e.status, e.message);
+    }
   }
 }

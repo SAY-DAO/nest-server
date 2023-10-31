@@ -33,6 +33,16 @@ import { DownloadService } from '../download/download.service';
 import { NgoService } from '../ngo/ngo.service';
 import { NGO } from 'src/entities/flaskEntities/ngo.entity';
 import { Countries } from 'src/entities/flaskEntities/countries.entity';
+import { SyncService } from '../sync/sync.service';
+import { ReceiptService } from '../receipt/receipt.service';
+import { PaymentService } from '../payment/payment.service';
+import { StatusService } from '../status/status.service';
+import { ProviderService } from '../provider/provider.service';
+import { ReceiptEntity } from 'src/entities/receipt.entity';
+import { PaymentEntity } from 'src/entities/payment.entity';
+import { StatusEntity } from 'src/entities/status.entity';
+import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { ProviderEntity } from 'src/entities/provider.entity';
 
 @Module({
   imports: [
@@ -48,6 +58,7 @@ import { Countries } from 'src/entities/flaskEntities/countries.entity';
         Cities,
         NGO,
         Countries,
+        Payment,
       ],
       'flaskPostgres',
     ),
@@ -63,6 +74,11 @@ import { Countries } from 'src/entities/flaskEntities/countries.entity';
       LocationEntity,
       NgoEntity,
       NgoArrivalEntity,
+      ReceiptEntity,
+      PaymentEntity,
+      StatusEntity,
+      ProviderJoinNeedEntity,
+      ProviderEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -76,6 +92,11 @@ import { Countries } from 'src/entities/flaskEntities/countries.entity';
     LocationService,
     NgoService,
     DownloadService,
+    SyncService,
+    ReceiptService,
+    PaymentService,
+    StatusService,
+    ProviderService,
   ],
 })
 export class ChildrenModule implements NestModule {
@@ -83,7 +104,7 @@ export class ChildrenModule implements NestModule {
     consumer
       .apply(ChildrenMiddleware)
       .exclude(
-        { path: 'children/images/:fileName', method: RequestMethod.GET },
+        { path: 'children/avatars/images/:fileName', method: RequestMethod.GET },
         { path: 'children/voices/:fileName', method: RequestMethod.GET },
         { path: `children/preregister/old`, method: RequestMethod.GET },
       )

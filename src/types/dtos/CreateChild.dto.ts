@@ -1,5 +1,10 @@
 import { IsNotEmpty } from 'class-validator';
-import { EducationEnum, HousingEnum, SchoolTypeEnum, SexEnum } from '../interfaces/interface';
+import {
+  EducationEnum,
+  HousingEnum,
+  SchoolTypeEnum,
+  SexEnum,
+} from '../interfaces/interface';
 
 export class CreateChildrenDto {
   /**
@@ -11,6 +16,15 @@ export class CreateChildrenDto {
   lastName?: string;
   birthDate?: string;
   awakeAvatarUrl?: string;
+}
+
+export class CreateFlaskChildDto {
+  @IsNotEmpty()
+  firstNameEn: string;
+  @IsNotEmpty()
+  lastNameEn: string;
+  @IsNotEmpty()
+  bioEn: string;
 }
 
 export class UpdatePreRegisterChildDto {

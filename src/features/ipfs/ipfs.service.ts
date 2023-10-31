@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NFTStorage, File } from 'nft.storage';
-import mime from 'mime';
 import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,13 +7,11 @@ import { IpfsEntity } from 'src/entities/ipfs.entity';
 import { NeedEntity } from 'src/entities/need.entity';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 import { Token } from 'nft.storage/dist/src/lib/interface';
-import { SAYPlatformRoles } from 'src/types/interfaces/interface';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
 import { ChildrenService } from '../children/children.service';
 import { PaymentService } from '../payment/payment.service';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { DownloadService } from '../download/download.service';
-import fs from 'fs';
 
 @Injectable()
 export class IpfsService {
@@ -77,21 +74,21 @@ export class IpfsService {
       unlinkList.push(`./${child.sayName}Awake.jpg`);
       if (child.awakeAvatarUrl) {
         // Awake avatar
-        awakeImage = await this.fileFromPath(
+        awakeImage = await this.downloadService.fileFromPath(
           child.awakeAvatarUrl,
-          `${child.sayName}Awake`,
+          `${child.sayName}Awake.jpg`,
         );
       }
       unlinkList.push(`./${child.sayName}Slept.jpg`);
       if (child && child.sleptAvatarUrl) {
         // Slept avatar
-        sleptImage = await this.fileFromPath(
+        sleptImage = await this.downloadService.fileFromPath(
           child.sleptAvatarUrl,
-          `${child.sayName}Slept`,
+          `${child.sayName}Slept.jpg`,
         );
       }
 
-      const iconImage = await this.fileFromPath(need.imageUrl, `${need.name}`);
+      const iconImage = await this.downloadService.fileFromPath(need.imageUrl, `${need.name}.jpg`);
 
       unlinkList.push(`./${need.name}.jpg`);
       // dates
@@ -189,9 +186,9 @@ export class IpfsService {
       //     properties: {
       //     },
       //     receipts: need.receipts.map(async r => {
-      //       const receiptImage = await this.fileFromPath(
+      //       const receiptImage = await this.downloadService.fileFromPath(
       //         r.attachment,
-      //         r.title,
+      //         r.title.jpg,
       //       )
       //       return {
       //         image: receiptImage,
@@ -248,7 +245,7 @@ export class IpfsService {
         receipt: {
           properties: {},
           receipts: need.receipts.map(async (r) => {
-            const receiptImage = await this.fileFromPath(r.attachment, r.title);
+            const receiptImage = await this.downloadService.fileFromPath(r.attachment, `${r.title}.jpg`);
             return {
               image: receiptImage,
               name: r.title,
@@ -317,22 +314,4 @@ export class IpfsService {
     }
   }
 
-  async fileFromPath(url: string, name = 'noTitle'): Promise<any> {
-    try {
-      console.log('Downloading ' + name);
-
-      await this.downloadService.downloadFile(url, `${name}.jpg`);
-      const content = await fs.promises.readFile(`${name}.jpg`);
-      if (!content) {
-        throw new ServerError('could not read the file.');
-      }
-      const type = mime.getType(`${name}.jpg`);
-
-      const file = new File([content], `${name}`, { type: type });
-      console.log('Downloaded !! ' + name);
-      return file;
-    } catch (e) {
-      throw new WalletExceptionFilter(e.status, e.message);
-    }
-  }
 }
