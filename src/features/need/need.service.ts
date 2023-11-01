@@ -585,6 +585,19 @@ export class NeedService {
         'need_status_updates',
         'need_status_updates.need_id = need.id',
       )
+      .leftJoinAndMapMany(
+        'need.receipts_',
+        NeedReceipt,
+        'need_receipt',
+        'need_receipt.need_id = need.id',
+      )
+
+      .leftJoinAndMapMany(
+        'need_receipt.receipt',
+        Receipt,
+        'receipt',
+        'receipt.id = need_receipt.receipt_id',
+      )
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .where(
@@ -606,6 +619,7 @@ export class NeedService {
       .andWhere('need.created_by_id IN (:...swIds)', {
         swIds: socialWorker ? [socialWorker] : [...swIds],
       })
+
       .select([
         'child',
         'ngo.id',
@@ -643,6 +657,8 @@ export class NeedService {
         'need.unavailable_from',
         'need_status_updates',
         'payment',
+        'receipt',
+        'need_receipt',
       ])
       .cache(60000);
     return await nestPaginate<Need>(options, queryBuilder, {
