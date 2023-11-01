@@ -350,9 +350,9 @@ export class NeedService {
       })
       .andWhere('need.isConfirmed = :needConfirmed', { needConfirmed: false })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-      // .andWhere('need.created_by_id IN (:...swIds)', {
-      //   swIds: socialWorker ? [socialWorker] : [...swIds],
-      // })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
       .andWhere('need.status = :statusNotPaid', {
         statusNotPaid: PaymentStatusEnum.NOT_PAID,
       })
@@ -414,15 +414,15 @@ export class NeedService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
+      // .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .where('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
       .andWhere('child.existence_status IN (:...existenceStatus)', {
         existenceStatus: [ChildExistence.AlivePresent],
       })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-      // .andWhere('need.created_by_id IN (:...swIds)', {
-      //   swIds: socialWorker ? [socialWorker] : [...swIds],
-      // })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
       .andWhere('need.status = :statusNotPaid', {
         statusNotPaid: PaymentStatusEnum.NOT_PAID,
       })
@@ -495,8 +495,8 @@ export class NeedService {
         'payment',
         'payment.id_need = need.id',
       )
-      .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
-      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .where('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.status IN (:...statuses)', {
         statuses: [
           PaymentStatusEnum.COMPLETE_PAY,
@@ -506,9 +506,9 @@ export class NeedService {
       .andWhere('payment.id IS NOT NULL')
       .andWhere('payment.verified IS NOT NULL')
       .andWhere('payment.order_id IS NOT NULL')
-      // .andWhere('need.created_by_id IN (:...swIds)', {
-      //   swIds: socialWorker ? [socialWorker] : [...swIds],
-      // })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
       .select([
         'child',
         'ngo.id',
@@ -598,9 +598,9 @@ export class NeedService {
         'receipt',
         'receipt.id = need_receipt.receipt_id',
       )
-      .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
-      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-      .where(
+      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .where('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere(
         new Brackets((qb) => {
           qb.where('need.type = :typeProduct', {
             typeProduct: NeedTypeEnum.PRODUCT,
@@ -616,9 +616,9 @@ export class NeedService {
             });
         }),
       )
-      // .andWhere('need.created_by_id IN (:...swIds)', {
-      //   swIds: socialWorker ? [socialWorker] : [...swIds],
-      // })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
 
       .select([
         'child',
@@ -718,7 +718,7 @@ export class NeedService {
           ? [...needWithSignatures]
           : [0],
       })
-      .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
 
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere(
@@ -737,9 +737,9 @@ export class NeedService {
             });
         }),
       )
-      // .andWhere('need.created_by_id IN (:...swIds)', {
-      //   swIds: socialWorker ? [socialWorker] : [...swIds],
-      // })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
       .select([
         'child',
         'ngo.id',
