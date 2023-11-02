@@ -17,6 +17,5 @@ WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=builder /usr/src/app/dist /usr/src/app/dist
-COPY .env ./.env
 
 CMD ["node", "/usr/src/app/dist/main.js"]
