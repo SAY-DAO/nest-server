@@ -33,6 +33,7 @@
       body {
         min-width: 260px;
       }
+
       .rollover:hover .rollover-first {
         max-height: 0px !important;
         display: none !important;
@@ -466,6 +467,7 @@
     </style>
   </head>
   <!-- Gmail auto-resize hack -->
+
   <body
     class="body"
     style="
@@ -1720,7 +1722,7 @@
                             </td>
                             <td
                               class="es-hidden"
-                              style="padding: 0; margin: 0; width: 31px"
+                              style="padding: 0; margin: 0; width: 20px"
                             ></td>
                           </tr>
                         </table>
@@ -2407,7 +2409,7 @@
                     <tr>
                       <td
                         style="
-                          padding: 20px;
+                          padding: 10px;
                           margin: 0;
                           background-color: #efefef;
                           border-radius: 0 0 30px 30px;
@@ -3342,11 +3344,13 @@
               "
             >
               <tr>
+            {{#each readyToSignNeeds as |need|}}
                 <td
                   align="center"
                   bgcolor="#ffffff"
                   style="padding: 0; margin: 0; background-color: #ffffff"
                 >
+
                   <table
                     class="es-content-body"
                     cellspacing="0"
@@ -3365,86 +3369,6 @@
                     role="none"
                   >
                     <tr>
-                      <td align="left" style="padding: 0; margin: 0">
-                        <table
-                          width="100% !important"
-                          cellspacing="0"
-                          cellpadding="0"
-                          role="none"
-                          style="
-                            mso-table-lspace: 0pt;
-                            mso-table-rspace: 0pt;
-                            border-collapse: collapse;
-                            border-spacing: 0px;
-                          "
-                        >
-                          <tr>
-                            <td
-                              valign="top"
-                              align="center"
-                              style="padding: 0; margin: 0; width: 550px"
-                            >
-                              <table
-                                width="100% !important"
-                                cellspacing="0"
-                                cellpadding="0"
-                                role="presentation"
-                                style="
-                                  mso-table-lspace: 0pt;
-                                  mso-table-rspace: 0pt;
-                                  border-collapse: collapse;
-                                  border-spacing: 0px;
-                                "
-                              >
-                                <tr>
-                                  <td
-                                    align="center"
-                                    style="
-                                      padding: 0;
-                                      margin: 0;
-                                      padding-right: 20px;
-                                      padding-left: 20px;
-                                      font-size: 0;
-                                    "
-                                  >
-                                    <table
-                                      width="100% !important"
-                                      height="100% !important"
-                                      cellspacing="0"
-                                      cellpadding="0"
-                                      border="0"
-                                      role="presentation"
-                                      style="
-                                        mso-table-lspace: 0pt;
-                                        mso-table-rspace: 0pt;
-                                        border-collapse: collapse;
-                                        border-spacing: 0px;
-                                      "
-                                    >
-                                      <tr>
-                                        <td
-                                          style="
-                                            padding: 0;
-                                            margin: 0;
-                                            border-bottom: 1px solid transparent;
-                                            background: #ffffff none repeat
-                                              scroll 0% 0%;
-                                            height: 1px;
-                                            width: 100% !important;
-                                            margin: 0px;
-                                          "
-                                        ></td>
-                                      </tr>
-                                    </table>
-                                  </td>
-                                </tr>
-                              </table>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-                    <tr>
                       <td
                         align="left"
                         style="
@@ -3455,130 +3379,8 @@
                           padding-top: 10px;
                         "
                       >
-                        <!--
-                  --><!--[if mso]><table style="width:510px" cellpadding="0" cellspacing="0"><tr><td style="width:260px" valign="top"><![endif]-->
-                        <table
-                          class="es-left"
-                          cellspacing="0"
-                          cellpadding="0"
-                          align="left"
-                          role="none"
-                          style="
-                            mso-table-lspace: 0pt;
-                            mso-table-rspace: 0pt;
-                            border-collapse: collapse;
-                            border-spacing: 0px;
-                            float: left;
-                          "
-                        >
-                          <tr>
-                            <td
-                              class="es-m-p20b"
-                              align="left"
-                              style="padding: 0; margin: 0; width: 240px"
-                            >
-                              <table
-                                width="100% !important"
-                                style="
-                                  mso-table-lspace: 0pt;
-                                  mso-table-rspace: 0pt;
-                                  border-collapse: collapse;
-                                  border-spacing: 0px;
-                                  border-width: 1px;
-                                  border-style: solid;
-                                  border-color: #666666;
-                                  background-color: #fef9f5;
-                                "
-                                bgcolor="#fef9f5"
-                                role="presentation"
-                              >
-                                <tr>
-                                  <td
-                                    align="center"
-                                    style="
-                                      padding: 0;
-                                      margin: 0;
-                                      font-size: 0px;
-                                    "
-                                  >
-                                    <a
-                                      target="_blank"
-                                      href="https://dapp.saydao.org/dao/signatures/{{signatureId1}}"
-                                      style="
-                                        mso-line-height-rule: exactly;
-                                        font-size: 14px;
-                                      "
-                                      ><img
-                                        class="adapt-img p_image"
-                                        src="{{signatureImage1}}"
-                                        alt="{{signatureName1}}"
-                                        style="
-                                          display: block;
-                                          font-size: 14px;
-                                          border: 0;
-                                          outline: none;
-                                          text-decoration: none;
-                                        "
-                                        height="200"
-                                        width="200"
-                                    /></a>
-                                  </td>
-                                </tr>
-                              </table>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td
-                              class="es-m-p20b"
-                              align="left"
-                              style="padding: 0; margin: 0; width: 240px"
-                            >
-                              <table
-                                cellpadding="0"
-                                cellspacing="0"
-                                width="100% !important"
-                                role="presentation"
-                                style="
-                                  mso-table-lspace: 0pt;
-                                  mso-table-rspace: 0pt;
-                                  border-collapse: collapse;
-                                  border-spacing: 0px;
-                                "
-                              >
-                                <tr>
-                                  <td
-                                    align="center"
-                                    style="
-                                      padding: 0;
-                                      margin: 0;
-                                      padding-top: 5px;
-                                      padding-bottom: 5px;
-                                    "
-                                  >
-                                    <p
-                                      class="p_name"
-                                      style="
-                                        margin: 0;
-                                        mso-line-height-rule: exactly;
-                                        font-family: arial, 'helvetica neue',
-                                          helvetica, sans-serif;
-                                        line-height: 21px;
-                                        letter-spacing: 0;
-                                        color: #666666;
-                                        font-size: 14px;
-                                        direction: rtl;
-                                      "
-                                    >
-                                      {{signatureName1}}
-                                    </p>
-                                  </td>
-                                </tr>
-                              </table>
-                            </td>
-                          </tr>
-                        </table>
-                        <!--
-                  --><!--[if mso]></td><td style="width:240px" valign="top"><![endif]-->
+                        {{!-- {{#with signature as | signature|}} {{#with
+                        signature.need as | need|}} --}}
                         <table
                           cellspacing="0"
                           align="right"
@@ -3624,14 +3426,14 @@
                                   >
                                     <a
                                       target="_blank"
-                                      href="https://dapp.saydao.org/dao/signatures/{{signatureId2}}"
+                                      href="https://dapp.saydao.org/dao/signatures/{{need.id}}"
                                       style="
                                         mso-line-height-rule: exactly;
                                         font-size: 14px;
                                       "
                                       ><img
-                                        src="{{signatureImage2}}"
-                                        alt="{{signatureName2}}"
+                                        src="https://raw.githubusercontent.com/SAY-DAO/midjourney-bot/main/main/need-images/{{need.midjourneyImage}}"
+                                        alt="{{need.name}}"
                                         style="
                                           display: block;
                                           font-size: 14px;
@@ -3688,7 +3490,7 @@
                                         direction: rtl;
                                       "
                                     >
-                                      {{signatureName2}}
+                                      {{need.name}}
                                     </p>
                                   </td>
                                 </tr>
@@ -3696,30 +3498,15 @@
                             </td>
                           </tr>
                         </table>
-                        <!--[if mso]></td><td style="width:250px" valign="top"><![endif]-->
+                        {{!-- {{/with}} {{/with}} --}}
                       </td>
                     </tr>
                   </table>
                 </td>
+            {{/each}}
               </tr>
             </table>
-            <table
-              class="es-content"
-              cellspacing="0"
-              cellpadding="0"
-              align="center"
-              role="none"
-              style="
-                mso-table-lspace: 0pt;
-                mso-table-rspace: 0pt;
-                border-collapse: collapse;
-                border-spacing: 0px;
-                width: 100% !important;
-                table-layout: fixed !important;
-              "
-            >
-              <tr></tr>
-            </table>
+            <!-- Other SIgnatures -->
             <table
               class="es-content"
               cellspacing="0"
@@ -3847,6 +3634,8 @@
                 </td>
               </tr>
             </table>
+            <!-- Other SIgnatures  END-->
+
             <table
               class="es-content"
               cellspacing="0"

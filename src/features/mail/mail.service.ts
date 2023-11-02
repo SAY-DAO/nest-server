@@ -69,25 +69,28 @@ export class MailService {
       }
       if (!nestUser.monthlyEmail) {
         const children = await this.childrenService.getMyChildren(ehsan.id);
-        const readyToSignNeeds =
-          await this.familyService.getFamilyReadyToSignNeeds(ehsan.id);
-        console.log(readyToSignNeeds);
+        const readyToSignNeeds = (
+          await this.familyService.getFamilyReadyToSignNeeds(ehsan.id)
+        ).filter((n) => n.midjourneyImage);
+
+        // signatures
+        if (readyToSignNeeds[0]) {
+          signatureId1 = readyToSignNeeds[0].id;
+          signatureImage1 = `https://raw.githubusercontent.com/SAY-DAO/midjourney-bot/main/main/need-images/${readyToSignNeeds[0].midjourneyImage}`;
+          signatureName1 = readyToSignNeeds[0].name;
+        }
+        if (readyToSignNeeds[1]) {
+          signatureId2 = readyToSignNeeds[1].id;
+          signatureImage2 = `https://raw.githubusercontent.com/SAY-DAO/midjourney-bot/main/main/need-images/${readyToSignNeeds[1].midjourneyImage}`;
+          signatureName2 = readyToSignNeeds[1].name;
+        }
 
         let counter = 1;
         for await (const child of children) {
           const childNeeds = await this.needService.getFlaskChildNeeds(
             child.id,
           );
-          if (readyToSignNeeds[0]) {
-            signatureId1 = readyToSignNeeds[0].id;
-            signatureImage1 = readyToSignNeeds[0].midjourneyImage;
-            signatureName1 = readyToSignNeeds[0].name;
-          }
-          if (readyToSignNeeds[1]) {
-            signatureId2 = readyToSignNeeds[1].id;
-            signatureImage2 = readyToSignNeeds[1].midjourneyImage;
-            signatureName2 = readyToSignNeeds[1].name;
-          }
+
           // Child One
           if (counter === 1) {
             sayName1 = child.sayname_translations.fa;
@@ -100,7 +103,7 @@ export class MailService {
                 needImage11 =
                   childNeeds[i].type === NeedTypeEnum.PRODUCT
                     ? childNeeds[i].img
-                    : childNeeds[i].imageUrl;
+                    : prepareUrl(childNeeds[i].imageUrl);
                 needPrice11 = childNeeds[i]._cost;
               }
               if (childNeeds[1] && i === 1) {
@@ -109,7 +112,7 @@ export class MailService {
                 needImage12 =
                   childNeeds[i].type === NeedTypeEnum.PRODUCT
                     ? childNeeds[i].img
-                    : childNeeds[i].imageUrl;
+                    : prepareUrl(childNeeds[i].imageUrl);
                 needPrice12 = childNeeds[i]._cost;
               }
               if (childNeeds[2] && i === 2) {
@@ -118,7 +121,7 @@ export class MailService {
                 needImage13 =
                   childNeeds[i].type === NeedTypeEnum.PRODUCT
                     ? childNeeds[i].img
-                    : childNeeds[i].imageUrl;
+                    : prepareUrl(childNeeds[i].imageUrl);
                 needPrice13 = childNeeds[i]._cost;
               }
             }
@@ -131,19 +134,28 @@ export class MailService {
               if (childNeeds[0] && i === 0) {
                 needId21 = childNeeds[i].id;
                 needName21 = childNeeds[i].name_translations.fa;
-                needImage21 = childNeeds[i].img;
+                needImage21 =
+                  childNeeds[i].type === NeedTypeEnum.PRODUCT
+                    ? childNeeds[i].img
+                    : prepareUrl(childNeeds[i].imageUrl);
                 needPrice21 = childNeeds[i]._cost;
               }
               if (childNeeds[1] && i === 1) {
                 needId22 = childNeeds[i].id;
                 needName22 = childNeeds[i].name_translations.fa;
-                needImage22 = childNeeds[i].img;
+                needImage22 =
+                  childNeeds[i].type === NeedTypeEnum.PRODUCT
+                    ? childNeeds[i].img
+                    : prepareUrl(childNeeds[i].imageUrl);
                 needPrice22 = childNeeds[i]._cost;
               }
               if (childNeeds[2] && i === 2) {
                 needId23 = childNeeds[i].id;
                 needName23 = childNeeds[i].name_translations.fa;
-                needImage23 = childNeeds[i].img;
+                needImage23 =
+                  childNeeds[i].type === NeedTypeEnum.PRODUCT
+                    ? childNeeds[i].img
+                    : prepareUrl(childNeeds[i].imageUrl);
                 needPrice23 = childNeeds[i]._cost;
               }
             }
@@ -157,21 +169,26 @@ export class MailService {
           subject: 'نیازهای این ماه کودکان شما',
           template: './monthlySummary', // `.hbs` extension is appended automatically
           context: {
+            readyToSignNeeds,
+            // signatureCounter,
+            // childrenCounter,
+            // childNeedCounter1,
+            // childNeedCounter2,
             sayName1,
             avatar1,
             childId1,
             needId11,
             needName11,
             needImage11,
-            needPrice11,
+            needPrice11: needPrice11 && needPrice11.toLocaleString(),
             needId12,
             needName12,
             needImage12,
-            needPrice12,
+            needPrice12: needPrice12 && needPrice12.toLocaleString(),
             needId13,
             needName13,
             needImage13,
-            needPrice13,
+            needPrice13: needPrice13 && needPrice13.toLocaleString(),
 
             sayName2,
             avatar2,
@@ -179,15 +196,15 @@ export class MailService {
             needId21,
             needName21,
             needImage21,
-            needPrice21,
+            needPrice21: needPrice21 && needPrice21.toLocaleString(),
             needId22,
             needName22,
             needImage22,
-            needPrice22,
+            needPrice22: needPrice22 && needPrice22.toLocaleString(),
             needId23,
             needName23,
             needImage23,
-            needPrice23,
+            needPrice23: needPrice23 && needPrice23.toLocaleString(),
 
             signatureId1,
             signatureImage1,
@@ -200,7 +217,6 @@ export class MailService {
       }
     } catch (e) {
       console.log(e);
-
       throw new ServerError('Cold not send email!');
     }
   }
