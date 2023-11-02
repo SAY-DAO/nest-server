@@ -60,4 +60,7 @@ export class AllUserEntity extends BaseEntity {
     eager: false,
   })
   signatures: SignatureEntity[];
+
+  @Column({ default: false })
+  monthlyEmail: boolean;
 }

@@ -718,7 +718,7 @@ export class NeedService {
           ? [...needWithSignatures]
           : [0],
       })
-      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
 
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere(

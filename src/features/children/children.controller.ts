@@ -517,27 +517,36 @@ export class ChildrenController {
   @ApiOperation({ description: 'Check similar names' })
   async checkChildrenNames(
     @Param('newName') newName: string,
-    @Param('lang') lang: 'FA' | 'EN',
+    @Param('lang') lang: 'fa' | 'en',
     @Req() req: Request,
   ) {
-    // const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    // const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    // if (
-    //   !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-    //   panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-    //   panelFlaskTypeId !== FlaskUserTypesEnum.ADMIN
-    // ) {
-    //   throw new ForbiddenException(403, 'You Are not the Super admin');
-    // }
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
     const names = (await this.childrenService.getFlaskChildrenNames()).map(
       (r) => r.sayname_translations,
     );
 
-    return names.filter((n) =>
-      lang === 'EN'
-        ? n.en.toUpperCase() === newName.toUpperCase()
-        : n.fa === newName,
-    ).length;
+    return {
+      found: names.filter((n) =>
+        lang === 'en'
+          ? n.en.toUpperCase() === newName.toUpperCase()
+          : n.fa === newName,
+      )[0],
+      total: names.filter((n) =>
+        lang === 'en'
+          ? n.en.toUpperCase() === newName.toUpperCase()
+          : n.fa === newName,
+      ).length,
+    };
   }
 
   @UseInterceptors(ChildrenInterceptor)

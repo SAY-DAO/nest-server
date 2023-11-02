@@ -302,7 +302,7 @@ export class WalletController {
         }
       });
 
-      if (counter - body.arrivedColumnNumber !== 0) {
+      if (counter - body.arrivedColumnNumber === 0) {
         throw new WalletExceptionFilter(
           418,
           'You have to announce arrivals first!',
@@ -777,9 +777,11 @@ export class WalletController {
     const panelFlaskTypeId = Number(req.headers['panelFlaskTypeId']);
 
     if (
-      (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId) &&
-        panelFlaskTypeId !== FlaskUserTypesEnum.ADMIN &&
-        panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN) ||
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN
+      ) ||
       !panelFlaskUserId
     ) {
       throw new WalletExceptionFilter(401, 'You are not the admin');
@@ -819,7 +821,7 @@ export class WalletController {
     const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
     const page = X_TAKE * limit;
 
-    const userSignatures = await this.walletService.getUserSignatures(
+    const userSignatures = await this.walletService.getContributorSignatures(
       {
         skip: page || 0,
         take: limit || 10,

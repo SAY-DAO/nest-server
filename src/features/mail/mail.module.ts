@@ -18,6 +18,13 @@ import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenEntity } from 'src/entities/children.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { WalletService } from '../wallet/wallet.service';
+import { SignatureEntity } from 'src/entities/signature.entity';
+import { FamilyService } from '../family/family.service';
+import { MineService } from '../mine/mine.service';
+import { PaymentEntity } from 'src/entities/payment.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 
 @Global() // 👈 global module
 @Module({
@@ -49,7 +56,7 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature(
-      [SocialWorker, User, Need, Child],
+      [SocialWorker, User, Need, Child, Family, UserFamily],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -59,10 +66,20 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
-      ChildrenPreRegisterEntity
+      ChildrenPreRegisterEntity,
+      SignatureEntity,
+      PaymentEntity,
     ]),
   ],
-  providers: [MailService, UserService, NeedService, ChildrenService],
+  providers: [
+    MailService,
+    UserService,
+    NeedService,
+    ChildrenService,
+    WalletService,
+    FamilyService,
+    MineService,
+  ],
   exports: [MailService],
 })
 export class MailModule {}
