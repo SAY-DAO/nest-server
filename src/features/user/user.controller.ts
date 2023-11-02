@@ -263,7 +263,7 @@ export class UserController {
           limit: limit,
           path: '',
         },
-        socialWorkerId,
+        panelFlaskUserId,
         auditorId,
         purchaserId,
         supervisorId,

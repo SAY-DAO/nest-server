@@ -718,7 +718,7 @@ export class NeedService {
           ? [...needWithSignatures]
           : [0],
       })
-      .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds }) // it should be on here since the last column of myPage we do not need to show ngo supervisors the other sw's needs / no need to sign by ngo supervisor
 
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere(
@@ -738,7 +738,7 @@ export class NeedService {
         }),
       )
       .andWhere('need.created_by_id IN (:...swIds)', {
-        swIds: socialWorker ? [socialWorker] : [...swIds],
+        swIds: socialWorker ? [socialWorker] : [socialWorker],
       })
       .select([
         'child',
