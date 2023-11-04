@@ -119,12 +119,13 @@ export class NeedService {
     });
   }
 
-  getFlaskChildNeeds(flaskChildId): Promise<Need[]> {
+  getFlaskChildUnpaidNeeds(flaskChildId: number): Promise<Need[]> {
     return this.flaskNeedRepository.find({
       where: {
         child_id: flaskChildId,
         status: LessThan(PaymentStatusEnum.COMPLETE_PAY),
         isConfirmed: true,
+        isDeleted: false,
       },
     });
   }
@@ -678,6 +679,10 @@ export class NeedService {
     ngoIds: number[],
     needWithSignatures: number[],
   ): Promise<Paginated<Need>> {
+    // console.log(ngoIds);
+    console.log(swIds);
+    // return
+
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -718,6 +723,9 @@ export class NeedService {
           ? [...needWithSignatures]
           : [0],
       })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds }) // it should be on here since the last column of myPage we do not need to show ngo supervisors the other sw's needs / no need to sign by ngo supervisor
 
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
@@ -737,9 +745,7 @@ export class NeedService {
             });
         }),
       )
-      .andWhere('need.created_by_id IN (:...swIds)', {
-        swIds: socialWorker ? [socialWorker] : [socialWorker],
-      })
+
       .select([
         'child',
         'ngo.id',

@@ -14,11 +14,17 @@ import { Family } from 'src/entities/flaskEntities/family.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { NeedService } from '../need/need.service';
 import { VariableEntity } from 'src/entities/variable.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Need, User, Family, UserFamily], 'flaskPostgres'),
-    TypeOrmModule.forFeature([NeedEntity, PaymentEntity, VariableEntity]),
+    TypeOrmModule.forFeature([
+      NeedEntity,
+      PaymentEntity,
+      VariableEntity,
+      AllUserEntity,
+    ]),
     ScheduleModule.forRoot(),
     HttpModule,
   ],

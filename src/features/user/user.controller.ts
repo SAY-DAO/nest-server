@@ -257,13 +257,17 @@ export class UserController {
         ngoIds,
       );
 
+      // to avoid seeing an SW created need by the NGO supervisor in the fourth column / Could not find ypu role / when signing
+      socialWorkerId =
+        role === SAYPlatformRoles.NGO_SUPERVISOR && panelFlaskUserId;
+
       delivered = await this.needService.getDeliveredNeeds(
         {
           page: page,
           limit: limit,
           path: '',
         },
-        panelFlaskUserId,
+        socialWorkerId,
         auditorId,
         purchaserId,
         supervisorId,

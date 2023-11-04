@@ -4,9 +4,13 @@ import { UserService } from '../user/user.service';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
-import { prepareUrl } from 'src/utils/helpers';
+import { prepareUrl, shuffleArray } from 'src/utils/helpers';
 import { WalletService } from '../wallet/wallet.service';
-import { NeedTypeEnum } from 'src/types/interfaces/interface';
+import {
+  ChildExistence,
+  NeedTypeEnum,
+  PaymentStatusEnum,
+} from 'src/types/interfaces/interface';
 import { MineService } from '../mine/mine.service';
 import { FamilyService } from '../family/family.service';
 
@@ -17,204 +21,89 @@ export class MailService {
     private needService: NeedService,
     private userService: UserService,
     private familyService: FamilyService,
-    private walletService: WalletService,
-    private mineService: MineService,
     private childrenService: ChildrenService,
   ) {}
 
   async sendUserSummaries() {
-    let sayName1: string;
-    let avatar1: string;
-    let childId1: number;
-    let needId11: number;
-    let needName11: string;
-    let needImage11: string;
-    let needPrice11: number;
-    let needId12: number;
-    let needName12: string;
-    let needImage12: string;
-    let needPrice12: number;
-    let needId13: number;
-    let needName13: string;
-    let needImage13: string;
-    let needPrice13: number;
-    let sayName2: string;
-    let avatar2: string;
-    let childId2: number;
-    let needId21: number;
-    let needName21: string;
-    let needImage21: string;
-    let needPrice21: number;
-    let needId22: number;
-    let needName22: string;
-    let needImage22: string;
-    let needPrice22: number;
-    let needId23: number;
-    let needName23: string;
-    let needImage23: string;
-    let needPrice23: number;
-    let signatureId1: string;
-    let signatureImage1: string;
-    let signatureName1: string;
-    let signatureId2: string;
-    let signatureImage2: string;
-    let signatureName2: string;
-
     const users = await this.userService.getFlaskUsers();
     try {
-      const ehsan = users.find((u) => u.userName === 'ehsan');
-      let nestUser = await this.userService.getFamilyByFlaskId(ehsan.id);
+      // for await (const user of shuffleArray(users)) {
+      const user = users.find((u) => u.userName === 'ehsan');
+      let nestUser = await this.userService.getFamilyByFlaskId(user.id);
       if (!nestUser) {
-        nestUser = await this.userService.createFamily(ehsan.id);
+        nestUser = await this.userService.createFamily(user.id);
       }
-      if (!nestUser.monthlyEmail) {
-        const children = await this.childrenService.getMyChildren(ehsan.id);
+      const myChildren = [];
+      if (nestUser.monthlyEmail) {
         const readyToSignNeeds = (
-          await this.familyService.getFamilyReadyToSignNeeds(ehsan.id)
+          await this.familyService.getFamilyReadyToSignNeeds(user.id)
         ).filter((n) => n.midjourneyImage);
 
-        // signatures
-        if (readyToSignNeeds[0]) {
-          signatureId1 = readyToSignNeeds[0].id;
-          signatureImage1 = `https://raw.githubusercontent.com/SAY-DAO/midjourney-bot/main/main/need-images/${readyToSignNeeds[0].midjourneyImage}`;
-          signatureName1 = readyToSignNeeds[0].name;
-        }
-        if (readyToSignNeeds[1]) {
-          signatureId2 = readyToSignNeeds[1].id;
-          signatureImage2 = `https://raw.githubusercontent.com/SAY-DAO/midjourney-bot/main/main/need-images/${readyToSignNeeds[1].midjourneyImage}`;
-          signatureName2 = readyToSignNeeds[1].name;
-        }
+        const children = (
+          await this.childrenService.getMyChildren(user.id)
+        ).filter((c) => c.existence_status === ChildExistence.AlivePresent);
+        console.log(children.length);
 
-        let counter = 1;
-        for await (const child of children) {
-          const childNeeds = await this.needService.getFlaskChildNeeds(
-            child.id,
-          );
+        for await (const child of shuffleArray(children)) {
+          if (myChildren.length < 3) {
+            const childUnpaidNeeds =
+              await this.needService.getFlaskChildUnpaidNeeds(child.id);
+            const shuffledNeeds = shuffleArray(childUnpaidNeeds);
+            const partialPayment = shuffledNeeds.find(
+              (n) => n.status === PaymentStatusEnum.PARTIAL_PAY,
+            );
+            const noPayments = shuffledNeeds.filter(
+              (n) => n.status === PaymentStatusEnum.NOT_PAID,
+            );
+            if (partialPayment || noPayments[0]) {
+              const theChild = {
+                id: child.id,
+                sayName: child.sayname_translations.fa,
+                avatar: prepareUrl(child.awakeAvatarUrl),
+                unPaidNeeds: (partialPayment
+                  ? [partialPayment, noPayments[0]]
+                  : noPayments[1]
+                  ? [noPayments[0], noPayments[1]]
+                  : [noPayments[0]]
+                ).map((n) => {
+                  return {
+                    id: n.id,
+                    name: n.name_translations.fa,
+                    price: n._cost.toLocaleString(),
+                    image:
+                      n.type === NeedTypeEnum.PRODUCT
+                        ? n.img
+                        : prepareUrl(n.imageUrl),
+                  };
+                }),
+              };
 
-          // Child One
-          if (counter === 1) {
-            sayName1 = child.sayname_translations.fa;
-            avatar1 = prepareUrl(child.awakeAvatarUrl);
-            childId1 = child.id;
-            for (let i = 0; i < 3; i++) {
-              if (childNeeds[0] && i === 0) {
-                needId11 = childNeeds[i].id;
-                needName11 = childNeeds[i].name_translations.fa;
-                needImage11 =
-                  childNeeds[i].type === NeedTypeEnum.PRODUCT
-                    ? childNeeds[i].img
-                    : prepareUrl(childNeeds[i].imageUrl);
-                needPrice11 = childNeeds[i]._cost;
-              }
-              if (childNeeds[1] && i === 1) {
-                needId12 = childNeeds[i].id;
-                needName12 = childNeeds[i].name_translations.fa;
-                needImage12 =
-                  childNeeds[i].type === NeedTypeEnum.PRODUCT
-                    ? childNeeds[i].img
-                    : prepareUrl(childNeeds[i].imageUrl);
-                needPrice12 = childNeeds[i]._cost;
-              }
-              if (childNeeds[2] && i === 2) {
-                needId13 = childNeeds[i].id;
-                needName13 = childNeeds[i].name_translations.fa;
-                needImage13 =
-                  childNeeds[i].type === NeedTypeEnum.PRODUCT
-                    ? childNeeds[i].img
-                    : prepareUrl(childNeeds[i].imageUrl);
-                needPrice13 = childNeeds[i]._cost;
-              }
-            }
-            // Child Two
-          } else if (counter === 2) {
-            sayName2 = child.sayname_translations.fa;
-            avatar2 = prepareUrl(child.awakeAvatarUrl);
-            childId2 = child.id;
-            for (let i = 0; i < 3; i++) {
-              if (childNeeds[0] && i === 0) {
-                needId21 = childNeeds[i].id;
-                needName21 = childNeeds[i].name_translations.fa;
-                needImage21 =
-                  childNeeds[i].type === NeedTypeEnum.PRODUCT
-                    ? childNeeds[i].img
-                    : prepareUrl(childNeeds[i].imageUrl);
-                needPrice21 = childNeeds[i]._cost;
-              }
-              if (childNeeds[1] && i === 1) {
-                needId22 = childNeeds[i].id;
-                needName22 = childNeeds[i].name_translations.fa;
-                needImage22 =
-                  childNeeds[i].type === NeedTypeEnum.PRODUCT
-                    ? childNeeds[i].img
-                    : prepareUrl(childNeeds[i].imageUrl);
-                needPrice22 = childNeeds[i]._cost;
-              }
-              if (childNeeds[2] && i === 2) {
-                needId23 = childNeeds[i].id;
-                needName23 = childNeeds[i].name_translations.fa;
-                needImage23 =
-                  childNeeds[i].type === NeedTypeEnum.PRODUCT
-                    ? childNeeds[i].img
-                    : prepareUrl(childNeeds[i].imageUrl);
-                needPrice23 = childNeeds[i]._cost;
-              }
+              myChildren.push(theChild);
+            } else {
+              continue;
             }
           }
-          counter++;
         }
 
-        await this.mailerService.sendMail({
-          to: ehsan.emailAddress,
-          // from: '"Support Team" <support@example.com>', // override default from
-          subject: 'نیازهای این ماه کودکان شما',
-          template: './monthlySummary', // `.hbs` extension is appended automatically
-          context: {
-            readyToSignNeeds,
-            // signatureCounter,
-            // childrenCounter,
-            // childNeedCounter1,
-            // childNeedCounter2,
-            sayName1,
-            avatar1,
-            childId1,
-            needId11,
-            needName11,
-            needImage11,
-            needPrice11: needPrice11 && needPrice11.toLocaleString(),
-            needId12,
-            needName12,
-            needImage12,
-            needPrice12: needPrice12 && needPrice12.toLocaleString(),
-            needId13,
-            needName13,
-            needImage13,
-            needPrice13: needPrice13 && needPrice13.toLocaleString(),
-
-            sayName2,
-            avatar2,
-            childId2,
-            needId21,
-            needName21,
-            needImage21,
-            needPrice21: needPrice21 && needPrice21.toLocaleString(),
-            needId22,
-            needName22,
-            needImage22,
-            needPrice22: needPrice22 && needPrice22.toLocaleString(),
-            needId23,
-            needName23,
-            needImage23,
-            needPrice23: needPrice23 && needPrice23.toLocaleString(),
-
-            signatureId1,
-            signatureImage1,
-            signatureName1,
-            signatureId2,
-            signatureImage2,
-            signatureName2,
-          },
-        });
+        // await this.mailerService.sendMail({
+        //   to: user.emailAddress,
+        //   // from: '"Support Team" <support@example.com>', // override default from
+        //   subject: 'نیازهای این ماه کودکان شما',
+        //   template: './monthlySummary', // `.hbs` extension is appended automatically
+        //   context: {
+        //     readyToSignNeeds,
+        //     myChildren,
+        //   },
+        // });
       }
+      console.log('here');
+      console.log(user.id);
+      
+      console.log(myChildren.length);
+      console.log(nestUser.monthlyEmail);
+      
+      console.log('-----------------');
+      // }
     } catch (e) {
       console.log(e);
       throw new ServerError('Cold not send email!');

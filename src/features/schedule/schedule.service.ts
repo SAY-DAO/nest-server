@@ -121,6 +121,6 @@ export class ScheduleService {
   // @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_NOON)
   async handleSummaryMailCron() {
     this.logger.debug('Mailing User summaries');
-    // await this.mailService.sendUserSummaries();
+    await this.mailService.sendUserSummaries();
   }
 }

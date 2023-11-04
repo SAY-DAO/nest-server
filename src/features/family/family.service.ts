@@ -6,7 +6,7 @@ import {
 } from 'src/types/interfaces/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from 'src/entities/flaskEntities/need.entity';
-import { And, ArrayContains, IsNull, Not, Repository } from 'typeorm';
+import { And, IsNull, Not, Repository, UpdateResult } from 'typeorm';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { User } from 'src/entities/flaskEntities/user.entity';
@@ -14,15 +14,15 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { NeedEntity } from 'src/entities/need.entity';
 import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
-import { PaymentEntity } from 'src/entities/payment.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
 
 @Injectable()
 export class FamilyService {
   constructor(
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
-    @InjectRepository(PaymentEntity)
-    private paymentRepository: Repository<PaymentEntity>,
+    @InjectRepository(AllUserEntity)
+    private allUserRepository: Repository<AllUserEntity>,
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
     @InjectRepository(User, 'flaskPostgres')
@@ -134,7 +134,9 @@ export class FamilyService {
           statusNotPaid: PaymentStatusEnum.COMPLETE_PAY,
         })
         .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-        .andWhere(userId > 0 && `payment.id_user = :pUserId`, { pUserId: userId })
+        .andWhere(userId > 0 && `payment.id_user = :pUserId`, {
+          pUserId: userId,
+        })
         .andWhere(userId > 0 && `needFamily.id_user = :nUserId`, {
           nUserId: userId,
         })
@@ -290,5 +292,12 @@ export class FamilyService {
       })
       .cache(10000)
       .getMany();
+  }
+
+  async updateEmailMarketing(user: AllUserEntity): Promise<UpdateResult> {
+    const newStatus = user.monthlyEmail ? false : true;
+    return this.allUserRepository.update(user.id, {
+      monthlyEmail: newStatus,
+    });
   }
 }

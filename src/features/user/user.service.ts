@@ -187,6 +187,23 @@ export class UserService {
     }
   }
 
+  getContributorByFlaskId(
+    flaskSwId: number,
+    panelRole: PanelContributors,
+  ): Promise<AllUserEntity> {
+    const user = this.allUserRepository.findOne({
+      where: {
+        flaskUserId: flaskSwId,
+        isContributor: true,
+        contributions: {
+          panelRole,
+        },
+      },
+    });
+    return user;
+  }
+
+
   async createFamily(flaskUserId: number): Promise<AllUserEntity> {
     const flaskUser = await this.flaskUserRepository
       .createQueryBuilder('user')
@@ -235,22 +252,6 @@ export class UserService {
       flaskUserId: userDetails.flaskUserId,
       isContributor: false,
     });
-  }
-
-  getContributorByFlaskId(
-    flaskSwId: number,
-    panelRole: PanelContributors,
-  ): Promise<AllUserEntity> {
-    const user = this.allUserRepository.findOne({
-      where: {
-        flaskUserId: flaskSwId,
-        isContributor: true,
-        contributions: {
-          panelRole,
-        },
-      },
-    });
-    return user;
   }
 
   getFamilyByFlaskId(flaskFamilyId: number): Promise<AllUserEntity> {

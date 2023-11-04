@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Get,
   Param,
+  Patch,
   Req,
 } from '@nestjs/common';
 import { FamilyService } from './family.service';
@@ -29,6 +30,7 @@ import { ServerError } from 'src/filters/server-exception.filter';
 import { PaymentService } from '../payment/payment.service';
 import { NeedService } from '../need/need.service';
 import { isAuthenticated } from 'src/utils/auth';
+import { UserService } from '../user/user.service';
 
 @ApiTags('Family')
 @ApiSecurity('flask-access-token')
@@ -41,6 +43,7 @@ import { isAuthenticated } from 'src/utils/auth';
 export class FamilyController {
   constructor(
     private readonly familyService: FamilyService,
+    private userService: UserService,
     private childrenService: ChildrenService,
     private needService: NeedService,
     private paymentService: PaymentService,
@@ -495,5 +498,41 @@ export class FamilyController {
         ammeCompletePay: userAsAmme[1],
       },
     };
+  }
+
+  @Get(`email/status`)
+  @ApiOperation({ description: 'Get all contributors' })
+  async getEmailStatus(@Req() req: Request) {
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (dappFlaskUserId) {
+      if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+        throw new ForbiddenException(403, 'You Are not authorized');
+      }
+    }
+    let nestFamilyMember = await this.userService.getFamilyByFlaskId(
+      dappFlaskUserId,
+    );
+    if (!nestFamilyMember) {
+      nestFamilyMember = await this.userService.createFamily(dappFlaskUserId);
+    }
+    return nestFamilyMember.monthlyEmail;
+  }
+
+  @Patch(`email/status`)
+  @ApiOperation({ description: 'Get all contributors' })
+  async updateEmailStatus(@Req() req: Request) {
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (dappFlaskUserId) {
+      if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+        throw new ForbiddenException(403, 'You Are not authorized');
+      }
+    }
+    let nestFamilyMember = await this.userService.getFamilyByFlaskId(
+      dappFlaskUserId,
+    );
+    if (!nestFamilyMember) {
+      nestFamilyMember = await this.userService.createFamily(dappFlaskUserId);
+    }
+    return await this.familyService.updateEmailMarketing(nestFamilyMember);
   }
 }

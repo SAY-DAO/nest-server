@@ -36,7 +36,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
         // or
         transport: {
           host: config.get('MAIL_HOST'),
-          secure: false,
+          secure: true,
           auth: {
             user: config.get('MAIL_FROM'),
             pass: config.get('MAIL_PASSWORD'),
@@ -69,6 +69,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
       ChildrenPreRegisterEntity,
       SignatureEntity,
       PaymentEntity,
+      AllUserEntity,
     ]),
   ],
   providers: [
