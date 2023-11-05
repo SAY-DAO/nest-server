@@ -1,8 +1,9 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, ManyToMany } from 'typeorm';
 import { SAYPlatformRoles } from '../types/interfaces/interface';
 import { BaseEntity } from './BaseEntity';
 import { NeedEntity } from './need.entity';
 import { AllUserEntity } from './user.entity';
+import { CampaignEntity } from './campaign.entity';
 
 @Entity()
 export class SignatureEntity extends BaseEntity {
@@ -38,4 +39,7 @@ export class SignatureEntity extends BaseEntity {
     nullable: false,
   })
   need: NeedEntity;
+
+  @ManyToMany(() => CampaignEntity, (c) => c.contentNeeds)
+  campaigns: CampaignEntity[];
 }

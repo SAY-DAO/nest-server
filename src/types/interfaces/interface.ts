@@ -306,3 +306,12 @@ export enum NeedTypeDefinitionEnum {
   SERVICE = 'Service',
   PRODUCT = 'Product',
 }
+
+export enum CampaignEnum {
+  MONTHLY_SUMMARIES = 1,
+}
+
+export enum CampaignTypeEnum {
+  SMS = 1,
+  EMAIL = 1,
+}

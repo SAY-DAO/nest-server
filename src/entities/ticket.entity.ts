@@ -27,7 +27,7 @@ export class TicketEntity extends BaseEntity {
     @Column({ nullable: true })
     lastAnnouncement: AnnouncementEnum
 
-    @ManyToMany(() => AllUserEntity, (user) => user.tickets, { eager: true, onDelete: 'CASCADE' })
+    @ManyToMany(() => AllUserEntity, (user) => user.tickets, { eager: true })
     @JoinTable()
     contributors?: AllUserEntity[];
 

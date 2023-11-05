@@ -6,6 +6,7 @@ import { TicketEntity } from './ticket.entity';
 import { ContributorEntity } from './contributor.entity';
 import { SignatureEntity } from './signature.entity';
 import { CommentEntity } from './comment.entity';
+import { CampaignEntity } from './campaign.entity';
 
 @Entity()
 export class AllUserEntity extends BaseEntity {
@@ -27,6 +28,9 @@ export class AllUserEntity extends BaseEntity {
     eager: false,
   })
   comments: CommentEntity[];
+
+  @ManyToMany(() => CampaignEntity, (c) => c.contentNeeds)
+  campaigns: CampaignEntity[];
 
   @Column({ nullable: false })
   isContributor: boolean;
@@ -63,4 +67,9 @@ export class AllUserEntity extends BaseEntity {
 
   @Column({ default: false })
   monthlyEmail: boolean;
+
+  @OneToMany(() => CampaignEntity, (e) => e.receivers, {
+    eager: false,
+  })
+  receivedEmails: CampaignEntity[];
 }

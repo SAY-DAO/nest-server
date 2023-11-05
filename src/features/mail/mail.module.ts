@@ -25,6 +25,7 @@ import { MineService } from '../mine/mine.service';
 import { PaymentEntity } from 'src/entities/payment.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { CampaignEntity } from 'src/entities/campaign.entity';
 
 @Global() // 👈 global module
 @Module({
@@ -70,6 +71,7 @@ import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
       SignatureEntity,
       PaymentEntity,
       AllUserEntity,
+      CampaignEntity,
     ]),
   ],
   providers: [

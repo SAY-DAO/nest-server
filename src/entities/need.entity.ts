@@ -1,4 +1,12 @@
-import { Entity, Column, Index, OneToMany, ManyToOne, OneToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  Index,
+  OneToMany,
+  ManyToOne,
+  OneToOne,
+  ManyToMany,
+} from 'typeorm';
 import { ProviderEntity } from './provider.entity';
 import { ChildrenEntity } from './children.entity';
 import { PaymentEntity } from './payment.entity';
@@ -14,6 +22,7 @@ import { SignatureEntity } from './signature.entity';
 import { CommentEntity } from './comment.entity';
 import { VariableEntity } from './variable.entity';
 import { EthereumTransaction } from './ethereum.transaction.entity';
+import { CampaignEntity } from './campaign.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
@@ -170,4 +179,7 @@ export class NeedEntity extends BaseEntity {
 
   @OneToMany(() => VariableEntity, (v) => v.need, { eager: true })
   variables?: VariableEntity[];
+
+  @ManyToMany(() => CampaignEntity, (c) => c.contentNeeds)
+  campaigns: CampaignEntity[];
 }
