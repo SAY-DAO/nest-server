@@ -679,10 +679,6 @@ export class NeedService {
     ngoIds: number[],
     needWithSignatures: number[],
   ): Promise<Paginated<Need>> {
-    // console.log(ngoIds);
-    console.log(swIds);
-    // return
-
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -727,7 +723,7 @@ export class NeedService {
         swIds: socialWorker ? [socialWorker] : [...swIds],
       })
       .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds }) // it should be on here since the last column of myPage we do not need to show ngo supervisors the other sw's needs / no need to sign by ngo supervisor
-
+      // .andWhere('need_receipt.deleted = :receiptDeleted', { receiptDeleted: null })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere(
         new Brackets((qb) => {
@@ -789,7 +785,7 @@ export class NeedService {
       .cache(60000);
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
-      defaultSortBy: [['updated', 'DESC']],
+      defaultSortBy: [['type', 'DESC']],
       nullSort: 'last',
     });
   }
@@ -858,9 +854,9 @@ export class NeedService {
         startDate: new Date(2019, 1, 1),
       })
       .andWhere('need.confirmDate < :endDate', { endDate: date })
-      .andWhere('need.status = :statusNotPaid', {
-        statusNotPaid: PaymentStatusEnum.NOT_PAID,
-      })
+      // .andWhere('need.status = :statusNotPaid', {
+      //   statusNotPaid: PaymentStatusEnum.NOT_PAID,
+      // })
       .select([
         'need.id',
         'need.status',
