@@ -22,5 +22,8 @@ export class Receipt extends BaseEntity {
     description: string;
 
     @Column({ nullable: true })
+    is_public: boolean;
+
+    @Column({ nullable: true })
     deleted: Date;
 }

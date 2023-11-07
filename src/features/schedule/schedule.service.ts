@@ -4,12 +4,12 @@ import { VirtualFamilyRole } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
-import { MailService } from '../mail/mail.service';
+import { CampaignService } from '../campaign/campaign.service';
 
 @Injectable()
 export class ScheduleService {
   constructor(
-    private mailService: MailService,
+    private campaignService: CampaignService,
     private familyService: FamilyService,
     private analyticService: AnalyticService,
   ) {}
@@ -92,20 +92,12 @@ export class ScheduleService {
     this.rolesCount();
   }
 
-  @Cron(CronExpression.EVERY_WEEK)
-  async handleWeeklyCron() {
-    this.logger.debug('Called every Week');
-    const data = config().dataCache.fetchFamilyAll();
-    if (!data) {
-      this.completePays();
-    } else {
-      this.logger.debug('Reading from cache');
-    }
-  }
-
-  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT, {
+    name: 'ActiveFamilies',
+    timeZone: 'Asia/Tehran',
+  })
   async handleMonthlyCron() {
-    this.logger.debug('Called every Month');
+    this.logger.debug('Active Families Called every Month');
 
     // active families
     let actives = config().dataCache.fetchActiveFamilies();
@@ -117,10 +109,36 @@ export class ScheduleService {
     }
   }
 
+  @Cron(CronExpression.EVERY_WEEK, {
+    name: 'CompletePayments',
+    timeZone: 'Asia/Tehran',
+  })
+  async handleWeeklyCron() {
+    this.logger.debug(' Complete payments of families Called every Week');
+    const data = config().dataCache.fetchFamilyAll();
+    if (!data) {
+      this.completePays();
+    } else {
+      this.logger.debug('Reading from cache');
+    }
+  }
+
+  // @Cron('32 13 * * 0', {
+  //   name: 'MonthlyCampaigns',
+  //   timeZone: 'Asia/Tehran',
+  // })
   @Timeout(5000)
-  // @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_NOON)
   async handleSummaryMailCron() {
-    this.logger.debug('Mailing User summaries');
-    // await this.mailService.sendUserSummaries();
+    this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
+    // await this.campaignService.sendUserMonthlySummaries();
+  }
+
+  @Cron('23 8 * * Tue', {
+    name: 'Reminders',
+    timeZone: 'Asia/Tehran',
+  })
+  async handleReminderMailCron() {
+    this.logger.debug('Sending Reminder to Social workers');
+    // await this.campaignService.sendSocialWorkersMonthlyReminder();
   }
 }

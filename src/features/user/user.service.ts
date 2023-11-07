@@ -203,7 +203,6 @@ export class UserService {
     return user;
   }
 
-
   async createFamily(flaskUserId: number): Promise<AllUserEntity> {
     const flaskUser = await this.flaskUserRepository
       .createQueryBuilder('user')
@@ -268,6 +267,15 @@ export class UserService {
     const user = this.allUserRepository.findOne({
       where: {
         flaskUserId: flaskId,
+      },
+    });
+    return user;
+  }
+
+  getFamilyById(id: string): Promise<AllUserEntity> {
+    const user = this.allUserRepository.findOne({
+      where: {
+        id,
       },
     });
     return user;

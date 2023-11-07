@@ -43,7 +43,7 @@ import { MineModule } from './features/mine/mine.module';
 import { ContributionModule } from './features/contribution/contribution.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { postgresDataSourceOptions } from './db/data-source';
-import { MailModule } from './features/mail/mail.module';
+import { CampaignModule } from './features/campaign/campaign.module';
 import { Countries } from './entities/flaskEntities/countries.entity';
 
 const imports = [
@@ -80,7 +80,7 @@ const imports = [
   // ServeStaticModule.forRoot({
   //   rootPath: join(__dirname, '..', 'files'),
   // }),
-  MailModule,
+  CampaignModule,
   ScheduleTaskModule,
   GatewayModule,
   LocationModule,
@@ -105,6 +105,7 @@ const imports = [
   CommentModule,
   MineModule,
   ContributionModule,
+  CampaignModule,
 ];
 
 @Module({

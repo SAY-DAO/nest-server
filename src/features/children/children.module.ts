@@ -43,6 +43,8 @@ import { PaymentEntity } from 'src/entities/payment.entity';
 import { StatusEntity } from 'src/entities/status.entity';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 import { ProviderEntity } from 'src/entities/provider.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { ProviderEntity } from 'src/entities/provider.entity';
         NGO,
         Countries,
         Payment,
+        Receipt,
+        NeedReceipt,
       ],
       'flaskPostgres',
     ),
@@ -104,7 +108,10 @@ export class ChildrenModule implements NestModule {
     consumer
       .apply(ChildrenMiddleware)
       .exclude(
-        { path: 'children/avatars/images/:fileName', method: RequestMethod.GET },
+        {
+          path: 'children/avatars/images/:fileName',
+          method: RequestMethod.GET,
+        },
         { path: 'children/voices/:fileName', method: RequestMethod.GET },
         { path: `children/preregister/old`, method: RequestMethod.GET },
       )

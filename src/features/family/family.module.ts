@@ -23,11 +23,23 @@ import { PaymentService } from '../payment/payment.service';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [Need, Family, User, Child, SocialWorker, UserFamily, Payment],
+      [
+        Need,
+        Family,
+        User,
+        Child,
+        SocialWorker,
+        UserFamily,
+        Payment,
+        Receipt,
+        NeedReceipt,
+      ],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([

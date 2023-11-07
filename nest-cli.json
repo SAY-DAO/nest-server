@@ -4,7 +4,7 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "assets": [
-      "features/mail/templates/**/*"
+      "features/campaign/templates/**/*"
     ], 
     "watchAssets": true 
   }

@@ -29,7 +29,7 @@ export class AllUserEntity extends BaseEntity {
   })
   comments: CommentEntity[];
 
-  @ManyToMany(() => CampaignEntity, (c) => c.contentNeeds)
+  @ManyToMany(() => CampaignEntity, (c) => c.receivers)
   campaigns: CampaignEntity[];
 
   @Column({ nullable: false })
@@ -65,7 +65,7 @@ export class AllUserEntity extends BaseEntity {
   })
   signatures: SignatureEntity[];
 
-  @Column({ default: false })
+  @Column({ default: true })
   monthlyEmail: boolean;
 
   @OneToMany(() => CampaignEntity, (e) => e.receivers, {

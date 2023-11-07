@@ -307,8 +307,8 @@ export enum NeedTypeDefinitionEnum {
   PRODUCT = 'Product',
 }
 
-export enum CampaignEnum {
-  MONTHLY_SUMMARIES = 1,
+export enum CampaignNameEnum {
+  MONTHLY_SUMMARIES = 'MONTHLY_SUMMARIES',
 }
 
 export enum CampaignTypeEnum {

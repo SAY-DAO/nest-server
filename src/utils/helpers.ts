@@ -40,10 +40,15 @@ export function getAllFilesFromFolder(dir: string) {
   return results;
 }
 
-export function removeDuplicates(array: any[]) {
+// {id: 44 }
+export function removeSpecialDuplicates(array: any[]) {
   return array.filter((obj, index) => {
     return index === array.findIndex((o) => obj.id === o.id);
   });
+}
+
+export function removeDuplicates(array: any[]) {
+  return array.filter((item, index) => array.indexOf(item) === index);
 }
 
 export function getSAYRoleInteger(sayRole: string) {
@@ -194,6 +199,35 @@ export function persianMonthString(value: Date) {
   return new Intl.DateTimeFormat('en-US-u-ca-persian', {
     month: 'short',
   }).format(value);
+}
+
+export function persianMonthStringFarsi(value: Date) {
+  const pm = persianMonthString(value);
+  return pm === 'Farvardin'
+    ? 'فروردین'
+    : pm === 'Ordibehesht'
+    ? 'اردیبهست'
+    : pm === 'Khordad'
+    ? 'خرداد'
+    : pm === 'Tir'
+    ? 'تیر'
+    : pm === 'Mordad'
+    ? 'مرداد'
+    : pm === 'Shahrivar'
+    ? 'شهریور'
+    : pm === 'Mehr'
+    ? 'مهر'
+    : pm === 'Aban'
+    ? 'آبان'
+    : pm === 'Azar'
+    ? 'آذر'
+    : pm === 'Dey'
+    ? 'دی'
+    : pm === 'Bahman'
+    ? 'بهمن'
+    : pm === 'Esfand'
+    ? 'اسفند'
+    : null;
 }
 
 export function persianMonth(value: Date) {

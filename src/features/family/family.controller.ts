@@ -500,6 +500,28 @@ export class FamilyController {
     };
   }
 
+  @Get(`credit/:flaskUserId`)
+  @ApiOperation({ description: 'Get all contributors' })
+  async getFamilyCredit(
+    @Param('flaskUserId') flaskUserId: number,
+    @Req() req: Request,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException(403, 'You Are not authorized');
+    }
+
+    const credit = await this.paymentService.getFamilyCredit(flaskUserId);
+    return credit;
+  }
+
   @Get(`email/status`)
   @ApiOperation({ description: 'Get all contributors' })
   async getEmailStatus(@Req() req: Request) {

@@ -130,12 +130,23 @@ export class PaymentService {
         endDate: new Date(d2),
       })
       .andWhere('payment.need_amount > :amount', { amount: 0 }) // only positive amounts
-      .andWhere('payment.id_user != :sayId', { sayId: SAY_DAPP_ID }) // only positive amounts
-
+      .andWhere('payment.id_user != :sayId', { sayId: SAY_DAPP_ID })
       .andWhere('payment.id_need IS NOT NULL')
       .andWhere('payment.id IS NOT NULL')
       .andWhere('payment.verified IS NOT NULL')
       .select(['payment', 'need'])
       .getManyAndCount();
+  }
+
+  getFamilyCredit(flaskUserId: number): Promise<any> {
+    return (
+      this.flaskPaymentRepository
+        .createQueryBuilder('payment')
+        .andWhere('payment.id_user = :flaskUserId', { flaskUserId })
+        .andWhere('payment.verified IS NOT NULL')
+        // .andWhere('payment.id_need IS NOT NULL') // payments with id_need null are just credit payments - positive credits (used credits) , negative (can use)
+        .select('SUM(Payment.credit_amount)', 'credit')
+        .getRawOne()
+    );
   }
 }

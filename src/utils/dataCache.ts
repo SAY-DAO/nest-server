@@ -5,7 +5,7 @@ import {
   VirtualFamilyRole,
 } from 'src/types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
-import { getScattered, removeDuplicates } from './helpers';
+import { getScattered } from './helpers';
 
 export default class DataCache {
   childrenEcosystem = null;
@@ -18,6 +18,11 @@ export default class DataCache {
   childActiveFamilies = null;
   medianList = [];
   midjourneyList = [];
+  countChildrenNoNeeds = null;
+
+  updateChildrenNoNeeds(count: number) {
+    this.countChildrenNoNeeds = count;
+  }
 
   storeActiveFamilies = (activesList) => {
     this.childActiveFamilies = { actives: activesList, created: new Date() };
@@ -118,9 +123,10 @@ export default class DataCache {
     };
   };
 
-  fetchMidjourney = () =>
-    (this.midjourneyList = removeDuplicates(this.midjourneyList));
-
+  fetchMidjourney = () => (this.midjourneyList = this.midjourneyList);
+  fetchChildrenNoNeeds() {
+    return this.countChildrenNoNeeds;
+  }
   fetchChildrenEcosystem = () => this.childrenEcosystem;
   fetchFamilyAll = () => this.familyData;
   fetchFamilyCount = () => this.familyRolesCount;

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { mean, round } from 'mathjs';
+import config from 'src/config';
 import { Child } from 'src/entities/flaskEntities/child.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { Need } from 'src/entities/flaskEntities/need.entity';
@@ -16,7 +17,7 @@ import {
 import {
   daysDifference,
   getNeedsTimeLine,
-  removeDuplicates,
+  removeSpecialDuplicates,
   timeDifferenceWithComment,
 } from 'src/utils/helpers';
 import { Repository } from 'typeorm';
@@ -203,6 +204,7 @@ export class AnalyticService {
       .getCount();
 
     return {
+      noNeeds: config().dataCache.fetchChildrenNoNeeds(),
       allChildren: allChildren[1],
       dead,
       alivePresent,
@@ -445,11 +447,13 @@ export class AnalyticService {
         childSayName: child.sayname_translations.en,
         family: {
           familyId: familyId,
-          activeUsers: removeDuplicates(activeUsersId).length,
-          activeUsersInOneMonths: removeDuplicates(activeUsersIdInOneMonths)
-            .length,
-          activeUsersInThreeMonths: removeDuplicates(activeUsersIdInThreeMonths)
-            .length,
+          activeUsers: removeSpecialDuplicates(activeUsersId).length,
+          activeUsersInOneMonths: removeSpecialDuplicates(
+            activeUsersIdInOneMonths,
+          ).length,
+          activeUsersInThreeMonths: removeSpecialDuplicates(
+            activeUsersIdInThreeMonths,
+          ).length,
           familyCount: familyCount,
         },
       });

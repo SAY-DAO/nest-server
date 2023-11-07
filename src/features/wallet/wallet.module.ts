@@ -46,6 +46,8 @@ import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 import { Countries } from 'src/entities/flaskEntities/countries.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { Countries } from 'src/entities/flaskEntities/countries.entity';
         Family,
         User,
         Countries,
+        Receipt,
+        NeedReceipt,
       ],
       'flaskPostgres',
     ),

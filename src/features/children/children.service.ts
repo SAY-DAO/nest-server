@@ -314,7 +314,6 @@ export class ChildrenService {
     },
     socialWorkerIds: number[],
   ): Promise<Paginated<Child>> {
-
     const queryBuilder = this.flaskChildRepository
       .createQueryBuilder('child')
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
@@ -360,8 +359,9 @@ export class ChildrenService {
   async getFlaskActiveChildren(): Promise<Child[]> {
     return await this.flaskChildRepository
       .createQueryBuilder('child')
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
-      .where('child.existence_status = :existence_status', {
+      .andWhere('child.existence_status = :existence_status', {
         existence_status: ChildExistence.AlivePresent,
       })
       .andWhere('child.isMigrated = :childIsMigrated', {

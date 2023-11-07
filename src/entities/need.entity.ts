@@ -179,7 +179,4 @@ export class NeedEntity extends BaseEntity {
 
   @OneToMany(() => VariableEntity, (v) => v.need, { eager: true })
   variables?: VariableEntity[];
-
-  @ManyToMany(() => CampaignEntity, (c) => c.contentNeeds)
-  campaigns: CampaignEntity[];
 }

@@ -39,7 +39,4 @@ export class SignatureEntity extends BaseEntity {
     nullable: false,
   })
   need: NeedEntity;
-
-  @ManyToMany(() => CampaignEntity, (c) => c.contentNeeds)
-  campaigns: CampaignEntity[];
 }

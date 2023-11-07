@@ -1,7 +1,7 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Global, Module } from '@nestjs/common';
-import { MailService } from './mail.service';
+import { CampaignService } from './campaign.service';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
@@ -26,6 +26,9 @@ import { PaymentEntity } from 'src/entities/payment.entity';
 import { Family } from 'src/entities/flaskEntities/family.entity';
 import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
 import { CampaignEntity } from 'src/entities/campaign.entity';
+import { CampaignController } from './campaign.controller';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 
 @Global() // 👈 global module
 @Module({
@@ -57,7 +60,16 @@ import { CampaignEntity } from 'src/entities/campaign.entity';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature(
-      [SocialWorker, User, Need, Child, Family, UserFamily],
+      [
+        SocialWorker,
+        User,
+        Need,
+        Child,
+        Family,
+        UserFamily,
+        Receipt,
+        NeedReceipt,
+      ],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
@@ -75,7 +87,7 @@ import { CampaignEntity } from 'src/entities/campaign.entity';
     ]),
   ],
   providers: [
-    MailService,
+    CampaignService,
     UserService,
     NeedService,
     ChildrenService,
@@ -83,6 +95,7 @@ import { CampaignEntity } from 'src/entities/campaign.entity';
     FamilyService,
     MineService,
   ],
-  exports: [MailService],
+  controllers: [CampaignController],
+  exports: [CampaignService],
 })
-export class MailModule {}
+export class CampaignModule {}

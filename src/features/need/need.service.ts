@@ -130,6 +130,17 @@ export class NeedService {
     });
   }
 
+  getFlaskChildUnconfirmedNeeds(flaskChildId: number): Promise<Need[]> {
+    return this.flaskNeedRepository.find({
+      where: {
+        child_id: flaskChildId,
+        isConfirmed: false,
+        isDeleted: false,
+      },
+    });
+  }
+
+
   getFlaskPreNeed(accessToken: any): Promise<PreneedSummary> {
     const preneedApi = new PreneedAPIApi();
     const preneeds = preneedApi.apiV2PreneedsGet(accessToken);
@@ -854,9 +865,9 @@ export class NeedService {
         startDate: new Date(2019, 1, 1),
       })
       .andWhere('need.confirmDate < :endDate', { endDate: date })
-      // .andWhere('need.status = :statusNotPaid', {
-      //   statusNotPaid: PaymentStatusEnum.NOT_PAID,
-      // })
+      .andWhere('need.status <= :statusNotPaid', {
+        statusNotPaid: PaymentStatusEnum.PARTIAL_PAY,
+      })
       .select([
         'need.id',
         'need.status',

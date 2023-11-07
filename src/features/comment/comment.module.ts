@@ -14,11 +14,13 @@ import { ContributorEntity } from 'src/entities/contributor.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 import { VariableEntity } from 'src/entities/variable.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [User, Need, SocialWorker, Child],
+      [User, Need, SocialWorker, Child, Receipt, NeedReceipt],
       'flaskPostgres',
     ),
     TypeOrmModule.forFeature([
