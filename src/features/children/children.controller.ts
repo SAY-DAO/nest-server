@@ -649,9 +649,10 @@ export class ChildrenController {
     ) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
-    return await this.downloadService.excelStream('src/resources/names.xlsx');
+    return await this.downloadService.excelStream(
+      'src/features/children/resources/names.xlsx',
+    );
   }
-
   @UseInterceptors(ChildrenInterceptor)
   @Post(`flask/all`)
   @ApiOperation({ description: 'Get all flask children from db' })

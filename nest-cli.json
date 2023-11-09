@@ -4,8 +4,9 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "assets": [
-      "features/campaign/templates/**/*"
-    ], 
-    "watchAssets": true 
+      "features/campaign/templates/**/*",
+      "features/children/**/*"
+    ],
+    "watchAssets": true
   }
 }
