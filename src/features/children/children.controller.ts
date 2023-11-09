@@ -316,7 +316,7 @@ export class ChildrenController {
     }
     // for local purposes - organized folders and files
     const newChildFolder = `../../Docs/children${
-      SexEnum.MALE ? '/boys/' : '/girls/'
+      body.sex === SexEnum.MALE ? '/boys/' : '/girls/'
     }organized/${capitalizeFirstLetter(body.sayNameEn)}-${body.sayNameFa}`;
 
     const originalAwakeGirl = `../../Docs/children/girls/${
@@ -335,8 +335,6 @@ export class ChildrenController {
     const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
     const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
 
-    console.log(originalAwakeBoy);
-
     if (
       checkIfFileOrDirectoryExists(originalAwakeGirl) ||
       checkIfFileOrDirectoryExists(originalAwakeBoy)
@@ -349,11 +347,8 @@ export class ChildrenController {
         moveFile(originalSleptBoy, `${newChildFolder}/${newSleepName}`);
       }
       if (Number(body.sex) === SexEnum.FEMALE) {
-        moveFile(originalSleptGirl, `${newChildFolder}/${newAwakeName}`);
-        moveFile(
-          originalSleptGirl,
-          `${newChildFolder}/sleep-${body.sayNameFa}.png`,
-        );
+        moveFile(originalAwakeGirl, `${newChildFolder}/${newAwakeName}`);
+        moveFile(originalSleptGirl, `${newChildFolder}/${newSleepName}`);
       }
     } else {
       throw new ServerError('could not find the file');
