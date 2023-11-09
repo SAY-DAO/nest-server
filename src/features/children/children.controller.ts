@@ -650,7 +650,7 @@ export class ChildrenController {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
     return await this.downloadService.excelStream(
-      'src/features/children/resources/names.xlsx',
+      '/features/children/resources/names.xlsx',
     );
   }
   @UseInterceptors(ChildrenInterceptor)
