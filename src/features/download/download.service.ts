@@ -5,20 +5,40 @@ import { join } from 'path';
 import { createWriteStream } from 'fs';
 import axios from 'axios';
 import { Readable } from 'stream';
-import { createFile } from 'src/utils/file';
 import { prepareUrl } from 'src/utils/helpers';
 import { ServerError } from 'src/filters/server-exception.filter';
 import mime from 'mime';
 import fs from 'fs';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
 import { File } from '@web-std/file';
+import readXlsxFile from 'read-excel-file/node';
 
 @Injectable()
 export class DownloadService {
   private readonly logger = new Logger(DownloadService.name);
   constructor(private httpService: HttpService) {}
 
-  async imageBuffer(fileName: string) {
+  // Excel
+  async excelReadBuffer(path: string) {
+    // `rows` is an array of rows
+    // each row being an array of cells.
+    return readXlsxFile(path);
+  }
+
+  async excelStream(path: string) {
+    // `rows` is an array of rows
+    // each row being an array of cells.
+    return readXlsxFile(fs.createReadStream(path));
+  }
+
+  async excelFileBuffer(path: string) {
+    // `rows` is an array of rows
+    // each row being an array of cells.
+    return readXlsxFile(Buffer.from(fs.readFileSync(path)));
+  }
+
+  // image and files
+  async imageReadBuffer(fileName: string) {
     return readFileSync(join(process.cwd(), fileName));
   }
 

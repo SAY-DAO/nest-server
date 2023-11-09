@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Get,
   Param,
+  Query,
   Req,
   Res,
   StreamableFile,
@@ -43,15 +44,15 @@ export class DownloadController {
     ) {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
-    const file = await this.downloadService.imageBuffer(path);
+    const file = await this.downloadService.imageReadBuffer(path);
     response.contentType('image/png');
     response.send(file);
   }
 
-  @Get('stream/:path')
+  @Get('stream')
   async stream(
     @Req() req: Request,
-    @Param('path') path: string,
+    @Query('path') path: string,
     @Res() response: Response,
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
@@ -66,8 +67,8 @@ export class DownloadController {
     file.pipe(response);
   }
 
-  @Get('streamable/:path')
-  async streamable(@Param('path') path: string, @Req() req: Request) {
+  @Get('streamable')
+  async streamable(@Query('path') path: string, @Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
@@ -77,9 +78,10 @@ export class DownloadController {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
     const file = await this.downloadService.fileStream(path);
-    // or
-    // const file = this.downloadService.fileBuffer();
     return new StreamableFile(file); // 👈 supports Buffer and Stream
+    // or
+    // const file = this.downloadService.fileBuffer(path);
+    // return file
   }
 
   @Get('streamable2/:flaskNeedId')

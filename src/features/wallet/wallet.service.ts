@@ -188,8 +188,6 @@ export class WalletService {
     };
     let role: string;
     const allRoles = [];
-console.log(need);
-console.log(flaskUserId);
 
     // could have multiple roles e.g. [Auditor, SocialWorker]
     if (needRoles.socialWorker === flaskUserId) {

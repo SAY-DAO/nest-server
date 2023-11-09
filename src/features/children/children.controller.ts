@@ -50,8 +50,14 @@ import { NgoEntity } from 'src/entities/ngo.entity';
 import { SyncService } from '../sync/sync.service';
 import { LocationEntity } from 'src/entities/location.entity';
 import { NgoParams } from 'src/types/parameters/NgoParammeters';
-import { formatDate, truncateString } from 'src/utils/helpers';
+import {
+  captilizeFirstLetter as capitalizeFirstLetter,
+  truncateString,
+} from 'src/utils/helpers';
 import axios from 'axios';
+import { AllUserEntity } from 'src/entities/user.entity';
+import { checkIfFileOrDirectoryExists, moveFile } from 'src/utils/file';
+import fs from 'fs';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -308,6 +314,50 @@ export class ChildrenController {
     if (!files) {
       throw new ServerError('No files were uploaded!');
     }
+    // for local purposes - organized folders and files
+    const newChildFolder = `../../Docs/children${
+      SexEnum.MALE ? '/boys/' : '/girls/'
+    }organized/${capitalizeFirstLetter(body.sayNameEn)}-${body.sayNameFa}`;
+
+    const originalAwakeGirl = `../../Docs/children/girls/${
+      files.awakeFile[0].filename.split('-s-')[0]
+    }.png`;
+    const originalAwakeBoy = `../../Docs/children/boys/${
+      files.awakeFile[0].filename.split('-s-')[0]
+    }.png`;
+    const originalSleptGirl = `../../Docs/children/girls/${
+      files.sleptFile[0].filename.split('-s-')[0]
+    }.png`;
+    const originalSleptBoy = `../../Docs/children/boys/${
+      files.sleptFile[0].filename.split('-s-')[0]
+    }.png`;
+
+    const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
+    const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
+
+    console.log(originalAwakeBoy);
+
+    if (
+      checkIfFileOrDirectoryExists(originalAwakeGirl) ||
+      checkIfFileOrDirectoryExists(originalAwakeBoy)
+    ) {
+      if (!checkIfFileOrDirectoryExists(newChildFolder)) {
+        fs.mkdirSync(newChildFolder);
+      }
+      if (Number(body.sex) === SexEnum.MALE) {
+        moveFile(originalAwakeBoy, `${newChildFolder}/${newAwakeName}`);
+        moveFile(originalSleptBoy, `${newChildFolder}/${newSleepName}`);
+      }
+      if (Number(body.sex) === SexEnum.FEMALE) {
+        moveFile(originalSleptGirl, `${newChildFolder}/${newAwakeName}`);
+        moveFile(
+          originalSleptGirl,
+          `${newChildFolder}/sleep-${body.sayNameFa}.png`,
+        );
+      }
+    } else {
+      throw new ServerError('could not find the file');
+    }
 
     return await this.childrenService.createPreRegisterChild(
       files.awakeFile[0].filename,
@@ -393,11 +443,48 @@ export class ChildrenController {
         console.log('\x1b[36m%s\x1b[0m', 'Created a Location ...');
       }
       const ngo = await this.ngoService.getNgoById(Number(body.ngoId));
-      const sw = await this.userService.getContributorByFlaskId(
+
+      let nestSocialWorker: AllUserEntity;
+      let swNgo: NgoEntity;
+
+      nestSocialWorker = await this.userService.getContributorByFlaskId(
         Number(body.swId),
         PanelContributors.SOCIAL_WORKER,
       );
 
+      if (!nestSocialWorker) {
+        const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
+          body.swId,
+        );
+
+        const swDetails = {
+          typeId: flaskSocialWorker.type_id,
+          firstName: flaskSocialWorker.firstName,
+          lastName: flaskSocialWorker.lastName,
+          avatarUrl: flaskSocialWorker.avatar_url,
+          flaskUserId: flaskSocialWorker.id,
+          birthDate:
+            flaskSocialWorker.birth_date &&
+            new Date(flaskSocialWorker.birth_date),
+          panelRole: PanelContributors.SOCIAL_WORKER,
+          userName: flaskSocialWorker.userName,
+        };
+
+        swNgo = await this.syncService.syncContributorNgo(flaskSocialWorker);
+        console.log('\x1b[36m%s\x1b[0m', 'Creating a Social Worker ...\n');
+        nestSocialWorker = await this.userService.createContributor(
+          swDetails,
+          swNgo,
+        );
+        console.log('\x1b[36m%s\x1b[0m', 'Created a Social Worker ...\n');
+      }
+
+      const contributor = nestSocialWorker.contributions.find(
+        (c) => c.flaskUserId === Number(body.swId),
+      );
+      if (!nestSocialWorker || !ngo || !contributor) {
+        throw new ServerError('This social worker has not contributed yet');
+      }
       return await this.childrenService.updatePreRegisterChild(
         candidate.id,
         {
@@ -423,7 +510,7 @@ export class ChildrenController {
         },
         location,
         ngo,
-        sw.contributions.find((c) => c.flaskUserId === body.swId),
+        contributor,
       );
     } catch (e) {
       throw new ServerError(e);
@@ -448,12 +535,11 @@ export class ChildrenController {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
     let ngoIds: number[];
-
     if (
       panelFlaskTypeId === FlaskUserTypesEnum.ADMIN ||
       panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      ngoIds = (await this.ngoService.getFlaskNgos()).map((n) => n.id);
+      ngoIds = (await this.ngoService.getAllFlaskNgos()).map((n) => n.id);
       if (Number(status) === PreRegisterStatusEnum.NOT_REGISTERED) {
         return await this.childrenService.getChildrenPreRegisterNotRegistered(
           {
@@ -547,6 +633,23 @@ export class ChildrenController {
           : n.fa === newName,
       ).length,
     };
+  }
+
+  @Get(`generate/say/names`)
+  @ApiOperation({ description: 'Get all children from db' })
+  async generateNames(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) &&
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException(403, 'You Are not the Super admin');
+    }
+    return await this.downloadService.excelStream('src/resources/names.xlsx');
   }
 
   @UseInterceptors(ChildrenInterceptor)
@@ -847,7 +950,6 @@ export class ChildrenController {
             );
             console.log('\x1b[36m%s\x1b[0m`, `Created a Social Worker ...\n');
           }
-          console.log(child.id_ngo);
 
           if (!nestSocialWorker) {
             throw new ServerError('we need the sw');

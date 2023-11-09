@@ -42,11 +42,12 @@ export const getFile = async (
 export const createFile = async (
   path: string,
   fileName: string,
-  data: string,
+  data: string | NodeJS.ArrayBufferView,
 ): Promise<void> => {
   if (!checkIfFileOrDirectoryExists(path)) {
     fs.mkdirSync(path);
   }
+  console.log(`${path}/${fileName}`);
 
   const writeFile = promisify(fs.writeFile);
   return await writeFile(`${path}/${fileName}`, data, 'utf8');
@@ -63,4 +64,8 @@ export const deleteFile = async (path: string): Promise<void> => {
   const unlink = promisify(fs.unlink);
 
   return await unlink(path);
+};
+
+export const moveFile = async (oldPath: string, newPath: string) => {
+  fs.rename(oldPath, newPath, () => console.log('Moved a file...'));
 };

@@ -139,7 +139,7 @@ export class MidjourneyController {
     return {
       totalReady: needsWithSignatures.meta.totalItems,
       total: count,
-      list, 
+      list,
     };
   }
 
@@ -165,7 +165,7 @@ export class MidjourneyController {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
     const theImage = await this.midjourneyService.getImage(flaskNeedId);
-    const file = await this.downloadService.imageBuffer(theImage.fileName);
+    const file = await this.downloadService.imageReadBuffer(theImage.fileName);
     response.contentType('image/png');
     response.send(file);
   }

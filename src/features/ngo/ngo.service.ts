@@ -163,6 +163,13 @@ export class NgoService {
       .getMany();
   }
 
+  getAllFlaskNgos(): Promise<NGO[]> {
+    return this.ngoFlaskRepository
+      .createQueryBuilder('ngo')
+      .cache(10000)
+      .getMany();
+  }
+
   getFlaskNgo(flaskNgoId: number): Promise<NGO> {
     return this.ngoFlaskRepository.findOne({
       where: { id: flaskNgoId },
