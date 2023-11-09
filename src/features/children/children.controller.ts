@@ -314,46 +314,48 @@ export class ChildrenController {
     if (!files) {
       throw new ServerError('No files were uploaded!');
     }
-    // for local purposes - organized folders and files
-    const newChildFolder = `../../Docs/children${
-      body.sex === SexEnum.MALE ? '/boys/' : '/girls/'
-    }organized/${capitalizeFirstLetter(body.sayNameEn)}-${body.sayNameFa}`;
 
-    const originalAwakeGirl = `../../Docs/children/girls/${
-      files.awakeFile[0].filename.split('-s-')[0]
-    }.png`;
-    const originalAwakeBoy = `../../Docs/children/boys/${
-      files.awakeFile[0].filename.split('-s-')[0]
-    }.png`;
-    const originalSleptGirl = `../../Docs/children/girls/${
-      files.sleptFile[0].filename.split('-s-')[0]
-    }.png`;
-    const originalSleptBoy = `../../Docs/children/boys/${
-      files.sleptFile[0].filename.split('-s-')[0]
-    }.png`;
+    if (process.env.NODE_ENV === 'development') {
+      // for local purposes - organized folders and files
+      const newChildFolder = `../../Docs/children${
+        body.sex === SexEnum.MALE ? '/boys/' : '/girls/'
+      }organized/${capitalizeFirstLetter(body.sayNameEn)}-${body.sayNameFa}`;
 
-    const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
-    const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
+      const originalAwakeGirl = `../../Docs/children/girls/${
+        files.awakeFile[0].filename.split('-s-')[0]
+      }.png`;
+      const originalAwakeBoy = `../../Docs/children/boys/${
+        files.awakeFile[0].filename.split('-s-')[0]
+      }.png`;
+      const originalSleptGirl = `../../Docs/children/girls/${
+        files.sleptFile[0].filename.split('-s-')[0]
+      }.png`;
+      const originalSleptBoy = `../../Docs/children/boys/${
+        files.sleptFile[0].filename.split('-s-')[0]
+      }.png`;
 
-    if (
-      checkIfFileOrDirectoryExists(originalAwakeGirl) ||
-      checkIfFileOrDirectoryExists(originalAwakeBoy)
-    ) {
-      if (!checkIfFileOrDirectoryExists(newChildFolder)) {
-        fs.mkdirSync(newChildFolder);
+      const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
+      const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
+
+      if (
+        checkIfFileOrDirectoryExists(originalAwakeGirl) ||
+        checkIfFileOrDirectoryExists(originalAwakeBoy)
+      ) {
+        if (!checkIfFileOrDirectoryExists(newChildFolder)) {
+          fs.mkdirSync(newChildFolder);
+        }
+        if (Number(body.sex) === SexEnum.MALE) {
+          moveFile(originalAwakeBoy, `${newChildFolder}/${newAwakeName}`);
+          moveFile(originalSleptBoy, `${newChildFolder}/${newSleepName}`);
+        }
+        if (Number(body.sex) === SexEnum.FEMALE) {
+          moveFile(originalAwakeGirl, `${newChildFolder}/${newAwakeName}`);
+          moveFile(originalSleptGirl, `${newChildFolder}/${newSleepName}`);
+        }
+      } else {
+        throw new ServerError('could not find the file');
       }
-      if (Number(body.sex) === SexEnum.MALE) {
-        moveFile(originalAwakeBoy, `${newChildFolder}/${newAwakeName}`);
-        moveFile(originalSleptBoy, `${newChildFolder}/${newSleepName}`);
-      }
-      if (Number(body.sex) === SexEnum.FEMALE) {
-        moveFile(originalAwakeGirl, `${newChildFolder}/${newAwakeName}`);
-        moveFile(originalSleptGirl, `${newChildFolder}/${newSleepName}`);
-      }
-    } else {
-      throw new ServerError('could not find the file');
     }
-
     return await this.childrenService.createPreRegisterChild(
       files.awakeFile[0].filename,
       files.sleptFile[0].filename,
