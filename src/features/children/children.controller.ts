@@ -315,10 +315,10 @@ export class ChildrenController {
       throw new ServerError('No files were uploaded!');
     }
 
+    // for local purposes - organized folders and files
     if (process.env.NODE_ENV === 'development') {
-      // for local purposes - organized folders and files
       const newChildFolder = `../../Docs/children${
-        body.sex === SexEnum.MALE ? '/boys/' : '/girls/'
+        Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
       }organized/${capitalizeFirstLetter(body.sayNameEn)}-${body.sayNameFa}`;
 
       const originalAwakeGirl = `../../Docs/children/girls/${

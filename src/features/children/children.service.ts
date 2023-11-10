@@ -255,6 +255,9 @@ export class ChildrenService {
       .andWhere('ngo.flaskNgoId IN (:...ngoIds)', {
         ngoIds: [...ngoIds],
       })
+      .where('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
       .andWhere('socialWorker.isContributor = :isContributor', {
         isContributor: true,
       });
