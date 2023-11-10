@@ -206,6 +206,7 @@ export class ChildrenController {
         },
       };
 
+      // create flask child
       const { data } = await axios.post(
         'https://api.sayapp.company/api/v2/child/add/',
         formData,
@@ -225,6 +226,9 @@ export class ChildrenController {
       // clean up downloaded files
       fs.unlinkSync(`${preRegister.awakeUrl}`);
       fs.unlinkSync(`${preRegister.sleptUrl}`);
+
+      // confirm child
+      await axios.patch(`/child/confirm/childId=${data.id}`, configs);
 
       // send email
       await this.campaignService.sendSwChildConfirmation(
