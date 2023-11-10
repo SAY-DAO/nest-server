@@ -109,6 +109,9 @@ export class ChildrenController {
         id,
       );
 
+      if (!voiceFile) {
+        throw new ServerError('we need the Edited Voice!');
+      }
       const token =
         config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
       const awakeFile = await this.downloadService.fileFromPath(
@@ -119,10 +122,6 @@ export class ChildrenController {
         `http://localhost:8002/api/dao/children/avatars/images/${preRegister.sleptUrl}`,
         `${preRegister.sleptUrl}`,
       );
-      // const voiceFile = await this.downloadService.fileFromPath(
-      //   `http://localhost:8002/api/dao/children/voices/${preRegister.voiceUrl}`,
-      //   `${preRegister.voiceUrl}`,
-      // );
 
       const formData = new FormData();
       formData.append('ngo_id', String(preRegister.flaskNgoId));
@@ -180,42 +179,47 @@ export class ChildrenController {
       formData.append('housingStatus', String(preRegister.housingStatus));
       formData.append('address', preRegister.address);
 
-      // const configs = {
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //     Authorization: token,
-      //     processData: false,
-      //     contentType: false,
-      //   },
-      // };
+      const configs = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: token,
+          processData: false,
+          contentType: false,
+        },
+      };
 
-      // const { data } = await axios.post(
-      //   'https://api.sayapp.company/api/v2/child/add/',
-      //   formData,
-      //   configs,
-      // );
-
-      // const approvedPre = await this.childrenService.approvePreregister(
-      //   preRegister,
-      //   body.firstNameEn,
-      //   body.lastNameEn,
-      //   body.bioEn,
-      //   data.id,
-      //   voiceFile.filename,
-      // );
-
-      await this.campaignService.sendSwChildConfirmation(
-        preRegister.flaskSwId,
-        preRegister.flaskChildId,
+      const { data } = await axios.post(
+        'https://api.sayapp.company/api/v2/child/add/',
+        formData,
+        configs,
       );
 
-      // return {
-      //   added: data,
-      //   approvedPre: approvedPre,
-      // };
+      // approve / confirm child Pre register
+      const approvedPre = await this.childrenService.approvePreregister(
+        preRegister,
+        body.firstNameEn,
+        body.lastNameEn,
+        body.bioEn,
+        data.id,
+        voiceFile.filename,
+      );
+
+      // clean up downloaded files
+      fs.unlinkSync(`${preRegister.awakeUrl}`);
+      fs.unlinkSync(`${preRegister.sleptUrl}`);
+
+      // send email
+      await this.campaignService.sendSwChildConfirmation(
+        preRegister.flaskSwId,
+        preRegister,
+      );
+
+      return {
+        added: data,
+        approvedPre: approvedPre,
+      };
     } catch (e) {
       console.log(e);
-
       throw new ServerError('Flask reverted!');
     }
   }
@@ -509,7 +513,7 @@ export class ChildrenController {
       // for auditor - admin
       swIds = await this.userService
         .getFlaskSwIds()
-        .then((r) => r.map((s) => s.id)); // all ngos
+        .then((r) => r.map((s) => s.id)); // all NGOs id
 
       ngoIds = await this.ngoService
         .getFlaskNgos()
@@ -648,6 +652,7 @@ export class ChildrenController {
       'dist/features/children/resources/names.xlsx',
     );
   }
+
   @UseInterceptors(ChildrenInterceptor)
   @Post(`flask/all`)
   @ApiOperation({ description: 'Get all flask children from db' })

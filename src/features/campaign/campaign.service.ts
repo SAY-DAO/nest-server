@@ -24,6 +24,7 @@ import { Repository } from 'typeorm';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import config from 'src/config';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 
 @Injectable()
 export class CampaignService {
@@ -94,16 +95,16 @@ export class CampaignService {
     return this.campaignRepository.save(campaign);
   }
 
-  async sendSwChildConfirmation(swId: number, flaskChildId: number) {
+  async sendSwChildConfirmation(
+    swId: number,
+    child: ChildrenPreRegisterEntity,
+  ) {
     const socialWorker = await this.userService.getContributorByFlaskId(
       swId,
       PanelContributors.SOCIAL_WORKER,
     );
-    // const email = (await this.userService.getFlaskSw(swId)).email;
+    const email = (await this.userService.getFlaskSw(swId)).email;
 
-    const child = await this.childrenService.getChildrenPreRegisterByFlaskId(
-      flaskChildId,
-    );
     const campaignCode = fetchCampaignCode(
       CampaignNameEnum.CHILD_CONFIRMATION,
       CampaignTypeEnum.EMAIL,
@@ -124,16 +125,12 @@ export class CampaignService {
 
       await this.mailerService.sendMail({
         from: '"NGOs" <ngo@saydao.org>', // override default from
-        to: 'ehsan@say.company',
+        to: email,
         bcc: process.env.SAY_ADMIN_EMAIL,
         subject: title,
         template: './swConfirmedChild', // `.hbs` extension is appended automatically
         context: {
-          avatarAwake: `${
-            process.env.NODE_ENV === 'development'
-              ? 'http://localhost:8002'
-              : 'https://nest.saydao.org'
-          }/api/dao/children/avatars/images/${child.awakeUrl}`,
+          avatarAwake: child.awakeUrl,
           sayName: child.sayName.fa,
           firstName: child.firstName.fa,
           lastName: child.lastName.fa,
