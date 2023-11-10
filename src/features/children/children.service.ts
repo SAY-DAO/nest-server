@@ -232,8 +232,6 @@ export class ChildrenService {
     ngoIds: number[],
     swIds: number[],
   ): Promise<Paginated<ChildrenPreRegisterEntity>> {
-    console.log(ngoIds);
-    console.log(swIds);
 
     const queryBuilder = this.preRegisterChildrenRepository
       .createQueryBuilder('preRegister')
