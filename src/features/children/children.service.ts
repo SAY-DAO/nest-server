@@ -233,6 +233,7 @@ export class ChildrenService {
     swIds: number[],
   ): Promise<Paginated<ChildrenPreRegisterEntity>> {
     console.log(ngoIds);
+    console.log(swIds);
 
     const queryBuilder = this.preRegisterChildrenRepository
       .createQueryBuilder('preRegister')
@@ -258,7 +259,7 @@ export class ChildrenService {
         status,
       })
       .andWhere('ngo.flaskNgoId IN (:...ngoIds)', {
-        ngoIds: ngoIds,
+        ngoIds: [...ngoIds],
       })
       .andWhere('preRegister.flaskSwId IN (:...swIds)', {
         swIds: swIds,

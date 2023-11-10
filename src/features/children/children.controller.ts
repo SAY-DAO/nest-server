@@ -510,6 +510,7 @@ export class ChildrenController {
       swIds = await this.userService
         .getFlaskSwIds()
         .then((r) => r.map((s) => s.id)); // all ngos
+
       ngoIds = await this.ngoService
         .getFlaskNgos()
         .then((r) => r.map((s) => s.id));
@@ -553,7 +554,7 @@ export class ChildrenController {
       },
       status,
       ngoIds,
-      panelFlaskTypeId === SAYPlatformRoles.SOCIAL_WORKER
+      panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER
         ? [panelFlaskUserId]
         : swIds,
     );
