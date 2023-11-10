@@ -139,6 +139,6 @@ export class ScheduleService {
   })
   async handleReminderMailCron() {
     this.logger.debug('Sending Reminder to Social workers');
-    // await this.campaignService.sendSocialWorkersMonthlyReminder();
+    // await this.campaignService.sendSwMonthlyReminder();
   }
 }

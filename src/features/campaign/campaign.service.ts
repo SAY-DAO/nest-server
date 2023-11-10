@@ -4,6 +4,7 @@ import { ServerError } from 'src/filters/server-exception.filter';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
 import {
+  fetchCampaginCode as fetchCampaignCode,
   persianMonthStringFarsi,
   prepareUrl,
   removeDuplicates,
@@ -14,6 +15,7 @@ import {
   CampaignTypeEnum,
   ChildExistence,
   NeedTypeEnum,
+  PanelContributors,
 } from 'src/types/interfaces/interface';
 import { FamilyService } from '../family/family.service';
 import { CampaignEntity } from 'src/entities/campaign.entity';
@@ -53,7 +55,7 @@ export class CampaignService {
     return need;
   }
 
-  getCampaignByCampaignNumber(campaignCode: string): Promise<CampaignEntity> {
+  getCampaignByCampaignCode(campaignCode: string): Promise<CampaignEntity> {
     const need = this.campaignRepository.findOne({
       where: {
         campaignCode,
@@ -92,7 +94,58 @@ export class CampaignService {
     return this.campaignRepository.save(campaign);
   }
 
-  async sendSocialWorkersMonthlyReminder() {
+  async sendSwChildConfirmation(swId: number, flaskChildId: number) {
+    const socialWorker = await this.userService.getContributorByFlaskId(
+      swId,
+      PanelContributors.SOCIAL_WORKER,
+    );
+    // const email = (await this.userService.getFlaskSw(swId)).email;
+
+    const child = await this.childrenService.getChildrenPreRegisterByFlaskId(
+      flaskChildId,
+    );
+    const campaignCode = fetchCampaignCode(
+      CampaignNameEnum.CHILD_CONFIRMATION,
+      CampaignTypeEnum.EMAIL,
+    );
+    const campaign = this.getCampaignByCampaignCode(campaignCode);
+    if (campaign) {
+      const title = `${child.sayName.fa} تأیید شد`;
+      await this.createCampaign(
+        campaignCode,
+        CampaignNameEnum.CHILD_CONFIRMATION,
+        CampaignTypeEnum.EMAIL,
+        title,
+        [socialWorker],
+      );
+      this.logger.warn(
+        `Emailing: Social worker ${socialWorker.flaskUserId} for new child Confirm!`,
+      );
+
+      await this.mailerService.sendMail({
+        from: '"NGOs" <ngo@saydao.org>', // override default from
+        to: 'ehsan@say.company',
+        bcc: process.env.SAY_ADMIN_EMAIL,
+        subject: title,
+        template: './swConfirmedChild', // `.hbs` extension is appended automatically
+        context: {
+          avatarAwake: `${
+            process.env.NODE_ENV === 'development'
+              ? 'http://localhost:8002'
+              : 'https://nest.saydao.org'
+          }/api/dao/children/avatars/images/${child.awakeUrl}`,
+          sayName: child.sayName.fa,
+          firstName: child.firstName.fa,
+          lastName: child.lastName.fa,
+          userName: socialWorker.firstName
+            ? socialWorker.firstName
+            : socialWorker.userName,
+        },
+      });
+    }
+  }
+
+  async sendSwMonthlyReminder() {
     const children = await this.childrenService.getFlaskActiveChildren();
     const list = [];
     for await (const child of children) {
@@ -124,7 +177,7 @@ export class CampaignService {
       await this.mailerService.sendMail({
         from: '"NGOs" <ngo@saydao.org>', // override default from
         to: socialWorker.email,
-        cc: process.env.SAY_ADMIN_EMAIL,
+        bcc: process.env.SAY_ADMIN_EMAIL,
         subject: `${swChildren.length} کودک بدون نیاز ثبت شده`,
         template: './monthlyReminder', // `.hbs` extension is appended automatically
         context: {
@@ -140,9 +193,10 @@ export class CampaignService {
   async sendUserMonthlySummaries() {
     try {
       const today = new Date();
-      const englishMonth = today.getMonth();
-      const englishYear = today.getFullYear();
-      const campaignCode = `${CampaignNameEnum.MONTHLY_SUMMARIES}-${CampaignTypeEnum.EMAIL}-${englishMonth}/${englishYear}`;
+      const campaignCode = fetchCampaignCode(
+        CampaignNameEnum.MONTHLY_SUMMARIES,
+        CampaignTypeEnum.EMAIL,
+      );
       const persianMonth = persianMonthStringFarsi(today);
       if (!persianMonth) {
         throw new ServerError('We need the month string');
@@ -154,7 +208,7 @@ export class CampaignService {
       const shuffledUsers = shuffleArray(
         users.filter((u) => u.userName === 'ehsan'),
       );
-      const campaign = await this.getCampaignByCampaignNumber(campaignCode);
+      const campaign = await this.getCampaignByCampaignCode(campaignCode);
       // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {
         if (flaskUser.emailAddress) {

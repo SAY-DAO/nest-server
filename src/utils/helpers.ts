@@ -13,9 +13,12 @@ import {
   VirtualFamilyRole,
   ChildExistence,
   AppContributors,
+  CampaignNameEnum,
+  CampaignTypeEnum,
 } from 'src/types/interfaces/interface';
 import fs from 'fs';
 import { checkIfFileOrDirectoryExists } from './file';
+import { uuid } from 'uuidv4';
 
 export const Q1_LOWER_COEFFICIENT = 0.75;
 export const Q1_TO_Q2_COEFFICIENT = 1;
@@ -902,4 +905,14 @@ export function shuffleArray(array: any[]) {
 
 export function captilizeFirstLetter(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+export function fetchCampaginCode(
+  name: CampaignNameEnum,
+  type: CampaignTypeEnum,
+) {
+  const today = new Date();
+  const englishMonth = today.getMonth();
+  const englishYear = today.getFullYear();
+  return `${name}-${type}-${englishMonth}/${englishYear}- ${uuid()}`;
 }

@@ -40,7 +40,7 @@ export class UserService {
     });
   }
 
-  getFlaskSw(id: number): Promise<SocialWorker> {
+  async getFlaskSw(id: number): Promise<SocialWorker> {
     return this.flaskSocialWorkerRepository.findOne({
       where: { id: id },
     });

@@ -309,6 +309,7 @@ export enum NeedTypeDefinitionEnum {
 
 export enum CampaignNameEnum {
   MONTHLY_SUMMARIES = 'MONTHLY_SUMMARIES',
+  CHILD_CONFIRMATION = 'CHILD_CONFIRMATION',
 }
 
 export enum CampaignTypeEnum {

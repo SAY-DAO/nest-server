@@ -61,6 +61,7 @@ import axios from 'axios';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { checkIfFileOrDirectoryExists, moveFile } from 'src/utils/file';
 import fs from 'fs';
+import { CampaignService } from '../campaign/campaign.service';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -78,13 +79,16 @@ export class ChildrenController {
     private ngoService: NgoService,
     private locationService: LocationService,
     private downloadService: DownloadService,
+    private campaignService: CampaignService,
   ) {}
 
   @UsePipes(new ValidationPipe()) // validation for dto files
   @Patch(`preregister/approve/:id`)
   @ApiOperation({ description: 'Delete a pre register' })
+  @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
   async approvePreregister(
     @Req() req: Request,
+    @UploadedFile() voiceFile,
     @Param('id') id: string,
     @Body(ValidateChildTsPipe) body: CreateFlaskChildDto,
   ) {
@@ -115,10 +119,10 @@ export class ChildrenController {
         `http://localhost:8002/api/dao/children/avatars/images/${preRegister.sleptUrl}`,
         `${preRegister.sleptUrl}`,
       );
-      const voiceFile = await this.downloadService.fileFromPath(
-        `http://localhost:8002/api/dao/children/voices/${preRegister.voiceUrl}`,
-        `${preRegister.voiceUrl}`,
-      );
+      // const voiceFile = await this.downloadService.fileFromPath(
+      //   `http://localhost:8002/api/dao/children/voices/${preRegister.voiceUrl}`,
+      //   `${preRegister.voiceUrl}`,
+      // );
 
       const formData = new FormData();
       formData.append('ngo_id', String(preRegister.flaskNgoId));
@@ -176,78 +180,42 @@ export class ChildrenController {
       formData.append('housingStatus', String(preRegister.housingStatus));
       formData.append('address', preRegister.address);
 
-      const configs = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: token,
-          processData: false,
-          contentType: false,
-        },
-      };
+      // const configs = {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data',
+      //     Authorization: token,
+      //     processData: false,
+      //     contentType: false,
+      //   },
+      // };
 
-      const { data } = await axios.post(
-        'https://api.sayapp.company/api/v2/child/add/',
-        formData,
-        configs,
+      // const { data } = await axios.post(
+      //   'https://api.sayapp.company/api/v2/child/add/',
+      //   formData,
+      //   configs,
+      // );
+
+      // const approvedPre = await this.childrenService.approvePreregister(
+      //   preRegister,
+      //   body.firstNameEn,
+      //   body.lastNameEn,
+      //   body.bioEn,
+      //   data.id,
+      //   voiceFile.filename,
+      // );
+
+      await this.campaignService.sendSwChildConfirmation(
+        preRegister.flaskSwId,
+        preRegister.flaskChildId,
       );
 
-      // const addedChild = await this.childrenService.addChildToFlask(token, {
-      //   ngoId: preRegister.flaskNgoId,
-      //   swId: preRegister.flaskSwId,
-      //   awakeAvatarUrl: awakeFile,
-      //   sleptAvatarUrl: sleptFile,
-      //   voiceUrl: voiceFile,
-      //   gender: preRegister.sex === SexEnum.MALE ? true : false, //gender: [true]male, [false]female
-      //   city: preRegister.city,
-      //   country: preRegister.country,
-      //   phoneNumber: preRegister.phoneNumber,
-      //   birthDate: String(formatDate(preRegister.birthDate)),
-      //   saynameTranslations: JSON.stringify({
-      //     fa: preRegister.sayName.fa,
-      //     en: preRegister.sayName.en,
-      //   }),
-      //   bioTranslations: JSON.stringify({
-      //     fa: preRegister.bio.fa,
-      //     en: body.bioEn,
-      //   }),
-      //   bioSummaryTranslations: JSON.stringify({
-      //     fa: truncateString(preRegister.bio.fa, 20),
-      //     en: truncateString(body.bioEn, 20),
-      //   }),
-
-      //   firstNameTranslations: JSON.stringify({
-      //     fa: preRegister.firstName.fa,
-      //     en: body.firstNameEn,
-      //   }),
-      //   lastNameTranslations: JSON.stringify({
-      //     fa: preRegister.lastName.fa,
-      //     en: body.lastNameEn,
-      //   }),
-      //   nationalityId: preRegister.birthPlaceId,
-      //   birthPlace: preRegister.birthPlaceName,
-      //   familyCount: preRegister.familyCount,
-      //   // some mess from previous panel => https://github.com/SAY-DAO/panel-legacy/blob/0cfea084fde2a9a23fd90dfd3bcf3256f86dde89/assets/js/child_data_serve_6.1.js#L598
-      //   education: Number(
-      //     String(preRegister.educationLevel) === '-2'
-      //       ? '-' + preRegister.schoolType + '2'
-      //       : `${preRegister.schoolType + preRegister.educationLevel}`,
-      //   ),
-      //   address: preRegister.address,
-      //   housingStatus: preRegister.housingStatus,
-      // });
-
-      const approvedPre = await this.childrenService.approvePreregister(
-        preRegister,
-        body.firstNameEn,
-        body.lastNameEn,
-        body.bioEn,
-        data.id,
-      );
-      return {
-        added: data,
-        approvedPre: approvedPre,
-      };
+      // return {
+      //   added: data,
+      //   approvedPre: approvedPre,
+      // };
     } catch (e) {
+      console.log(e);
+
       throw new ServerError('Flask reverted!');
     }
   }

@@ -147,6 +147,7 @@ export class ChildrenService {
     lastNameEn: string,
     bioEn: string,
     flaskChildId: number,
+    voiceUrl: string,
   ): Promise<UpdateResult> {
     return this.preRegisterChildrenRepository.update(
       { id: preRegister.id },
@@ -156,6 +157,7 @@ export class ChildrenService {
         firstName: { fa: preRegister.firstName.fa, en: firstNameEn },
         lastName: { fa: preRegister.lastName.fa, en: lastNameEn },
         bio: { fa: preRegister.bio.fa, en: bioEn },
+        voiceUrl,
       },
     );
   }
