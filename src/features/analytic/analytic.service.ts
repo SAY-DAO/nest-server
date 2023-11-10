@@ -412,33 +412,35 @@ export class AnalyticService {
         .getMany()
         .then(async (members) => {
           familyCount = members.length;
-          familyId = members[0].id_family;
-          for await (const user of members) {
-            await this.flaskPaymentRepository
-              .createQueryBuilder('payment')
-              .where('payment.id_user = :userId', { userId: user.id_user })
-              .andWhere('payment.id IS NOT NULL')
-              .andWhere('payment.verified IS NOT NULL')
-              .andWhere('payment.order_id IS NOT NULL')
-              .andWhere('payment.id_need IS NOT NULL')
-              // .andWhere('payment.created > :startDate', {
-              //   startDate: d.toLocaleDateString(),
-              // })
-              // .andWhere('payment.created < :endDate', { endDate: new Date() })
-              .getMany()
-              .then((userPayments) => {
-                userPayments.map((p) => {
-                  if (p.verified && paidNeeds.includes(p.id_need)) {
-                    activeUsersId.push({ id: p.id_user });
-                    if (daysDifference(p.created, new Date()) <= 30) {
-                      activeUsersIdInOneMonths.push({ id: p.id_user });
+          if (familyCount > 0) {
+            familyId = members[0].id_family;
+            for await (const user of members) {
+              await this.flaskPaymentRepository
+                .createQueryBuilder('payment')
+                .where('payment.id_user = :userId', { userId: user.id_user })
+                .andWhere('payment.id IS NOT NULL')
+                .andWhere('payment.verified IS NOT NULL')
+                .andWhere('payment.order_id IS NOT NULL')
+                .andWhere('payment.id_need IS NOT NULL')
+                // .andWhere('payment.created > :startDate', {
+                //   startDate: d.toLocaleDateString(),
+                // })
+                // .andWhere('payment.created < :endDate', { endDate: new Date() })
+                .getMany()
+                .then((userPayments) => {
+                  userPayments.map((p) => {
+                    if (p.verified && paidNeeds.includes(p.id_need)) {
+                      activeUsersId.push({ id: p.id_user });
+                      if (daysDifference(p.created, new Date()) <= 30) {
+                        activeUsersIdInOneMonths.push({ id: p.id_user });
+                      }
+                      if (daysDifference(p.created, new Date()) <= 90) {
+                        activeUsersIdInThreeMonths.push({ id: p.id_user });
+                      }
                     }
-                    if (daysDifference(p.created, new Date()) <= 90) {
-                      activeUsersIdInThreeMonths.push({ id: p.id_user });
-                    }
-                  }
+                  });
                 });
-              });
+            }
           }
         });
 
