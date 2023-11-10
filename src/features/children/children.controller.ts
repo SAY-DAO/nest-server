@@ -62,6 +62,7 @@ import { AllUserEntity } from 'src/entities/user.entity';
 import { checkIfFileOrDirectoryExists, moveFile } from 'src/utils/file';
 import fs from 'fs';
 import { CampaignService } from '../campaign/campaign.service';
+import { File } from '@web-std/file';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -88,7 +89,7 @@ export class ChildrenController {
   @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
   async approvePreregister(
     @Req() req: Request,
-    @UploadedFile() voiceFile,
+    @UploadedFile() voiceFile: Express.Multer.File,
     @Param('id') id: string,
     @Body(ValidateChildTsPipe) body: CreateFlaskChildDto,
   ) {
@@ -132,12 +133,20 @@ export class ChildrenController {
         `${preRegister.sleptUrl}`,
       );
 
+      const fileBuffer = await fs.promises.readFile(
+        `uploads/children/voices/${voiceFile.filename}`,
+      );
+
+      const file = new File([fileBuffer], `${voiceFile.filename}`, {
+        type: voiceFile.mimetype,
+      });
+
       const formData = new FormData();
       formData.append('ngo_id', String(preRegister.flaskNgoId));
       formData.append('sw_id', String(preRegister.flaskSwId));
       formData.append('awakeAvatarUrl', awakeFile);
       formData.append('sleptAvatarUrl', sleptFile);
-      formData.append('voiceUrl', voiceFile);
+      formData.append('voiceUrl', file);
       formData.append(
         'gender',
         String(preRegister.sex === SexEnum.MALE ? true : false),

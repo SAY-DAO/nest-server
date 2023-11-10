@@ -116,6 +116,7 @@ export class DownloadService {
       console.log('Downloaded !! ' + name);
       return file;
     } catch (e) {
+      console.log(e);
       throw new WalletExceptionFilter(e.status, e.message);
     }
   }
