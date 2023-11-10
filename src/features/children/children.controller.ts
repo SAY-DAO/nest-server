@@ -108,18 +108,27 @@ export class ChildrenController {
       const preRegister = await this.childrenService.getChildPreRegisterById(
         id,
       );
-
+      if (
+        preRegister.status === PreRegisterStatusEnum.CONFIRMED ||
+        preRegister.status === PreRegisterStatusEnum.NOT_REGISTERED
+      ) {
+        throw new ServerError('Pre register approval cou;d not go ahead!');
+      }
       if (!voiceFile) {
         throw new ServerError('we need the Edited Voice!');
       }
       const token =
         config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
       const awakeFile = await this.downloadService.fileFromPath(
-        `http://localhost:8002/api/dao/children/avatars/images/${preRegister.awakeUrl}`,
+        process.env.NODE_ENV === 'development'
+          ? `http://localhost:8002/api/dao/children/avatars/images/${preRegister.awakeUrl}`
+          : `https://nest.saydao.org/api/dao/children/avatars/images/${preRegister.awakeUrl}`,
         `${preRegister.awakeUrl}`,
       );
       const sleptFile = await this.downloadService.fileFromPath(
-        `http://localhost:8002/api/dao/children/avatars/images/${preRegister.sleptUrl}`,
+        process.env.NODE_ENV === 'development'
+          ? `http://localhost:8002/api/dao/children/avatars/images/${preRegister.sleptUrl}`
+          : `https://nest.saydao.org/api/dao/children/avatars/images/${preRegister.sleptUrl}`,
         `${preRegister.sleptUrl}`,
       );
 
