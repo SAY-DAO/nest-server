@@ -25,6 +25,7 @@ import {
   PanelContributors,
   PreRegisterStatusEnum,
   SchoolTypeEnum,
+  SAYPlatformRoles,
 } from 'src/types/interfaces/interface';
 import { isAuthenticated } from 'src/utils/auth';
 import config from 'src/config';
@@ -52,6 +53,8 @@ import { LocationEntity } from 'src/entities/location.entity';
 import { NgoParams } from 'src/types/parameters/NgoParammeters';
 import {
   captilizeFirstLetter as capitalizeFirstLetter,
+  convertFlaskToSayAppRoles,
+  convertFlaskToSayRoles,
   truncateString,
 } from 'src/utils/helpers';
 import axios from 'axios';
@@ -532,23 +535,46 @@ export class ChildrenController {
       throw new ForbiddenException(403, 'You Are not the Super admin');
     }
     let ngoIds: number[];
+    let swIds: number[];
+
+    if (convertFlaskToSayRoles(panelFlaskTypeId) === SAYPlatformRoles.AUDITOR) {
+      // for auditor - admin
+      swIds = await this.userService
+        .getFlaskSwIds()
+        .then((r) => r.map((s) => s.id)); // all ngos
+      ngoIds = await this.ngoService
+        .getFlaskNgos()
+        .then((r) => r.map((s) => s.id));
+    }
+
     if (
-      panelFlaskTypeId === FlaskUserTypesEnum.ADMIN ||
-      panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN
+      convertFlaskToSayRoles(panelFlaskTypeId) ===
+      SAYPlatformRoles.NGO_SUPERVISOR
     ) {
-      ngoIds = (await this.ngoService.getAllFlaskNgos()).map((n) => n.id);
-      if (Number(status) === PreRegisterStatusEnum.NOT_REGISTERED) {
-        return await this.childrenService.getChildrenPreRegisterNotRegistered(
-          {
-            page: page,
-            limit: limit,
-            path: '/',
-          },
-          status,
-        );
-      }
-    } else {
-      ngoIds = [(await this.userService.getFlaskSw(panelFlaskUserId)).ngo_id];
+      // for ngo supervisor
+      const supervisor = await this.userService.getFlaskSocialWorker(
+        panelFlaskUserId,
+      );
+
+      swIds = await this.userService
+        .getFlaskSocialWorkersByNgo(supervisor.ngo_id)
+        .then((r) => r.map((s) => s.id));
+      ngoIds = [supervisor.ngo_id];
+    }
+
+    if (
+      (panelFlaskTypeId === FlaskUserTypesEnum.ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN) &&
+      Number(status) === PreRegisterStatusEnum.NOT_REGISTERED
+    ) {
+      return await this.childrenService.getChildrenPreRegisterNotRegistered(
+        {
+          page: page,
+          limit: limit,
+          path: '/',
+        },
+        status,
+      );
     }
 
     return await this.childrenService.getChildrenPreRegisters(
@@ -559,6 +585,9 @@ export class ChildrenController {
       },
       status,
       ngoIds,
+      panelFlaskTypeId === SAYPlatformRoles.SOCIAL_WORKER
+        ? [panelFlaskUserId]
+        : swIds,
     );
   }
 

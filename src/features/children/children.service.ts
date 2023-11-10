@@ -228,7 +228,10 @@ export class ChildrenService {
     options: PaginateQuery,
     status: PreRegisterStatusEnum,
     ngoIds: number[],
+    swIds: number[],
   ): Promise<Paginated<ChildrenPreRegisterEntity>> {
+    console.log(ngoIds);
+
     const queryBuilder = this.preRegisterChildrenRepository
       .createQueryBuilder('preRegister')
       .leftJoinAndMapOne(
@@ -253,10 +256,10 @@ export class ChildrenService {
         status,
       })
       .andWhere('ngo.flaskNgoId IN (:...ngoIds)', {
-        ngoIds: [...ngoIds],
+        ngoIds: ngoIds,
       })
-      .where('child.isMigrated = :childIsMigrated', {
-        childIsMigrated: false,
+      .andWhere('preRegister.flaskSwId IN (:...swIds)', {
+        swIds: swIds,
       })
       .andWhere('socialWorker.isContributor = :isContributor', {
         isContributor: true,
