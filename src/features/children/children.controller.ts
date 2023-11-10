@@ -228,7 +228,7 @@ export class ChildrenController {
       fs.unlinkSync(`${preRegister.sleptUrl}`);
 
       // confirm child
-      await axios.patch(`/child/confirm/childId=${data.id}`, configs);
+      await axios.patch(`https://api.sayapp.company/api/v2/child/confirm/childId=${data.id}`, configs);
 
       // send email
       await this.campaignService.sendSwChildConfirmation(
