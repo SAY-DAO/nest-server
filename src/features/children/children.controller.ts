@@ -526,7 +526,9 @@ export class ChildrenController {
     }
     let ngoIds: number[];
     let swIds: number[];
-
+    const socialWorker = await this.userService.getFlaskSocialWorker(
+      panelFlaskUserId,
+    );
     if (convertFlaskToSayRoles(panelFlaskTypeId) === SAYPlatformRoles.AUDITOR) {
       // for auditor - admin
       swIds = await this.userService
@@ -543,14 +545,11 @@ export class ChildrenController {
       SAYPlatformRoles.NGO_SUPERVISOR
     ) {
       // for ngo supervisor
-      const supervisor = await this.userService.getFlaskSocialWorker(
-        panelFlaskUserId,
-      );
 
       swIds = await this.userService
-        .getFlaskSocialWorkersByNgo(supervisor.ngo_id)
+        .getFlaskSocialWorkersByNgo(socialWorker.ngo_id)
         .then((r) => r.map((s) => s.id));
-      ngoIds = [supervisor.ngo_id];
+      ngoIds = [socialWorker.ngo_id];
     }
 
     if (
@@ -575,7 +574,7 @@ export class ChildrenController {
         path: '/',
       },
       status,
-      ngoIds,
+      ngoIds ? ngoIds : [socialWorker.ngo_id],
       panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER
         ? [panelFlaskUserId]
         : swIds,
