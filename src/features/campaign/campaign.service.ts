@@ -36,7 +36,7 @@ export class CampaignService {
     private familyService: FamilyService,
     private mailerService: MailerService,
     private childrenService: ChildrenService,
-  ) {}
+  ) { }
   private readonly logger = new Logger(CampaignService.name);
 
   getCampaigns(): Promise<CampaignEntity[]> {
@@ -97,7 +97,7 @@ export class CampaignService {
 
   async sendSwChildConfirmation(
     swId: number,
-    child: ChildrenPreRegisterEntity,
+    preChild: ChildrenPreRegisterEntity,
   ) {
     const socialWorker = await this.userService.getContributorByFlaskId(
       swId,
@@ -111,7 +111,7 @@ export class CampaignService {
     );
     const campaign = this.getCampaignByCampaignCode(campaignCode);
     if (campaign) {
-      const title = `${child.sayName.fa} تأیید شد`;
+      const title = `${preChild.sayName.fa} تأیید شد`;
       await this.createCampaign(
         campaignCode,
         CampaignNameEnum.CHILD_CONFIRMATION,
@@ -130,10 +130,10 @@ export class CampaignService {
         subject: title,
         template: './swConfirmedChild', // `.hbs` extension is appended automatically
         context: {
-          avatarAwake: child.awakeUrl,
-          sayName: child.sayName.fa,
-          firstName: child.firstName.fa,
-          lastName: child.lastName.fa,
+          avatarAwake: preChild.awakeUrl,
+          sayName: preChild.sayName.fa,
+          firstName: preChild.firstName.fa,
+          lastName: preChild.lastName.fa,
           userName: socialWorker.firstName
             ? socialWorker.firstName
             : socialWorker.userName,

@@ -81,7 +81,7 @@ export class ChildrenController {
     private locationService: LocationService,
     private downloadService: DownloadService,
     private campaignService: CampaignService,
-  ) {}
+  ) { }
 
   @UsePipes(new ValidationPipe()) // validation for dto files
   @Patch(`preregister/approve/:id`)
@@ -113,6 +113,12 @@ export class ChildrenController {
         preRegister.status === PreRegisterStatusEnum.CONFIRMED ||
         preRegister.status === PreRegisterStatusEnum.NOT_REGISTERED
       ) {
+        // send email
+        await this.campaignService.sendSwChildConfirmation(
+          preRegister.flaskSwId,
+          preRegister,
+        );
+
         throw new ServerError('Pre register approval cou;d not go ahead!');
       }
       if (!voiceFile) {
@@ -266,6 +272,9 @@ export class ChildrenController {
         id,
       );
 
+      if (preRegister.status === PreRegisterStatusEnum.CONFIRMED) {
+        throw new ForbiddenException(403, 'This Child has been confirmed');
+      }
       await this.childrenService.deletePreRegister(preRegister.id);
     } catch (e) {
       throw new ServerError(e);
@@ -314,22 +323,17 @@ export class ChildrenController {
 
     // for local purposes - organized folders and files
     if (process.env.NODE_ENV === 'development') {
-      const newChildFolder = `../../Docs/children${
-        Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
-      }organized/${capitalizeFirstLetter(body.sayNameEn)}-${body.sayNameFa}`;
+      const newChildFolder = `../../Docs/children${Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
+        }organized/${capitalizeFirstLetter(body.sayNameEn)}-${body.sayNameFa}`;
 
-      const originalAwakeGirl = `../../Docs/children/girls/${
-        files.awakeFile[0].filename.split('-s-')[0]
-      }.png`;
-      const originalAwakeBoy = `../../Docs/children/boys/${
-        files.awakeFile[0].filename.split('-s-')[0]
-      }.png`;
-      const originalSleptGirl = `../../Docs/children/girls/${
-        files.sleptFile[0].filename.split('-s-')[0]
-      }.png`;
-      const originalSleptBoy = `../../Docs/children/boys/${
-        files.sleptFile[0].filename.split('-s-')[0]
-      }.png`;
+      const originalAwakeGirl = `../../Docs/children/girls/${files.awakeFile[0].filename.split('-s-')[0]
+        }.png`;
+      const originalAwakeBoy = `../../Docs/children/boys/${files.awakeFile[0].filename.split('-s-')[0]
+        }.png`;
+      const originalSleptGirl = `../../Docs/children/girls/${files.sleptFile[0].filename.split('-s-')[0]
+        }.png`;
+      const originalSleptBoy = `../../Docs/children/boys/${files.sleptFile[0].filename.split('-s-')[0]
+        }.png`;
 
       const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
       const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
