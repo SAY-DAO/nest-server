@@ -113,13 +113,7 @@ export class ChildrenController {
         preRegister.status === PreRegisterStatusEnum.CONFIRMED ||
         preRegister.status === PreRegisterStatusEnum.NOT_REGISTERED
       ) {
-        // send email
-        await this.campaignService.sendSwChildConfirmation(
-          preRegister.flaskSwId,
-          preRegister,
-        );
-
-        throw new ServerError('Pre register approval cou;d not go ahead!');
+        throw new ServerError('Pre register approval could not go ahead!');
       }
       if (!voiceFile) {
         throw new ServerError('we need the Edited Voice!');
