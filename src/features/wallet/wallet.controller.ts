@@ -298,14 +298,11 @@ export class WalletController {
               ),
           )
         ) {
-        console.log(need);
         counter++;
         }
       });
-      console.log(counter);
-      console.log(counter - body.arrivedColumnNumber === 0);
 
-      if (counter - body.arrivedColumnNumber === 0) {
+      if (counter - body.arrivedColumnNumber !== 0) {
         throw new WalletExceptionFilter(
           418,
           'You have to announce arrivals first!',
