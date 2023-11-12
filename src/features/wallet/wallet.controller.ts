@@ -288,7 +288,9 @@ export class WalletController {
       const purchasedNeeds = await this.needService.getPurchasedNeedsCount(
         flaskUserId,
       );
-      purchasedNeeds.forEach((need) => {
+        purchasedNeeds.forEach((need) => {
+        console.log(need);
+
         if (
           userTickets.find(
             (t) =>
@@ -301,6 +303,8 @@ export class WalletController {
           counter++;
         }
       });
+      console.log(counter);
+      console.log(body);
 
       if (counter - body.arrivedColumnNumber === 0) {
         throw new WalletExceptionFilter(
