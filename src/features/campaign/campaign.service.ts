@@ -311,8 +311,8 @@ export class CampaignService {
             this.logger.warn(
               `SMS: User ${nestUser.flaskUserId} because has no children! - ${campaignSmsCode}`,
             );
-            const to = '09108591822';
-            const from = '10007778777827';
+            const to = flaskUser.phone_number;
+            const from = process.env.SMS_FROM;
             const text = 'تست وب سرویس ملی پیامک - بدون کودک';
             // await this.smsRest.send(to, from, text);
           }
