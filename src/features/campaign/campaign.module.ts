@@ -1,6 +1,6 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { Global, Module } from '@nestjs/common';
+import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { CampaignService } from './campaign.service';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
@@ -29,6 +29,8 @@ import { CampaignEntity } from 'src/entities/campaign.entity';
 import { CampaignController } from './campaign.controller';
 import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
+import { UrlEntity } from 'src/entities/url.entity';
+import { CampaignMiddleware } from './middlewares/campaign.middleware';
 
 @Global() // 👈 global module
 @Module({
@@ -84,6 +86,7 @@ import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
       PaymentEntity,
       AllUserEntity,
       CampaignEntity,
+      UrlEntity
     ]),
   ],
   providers: [
@@ -98,4 +101,8 @@ import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
   controllers: [CampaignController],
   exports: [CampaignService],
 })
-export class CampaignModule {}
+export class CampaignModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CampaignMiddleware).forRoutes('campaign');
+  }
+}

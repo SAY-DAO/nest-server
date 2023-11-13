@@ -27,6 +27,7 @@ import { AllUserEntity } from 'src/entities/user.entity';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 import { ContributionEntity } from 'src/entities/contribution.entity';
 import { CampaignEntity } from 'src/entities/campaign.entity';
+import { UrlEntity } from 'src/entities/url.entity';
 
 export const postgresDataSourceOptions: DataSourceOptions = {
   ...config().db1,
@@ -59,6 +60,7 @@ export const postgresDataSourceOptions: DataSourceOptions = {
     CommentEntity,
     ChildrenPreRegisterEntity,
     ContributionEntity,
+    UrlEntity
   ],
 };
 

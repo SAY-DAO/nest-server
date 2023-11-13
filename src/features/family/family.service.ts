@@ -295,9 +295,9 @@ export class FamilyService {
   }
 
   async updateEmailMarketing(user: AllUserEntity): Promise<UpdateResult> {
-    const newStatus = user.monthlyEmail ? false : true;
+    const newStatus = user.monthlyCampaign ? false : true;
     return this.allUserRepository.update(user.id, {
-      monthlyEmail: newStatus,
+      monthlyCampaign: newStatus,
     });
   }
 }

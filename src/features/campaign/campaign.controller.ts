@@ -1,8 +1,9 @@
-import { Controller, Get, Req, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Req, ForbiddenException, Post, Body, Res, Param } from '@nestjs/common';
 import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 import { isAuthenticated } from 'src/utils/auth';
 import { CampaignService } from './campaign.service';
+import { ShortenURLDto } from 'src/types/dtos/url.dto';
 
 @ApiTags('Campaign')
 @ApiSecurity('flask-access-token')
@@ -13,7 +14,7 @@ import { CampaignService } from './campaign.service';
 })
 @Controller('campaign')
 export class CampaignController {
-  constructor(private readonly campaignService: CampaignService) {}
+  constructor(private readonly campaignService: CampaignService) { }
 
   @Get('/all')
   getAvailableContributions(@Req() req: Request) {
@@ -30,5 +31,21 @@ export class CampaignController {
     }
 
     return this.campaignService.getCampaigns();
+  }
+
+  @Get(':code')
+  async redirect(
+    @Res() res,
+    @Param('code') code: string,
+  ) {
+    const url = await this.campaignService.redirect(code);
+    return res.redirect(url.longUrl)
+  }
+
+  @Post('shorten')
+  shortenUrl(
+    @Body() longUrl: ShortenURLDto,
+  ) {
+    return this.campaignService.shortenUrl(longUrl);
   }
 }

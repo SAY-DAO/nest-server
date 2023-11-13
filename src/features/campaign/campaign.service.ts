@@ -1,4 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { ChildrenService } from '../children/children.service';
@@ -25,12 +31,19 @@ import { AllUserEntity } from 'src/entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import config from 'src/config';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { isURL } from 'class-validator';
+import { UrlEntity } from 'src/entities/url.entity';
+import { nanoid } from 'nanoid';
+import { ShortenURLDto } from 'src/types/dtos/url.dto';
+import MelipayamakApi from 'melipayamak';
 
 @Injectable()
 export class CampaignService {
   constructor(
     @InjectRepository(CampaignEntity)
     private campaignRepository: Repository<CampaignEntity>,
+    @InjectRepository(UrlEntity)
+    private urlRepository: Repository<UrlEntity>,
     private needService: NeedService,
     private userService: UserService,
     private familyService: FamilyService,
@@ -38,6 +51,8 @@ export class CampaignService {
     private childrenService: ChildrenService,
   ) { }
   private readonly logger = new Logger(CampaignService.name);
+  smsApi = new MelipayamakApi(process.env.SMS_USER, process.env.SMS_PASSWORD);
+  smsRest = this.smsApi.sms();
 
   getCampaigns(): Promise<CampaignEntity[]> {
     return this.campaignRepository.find({
@@ -56,10 +71,14 @@ export class CampaignService {
     return need;
   }
 
-  getCampaignByCampaignCode(campaignCode: string): Promise<CampaignEntity> {
+  getCampaignByCampaignCode(
+    campaignCode: string,
+    type: CampaignTypeEnum,
+  ): Promise<CampaignEntity> {
     const need = this.campaignRepository.findOne({
       where: {
         campaignCode,
+        type,
       },
     });
     return need;
@@ -105,12 +124,12 @@ export class CampaignService {
     );
     const email = (await this.userService.getFlaskSw(swId)).email;
 
-    const campaignCode = fetchCampaignCode(
-      CampaignNameEnum.CHILD_CONFIRMATION,
+    const campaignCode = fetchCampaignCode(CampaignNameEnum.CHILD_CONFIRMATION, CampaignTypeEnum.EMAIL);
+    const campaign = this.getCampaignByCampaignCode(
+      campaignCode,
       CampaignTypeEnum.EMAIL,
     );
-    const campaign = this.getCampaignByCampaignCode(campaignCode);
-    if (campaign) {
+    if (!campaign) {
       const title = `${preChild.sayName.fa} تأیید شد`;
       await this.createCampaign(
         campaignCode,
@@ -187,166 +206,295 @@ export class CampaignService {
     }
   }
 
-  async sendUserMonthlySummaries() {
+  async sendUserMonthlyCampaigns() {
     try {
-      const today = new Date();
-      const campaignCode = fetchCampaignCode(
-        CampaignNameEnum.MONTHLY_SUMMARIES,
+      // campaign codes
+      const campaignEmailCode = fetchCampaignCode(
+        CampaignNameEnum.MONTHLY_CAMPAIGNS,
+        CampaignTypeEnum.EMAIL
+      );
+      const campaignSmsCode = fetchCampaignCode(
+        CampaignNameEnum.MONTHLY_CAMPAIGNS,
+        CampaignTypeEnum.SMS
+      );
+
+      const emailCampaign = await this.getCampaignByCampaignCode(
+        campaignEmailCode,
         CampaignTypeEnum.EMAIL,
       );
-      const persianMonth = persianMonthStringFarsi(today);
+      const smsCampaign = await this.getCampaignByCampaignCode(
+        campaignSmsCode,
+        CampaignTypeEnum.SMS,
+      );
+
+      const credit = await this.smsRest.getCredit();
+      // Notify admin if running out of sms credit
+      if (credit < 100) {
+        const to = process.env.SAY_ADMIN_SMS;
+        const from = process.env.SMS_FROM;
+        const text = `سلام،\nتعداد پیامک شما رو به پایان است. \n لغو۱۱`;
+        await this.smsRest.send(to, from, text);
+      }
+
+      const persianMonth = persianMonthStringFarsi(new Date());
       if (!persianMonth) {
         throw new ServerError('We need the month string');
       }
       const tittle = `نیازهای ${persianMonth} ماه کودکان شما`;
 
-      const receivers = [];
+      const emailReceivers = [];
+      const smsReceivers = [];
       const users = await this.userService.getFlaskUsers();
       const shuffledUsers = shuffleArray(
-        users.filter((u) => u.userName === 'ehsan'),
+        users.filter((u) => u.userName === 'ehsan' || u.userName === 'mamad'),
       );
-      const campaign = await this.getCampaignByCampaignCode(campaignCode);
+
       // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {
-        if (flaskUser.emailAddress) {
-          let nestUser = await this.userService.getFamilyByFlaskId(
-            flaskUser.id,
+        let nestUser = await this.userService.getFamilyByFlaskId(flaskUser.id);
+        if (!nestUser) {
+          nestUser = await this.userService.createFamily(flaskUser.id);
+        }
+        if (!nestUser.monthlyCampaign) {
+          this.logger.debug(
+            `Skipping: User ${nestUser.flaskUserId} has turned off monthly campaigns - ${tittle}`,
           );
-          // 2- eligible to receive?
-          if (!nestUser) {
-            nestUser = await this.userService.createFamily(flaskUser.id);
-          }
-          if (campaign) {
-            const alreadyReceived = campaign.receivers.find(
-              (r) => r.flaskUserId === flaskUser.id,
+          continue;
+        }
+        // 2- eligible to receive?
+        if (emailCampaign) {
+          const alreadyReceived = emailCampaign.receivers.find(
+            (r) => r.flaskUserId === flaskUser.id,
+          );
+          if (alreadyReceived) {
+            this.logger.log(
+              `EMAIL - Skipping: User ${nestUser.flaskUserId} has already received this email - ${campaignEmailCode}`,
             );
-            if (!alreadyReceived) {
-              this.logger.log(
-                `Skipping: User ${nestUser.flaskUserId} has already received this email - ${campaignCode}`,
+            continue;
+          }
+        }
+        if (smsCampaign) {
+          const alreadyReceived = smsCampaign.receivers.find(
+            (r) => r.flaskUserId === flaskUser.id,
+          );
+          if (alreadyReceived) {
+            this.logger.log(
+              `SMS - Skipping: User ${nestUser.flaskUserId} has already received this email - ${campaignSmsCode}`,
+            );
+            continue;
+          }
+        }
+
+        // 3- get user children & shuffle
+        const userChildren = (
+          await this.childrenService.getMyChildren(flaskUser.id)
+        ).filter((c) => c.existence_status === ChildExistence.AlivePresent);
+
+        // 4- send campaign users with no children
+        if (!userChildren || !userChildren) {
+          if (flaskUser.is_email_verified) {
+            this.logger.warn(
+              `EMAIL: User ${nestUser.flaskUserId} because has no children! - ${campaignEmailCode}`,
+            );
+            // await this.mailerService.sendMail({
+            //   to: flaskUser.emailAddress,
+            //   subject: `گسترش خانواده مجازی`,
+            //   template: './expandFamilyNoChild', // `.hbs` extension is appended automatically
+            //   context: {
+            //     userName: flaskUser.firstName
+            //       ? flaskUser.firstName
+            //       : flaskUser.userName,
+            //   },
+            // });
+          }
+          if (flaskUser.is_phonenumber_verified) {
+            this.logger.warn(
+              `SMS: User ${nestUser.flaskUserId} because has no children! - ${campaignSmsCode}`,
+            );
+            const to = '09108591822';
+            const from = '10007778777827';
+            const text = 'تست وب سرویس ملی پیامک - بدون کودک';
+            // await this.smsRest.send(to, from, text);
+          }
+          continue;
+        }
+
+        const eligibleChildren = [];
+        let counter = 1;
+        // 5- loop shuffled children
+        for await (const child of shuffleArray(userChildren)) {
+          if (counter <= 3) {
+            const childUnpaidNeeds =
+              await this.needService.getFlaskChildUnpaidNeeds(child.id);
+            if (!childUnpaidNeeds || !childUnpaidNeeds[0]) {
+              // we separately email social workers
+              this.logger.debug(
+                `Skipping: Child ${child.id} has no unpaid needs - ${tittle}`,
               );
               continue;
             }
+            counter++;
+
+            // 6- shuffle children needs and create an object - prioritize partial paid needs
+            const TAKE = 2;
+            const shuffledNeeds = shuffleArray(childUnpaidNeeds);
+            const organizedNeeds = shuffledNeeds
+              .sort((a, b) => b.status - a.status)
+              .slice(0, TAKE);
+
+            const theChild = {
+              id: child.id,
+              sayName: child.sayname_translations.fa,
+              avatar: prepareUrl(child.awakeAvatarUrl),
+              unPaidNeeds: organizedNeeds.map((n) => {
+                return {
+                  id: n.id,
+                  name: n.name_translations.fa,
+                  price: n._cost.toLocaleString(),
+                  image:
+                    n.type === NeedTypeEnum.PRODUCT
+                      ? n.img
+                      : prepareUrl(n.imageUrl),
+                };
+              }),
+            };
+            eligibleChildren.push(theChild);
           }
-
-          if (!nestUser.monthlyEmail) {
-            this.logger.debug(
-              `Skipping: User ${nestUser.flaskUserId} has turned off monthly summaries - ${campaignCode}`,
-            );
-            continue;
-          }
-          // 3- get user children & shuffle
-          const children = (
-            await this.childrenService.getMyChildren(flaskUser.id)
-          ).filter((c) => c.existence_status === ChildExistence.AlivePresent);
-
-          // 4- send mail users with no children
-          if (children || !children[0]) {
-            this.logger.warn(
-              `Emailing: User ${nestUser.flaskUserId} because has no children! - ${campaignCode}`,
-            );
-            await this.mailerService.sendMail({
-              to: flaskUser.emailAddress,
-              subject: `گسترش خانواده مجازی`,
-              template: './expandFamilyNoChild', // `.hbs` extension is appended automatically
-              context: {
-                userName: flaskUser.firstName
-                  ? flaskUser.firstName
-                  : flaskUser.userName,
-              },
-            });
-            receivers.push(nestUser);
-            continue;
-          }
-
-          const userChildren = [];
-          let counter = 1;
-          // 5- loop shuffled children
-          for await (const child of shuffleArray(children)) {
-            if (counter <= 3) {
-              const childUnpaidNeeds =
-                await this.needService.getFlaskChildUnpaidNeeds(child.id);
-              if (!childUnpaidNeeds || !childUnpaidNeeds[0]) {
-                // we separately email social workers
-                this.logger.debug(
-                  `Skipping: Child ${child.id} has no unpaid needs - ${campaignCode}`,
-                );
-                continue;
-              }
-              counter++;
-
-              // 6- shuffle children needs and create an object - prioritize partial paid needs
-              const TAKE = 2;
-              const shuffledNeeds = shuffleArray(childUnpaidNeeds);
-              const organizedNeeds = shuffledNeeds
-                .sort((a, b) => b.status - a.status)
-                .slice(0, TAKE);
-
-              const theChild = {
-                id: child.id,
-                sayName: child.sayname_translations.fa,
-                avatar: prepareUrl(child.awakeAvatarUrl),
-                unPaidNeeds: organizedNeeds.map((n) => {
-                  return {
-                    id: n.id,
-                    name: n.name_translations.fa,
-                    price: n._cost.toLocaleString(),
-                    image:
-                      n.type === NeedTypeEnum.PRODUCT
-                        ? n.img
-                        : prepareUrl(n.imageUrl),
-                  };
-                }),
-              };
-              userChildren.push(theChild);
-            }
-          }
-          if (!userChildren || !userChildren[0]) {
-            this.logger.warn(
-              `Skipping: User ${nestUser.flaskUserId}'s children have no unpaidNeeds! - ${campaignCode}`,
-            );
-            continue;
-          }
-
-          const readyToSignNeeds = (
-            await this.familyService.getFamilyReadyToSignNeeds(flaskUser.id)
-          ).filter((n) => n.midjourneyImage);
-
+        }
+        if (!eligibleChildren || !eligibleChildren[0]) {
           this.logger.warn(
-            `Emailing: User ${nestUser.flaskUserId} the Campaign! - ${campaignCode}`,
+            `Skipping: User ${nestUser.flaskUserId}'s children have no unpaidNeeds! - ${tittle}`,
           );
-          await this.mailerService.sendMail({
-            to: flaskUser.emailAddress,
-            subject: `نیازهای ${persianMonth} ماه کودکان شما`,
-            template: './monthlyCampaign', // `.hbs` extension is appended automatically
-            context: {
-              myChildren: userChildren,
-              readyToSignNeeds,
-            },
-          });
-          receivers.push(nestUser);
+          continue;
+        }
+
+        const readyToSignNeeds = (
+          await this.familyService.getFamilyReadyToSignNeeds(flaskUser.id)
+        ).filter((n) => n.midjourneyImage);
+
+        if (flaskUser.is_email_verified) {
+          this.logger.warn(
+            `EMAIL: User ${nestUser.flaskUserId} the Campaign! - ${campaignEmailCode}`,
+          );
+
+          // await this.mailerService.sendMail({
+          //   to: flaskUser.emailAddress,
+          //   subject: `نیازهای ${persianMonth} ماه کودکان شما`,
+          //   template: './monthlyCampaign', // `.hbs` extension is appended automatically
+          //   context: {
+          //     myChildren: eligibleChildren,
+          //     readyToSignNeeds,
+          //   },
+          // });
           this.logger.debug(`Email Sent to User: ${nestUser.flaskUserId}`);
+          emailReceivers.push(nestUser);
+        }
+        if (flaskUser.is_phonenumber_verified) {
+          this.logger.warn(
+            `SMS: User ${nestUser.flaskUserId} the Campaign! - ${campaignSmsCode}`,
+          );
+
+          const to = flaskUser.phone_number;
+          const from = process.env.SMS_FROM;
+          const shortNeedUrl = await this.shortenUrl({
+            longUrl: `https://dapp.saydao.org/${eligibleChildren[0].unPaidNeeds[0].id}`,
+          });
+          const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+            }\n  یکی از نیازهای کودک شما، ${eligibleChildren[0].sayName}: ${shortNeedUrl} لغو۱۱`;
+          // await this.smsRest.send(to, from, text);
+
+
+
+          this.logger.debug(`SMS Sent to User: ${nestUser.flaskUserId}`);
+          smsReceivers.push(nestUser);
         }
       }
 
-      if (!campaign) {
+      if (!emailCampaign && emailReceivers && emailReceivers[0]) {
+        this.logger.debug(`EMAIL: Campaign creating - ${campaignEmailCode}`);
         await this.createCampaign(
-          campaignCode,
-          CampaignNameEnum.MONTHLY_SUMMARIES,
+          campaignEmailCode,
+          CampaignNameEnum.MONTHLY_CAMPAIGNS,
           CampaignTypeEnum.EMAIL,
           tittle,
-          receivers,
+          emailReceivers,
         );
-        this.logger.log(`Campaign Created - ${campaignCode}`);
-      } else if (campaign && receivers[0]) {
-        this.logger.log(`Campaign Updating - ${campaignCode}`);
-        await this.updateCampaignUsers(campaign, campaign.receivers, receivers);
-        this.logger.log(`Campaign Updated - ${campaignCode}`);
+        this.logger.log(`EMAIL: Campaign Created - ${campaignEmailCode}`);
+      }
+      if (!smsCampaign && smsReceivers && smsReceivers[0]) {
+        this.logger.debug(`SMS: Campaign creating - ${campaignSmsCode}`);
+        await this.createCampaign(
+          campaignSmsCode,
+          CampaignNameEnum.MONTHLY_CAMPAIGNS,
+          CampaignTypeEnum.SMS,
+          tittle,
+          smsReceivers,
+        );
+        this.logger.log(`SMS: Campaign Created - ${campaignSmsCode}`);
+      }
+      if (emailCampaign && emailReceivers[0]) {
+        await this.updateCampaignUsers(
+          emailCampaign,
+          emailCampaign.receivers,
+          emailReceivers,
+        );
+        this.logger.log(`EMAIL: Campaign Updated - ${campaignEmailCode}`);
+      }
+      if (smsCampaign && smsReceivers[0]) {
+        await this.updateCampaignUsers(
+          smsCampaign,
+          smsCampaign.receivers,
+          smsReceivers,
+        );
+        this.logger.log(`SMS: Campaign Updated - ${campaignSmsCode}`);
       } else {
-        this.logger.debug(`No email was sent - ${campaignCode}`);
+        this.logger.log(`All done for this month. - ${tittle}`);
       }
     } catch (e) {
       console.log(e);
-      throw new ServerError('Cold not send email!');
+      throw new ServerError('Could not send email!');
+    }
+  }
+
+  async shortenUrl(url: ShortenURLDto) {
+    const { longUrl } = url;
+    //checks if longUrl is a valid URL
+    if (!isURL(longUrl)) {
+      throw new BadRequestException('String Must be a Valid URL');
+    }
+    const urlCode = nanoid(10);
+    const baseURL = 'https://nest.saydao.org/campaign';
+    try {
+      // check if the URL has already been shortened
+      let url = await this.urlRepository.findOneBy({ longUrl });
+      // return it if it exists
+      if (url) return url.shortUrl;
+
+      // if it doesn't exist, shorten it
+      const shortUrl = `${baseURL}/${urlCode}`;
+
+      //add the new record to the database
+      url = this.urlRepository.create({
+        urlCode,
+        longUrl,
+        shortUrl,
+      });
+
+      this.urlRepository.save(url);
+      return url.shortUrl;
+    } catch (e) {
+      console.log(e);
+      throw new UnprocessableEntityException('Server Error');
+    }
+  }
+
+  async redirect(urlCode: string) {
+    try {
+      const url = await this.urlRepository.findOneBy({ urlCode });
+      if (url) return url;
+    } catch (e) {
+      console.log(e);
+      throw new NotFoundException('Resource Not Found');
     }
   }
 }

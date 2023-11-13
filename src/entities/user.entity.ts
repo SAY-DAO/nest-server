@@ -66,7 +66,7 @@ export class AllUserEntity extends BaseEntity {
   signatures: SignatureEntity[];
 
   @Column({ default: true })
-  monthlyEmail: boolean;
+  monthlyCampaign: boolean;
 
   @OneToMany(() => CampaignEntity, (e) => e.receivers, {
     eager: false,

@@ -12,7 +12,7 @@ export class ScheduleService {
     private campaignService: CampaignService,
     private familyService: FamilyService,
     private analyticService: AnalyticService,
-  ) {}
+  ) { }
   private readonly logger = new Logger(ScheduleService.name);
 
   async completePays() {
@@ -130,7 +130,7 @@ export class ScheduleService {
   @Timeout(5000)
   async handleSummaryMailCron() {
     this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
-    // await this.campaignService.sendUserMonthlySummaries();
+    // await this.campaignService.sendUserMonthlyCampaigns();
   }
 
   @Cron('23 8 * * Tue', {

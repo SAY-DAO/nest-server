@@ -5,8 +5,6 @@ import {
   CampaignNameEnum,
   CampaignTypeEnum,
 } from 'src/types/interfaces/interface';
-import { SignatureEntity } from './signature.entity';
-import { NeedEntity } from './need.entity';
 
 @Entity()
 export class CampaignEntity extends BaseEntity {

@@ -151,8 +151,6 @@ export function isAuthenticated(
   } else {
     const panelAuthentication =
       config().dataCache.fetchPanelAuthentication(flaskUserId);
-    console.log(panelAuthentication);
-
     if (!panelAuthentication || panelAuthentication.isExpired === true) {
       return false;
     } else {

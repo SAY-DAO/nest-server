@@ -308,11 +308,11 @@ export enum NeedTypeDefinitionEnum {
 }
 
 export enum CampaignNameEnum {
-  MONTHLY_SUMMARIES = 'MONTHLY_SUMMARIES',
+  MONTHLY_CAMPAIGNS = 'MONTHLY_CAMPAIGNS',
   CHILD_CONFIRMATION = 'CHILD_CONFIRMATION',
 }
 
 export enum CampaignTypeEnum {
-  SMS = 1,
   EMAIL = 1,
+  SMS = 2,
 }

@@ -537,7 +537,7 @@ export class FamilyController {
     if (!nestFamilyMember) {
       nestFamilyMember = await this.userService.createFamily(dappFlaskUserId);
     }
-    return nestFamilyMember.monthlyEmail;
+    return nestFamilyMember.monthlyCampaign;
   }
 
   @Patch(`email/status`)
