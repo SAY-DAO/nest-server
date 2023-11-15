@@ -131,16 +131,10 @@ export class CampaignService {
       CampaignNameEnum.CHILD_CONFIRMATION,
       CampaignTypeEnum.EMAIL,
     );
-    const campaign = this.getCampaignByCampaignCode(
+    const campaign = await this.getCampaignByCampaignCode(
       campaignCode,
       CampaignTypeEnum.EMAIL,
     );
-    console.log(socialWorker.id);
-    console.log(email);
-    console.log(campaignCode);
-    console.log(campaign);
-
-
 
     if (!campaign) {
       const title = `${preChild.sayName.fa} تأیید شد`;
