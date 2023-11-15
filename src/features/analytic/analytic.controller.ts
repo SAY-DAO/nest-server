@@ -30,7 +30,7 @@ export class AnalyticController {
     private userService: UserService,
 
     private readonly analyticService: AnalyticService,
-  ) {}
+  ) { }
 
   @Get('ecosystem/children')
   @ApiOperation({ description: 'get SAY children ecosystem analytics' })
@@ -41,7 +41,7 @@ export class AnalyticController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     let result: {
@@ -96,7 +96,7 @@ export class AnalyticController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.analyticService.getDeliveredNeedsAnalytic(needType);
   }
@@ -110,7 +110,7 @@ export class AnalyticController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.analyticService.getChildrenAnalytic();
   }
@@ -124,7 +124,7 @@ export class AnalyticController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.analyticService.getNgoAnalytic();
   }
@@ -144,7 +144,7 @@ export class AnalyticController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.analyticService.getChildNeedsAnalytic(childId);
   }
@@ -158,7 +158,7 @@ export class AnalyticController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     let activesList = config().dataCache.fetchActiveFamilies();
     if (!activesList) {
@@ -179,7 +179,7 @@ export class AnalyticController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return {
       scattered: config().dataCache.roleScatteredData(),
@@ -193,7 +193,7 @@ export class AnalyticController {
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
 
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const role = convertFlaskToSayRoles(Number(panelFlaskTypeId));
     let swIds: number[];

@@ -86,7 +86,7 @@ import { CampaignMiddleware } from './middlewares/campaign.middleware';
       PaymentEntity,
       AllUserEntity,
       CampaignEntity,
-      UrlEntity
+      UrlEntity,
     ]),
   ],
   providers: [
@@ -103,6 +103,9 @@ import { CampaignMiddleware } from './middlewares/campaign.middleware';
 })
 export class CampaignModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CampaignMiddleware).forRoutes('campaign');
+    consumer
+      .apply(CampaignMiddleware)
+      .exclude('campaign/:code')
+      .forRoutes('campaign');
   }
 }

@@ -47,7 +47,7 @@ export class FamilyController {
     private childrenService: ChildrenService,
     private needService: NeedService,
     private paymentService: PaymentService,
-  ) {}
+  ) { }
 
   @Get(`my/children/:familyUserId`)
   @ApiOperation({ description: 'Get my children' })
@@ -61,7 +61,7 @@ export class FamilyController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     return await this.childrenService.getMyChildren(familyUserId);
@@ -76,7 +76,7 @@ export class FamilyController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.SAY,
@@ -92,7 +92,7 @@ export class FamilyController {
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (dappFlaskUserId) {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-        throw new ForbiddenException(403, 'You Are not authorized');
+        throw new ForbiddenException('You Are not authorized');
       }
     }
     if (panelFlaskUserId) {
@@ -100,7 +100,7 @@ export class FamilyController {
         !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
         panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
       ) {
-        throw new ForbiddenException(403, 'You Are not the Super admin');
+        throw new ForbiddenException('You Are not the Super admin');
       }
     }
     const ecoCompletePayQuartile = config().dataCache.theQuartile();
@@ -156,7 +156,7 @@ export class FamilyController {
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (dappFlaskUserId) {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-        throw new ForbiddenException(403, 'You Are not authorized');
+        throw new ForbiddenException('You Are not authorized');
       }
     }
     if (panelFlaskUserId) {
@@ -164,7 +164,7 @@ export class FamilyController {
         !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
         panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
       ) {
-        throw new ForbiddenException(403, 'You Are not the Super admin');
+        throw new ForbiddenException('You Are not the Super admin');
       }
     }
     const flaskUserId = req.headers['dappFlaskUserId'];
@@ -416,7 +416,7 @@ export class FamilyController {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
 
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
 
     const userAsFather = await this.familyService.getFamilyRoleCompletePay(
@@ -515,7 +515,7 @@ export class FamilyController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
 
     const credit = await this.paymentService.getFamilyCredit(flaskUserId);
@@ -528,7 +528,7 @@ export class FamilyController {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (dappFlaskUserId) {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-        throw new ForbiddenException(403, 'You Are not authorized');
+        throw new ForbiddenException('You Are not authorized');
       }
     }
     let nestFamilyMember = await this.userService.getFamilyByFlaskId(
@@ -546,7 +546,7 @@ export class FamilyController {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (dappFlaskUserId) {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-        throw new ForbiddenException(403, 'You Are not authorized');
+        throw new ForbiddenException('You Are not authorized');
       }
     }
     let nestFamilyMember = await this.userService.getFamilyByFlaskId(

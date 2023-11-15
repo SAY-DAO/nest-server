@@ -13,7 +13,7 @@ import { isAuthenticated } from 'src/utils/auth';
 })
 @Controller('ipfs')
 export class IpfsController {
-  constructor(private readonly ipfsService: IpfsService) {}
+  constructor(private readonly ipfsService: IpfsService) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all IPFS' })
@@ -24,7 +24,7 @@ export class IpfsController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     return await this.ipfsService.getAllIpfs();

@@ -27,7 +27,7 @@ import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 })
 @Controller('download')
 export class DownloadController {
-  constructor(private readonly downloadService: DownloadService) {}
+  constructor(private readonly downloadService: DownloadService) { }
 
   @Get('buffer/:path')
   @ApiFileResponse('image/png')
@@ -42,7 +42,7 @@ export class DownloadController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const file = await this.downloadService.imageReadBuffer(path);
     response.contentType('image/png');
@@ -61,7 +61,7 @@ export class DownloadController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const file = await this.downloadService.imageStream(path);
     file.pipe(response);
@@ -75,7 +75,7 @@ export class DownloadController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const file = await this.downloadService.fileStream(path);
     return new StreamableFile(file); // 👈 supports Buffer and Stream
@@ -95,7 +95,7 @@ export class DownloadController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.downloadService.fileStream(
       `../midjourney-bot/main/need-images/need-${flaskNeedId}/${flaskNeedId}_1.png`,

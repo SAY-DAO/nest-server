@@ -34,7 +34,7 @@ export class MidjourneyController {
     private readonly downloadService: DownloadService,
     private readonly needService: NeedService,
     private readonly familyService: FamilyService,
-  ) {}
+  ) { }
 
   @Get(`db/all`)
   @ApiSecurity('flask-access-token')
@@ -51,7 +51,7 @@ export class MidjourneyController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.midjourneyService.getAllImages();
   }
@@ -74,7 +74,7 @@ export class MidjourneyController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     let theImage;
     try {
@@ -85,7 +85,7 @@ export class MidjourneyController {
         need,
       });
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
     return theImage;
   }
@@ -107,7 +107,7 @@ export class MidjourneyController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     const X_LIMIT = parseInt(req.headers['x-limit']);
@@ -162,7 +162,7 @@ export class MidjourneyController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const theImage = await this.midjourneyService.getImage(flaskNeedId);
     const file = await this.downloadService.imageReadBuffer(theImage.fileName);
@@ -185,7 +185,7 @@ export class MidjourneyController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const promptList = await this.midjourneyService.preparePrompts();
     return promptList;
@@ -210,7 +210,7 @@ export class MidjourneyController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const promptList = this.midjourneyService.selectImage(
       flaskNeedId,

@@ -13,7 +13,7 @@ import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 })
 @Controller('location')
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+  constructor(private readonly locationService: LocationService) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all ngos' })
@@ -24,7 +24,7 @@ export class LocationController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     return await this.locationService.getCities();

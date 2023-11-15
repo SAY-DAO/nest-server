@@ -30,7 +30,7 @@ export class MineController {
     private readonly mineService: MineService,
     private readonly familyService: FamilyService,
     private readonly needService: NeedService,
-  ) {}
+  ) { }
 
   @Get(`needs/paid`)
   @ApiOperation({
@@ -39,7 +39,7 @@ export class MineController {
   async getPaidNeeds(@Req() req: Request) {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
 
     const readyNeeds = await this.familyService.getFamilyReadyToSignNeeds(
@@ -70,7 +70,7 @@ export class MineController {
   async getReadyOneNeed(@Req() req: Request, @Param('needId') needId: string) {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
 
     if (!needId) {
@@ -112,7 +112,7 @@ export class MineController {
   async getEcosystemMineables(@Req() req: Request) {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     // 1 - get my signed needs
     const mySignedNeeds = await this.mineService.getMySignedNeeds(

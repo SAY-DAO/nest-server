@@ -49,7 +49,7 @@ export class TicketController {
     private needService: NeedService,
     private readonly syncService: SyncService,
     private userService: UserService,
-  ) {}
+  ) { }
 
   @Get('all')
   async findAll(@Req() req: Request) {
@@ -59,7 +59,7 @@ export class TicketController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.ticketService.getTickets();
   }
@@ -69,7 +69,7 @@ export class TicketController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized!');
+      throw new ForbiddenException('You Are not authorized!');
     }
     const user = await this.userService.getFlaskSocialWorker(panelFlaskUserId);
     if (convertFlaskToSayRoles(user.type_id) === SAYPlatformRoles.AUDITOR) {
@@ -84,7 +84,7 @@ export class TicketController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized!');
+      throw new ForbiddenException('You Are not authorized!');
     }
     const { ticket } = await this.ticketService.getTicketById(
       id,
@@ -102,7 +102,7 @@ export class TicketController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized!');
+      throw new ForbiddenException('You Are not authorized!');
     }
     const { ticket } = await this.ticketService.getTicketById(
       body.ticketId,
@@ -129,7 +129,7 @@ export class TicketController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized!');
+      throw new ForbiddenException('You Are not authorized!');
     }
     const flaskNeed = await this.needService.getFlaskNeed(body.flaskNeedId);
 
@@ -144,7 +144,7 @@ export class TicketController {
         body.statuses,
       );
 
-      const createTicketDetails: CreateTicketParams = {
+    const createTicketDetails: CreateTicketParams = {
       title: body.title,
       flaskNeedId: body.flaskNeedId,
       need: need,
@@ -215,9 +215,8 @@ export class TicketController {
       const contentDetails = {
         message: ` .به سمن رسید --- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
-        ).getFullYear()}-${
-          new Date(body.arrivalDate).getMonth() + 1
-        }-${new Date(body.arrivalDate).getDate()}`} `,
+        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
+          }-${new Date(body.arrivalDate).getDate()}`} `,
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.ARRIVED_AT_NGO,
@@ -235,9 +234,8 @@ export class TicketController {
       const contentDetails = {
         message: ` .مبلغ دریافت شد--- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
-        ).getFullYear()}-${
-          new Date(body.arrivalDate).getMonth() + 1
-        }-${new Date(body.arrivalDate).getDate()}`} `,
+        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
+          }-${new Date(body.arrivalDate).getDate()}`} `,
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.NGO_RECEIVED_MONEY,
@@ -268,7 +266,7 @@ export class TicketController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.ticketService.DeleteTicket(id);
   }

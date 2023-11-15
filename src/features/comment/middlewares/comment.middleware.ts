@@ -19,7 +19,7 @@ export class CommentMiddleware implements NestMiddleware {
     try {
       await updateFlaskCacheAuthentication(req, this.logger);
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
     const { host, origin } = req.headers;
     const origins = [

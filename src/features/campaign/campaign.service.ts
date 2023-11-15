@@ -126,46 +126,27 @@ export class CampaignService {
       PanelContributors.SOCIAL_WORKER,
     );
     const email = (await this.userService.getFlaskSw(swId)).email;
+    const title = `${preChild.sayName.fa} تأیید شد`;
 
-    const campaignCode = fetchCampaignCode(
-      CampaignNameEnum.CHILD_CONFIRMATION,
-      CampaignTypeEnum.EMAIL,
+    this.logger.warn(
+      `Emailing: Social worker ${socialWorker.flaskUserId} for new child Confirm!`,
     );
-    const campaign = await this.getCampaignByCampaignCode(
-      `${campaignCode} - ${preChild.sayName.fa} - ${preChild.flaskChildId}`,
-      CampaignTypeEnum.EMAIL,
-    );
-
-    if (!campaign) {
-      const title = `${preChild.sayName.fa} تأیید شد`;
-      await this.createCampaign(
-        `${campaignCode} - ${preChild.sayName.fa} - ${preChild.flaskChildId}`,
-        CampaignNameEnum.CHILD_CONFIRMATION,
-        CampaignTypeEnum.EMAIL,
-        title,
-        [socialWorker],
-      );
-      this.logger.warn(
-        `Emailing: Social worker ${socialWorker.flaskUserId} for new child Confirm!`,
-      );
-
-      await this.mailerService.sendMail({
-        from: '"NGOs" <ngo@saydao.org>', // override default from
-        to: email,
-        bcc: process.env.SAY_ADMIN_EMAIL,
-        subject: title,
-        template: './swConfirmedChild', // `.hbs` extension is appended automatically
-        context: {
-          avatarAwake: preChild.awakeUrl,
-          sayName: preChild.sayName.fa,
-          firstName: preChild.firstName.fa,
-          lastName: preChild.lastName.fa,
-          userName: socialWorker.firstName
-            ? socialWorker.firstName
-            : socialWorker.userName,
-        },
-      });
-    }
+    await this.mailerService.sendMail({
+      from: '"NGOs" <ngo@saydao.org>', // override default from
+      to: email,
+      bcc: process.env.SAY_ADMIN_EMAIL,
+      subject: title,
+      template: './swConfirmedChild', // `.hbs` extension is appended automatically
+      context: {
+        avatarAwake: preChild.awakeUrl,
+        sayName: preChild.sayName.fa,
+        firstName: preChild.firstName.fa,
+        lastName: preChild.lastName.fa,
+        userName: socialWorker.firstName
+          ? socialWorker.firstName
+          : socialWorker.userName,
+      },
+    });
   }
 
   async sendSwChildNoNeedReminder() {

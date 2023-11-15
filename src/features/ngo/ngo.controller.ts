@@ -31,7 +31,7 @@ export class NgoController {
     private ngoService: NgoService,
     private userService: UserService,
     private syncService: SyncService,
-  ) {}
+  ) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all ngos' })
@@ -42,7 +42,7 @@ export class NgoController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.ngoService.getNgos();
   }
@@ -56,7 +56,7 @@ export class NgoController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.ngoService.getFlaskNGOSws(
       Number(flaskNgoId),
@@ -70,7 +70,7 @@ export class NgoController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     let socialWorkerId: number;
     let swIds: number[];
@@ -113,7 +113,7 @@ export class NgoController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
       flaskUserId,

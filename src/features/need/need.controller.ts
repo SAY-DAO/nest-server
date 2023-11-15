@@ -30,7 +30,7 @@ export class NeedController {
     private needService: NeedService,
     private userService: UserService,
     private syncService: SyncService,
-  ) {}
+  ) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs from db 1' })
@@ -41,7 +41,7 @@ export class NeedController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.needService.getNeeds();
   }
@@ -55,7 +55,7 @@ export class NeedController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.needService.getNeedById(needId);
   }
@@ -67,7 +67,7 @@ export class NeedController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.needService.getFlaskRandomNeed();
   }
@@ -216,7 +216,7 @@ export class NeedController {
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
       panelFlaskUserId !== SUPER_ADMIN_ID
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const deleteCandidates = await this.needService.getDeleteCandidates();
 
@@ -234,7 +234,7 @@ export class NeedController {
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
       panelFlaskUserId !== SUPER_ADMIN_ID
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const deleteCandidates = await this.needService.getDeleteCandidates();
     for await (const need of deleteCandidates[0]) {

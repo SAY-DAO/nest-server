@@ -27,7 +27,7 @@ export class CampaignController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
 
     return this.campaignService.getCampaigns();

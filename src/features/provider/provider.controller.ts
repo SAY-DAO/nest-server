@@ -40,7 +40,7 @@ import { isAuthenticated } from 'src/utils/auth';
 @ApiTags('Provider')
 @Controller('providers')
 export class ProviderController {
-  constructor(private providerService: ProviderService) {}
+  constructor(private providerService: ProviderService) { }
 
   @Get(`all`)
   @ApiSecurity('flask-access-token')
@@ -54,7 +54,7 @@ export class ProviderController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     return await this.providerService.getProviders();
   }
@@ -71,14 +71,14 @@ export class ProviderController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     let provider: ProviderEntity;
     if (id) {
       try {
         provider = await this.providerService.getProviderById(id);
       } catch (e) {
-        throw new ServerError(e);
+        throw new ServerError(e.message, e.status);
       }
       return provider;
     } else {
@@ -101,7 +101,7 @@ export class ProviderController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     let relation: ProviderJoinNeedEntity;
     try {
@@ -134,7 +134,7 @@ export class ProviderController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     let provider: ProviderEntity;
     const newProvider = {
@@ -160,7 +160,7 @@ export class ProviderController {
     try {
       provider = await this.providerService.createProvider(newProvider);
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
     return provider;
   }
@@ -183,7 +183,7 @@ export class ProviderController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
 
     const newProvider = {
@@ -223,7 +223,7 @@ export class ProviderController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return this.providerService.deleteOne(id);
   }

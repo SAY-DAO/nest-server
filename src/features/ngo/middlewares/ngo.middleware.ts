@@ -21,7 +21,7 @@ export class NgoMiddleware implements NestMiddleware {
     } catch (e) {
       console.log(req.headers);
 
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
 
     const { host, origin } = req.headers;

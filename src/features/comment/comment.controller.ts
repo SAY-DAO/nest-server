@@ -40,7 +40,7 @@ export class CommentController {
     private readonly commentService: CommentService,
     private readonly needService: NeedService,
     private userService: UserService,
-  ) {}
+  ) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all comments' })
@@ -51,7 +51,7 @@ export class CommentController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.commentService.getComments();
   }
@@ -61,7 +61,7 @@ export class CommentController {
   async getNeedComments(@Req() req: Request, @Param('needId') needId: string) {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     return await this.commentService.getNeedComments(needId);
   }
@@ -87,7 +87,7 @@ export class CommentController {
       theNeed = await this.needService.getNeedByFlaskId(body.flaskNeedId);
       if (dappFlaskUserId) {
         if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-          throw new ForbiddenException(403, 'You Are not authorized');
+          throw new ForbiddenException('You Are not authorized');
         }
         theUser = await this.userService.getUserByFlaskId(dappFlaskUserId);
         comment = await this.commentService.createComment(
@@ -104,7 +104,7 @@ export class CommentController {
       }
       if (panelFlaskUserId) {
         if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-          throw new ForbiddenException(403, 'You Are not authorized');
+          throw new ForbiddenException('You Are not authorized');
         }
         theUser = await this.userService.getUserByFlaskId(panelFlaskUserId);
         comment = await this.commentService.createComment(
@@ -119,7 +119,7 @@ export class CommentController {
         );
       }
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
 
     return comment;
@@ -137,7 +137,7 @@ export class CommentController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     try {
       const theComment = await this.commentService.getComment(commentId);
@@ -151,7 +151,7 @@ export class CommentController {
         await this.needService.updateIsResolved(theNeed.id, true);
       }
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 
@@ -164,7 +164,7 @@ export class CommentController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const theNeed = await this.needService.getNeedById(needId);
     let isResolved = theNeed.isResolved;

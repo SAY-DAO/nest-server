@@ -52,7 +52,7 @@ export class UserController {
     private walletService: WalletService,
     private ipfsService: IpfsService,
     private ngoService: NgoService,
-  ) {}
+  ) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all users' })
@@ -63,7 +63,7 @@ export class UserController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.userService.getUsers();
   }
@@ -77,7 +77,7 @@ export class UserController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.userService.getContributors();
   }
@@ -94,7 +94,7 @@ export class UserController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.userService.getFlaskSw(flaskUserId);
   }
@@ -109,7 +109,7 @@ export class UserController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized!');
+      throw new ForbiddenException('You Are not authorized!');
     }
     const time1 = new Date().getTime();
 
@@ -370,10 +370,10 @@ export class UserController {
         paidCount === max
           ? paidCount
           : notPaidCount === max
-          ? notPaidCount
-          : purchasedCount === max
-          ? purchasedCount
-          : deliveredCount,
+            ? notPaidCount
+            : purchasedCount === max
+              ? purchasedCount
+              : deliveredCount,
       meta: {
         paid: paidCount,
         notPaid: notPaidCount,
@@ -409,7 +409,7 @@ export class UserController {
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
       panelFlaskUserId !== SUPER_ADMIN_ID
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const theUser = await this.userService.getUserByFlaskId(flaskUserId);
     const list = [];

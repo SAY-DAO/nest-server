@@ -74,7 +74,7 @@ export class WalletController {
     private userService: UserService,
     private needService: NeedService,
     private ticketService: TicketService,
-  ) {}
+  ) { }
 
   @Get('nonce/:typeId')
   @ApiOperation({ description: 'Get SIWE nonce' })
@@ -138,7 +138,7 @@ export class WalletController {
       }
     } catch (e) {
       req.session.destroy();
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 
@@ -288,7 +288,7 @@ export class WalletController {
       const purchasedNeeds = await this.needService.getPurchasedNeedsCount(
         flaskUserId,
       );
-        purchasedNeeds.forEach((need) => {
+      purchasedNeeds.forEach((need) => {
         if (
           userTickets.find(
             (t) =>
@@ -298,7 +298,7 @@ export class WalletController {
               ),
           )
         ) {
-        counter++;
+          counter++;
         }
       });
 
@@ -347,7 +347,7 @@ export class WalletController {
 
       return transaction;
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 
@@ -400,7 +400,7 @@ export class WalletController {
 
       return transaction;
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 
@@ -729,7 +729,7 @@ export class WalletController {
       );
       return transaction;
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 

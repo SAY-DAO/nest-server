@@ -27,7 +27,7 @@ import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 })
 @Controller('contribution')
 export class ContributionController {
-  constructor(private readonly contributionService: ContributionService) {}
+  constructor(private readonly contributionService: ContributionService) { }
 
   @Get('/all')
   getAvailableContributions(@Req() req: Request) {
@@ -36,12 +36,12 @@ export class ContributionController {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (panelFlaskUserId) {
       if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-        throw new ForbiddenException(403, 'You Are not authorized');
+        throw new ForbiddenException('You Are not authorized');
       }
     }
     if (dappFlaskUserId) {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-        throw new ForbiddenException(403, 'You Are not authorized');
+        throw new ForbiddenException('You Are not authorized');
       }
     }
     return this.contributionService.getAvailableContributions();
@@ -67,19 +67,19 @@ export class ContributionController {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (panelFlaskUserId) {
       if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-        throw new ForbiddenException(403, 'You Are not authorized');
+        throw new ForbiddenException('You Are not authorized');
       }
     }
     if (dappFlaskUserId) {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-        throw new ForbiddenException(403, 'You Are not authorized');
+        throw new ForbiddenException('You Are not authorized');
       }
     }
 
     try {
       return await this.contributionService.getContribution(contributionId);
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 
@@ -95,7 +95,7 @@ export class ContributionController {
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     try {
@@ -105,7 +105,7 @@ export class ContributionController {
 
       await this.contributionService.deleteOne(contribution.id);
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 }

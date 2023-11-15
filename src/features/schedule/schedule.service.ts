@@ -5,6 +5,7 @@ import config from 'src/config';
 import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
 import { CampaignService } from '../campaign/campaign.service';
+import { persianDay } from 'src/utils/helpers';
 
 @Injectable()
 export class ScheduleService {
@@ -97,8 +98,9 @@ export class ScheduleService {
     timeZone: 'Asia/Tehran',
   })
   async handleMonthlyCron() {
-    this.logger.debug('Active Families Called every Month');
-
+    this.logger.debug('Active Families (One and Three months report) Called every Month');
+    // how many amoos? ammes?
+    this.rolesCount();
     // active families
     let actives = config().dataCache.fetchActiveFamilies();
     if (!actives) {
@@ -123,22 +125,31 @@ export class ScheduleService {
     }
   }
 
-  // @Cron('32 13 * * 0', {
-  //   name: 'MonthlyCampaigns',
+  // @Cron('00 13 * * Thu', {
+  //   name: 'MonthlyCampaigns try At 13:00 on Thursday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
   //   timeZone: 'Asia/Tehran',
   // })
   @Timeout(5000)
   async handleSummaryMailCron() {
-    this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
-    // await this.campaignService.sendUserMonthlyCampaigns();
+    // const farsiDay = persianDay(new Date())
+    // if (farsiDay > 20) {
+    //   this.logger.warn(`We are near the end of this month let's skip one more week`);
+    //   return
+    // }
+    // if (process.env.NODE_ENV === 'production') {
+      this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
+      // await this.campaignService.sendUserMonthlyCampaigns();
+    // }
   }
 
-  @Cron('23 8 * * Tue', {
-    name: 'Reminders',
+  @Cron('30 8 * * Mon', {
+    name: 'Reminders At 08:30 on Monday.',
     timeZone: 'Asia/Tehran',
   })
   async handleReminderMailCron() {
-    this.logger.debug('Sending Reminder to Social workers');
-    // await this.campaignService.sendSwMonthlyReminder();
+    if (process.env.NODE_ENV === 'production') {
+      this.logger.debug('Sending Reminder to Social workers');
+      // await this.campaignService.sendSwChildNoNeedReminder();
+    }
   }
 }
