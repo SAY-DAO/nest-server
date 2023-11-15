@@ -232,6 +232,18 @@ export function persianMonthStringFarsi(value: Date) {
     : null;
 }
 
+export function persianDay(value: Date) {
+  if (!value) {
+    return null;
+  }
+  return parseInt(
+    new Intl.DateTimeFormat('en-US-u-ca-persian', { day: 'numeric' }).format(
+      value,
+    ),
+  );
+}
+
+
 export function persianMonth(value: Date) {
   if (!value) {
     return null;
