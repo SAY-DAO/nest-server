@@ -102,7 +102,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     try {
@@ -197,7 +197,7 @@ export class ChildrenController {
       formData.append('housingStatus', String(preRegister.housingStatus));
       formData.append('address', preRegister.address);
 
-      const configs = {
+      let configs = {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: token,
@@ -227,8 +227,14 @@ export class ChildrenController {
       fs.unlinkSync(`${preRegister.awakeUrl}`);
       fs.unlinkSync(`${preRegister.sleptUrl}`);
 
+      const configs2 = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+      };
       // confirm child
-      await axios.patch(`https://api.sayapp.company/api/v2/child/confirm/childId=${data.id}`, configs);
+      await axios.patch(`https://api.sayapp.company/api/v2/child/confirm/childId=${data.id}`, {}, configs2);
 
       // send email
       await this.campaignService.sendSwChildConfirmation(
@@ -245,6 +251,29 @@ export class ChildrenController {
       throw new ServerError('Flask reverted!');
     }
   }
+  @Patch('test')
+  async confirm(@Req() req: Request,) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    try {
+
+
+      const preRegister = await this.childrenService.getChildrenPreRegisterByFlaskId(
+        170);
+      console.log(preRegister);
+
+      // send email
+      await this.campaignService.sendSwChildConfirmation(
+        preRegister.flaskSwId,
+        preRegister,
+      );
+
+    } catch (e) {
+      console.log(e);
+
+    }
+
+  }
 
   @Delete(`preregister/:id`)
   @ApiOperation({ description: 'Delete a pre register' })
@@ -258,7 +287,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     try {
@@ -267,11 +296,11 @@ export class ChildrenController {
       );
 
       if (preRegister.status === PreRegisterStatusEnum.CONFIRMED) {
-        throw new ForbiddenException(403, 'This Child has been confirmed');
+        throw new ForbiddenException('This Child has been confirmed');
       }
       await this.childrenService.deletePreRegister(preRegister.id);
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 
@@ -308,7 +337,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     if (!files) {
@@ -381,7 +410,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     if (!voiceFile) {
       throw new ServerError('No file was uploaded!');
@@ -505,7 +534,7 @@ export class ChildrenController {
         contributor,
       );
     } catch (e) {
-      throw new ServerError(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 
@@ -524,7 +553,7 @@ export class ChildrenController {
     const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
     const page = X_TAKE + 1;
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     let ngoIds: number[];
     let swIds: number[];
@@ -595,7 +624,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.childrenService.getChildren();
   }
@@ -612,7 +641,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.childrenService.getFlaskActiveChildren();
   }
@@ -633,7 +662,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     const names = (await this.childrenService.getFlaskChildrenNames()).map(
       (r) => r.sayname_translations,
@@ -665,7 +694,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.downloadService.excelStream(
       'dist/features/children/resources/names.xlsx',
@@ -693,7 +722,7 @@ export class ChildrenController {
     const page = X_TAKE + 1;
 
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Super admin');
     }
 
     if (
@@ -752,7 +781,7 @@ export class ChildrenController {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     const token =
       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
@@ -763,7 +792,7 @@ export class ChildrenController {
   getAvailableContributions(@Req() req: Request) {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-      throw new ForbiddenException(403, 'You Are not authorized');
+      throw new ForbiddenException('You Are not authorized');
     }
     return this.childrenService.gtTheNetwork();
   }
@@ -800,7 +829,7 @@ export class ChildrenController {
     //     panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
     //   )
     // ) {
-    //   throw new ForbiddenException(403, 'You Are not the Super admin');
+    //   throw new ForbiddenException( 'You Are not the Super admin');
     // }
 
     const children = await this.childrenService.getFlaskChildrenSimple();
