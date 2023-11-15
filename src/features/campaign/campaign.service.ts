@@ -132,14 +132,14 @@ export class CampaignService {
       CampaignTypeEnum.EMAIL,
     );
     const campaign = await this.getCampaignByCampaignCode(
-      campaignCode,
+      `${campaignCode} - ${preChild.sayName.fa} - ${preChild.flaskChildId}`,
       CampaignTypeEnum.EMAIL,
     );
 
     if (!campaign) {
       const title = `${preChild.sayName.fa} تأیید شد`;
       await this.createCampaign(
-        campaignCode,
+        `${campaignCode} - ${preChild.sayName.fa} - ${preChild.flaskChildId}`,
         CampaignNameEnum.CHILD_CONFIRMATION,
         CampaignTypeEnum.EMAIL,
         title,

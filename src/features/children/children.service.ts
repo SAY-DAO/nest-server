@@ -41,7 +41,7 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-  ) {}
+  ) { }
 
   async countChildren(ngoIds: number[]) {
     return this.flaskChildRepository
@@ -270,7 +270,8 @@ export class ChildrenService {
       options,
       queryBuilder,
       {
-        sortableColumns: ['createdAt'],
+        defaultSortBy: [['createdAt', 'DESC']],
+        sortableColumns: ['id'],
         nullSort: 'last',
       },
     );
@@ -333,8 +334,8 @@ export class ChildrenService {
           body.isConfirmed === ChildConfirmation.CONFIRMED
             ? [true]
             : ChildConfirmation.NOT_CONFIRMED
-            ? [false]
-            : ChildConfirmation.BOTH && [true, false],
+              ? [false]
+              : ChildConfirmation.BOTH && [true, false],
       })
       .andWhere('child.id_social_worker IN (:...socialWorkerIds)', {
         socialWorkerIds: [...socialWorkerIds],
@@ -344,11 +345,11 @@ export class ChildrenService {
           body.statuses[0] >= 0
             ? [...body.statuses]
             : [
-                ChildExistence.DEAD,
-                ChildExistence.AlivePresent,
-                ChildExistence.AliveGone,
-                ChildExistence.TempGone,
-              ],
+              ChildExistence.DEAD,
+              ChildExistence.AlivePresent,
+              ChildExistence.AliveGone,
+              ChildExistence.TempGone,
+            ],
       })
 
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {

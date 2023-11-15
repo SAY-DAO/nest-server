@@ -247,34 +247,10 @@ export class ChildrenController {
         approvedPre: approvedPre,
       };
     } catch (e) {
-      console.log(e);
       throw new ServerError('Flask reverted!');
     }
   }
-  @Patch('test')
-  async confirm(@Req() req: Request,) {
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    try {
-
-
-      const preRegister = await this.childrenService.getChildrenPreRegisterByFlaskId(
-        170);
-      console.log(preRegister);
-
-      // send email
-      await this.campaignService.sendSwChildConfirmation(
-        preRegister.flaskSwId,
-        preRegister,
-      );
-
-    } catch (e) {
-      console.log(e);
-
-    }
-
-  }
-
+  
   @Delete(`preregister/:id`)
   @ApiOperation({ description: 'Delete a pre register' })
   async deletePreRegister(@Req() req: Request, @Param('id') id: string) {
