@@ -388,6 +388,14 @@ export class ChildrenService {
       .getMany();
   }
 
+
+  async getPreChildrenNames(): Promise<ChildrenPreRegisterEntity[]> {
+    return await this.preRegisterChildrenRepository
+      .createQueryBuilder('child')
+      .select(['child.sayName'])
+      .getMany();
+  }
+
   getChildPreRegisterById(id: string): Promise<ChildrenPreRegisterEntity> {
     const child = this.preRegisterChildrenRepository.findOne({
       where: {

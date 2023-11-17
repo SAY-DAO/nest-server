@@ -250,7 +250,7 @@ export class ChildrenController {
       throw new ServerError('Flask reverted!');
     }
   }
-  
+
   @Delete(`preregister/:id`)
   @ApiOperation({ description: 'Delete a pre register' })
   async deletePreRegister(@Req() req: Request, @Param('id') id: string) {
@@ -640,21 +640,27 @@ export class ChildrenController {
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
-    const names = (await this.childrenService.getFlaskChildrenNames()).map(
+    const confirmedNames = (await this.childrenService.getFlaskChildrenNames()).map(
       (r) => r.sayname_translations,
     );
 
+    const preNames = (await this.childrenService.getPreChildrenNames()).map(
+      (r) => r.sayName,
+    );
+
+    const names = confirmedNames.concat(preNames)
+    console.log(names);
+
+    // to minimize human mistakes, we also compare the last 3 chars - همادخت vs هُمادخت
+    const found = names.filter((n) =>
+      lang === 'en'
+        ? n.en.toUpperCase() === newName.toUpperCase() || n.en && n.en.slice(-3).toUpperCase() === newName.slice(-3).toUpperCase()
+        : n.fa === newName || n.fa && n.fa.slice(-3) === newName.slice(-3),
+    )
+
     return {
-      found: names.filter((n) =>
-        lang === 'en'
-          ? n.en.toUpperCase() === newName.toUpperCase()
-          : n.fa === newName,
-      )[0],
-      total: names.filter((n) =>
-        lang === 'en'
-          ? n.en.toUpperCase() === newName.toUpperCase()
-          : n.fa === newName,
-      ).length,
+      found,
+      total: found.length
     };
   }
 
