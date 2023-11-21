@@ -392,6 +392,7 @@ export class ChildrenService {
   async getPreChildrenNames(): Promise<ChildrenPreRegisterEntity[]> {
     return await this.preRegisterChildrenRepository
       .createQueryBuilder('child')
+      .where('child.status != :status', { status: PreRegisterStatusEnum.CONFIRMED })
       .select(['child.sayName'])
       .getMany();
   }

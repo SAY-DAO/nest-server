@@ -24,7 +24,7 @@ export class UserService {
     private flaskSocialWorkerRepository: Repository<SocialWorker>,
     @InjectRepository(User, 'flaskPostgres')
     private flaskUserRepository: Repository<User>,
-  ) {}
+  ) { }
 
   getFlaskSwIds(): Promise<SocialWorker[]> {
     return this.flaskSocialWorkerRepository.find({
@@ -287,4 +287,14 @@ export class UserService {
     }
     return from(this.allUserRepository.delete(userId));
   }
+
+
+  async temp(
+    userId: string,
+  ): Promise<UpdateResult> {
+    return this.allUserRepository.update(userId, {
+      monthlyCampaign: true,
+    });
+  }
+
 }
