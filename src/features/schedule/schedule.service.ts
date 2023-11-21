@@ -84,7 +84,6 @@ export class ScheduleService {
   }
 
   @Timeout(15000)
-  // @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCronOnce() {
     this.logger.debug(
       'Called only once after 15 seconds of the server initiation',
@@ -125,10 +124,10 @@ export class ScheduleService {
     }
   }
 
-  @Cron('00 13 * * Thu', {
-    name: 'MonthlyCampaigns try At 13:00 on Thursday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
-    timeZone: 'Asia/Tehran',
-  })
+  // @Cron('00 13 * * Wend', {
+  //   name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+  //   timeZone: 'Asia/Tehran',
+  // })
   @Timeout(5000)
   async handleSummaryMailCron() {
     // const farsiDay = persianDay(new Date())
@@ -136,10 +135,10 @@ export class ScheduleService {
     //   this.logger.warn(`We are near the end of this month let's skip one more week`);
     //   return
     // }
-    if (process.env.NODE_ENV === 'production') {
+    // if (process.env.NODE_ENV === 'production') {
       this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
-      // await this.campaignService.sendUserMonthlyCampaigns();
-    }
+      await this.campaignService.sendUserMonthlyCampaigns();
+    // }
   }
 
   @Cron('30 8 * * Mon', {

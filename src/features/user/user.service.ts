@@ -287,14 +287,4 @@ export class UserService {
     }
     return from(this.allUserRepository.delete(userId));
   }
-
-
-  async temp(
-    userId: string,
-  ): Promise<UpdateResult> {
-    return this.allUserRepository.update(userId, {
-      monthlyCampaign: true,
-    });
-  }
-
 }

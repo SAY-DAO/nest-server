@@ -248,7 +248,7 @@ export class CampaignService {
       let skippedUsersNoChildren = 0;
       let skippedUsersNoUnpaid = 0;
       let turnedOffCount = 0;
-      for await (const flaskUser of flaskUsers) {
+      for await (const flaskUser of shuffledUsers) {
         const eligibleChildren = [];
         let nestUser = await this.userService.getFamilyByFlaskId(flaskUser.id);
         if (!nestUser) {
@@ -287,27 +287,27 @@ export class CampaignService {
         // 4- send campaign users with no children
         if (!userChildren || !userChildren[0]) {
           if (flaskUser.is_email_verified) {
-            // await this.mailerService.sendMail({
-            //   to: flaskUser.emailAddress,
-            //   subject: `گسترش خانواده مجازی`,
-            //   template: './expandFamilyNoChild', // `.hbs` extension is appended automatically
-            //   context: {
-            //     userName: flaskUser.firstName
-            //       ? flaskUser.firstName
-            //       : flaskUser.userName,
-            //   },
-            // });
+            await this.mailerService.sendMail({
+              to: flaskUser.emailAddress,
+              subject: `گسترش خانواده مجازی`,
+              template: './expandFamilyNoChild', // `.hbs` extension is appended automatically
+              context: {
+                userName: flaskUser.firstName
+                  ? flaskUser.firstName
+                  : flaskUser.userName,
+              },
+            });
           }
           if (flaskUser.is_phonenumber_verified) {
-            // const to = flaskUser.phone_number;
-            // const from = process.env.SMS_FROM;
-            // const shortNeedUrl = await this.shortenUrl({
-            //   longUrl: `https://dapp.saydao.org//main/search?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.SMS}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignSmsCode}`,
-            // });
+            const to = flaskUser.phone_number;
+            const from = process.env.SMS_FROM;
+            const shortNeedUrl = await this.shortenUrl({
+              longUrl: `https://dapp.saydao.org/main/search?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.SMS}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignSmsCode}`,
+            });
 
-            // const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
-            //   }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} `;
-            // await this.smsRest.send(to, from, text);
+            const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+              }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} `;
+            await this.smsRest.send(to, from, text);
           }
           skippedUsersNoChildren++;
           continue;
@@ -363,16 +363,16 @@ export class CampaignService {
             await this.familyService.getFamilyReadyToSignNeeds(flaskUser.id)
           ).filter((n) => n.midjourneyImage);
 
-          // await this.mailerService.sendMail({
-          //   to: flaskUser.emailAddress,
-          //   subject: `نیازهای ${persianMonth} ماه کودکان شما`,
-          //   template: './monthlyCampaign', // `.hbs` extension is appended automatically
-          //   context: {
-          //     myChildren: eligibleChildren,
-          //     readyToSignNeeds,
-          //     googleCampaignBuilder
-          //   },
-          // });
+          await this.mailerService.sendMail({
+            to: flaskUser.emailAddress,
+            subject: `نیازهای ${persianMonth} ماه کودکان شما`,
+            template: './monthlyCampaign', // `.hbs` extension is appended automatically
+            context: {
+              myChildren: eligibleChildren,
+              readyToSignNeeds,
+              googleCampaignBuilder
+            },
+          });
 
           this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
           emailReceivers.push(nestUser);
@@ -380,17 +380,17 @@ export class CampaignService {
 
 
         if (flaskUser.is_phonenumber_verified) {
-          // const to = flaskUser.phone_number;
-          // const from = process.env.SMS_FROM;
-          // const shortNeedUrl = await this.shortenUrl({
-          //   longUrl: `https://dapp.saydao.org/child/${eligibleChildren[0].id}/needs/${eligibleChildren[0].unPaidNeeds[0].id}?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.SMS}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignSmsCode}`,
-          // });
+          const to = flaskUser.phone_number;
+          const from = process.env.SMS_FROM;
+          const shortNeedUrl = await this.shortenUrl({
+            longUrl: `https://dapp.saydao.org/child/${eligibleChildren[0].id}/needs/${eligibleChildren[0].unPaidNeeds[0].id}?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.SMS}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignSmsCode}`,
+          });
 
-          // const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
-          //   }،\n از آخرین نیازهای کودک شما، ${eligibleChildren[0].sayName
-          //   }: ${shortNeedUrl} لغو۱۱`;
+          const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+            }،\n از آخرین نیازهای کودک شما، ${eligibleChildren[0].sayName
+            }: ${shortNeedUrl} لغو۱۱`;
 
-          // await this.smsRest.send(to, from, text)
+          await this.smsRest.send(to, from, text)
 
           this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
           smsReceivers.push(nestUser);

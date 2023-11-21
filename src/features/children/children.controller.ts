@@ -197,7 +197,7 @@ export class ChildrenController {
       formData.append('housingStatus', String(preRegister.housingStatus));
       formData.append('address', preRegister.address);
 
-      let configs = {
+      const configs = {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: token,

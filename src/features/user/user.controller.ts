@@ -417,16 +417,4 @@ export class UserController {
     return await this.userService.deleteOneContributor(theUser.id, list);
   }
 
-  @Get('/temp')
-  async getAvailableContributions(@Req() req: Request) {
-    const users = await this.userService.getUsers();
-    for await(const user of users){
-      await this.userService.temp(user.id)
-    }
-
-
-  }
-
-
-
 }
