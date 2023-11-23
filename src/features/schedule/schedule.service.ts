@@ -125,24 +125,24 @@ export class ScheduleService {
       this.logger.debug('Reading from cache');
     }
   }
-
-  @Cron('17 15 * * Thu', {
-    name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
-    timeZone: 'Asia/Tehran',
-  })
-  async handleSummaryMailCron() {
-    const farsiDay = persianDay(new Date());
-    if (farsiDay > 20) {
-      this.logger.warn(
-        `We are near the end of this month let's skip one more week`,
-      );
-      return;
-    }
-    if (process.env.NODE_ENV === 'production') {
-    this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
-    await this.campaignService.sendUserMonthlyCampaigns();
-    }
-  }
+  // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here
+  // @Cron('17 15 * * Thu', {
+  //   name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+  //   timeZone: 'Asia/Tehran',
+  // })
+  // async handleSummaryMailCron() {
+  //   const farsiDay = persianDay(new Date());
+  //   if (farsiDay > 20) {
+  //     this.logger.warn(
+  //       `We are near the end of this month let's skip one more week`,
+  //     );
+  //     return;
+  //   }
+  //   if (process.env.NODE_ENV === 'production') {
+  //   this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
+  //   await this.campaignService.sendUserMonthlyCampaigns();
+  //   }
+  // }
 
   @Cron('30 8 * * Mon', {
     name: 'Reminders At 08:30 on Monday.',
