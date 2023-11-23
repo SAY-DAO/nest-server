@@ -300,7 +300,7 @@ export class CampaignService {
 
             const text = `سلام ${
               flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
-            }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} `;
+            }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
             await this.smsRest.send(to, from, text);
           }
           skippedUsersNoChildren++;
