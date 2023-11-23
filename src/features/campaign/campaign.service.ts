@@ -11,10 +11,8 @@ import { ServerError } from 'src/filters/server-exception.filter';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
 import {
-  daysDifference,
   fetchCampaginCode as fetchCampaignCode,
   isUnpayable,
-  persianDay,
   persianMonthStringFarsi,
   prepareUrl,
   removeDuplicates,
@@ -53,7 +51,7 @@ export class CampaignService {
     private familyService: FamilyService,
     private mailerService: MailerService,
     private childrenService: ChildrenService,
-  ) { }
+  ) {}
   private readonly logger = new Logger(CampaignService.name);
   smsApi = new MelipayamakApi(process.env.SMS_USER, process.env.SMS_PASSWORD);
   smsRest = this.smsApi.sms();
@@ -235,12 +233,7 @@ export class CampaignService {
       const emailReceivers = [];
       const smsReceivers = [];
       const flaskUsers = await this.userService.getFlaskUsers();
-      const shuffledUsers = shuffleArray(
-        flaskUsers.filter(
-          (u) => u.userName === 'ehsan' || u.userName === 'mamad',
-        ),
-      );
-
+      const shuffledUsers = shuffleArray(flaskUsers);
 
       // 1- loop shuffled users
       let alreadyReceivedEmailCount = 0;
@@ -264,7 +257,7 @@ export class CampaignService {
           const alreadyReceivedEmail = emailCampaign.receivers.find(
             (r) => r.flaskUserId === flaskUser.id,
           );
-          if (!alreadyReceivedEmail) {
+          if (alreadyReceivedEmail) {
             alreadyReceivedEmailCount++;
             continue;
           }
@@ -274,7 +267,7 @@ export class CampaignService {
           const alreadyReceivedSms = smsCampaign.receivers.find(
             (r) => r.flaskUserId === flaskUser.id,
           );
-          if (!alreadyReceivedSms) {
+          if (alreadyReceivedSms) {
             alreadyReceivedSmsCount++;
             continue;
           }
@@ -305,8 +298,9 @@ export class CampaignService {
               longUrl: `https://dapp.saydao.org/main/search?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.SMS}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignSmsCode}`,
             });
 
-            const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
-              }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} `;
+            const text = `سلام ${
+              flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+            }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} `;
             await this.smsRest.send(to, from, text);
           }
           skippedUsersNoChildren++;
@@ -317,8 +311,9 @@ export class CampaignService {
         // 5- loop shuffled children
         for await (const child of shuffleArray(userChildren)) {
           if (counter <= 3) {
-            const childUnpaidNeeds =
-              (await this.needService.getFlaskChildUnpaidNeeds(child.id)).filter(n => !isUnpayable(n));
+            const childUnpaidNeeds = (
+              await this.needService.getFlaskChildUnpaidNeeds(child.id)
+            ).filter((n) => !isUnpayable(n));
             if (!childUnpaidNeeds || !childUnpaidNeeds[0]) {
               // we separately email social workers
               continue;
@@ -387,9 +382,11 @@ export class CampaignService {
             longUrl: `https://dapp.saydao.org/child/${eligibleChildren[0].id}/needs/${eligibleChildren[0].unPaidNeeds[0].id}?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.SMS}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignSmsCode}`,
           });
 
-          const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
-            }،\n از آخرین نیازهای کودک شما، ${eligibleChildren[0].sayName
-            }: ${shortNeedUrl} لغو۱۱`;
+          const text = `سلام ${
+            flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+          }،\n از آخرین نیازهای کودک شما، ${
+            eligibleChildren[0].sayName
+          }: ${shortNeedUrl} لغو۱۱`;
 
           await this.smsRest.send(to, from, text);
 

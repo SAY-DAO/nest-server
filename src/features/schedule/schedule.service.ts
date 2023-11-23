@@ -13,7 +13,7 @@ export class ScheduleService {
     private campaignService: CampaignService,
     private familyService: FamilyService,
     private analyticService: AnalyticService,
-  ) { }
+  ) {}
   private readonly logger = new Logger(ScheduleService.name);
 
   async completePays() {
@@ -97,7 +97,9 @@ export class ScheduleService {
     timeZone: 'Asia/Tehran',
   })
   async handleMonthlyCron() {
-    this.logger.debug('Active Families (One and Three months report) Called every Month');
+    this.logger.debug(
+      'Active Families (One and Three months report) Called every Month',
+    );
     // how many amoos? ammes?
     this.rolesCount();
     // active families
@@ -124,21 +126,22 @@ export class ScheduleService {
     }
   }
 
-  // @Cron('53 13 * * Thu', {
-  //   name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
-  //   timeZone: 'Asia/Tehran',
-  // })
-  @Timeout(15000)
+  @Cron('40 14 * * Thu', {
+    name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+    timeZone: 'Asia/Tehran',
+  })
   async handleSummaryMailCron() {
-    const farsiDay = persianDay(new Date())
+    const farsiDay = persianDay(new Date());
     if (farsiDay > 20) {
-      this.logger.warn(`We are near the end of this month let's skip one more week`);
-      return
+      this.logger.warn(
+        `We are near the end of this month let's skip one more week`,
+      );
+      return;
     }
-    // if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production') {
     this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
     await this.campaignService.sendUserMonthlyCampaigns();
-    // }
+    }
   }
 
   @Cron('30 8 * * Mon', {
