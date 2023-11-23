@@ -124,20 +124,19 @@ export class ScheduleService {
     }
   }
 
-  // @Cron('00 13 * * Wend', {
-  //   name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
-  //   timeZone: 'Asia/Tehran',
-  // })
-  @Timeout(5000)
+  @Cron('53 13 * * Thu', {
+    name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+    timeZone: 'Asia/Tehran',
+  })
   async handleSummaryMailCron() {
-    // const farsiDay = persianDay(new Date())
-    // if (farsiDay > 20) {
-    //   this.logger.warn(`We are near the end of this month let's skip one more week`);
-    //   return
-    // }
+    const farsiDay = persianDay(new Date())
+    if (farsiDay > 20) {
+      this.logger.warn(`We are near the end of this month let's skip one more week`);
+      return
+    }
     // if (process.env.NODE_ENV === 'production') {
-      this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
-      await this.campaignService.sendUserMonthlyCampaigns();
+    this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
+    await this.campaignService.sendUserMonthlyCampaigns();
     // }
   }
 

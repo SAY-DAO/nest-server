@@ -13,6 +13,7 @@ import { NeedService } from '../need/need.service';
 import {
   daysDifference,
   fetchCampaginCode as fetchCampaignCode,
+  isUnpayable,
   persianDay,
   persianMonthStringFarsi,
   prepareUrl,
@@ -222,9 +223,7 @@ export class CampaignService {
         const from = process.env.SMS_FROM;
         const text = `سلام،\nتعداد پیامک شما رو به پایان است. \n با احترام \n SAY \n لغو۱۱`;
         await this.smsRest.send(to, from, text);
-        throw new ForbiddenException(
-          'We need to charge the sms provider',
-        );
+        throw new ForbiddenException('We need to charge the sms provider');
       }
 
       const persianMonth = persianMonthStringFarsi(new Date());
@@ -241,6 +240,7 @@ export class CampaignService {
           (u) => u.userName === 'ehsan' || u.userName === 'mamad',
         ),
       );
+
 
       // 1- loop shuffled users
       let alreadyReceivedEmailCount = 0;
@@ -318,7 +318,7 @@ export class CampaignService {
         for await (const child of shuffleArray(userChildren)) {
           if (counter <= 3) {
             const childUnpaidNeeds =
-              await this.needService.getFlaskChildUnpaidNeeds(child.id);
+              (await this.needService.getFlaskChildUnpaidNeeds(child.id)).filter(n => !isUnpayable(n));
             if (!childUnpaidNeeds || !childUnpaidNeeds[0]) {
               // we separately email social workers
               continue;
@@ -342,7 +342,7 @@ export class CampaignService {
                   name: n.name_translations.fa,
                   price: n._cost.toLocaleString(),
                   image:
-                    n.type === NeedTypeEnum.PRODUCT
+                    n.type === NeedTypeEnum.PRODUCT && n.img
                       ? n.img
                       : prepareUrl(n.imageUrl),
                 };
@@ -357,7 +357,9 @@ export class CampaignService {
         }
 
         if (flaskUser.is_email_verified) {
-          const googleCampaignBuilder = String(`?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.EMAIL}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignEmailCode}`)
+          const googleCampaignBuilder = String(
+            `?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.EMAIL}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignEmailCode}`,
+          );
 
           const readyToSignNeeds = (
             await this.familyService.getFamilyReadyToSignNeeds(flaskUser.id)
@@ -370,14 +372,13 @@ export class CampaignService {
             context: {
               myChildren: eligibleChildren,
               readyToSignNeeds,
-              googleCampaignBuilder
+              googleCampaignBuilder,
             },
           });
 
           this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
           emailReceivers.push(nestUser);
         }
-
 
         if (flaskUser.is_phonenumber_verified) {
           const to = flaskUser.phone_number;
@@ -390,7 +391,7 @@ export class CampaignService {
             }،\n از آخرین نیازهای کودک شما، ${eligibleChildren[0].sayName
             }: ${shortNeedUrl} لغو۱۱`;
 
-          await this.smsRest.send(to, from, text)
+          await this.smsRest.send(to, from, text);
 
           this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
           smsReceivers.push(nestUser);
