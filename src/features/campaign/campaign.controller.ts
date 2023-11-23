@@ -4,6 +4,7 @@ import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 import { isAuthenticated } from 'src/utils/auth';
 import { CampaignService } from './campaign.service';
 import { ShortenURLDto } from 'src/types/dtos/url.dto';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Campaign')
 @ApiSecurity('flask-access-token')
@@ -39,6 +40,9 @@ export class CampaignController {
     @Param('code') code: string,
   ) {
     const url = await this.campaignService.redirect(code);
+    if (!url) {
+      throw new ServerError('Could not find the url', 500)
+    }
     return res.redirect(url.longUrl)
   }
 

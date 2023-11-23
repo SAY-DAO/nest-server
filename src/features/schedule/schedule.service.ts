@@ -124,10 +124,11 @@ export class ScheduleService {
     }
   }
 
-  @Cron('53 13 * * Thu', {
-    name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
-    timeZone: 'Asia/Tehran',
-  })
+  // @Cron('53 13 * * Thu', {
+  //   name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+  //   timeZone: 'Asia/Tehran',
+  // })
+  @Timeout(15000)
   async handleSummaryMailCron() {
     const farsiDay = persianDay(new Date())
     if (farsiDay > 20) {
