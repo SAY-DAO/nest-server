@@ -126,7 +126,7 @@ export class ScheduleService {
     }
   }
 
-  @Cron('40 14 * * Thu', {
+  @Cron('17 15 * * Thu', {
     name: 'MonthlyCampaigns try At 13:00 on Wednesday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
     timeZone: 'Asia/Tehran',
   })
