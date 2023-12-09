@@ -6,7 +6,8 @@ import { ChildAPIApi } from 'src/generated-sources/openapi';
 import { NeedSummary } from 'src/types/interfaces/Need';
 import {
   ChildParams,
-  PreRegisterChildParams,
+  PreRegisterChildPrepareParams,
+  PreRegisterChildUpdateParams,
   createFlaskChildParams,
 } from 'src/types/parameters/ChildParameters';
 import { NgoEntity } from 'src/entities/ngo.entity';
@@ -41,7 +42,7 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-  ) { }
+  ) {}
 
   async countChildren(ngoIds: number[]) {
     return this.flaskChildRepository
@@ -162,9 +163,9 @@ export class ChildrenService {
     );
   }
 
-  updatePreRegisterChild(
+  preRegisterPrepare(
     theId: string,
-    childDetails: PreRegisterChildParams,
+    childDetails: PreRegisterChildPrepareParams,
     location: LocationEntity,
     ngo: NgoEntity,
     sw: ContributorEntity,
@@ -182,6 +183,24 @@ export class ChildrenService {
         location,
         ngo,
         socialWorker: sw,
+      },
+    );
+  }
+
+  preRegisterUpdate(
+    theId: string,
+    childDetails: PreRegisterChildUpdateParams,
+  ): Promise<UpdateResult> {
+    return this.preRegisterChildrenRepository.update(
+      { id: theId },
+      {
+        ...childDetails,
+        firstName: {
+          fa: childDetails.firstName.fa,
+          en: childDetails.firstName.en,
+        },
+        lastName: { fa: childDetails.lastName.fa, en: '' },
+        bio: { fa: childDetails.bio.fa, en: '' },
       },
     );
   }
@@ -232,7 +251,6 @@ export class ChildrenService {
     ngoIds: number[],
     swIds: number[],
   ): Promise<Paginated<ChildrenPreRegisterEntity>> {
-
     const queryBuilder = this.preRegisterChildrenRepository
       .createQueryBuilder('preRegister')
       .leftJoinAndMapOne(
@@ -334,8 +352,8 @@ export class ChildrenService {
           body.isConfirmed === ChildConfirmation.CONFIRMED
             ? [true]
             : ChildConfirmation.NOT_CONFIRMED
-              ? [false]
-              : ChildConfirmation.BOTH && [true, false],
+            ? [false]
+            : ChildConfirmation.BOTH && [true, false],
       })
       .andWhere('child.id_social_worker IN (:...socialWorkerIds)', {
         socialWorkerIds: [...socialWorkerIds],
@@ -345,11 +363,11 @@ export class ChildrenService {
           body.statuses[0] >= 0
             ? [...body.statuses]
             : [
-              ChildExistence.DEAD,
-              ChildExistence.AlivePresent,
-              ChildExistence.AliveGone,
-              ChildExistence.TempGone,
-            ],
+                ChildExistence.DEAD,
+                ChildExistence.AlivePresent,
+                ChildExistence.AliveGone,
+                ChildExistence.TempGone,
+              ],
       })
 
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
@@ -388,11 +406,12 @@ export class ChildrenService {
       .getMany();
   }
 
-
   async getPreChildrenNames(): Promise<ChildrenPreRegisterEntity[]> {
     return await this.preRegisterChildrenRepository
       .createQueryBuilder('child')
-      .where('child.status != :status', { status: PreRegisterStatusEnum.CONFIRMED })
+      .where('child.status != :status', {
+        status: PreRegisterStatusEnum.CONFIRMED,
+      })
       .select(['child.sayName'])
       .getMany();
   }

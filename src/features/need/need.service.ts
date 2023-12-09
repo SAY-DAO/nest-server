@@ -689,7 +689,6 @@ export class NeedService {
     ngoIds: number[],
     needWithSignatures: number[],
   ): Promise<Paginated<Need>> {
-
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -733,7 +732,7 @@ export class NeedService {
       .andWhere('need.created_by_id IN (:...swIds)', {
         swIds: socialWorker ? [socialWorker] : [...swIds],
       })
-      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds }) 
+      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds }) // e.g: sw: 1 used to be in Ngo:13, therefore some needs are created in an ngo where their sw is now active somewhere else.
       // .andWhere('need_receipt.deleted = :receiptDeleted', { receiptDeleted: null })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere(

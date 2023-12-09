@@ -62,7 +62,7 @@ export type createFlaskChildParams = {
   education?: number;
 };
 
-export type PreRegisterChildParams = {
+export type PreRegisterChildPrepareParams = {
   phoneNumber: string;
   address: string;
   country: number;
@@ -81,6 +81,15 @@ export type PreRegisterChildParams = {
   schoolType: SchoolTypeEnum;
   flaskNgoId: number;
   flaskSwId: number;
+  firstName: { fa: string; en: string };
+  lastName: { fa: string; en: string };
+};
+
+export type PreRegisterChildUpdateParams = {
+  bio: { fa: string; en: string };
+  housingStatus: HousingEnum;
+  educationLevel: EducationEnum;
+  schoolType: SchoolTypeEnum;
   firstName: { fa: string; en: string };
   lastName: { fa: string; en: string };
 };

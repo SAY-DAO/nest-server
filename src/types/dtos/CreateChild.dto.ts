@@ -27,7 +27,7 @@ export class CreateFlaskChildDto {
   bioEn: string;
 }
 
-export class UpdatePreRegisterChildDto {
+export class PreparePreRegisterChildDto {
   @IsNotEmpty()
   bio: string;
   @IsNotEmpty()
@@ -62,4 +62,22 @@ export class UpdatePreRegisterChildDto {
   ngoId: number;
   @IsNotEmpty()
   swId: number;
+}
+
+
+export class UpdatePreRegisterChildDto {
+  @IsNotEmpty()
+  id: string;
+  @IsNotEmpty()
+  bio: string;
+  @IsNotEmpty()
+  firstName: string;
+  @IsNotEmpty()
+  lastName: string;
+  @IsNotEmpty()
+  educationLevel: EducationEnum;
+  @IsNotEmpty()
+  schoolType: SchoolTypeEnum;
+  @IsNotEmpty()
+  housingStatus: HousingEnum;
 }
