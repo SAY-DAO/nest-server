@@ -347,23 +347,31 @@ export class CampaignService {
 
         // 4- send campaign users with no children
         if (!userChildren || !userChildren[0]) {
+          
           if (flaskUser.is_email_verified) {
             try {
-              // await this.mailerService.sendMail({
-              //   to: flaskUser.emailAddress,
-              //   subject: `گسترش خانواده مجازی`,
-              //   template: './expandFamilyNoChild', // `.hbs` extension is appended automatically
-              //   context: {
-              //     userName: flaskUser.firstName
-              //       ? flaskUser.firstName
-              //       : flaskUser.userName,
-              //   },
-              // });
+              await this.mailerService.sendMail({
+                to: flaskUser.emailAddress,
+                subject: `گسترش خانواده مجازی`,
+                template: './expandFamilyNoChild', // `.hbs` extension is appended automatically
+                context: {
+                  userName: flaskUser.firstName
+                    ? flaskUser.firstName
+                    : flaskUser.userName,
+                },
+              });
+              await this.handleEmailCampaign(
+                campaignEmailCode,
+                tittle,
+                emailCampaign,
+                [nestUser],
+              );
             } catch (e) {
               console.log(e);
               continue;
             }
           }
+
           if (flaskUser.is_phonenumber_verified) {
             const to = flaskUser.phone_number;
             const from = process.env.SMS_FROM;
@@ -374,8 +382,11 @@ export class CampaignService {
             const text = `سلام ${
               flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
             }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
-            // await this.smsRest.send(to, from, text);
+            await this.smsRest.send(to, from, text);
           }
+          await this.handleSmsCampaign(campaignSmsCode, tittle, smsCampaign, [
+            nestUser,
+          ]);
           skippedUsersNoChildren++;
           continue;
         }
