@@ -527,7 +527,7 @@ export function ticketNotifications(
   flaskUserId: number,
 ) {
   const unReads = myTickets.filter((t) => {
-    console.log(new Date(t.updatedAt));
+    // console.log(new Date(t.updatedAt));
     console.log(
       new Date(
         t.views.find((v) => v.flaskUserId === flaskUserId) &&
