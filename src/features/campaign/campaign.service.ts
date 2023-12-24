@@ -56,6 +56,60 @@ export class CampaignService {
   smsApi = new MelipayamakApi(process.env.SMS_USER, process.env.SMS_PASSWORD);
   smsRest = this.smsApi.sms();
 
+  async handleEmailCampaign(
+    campaignEmailCode: string,
+    tittle: string,
+    emailCampaign: CampaignEntity,
+    emailReceivers: any[],
+  ) {
+    if (!emailCampaign && emailReceivers && emailReceivers[0]) {
+      await this.createCampaign(
+        campaignEmailCode,
+        CampaignNameEnum.MONTHLY_CAMPAIGNS,
+        CampaignTypeEnum.EMAIL,
+        tittle,
+        emailReceivers,
+      );
+      this.logger.log(`EMAIL: Campaign Created - ${campaignEmailCode}`);
+    }
+
+    if (emailCampaign && emailReceivers[0]) {
+      await this.updateCampaignUsers(
+        emailCampaign,
+        emailCampaign.receivers,
+        emailReceivers,
+      );
+      this.logger.log(`EMAIL: Campaign Updated - ${campaignEmailCode}`);
+    }
+  }
+
+  async handleSmsCampaign(
+    campaignSmsCode: string,
+    tittle: string,
+    smsCampaign: CampaignEntity,
+    smsReceivers: any[],
+  ) {
+    if (!smsCampaign && smsReceivers && smsReceivers[0]) {
+      await this.createCampaign(
+        campaignSmsCode,
+        CampaignNameEnum.MONTHLY_CAMPAIGNS,
+        CampaignTypeEnum.SMS,
+        tittle,
+        smsReceivers,
+      );
+      this.logger.log(`SMS: Campaign Created - ${campaignSmsCode}`);
+    }
+
+    if (smsCampaign && smsReceivers[0]) {
+      await this.updateCampaignUsers(
+        smsCampaign,
+        smsCampaign.receivers,
+        smsReceivers,
+      );
+      this.logger.log(`SMS: Campaign Updated - ${campaignSmsCode}`);
+    }
+  }
+
   getCampaigns(): Promise<CampaignEntity[]> {
     return this.campaignRepository.find({
       relations: {
@@ -216,7 +270,7 @@ export class CampaignService {
 
       // Notify admin if running out of sms credit
       const credit = await this.smsRest.getCredit();
-      if (Number(credit.Value) < 100) {
+      if (Number(credit.Value) < 150) {
         const to = process.env.SAY_ADMIN_SMS;
         const from = process.env.SMS_FROM;
         const text = `سلام،\nتعداد پیامک شما رو به پایان است. \n با احترام \n SAY \n لغو۱۱`;
@@ -224,23 +278,34 @@ export class CampaignService {
         throw new ForbiddenException('We need to charge the sms provider');
       }
 
+      // 0 -setup
       const persianMonth = persianMonthStringFarsi(new Date());
       if (!persianMonth) {
         throw new ServerError('We need the month string');
       }
       const tittle = `نیازهای ${persianMonth} ماه کودکان شما`;
 
-      const emailReceivers = [];
-      const smsReceivers = [];
       const flaskUsers = await this.userService.getFlaskUsers();
-      const shuffledUsers = shuffleArray(flaskUsers);
+      let shuffledUsers = shuffleArray(flaskUsers);
 
-      // 1- loop shuffled users
       let alreadyReceivedEmailCount = 0;
       let alreadyReceivedSmsCount = 0;
       let skippedUsersNoChildren = 0;
       let skippedUsersNoUnpaid = 0;
       let turnedOffCount = 0;
+      let emailReceiversTotal = 0;
+      let smsReceiversTotal = 0;
+
+      const testUsers = [
+        await this.userService.getFlaskUser(12687),
+        await this.userService.getFlaskUser(115),
+      ];
+      shuffledUsers = testUsers;
+      if (shuffledUsers.length > 2) {
+        return;
+      }
+
+      // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {
         const eligibleChildren = [];
         let nestUser = await this.userService.getFamilyByFlaskId(flaskUser.id);
@@ -277,6 +342,7 @@ export class CampaignService {
         const userChildren = (
           await this.childrenService.getMyChildren(flaskUser.id)
         ).filter((c) => c.existence_status === ChildExistence.AlivePresent);
+
         // 4- send campaign users with no children
         if (!userChildren || !userChildren[0]) {
           if (flaskUser.is_email_verified) {
@@ -351,6 +417,7 @@ export class CampaignService {
           continue;
         }
 
+        // 7 - Send Campaign
         if (flaskUser.is_email_verified) {
           const googleCampaignBuilder = String(
             `?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.EMAIL}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignEmailCode}`,
@@ -371,8 +438,14 @@ export class CampaignService {
             },
           });
 
+          await this.handleEmailCampaign(
+            campaignEmailCode,
+            tittle,
+            emailCampaign,
+            [nestUser],
+          );
           this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
-          emailReceivers.push(nestUser);
+          emailReceiversTotal++;
         }
 
         if (flaskUser.is_phonenumber_verified) {
@@ -389,48 +462,15 @@ export class CampaignService {
           }: ${shortNeedUrl} لغو۱۱`;
 
           await this.smsRest.send(to, from, text);
+          await this.handleSmsCampaign(campaignSmsCode, tittle, smsCampaign, [
+            nestUser,
+          ]);
 
           this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
-          smsReceivers.push(nestUser);
+          smsReceiversTotal++;
         }
       }
 
-      if (!emailCampaign && emailReceivers && emailReceivers[0]) {
-        await this.createCampaign(
-          campaignEmailCode,
-          CampaignNameEnum.MONTHLY_CAMPAIGNS,
-          CampaignTypeEnum.EMAIL,
-          tittle,
-          emailReceivers,
-        );
-        this.logger.log(`EMAIL: Campaign Created - ${campaignEmailCode}`);
-      }
-      if (!smsCampaign && smsReceivers && smsReceivers[0]) {
-        await this.createCampaign(
-          campaignSmsCode,
-          CampaignNameEnum.MONTHLY_CAMPAIGNS,
-          CampaignTypeEnum.SMS,
-          tittle,
-          smsReceivers,
-        );
-        this.logger.log(`SMS: Campaign Created - ${campaignSmsCode}`);
-      }
-      if (emailCampaign && emailReceivers[0]) {
-        await this.updateCampaignUsers(
-          emailCampaign,
-          emailCampaign.receivers,
-          emailReceivers,
-        );
-        this.logger.log(`EMAIL: Campaign Updated - ${campaignEmailCode}`);
-      }
-      if (smsCampaign && smsReceivers[0]) {
-        await this.updateCampaignUsers(
-          smsCampaign,
-          smsCampaign.receivers,
-          smsReceivers,
-        );
-        this.logger.log(`SMS: Campaign Updated - ${campaignSmsCode}`);
-      }
       this.logger.warn(
         `Did Not reach: ${skippedUsersNoUnpaid} users did not have unpaidNeeds`,
       );
@@ -447,7 +487,7 @@ export class CampaignService {
         `Did Not reach: ${turnedOffCount} users have turned off monthly campaign`,
       );
       this.logger.log(
-        `All done for this month. - ${tittle} - SMS:${smsReceivers.length} - Email:${emailReceivers.length} - Out of ${flaskUsers.length}`,
+        `All done for this month. - ${tittle} - SMS:${smsReceiversTotal} - Email:${emailReceiversTotal} - Out of ${flaskUsers.length}`,
       );
     } catch (e) {
       throw new ServerError(e.message, e.status);

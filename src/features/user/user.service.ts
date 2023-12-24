@@ -272,6 +272,12 @@ export class UserService {
     return user;
   }
 
+  async getFlaskUser(id: number): Promise<User> {
+    return this.flaskUserRepository.findOne({
+      where: { id: id },
+    });
+  }
+
   getFamilyById(id: string): Promise<AllUserEntity> {
     const user = this.allUserRepository.findOne({
       where: {
