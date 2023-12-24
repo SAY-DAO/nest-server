@@ -140,10 +140,10 @@ export class ScheduleService {
       return;
     }
     // ############## BE CAREFUL #################
-    // if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production') {
     this.logger.debug('Sending user Campaigns at 02:00 PM, only on Sunday');
     await this.campaignService.sendUserMonthlyCampaigns();
-    // }
+    }
   }
 
   @Cron('30 8 * * Mon', {

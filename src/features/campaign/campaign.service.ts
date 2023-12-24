@@ -286,7 +286,7 @@ export class CampaignService {
       const tittle = `نیازهای ${persianMonth} ماه کودکان شما`;
 
       const flaskUsers = await this.userService.getFlaskUsers();
-      let shuffledUsers = shuffleArray(flaskUsers);
+      const shuffledUsers = shuffleArray(flaskUsers);
 
       let alreadyReceivedEmailCount = 0;
       let alreadyReceivedSmsCount = 0;
@@ -296,14 +296,14 @@ export class CampaignService {
       let emailReceiversTotal = 0;
       let smsReceiversTotal = 0;
 
-      const testUsers = [
-        await this.userService.getFlaskUser(12687),
-        await this.userService.getFlaskUser(115),
-      ];
-      shuffledUsers = testUsers;
-      if (shuffledUsers.length > 2) {
-        return;
-      }
+      // const testUsers = [
+      //   await this.userService.getFlaskUser(12687),
+      //   await this.userService.getFlaskUser(115),
+      // ];
+      // shuffledUsers = testUsers;
+      // if (shuffledUsers.length > 2) {
+      //   return;
+      // }
 
       // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {
