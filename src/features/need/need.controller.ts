@@ -10,9 +10,7 @@ import { UserService } from '../user/user.service';
 import { NeedService } from './need.service';
 import { isAuthenticated } from 'src/utils/auth';
 import {
-  AnnouncementEnum,
   FlaskUserTypesEnum,
-  NeedTypeEnum,
   ProductStatusEnum,
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
@@ -21,7 +19,6 @@ import { daysDifference } from 'src/utils/helpers';
 import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
-import { TicketService } from '../ticket/ticket.service';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -36,8 +33,6 @@ export class NeedController {
     private needService: NeedService,
     private userService: UserService,
     private ngoService: NgoService,
-    private ticketService: TicketService,
-    
   ) {}
 
   @Get(`all`)
@@ -307,41 +302,15 @@ export class NeedController {
     };
     console.log(needs[1]);
 
-    for await (const need of needs[0]) {
-      const formData = new FormData();
-      if (
-        need.type === NeedTypeEnum.PRODUCT &&
-        need.status === ProductStatusEnum.PURCHASED_PRODUCT
-      ) {
-        const ticket = await this.ticketService.getTicketByNeed(need.id);
-        console.log('ticket');
-        console.log(ticket);
-        console.log(need.id);
-        try {
-          if (ticket && ticket.ticketHistories) {
-            const { data } = await axios.patch(
-              `https://api.sayapp.company/api/v2/need/update/needId=${need.id}`,
-              {
-                status: ProductStatusEnum.DELIVERED_TO_NGO,
-                ngo_delivery_date: format(
-                  new Date(
-                    ticket.ticketHistories.find(
-                      (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
-                    ).announcedArrivalDate,
-                  ),
-                  'yyyy-MM-dd',
-                ),
-              },
-              configs,
-            );
-            console.log(data);
-            console.log(formData);
-            console.log(need.id);
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      }
-    }
+    // for await (const need of needs.data) {
+    //   const formData = new FormData();
+    //   if (need.status === ProductStatusEnum.DELIVERED_TO_NGO) {
+    //     formData.append(
+    //       'ngo_delivery_date',
+    //       format(new Date(need.expected_delivery_date), 'yyyy-MM-dd'),
+    //     );
+    //     await axios.patch(`/need/update/needId=${need.id}`, formData, configs);
+    //   }
+    // }
   }
 }
