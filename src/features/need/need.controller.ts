@@ -22,6 +22,7 @@ import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
 import { TicketService } from '../ticket/ticket.service';
+import { NeedAPIApi } from 'src/generated-sources/openapi';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -300,29 +301,28 @@ export class NeedController {
 
     const configs = {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'multipart/form-data',
         Authorization: token,
+        processData: false,
+        contentType: false,
       },
     };
-    console.log(needs[1]);
 
     for await (const need of needs[0]) {
-      const formData = new FormData();
       if (
         need.type === NeedTypeEnum.PRODUCT &&
         need.status === ProductStatusEnum.PURCHASED_PRODUCT
       ) {
         const ticket = await this.ticketService.getTicketByNeed(need.id);
-        console.log('ticket');
-        console.log(ticket);
-        console.log(need.id);
+
         try {
           if (ticket && ticket.ticketHistories) {
-            const { data } = await axios.patch(
-              `https://api.sayapp.company/api/v2/need/update/needId=${need.id}`,
-              {
-                status: ProductStatusEnum.DELIVERED_TO_NGO,
-                ngo_delivery_date: format(
+            const formData = new FormData();
+            formData.append('status', String(4));
+            formData.append(
+              'ngo_delivery_date',
+              String(
+                format(
                   new Date(
                     ticket.ticketHistories.find(
                       (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
@@ -330,12 +330,28 @@ export class NeedController {
                   ),
                   'yyyy-MM-dd',
                 ),
+              ),
+            );
+
+            const { data } = await axios.patch(
+              `https://api.sayapp.company/api/v2/need/update/needId=${need.id}`,
+              {
+                status: Number(ProductStatusEnum.DELIVERED_TO_NGO),
+                ngo_delivery_date: String(
+                  format(
+                    new Date(
+                      ticket.ticketHistories.find(
+                        (h) =>
+                          h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+                      ).announcedArrivalDate,
+                    ),
+                    'yyyy-MM-dd',
+                  ),
+                ),
               },
+              // formData,
               configs,
             );
-            console.log(data);
-            console.log(formData);
-            console.log(need.id);
           }
         } catch (e) {
           console.log(e);
