@@ -11,6 +11,7 @@ import { NeedService } from './need.service';
 import { isAuthenticated } from 'src/utils/auth';
 import {
   AnnouncementEnum,
+  Colors,
   FlaskUserTypesEnum,
   NeedTypeEnum,
   ProductStatusEnum,
@@ -336,7 +337,7 @@ export class NeedController {
             const { data } = await axios.patch(
               `https://api.sayapp.company/api/v2/need/update/needId=${need.id}`,
               {
-                status: Number(ProductStatusEnum.DELIVERED_TO_NGO),
+                status: ProductStatusEnum.DELIVERED_TO_NGO,
                 ngo_delivery_date: String(
                   format(
                     new Date(
@@ -349,9 +350,12 @@ export class NeedController {
                   ),
                 ),
               },
-              // formData,
               configs,
             );
+
+            if (data.status === ProductStatusEnum.DELIVERED_TO_NGO) {
+              await this.ticketService.updateTicketColor(ticket.id, Colors.BLUE);
+            }
           }
         } catch (e) {
           console.log(e);
