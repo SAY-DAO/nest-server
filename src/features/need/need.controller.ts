@@ -10,15 +10,18 @@ import { UserService } from '../user/user.service';
 import { NeedService } from './need.service';
 import { isAuthenticated } from 'src/utils/auth';
 import {
+  // AnnouncementEnum,
   FlaskUserTypesEnum,
-  ProductStatusEnum,
+  // NeedTypeEnum,
+  // ProductStatusEnum,
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { daysDifference } from 'src/utils/helpers';
-import axios from 'axios';
+// import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
+import { TicketService } from '../ticket/ticket.service';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -32,7 +35,9 @@ export class NeedController {
   constructor(
     private needService: NeedService,
     private userService: UserService,
-    private ngoService: NgoService,
+    // private ngoService: NgoService,
+    // private ticketService: TicketService,
+    
   ) {}
 
   @Get(`all`)
@@ -225,24 +230,24 @@ export class NeedController {
     return { list: deleteCandidates[0], total: deleteCandidates[1] };
   }
 
-  @Get('update/candidates')
-  @ApiOperation({ description: 'Get arrived needs to update them' })
-  async updateArrivalsCandidates(@Req() req: Request) {
-    // delete old confirmed needs
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
-    ) {
-      throw new ForbiddenException('You Are not the Super admin');
-    }
-    const updateCandidates =
-      await this.needService.getArrivalUpdateCandidates();
+  // @Get('update/candidates')
+  // @ApiOperation({ description: 'Get arrived needs to update them' })
+  // async updateArrivalsCandidates(@Req() req: Request) {
+  //   // delete old confirmed needs
+  //   const panelFlaskUserId = req.headers['panelFlaskUserId'];
+  //   const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+  //   if (
+  //     !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+  //     panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+  //     panelFlaskUserId !== SUPER_ADMIN_ID
+  //   ) {
+  //     throw new ForbiddenException('You Are not the Super admin');
+  //   }
+  //   const updateCandidates =
+  //     await this.needService.getArrivalUpdateCandidates();
 
-    return { list: updateCandidates[0], total: updateCandidates[1] };
-  }
+  //   return { list: updateCandidates[0], total: updateCandidates[1] };
+  // }
 
   @Get('delete/old')
   @ApiOperation({ description: 'Get duplicates need for confirming' })
@@ -269,48 +274,74 @@ export class NeedController {
     return { deleted: deleteCandidates[1] };
   }
 
-  @Get('update/arrivals')
-  async updateNeedsStatus(@Req() req: Request) {
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
-    ) {
-      throw new ForbiddenException('You Are not the Super admin');
-    }
+  // @Get('update/arrivals')
+  // async updateNeedsStatus(@Req() req: Request) {
+  //   const panelFlaskUserId = req.headers['panelFlaskUserId'];
+  //   const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+  //   if (
+  //     !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+  //     panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+  //     panelFlaskUserId !== SUPER_ADMIN_ID
+  //   ) {
+  //     throw new ForbiddenException('You Are not the Super admin');
+  //   }
 
-    const swIds = await this.userService
-      .getFlaskSwIds()
-      .then((r) => r.map((s) => s.id)); // all ngos
+  //   const swIds = await this.userService
+  //     .getFlaskSwIds()
+  //     .then((r) => r.map((s) => s.id)); // all ngos
 
-    const ngoIds = await this.ngoService
-      .getFlaskNgos()
-      .then((r) => r.map((s) => s.id));
+  //   const ngoIds = await this.ngoService
+  //     .getFlaskNgos()
+  //     .then((r) => r.map((s) => s.id));
 
-    const needs = await this.needService.getArrivalUpdateCandidates();
+  //   const needs = await this.needService.getArrivalUpdateCandidates();
 
-    const token =
-      config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
+  //   const token =
+  //     config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
 
-    const configs = {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-    };
-    console.log(needs[1]);
+  //   const configs = {
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization: token,
+  //     },
+  //   };
+  //   console.log(needs[1]);
 
-    // for await (const need of needs.data) {
-    //   const formData = new FormData();
-    //   if (need.status === ProductStatusEnum.DELIVERED_TO_NGO) {
-    //     formData.append(
-    //       'ngo_delivery_date',
-    //       format(new Date(need.expected_delivery_date), 'yyyy-MM-dd'),
-    //     );
-    //     await axios.patch(`/need/update/needId=${need.id}`, formData, configs);
-    //   }
-    // }
-  }
+  //   for await (const need of needs[0]) {
+  //     const formData = new FormData();
+  //     if (
+  //       need.type === NeedTypeEnum.PRODUCT &&
+  //       need.status === ProductStatusEnum.PURCHASED_PRODUCT
+  //     ) {
+  //       const ticket = await this.ticketService.getTicketByNeed(need.id);
+  //       console.log('ticket');
+  //       console.log(ticket);
+  //       console.log(need.id);
+  //       try {
+  //         if (ticket && ticket.ticketHistories) {
+  //           const { data } = await axios.patch(
+  //             `https://api.sayapp.company/api/v2/need/update/needId=${need.id}`,
+  //             {
+  //               status: ProductStatusEnum.DELIVERED_TO_NGO,
+  //               ngo_delivery_date: format(
+  //                 new Date(
+  //                   ticket.ticketHistories.find(
+  //                     (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+  //                   ).announcedArrivalDate,
+  //                 ),
+  //                 'yyyy-MM-dd',
+  //               ),
+  //             },
+  //             configs,
+  //           );
+  //           console.log(data);
+  //           console.log(formData);
+  //           console.log(need.id);
+  //         }
+  //       } catch (e) {
+  //         console.log(e);
+  //       }
+  //     }
+  //   }
+  // }
 }

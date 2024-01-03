@@ -60,7 +60,7 @@ export const postgresDataSourceOptions: DataSourceOptions = {
     CommentEntity,
     ChildrenPreRegisterEntity,
     ContributionEntity,
-    UrlEntity
+    UrlEntity,
   ],
 };
 
