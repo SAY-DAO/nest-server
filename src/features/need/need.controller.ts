@@ -317,7 +317,13 @@ export class NeedController {
         const ticket = await this.ticketService.getTicketByNeed(need.id);
 
         try {
-          if (ticket && ticket.ticketHistories) {
+          if (
+            ticket &&
+            ticket.ticketHistories &&
+            ticket.ticketHistories.find(
+              (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+            )
+          ) {
             const formData = new FormData();
             formData.append('status', String(4));
             formData.append(
@@ -354,7 +360,10 @@ export class NeedController {
             );
 
             if (data.status === ProductStatusEnum.DELIVERED_TO_NGO) {
-              await this.ticketService.updateTicketColor(ticket.id, Colors.BLUE);
+              await this.ticketService.updateTicketColor(
+                ticket.id,
+                Colors.BLUE,
+              );
             }
           }
         } catch (e) {
