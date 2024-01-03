@@ -141,8 +141,10 @@ export class ScheduleService {
     }
     // ############## BE CAREFUL #################
     if (process.env.NODE_ENV === 'production') {
-    this.logger.debug('Sending user Campaigns at 01:00 PM, only on Thursdays');
-    await this.campaignService.sendUserMonthlyCampaigns();
+      this.logger.debug(
+        'Sending user Campaigns at 01:00 PM, only on Thursdays',
+      );
+      await this.campaignService.sendUserMonthlyCampaigns();
     }
   }
 

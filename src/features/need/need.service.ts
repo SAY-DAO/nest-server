@@ -6,7 +6,6 @@ import {
   Brackets,
   LessThan,
   MoreThan,
-  Not,
   Repository,
   UpdateResult,
 } from 'typeorm';
@@ -879,6 +878,48 @@ export class NeedService {
       .cache(60000)
       .limit(500)
       .orderBy('need.created', 'ASC')
+      .getManyAndCount();
+  }
+
+  async getArrivalUpdateCandidates(): Promise<[Need[], number]> {
+    return this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .where(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
+            .andWhere('need.status = :productStatus', {
+              productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
+            })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
+            .andWhere('need.status = :serviceStatus', {
+              serviceStatus: ServiceStatusEnum.MONEY_TO_NGO,
+            });
+        }),
+      )
       .getManyAndCount();
   }
 

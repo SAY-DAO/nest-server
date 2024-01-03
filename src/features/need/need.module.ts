@@ -43,6 +43,9 @@ import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.enti
 import { Countries } from 'src/entities/flaskEntities/countries.entity';
 import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
+import { TicketService } from '../ticket/ticket.service';
+import { TicketContentEntity } from 'src/entities/ticketContent.entity';
+import { TicketViewEntity } from 'src/entities/ticketView.entity';
 
 @Module({
   imports: [
@@ -83,6 +86,9 @@ import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
       ProviderEntity,
       ProviderJoinNeedEntity,
       ChildrenPreRegisterEntity,
+      TicketEntity,
+      TicketContentEntity,
+      TicketViewEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -100,6 +106,7 @@ import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
     StatusService,
     LocationService,
     ProviderService,
+    TicketService,
   ],
 })
 export class NeedModule implements NestModule {

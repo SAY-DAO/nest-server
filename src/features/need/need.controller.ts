@@ -10,12 +10,18 @@ import { UserService } from '../user/user.service';
 import { NeedService } from './need.service';
 import { isAuthenticated } from 'src/utils/auth';
 import {
+  AnnouncementEnum,
   FlaskUserTypesEnum,
+  NeedTypeEnum,
+  ProductStatusEnum,
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { daysDifference } from 'src/utils/helpers';
-import { SyncService } from '../sync/sync.service';
+import axios from 'axios';
+import { NgoService } from '../ngo/ngo.service';
+import { format } from 'date-fns';
+import { TicketService } from '../ticket/ticket.service';
 
 @ApiTags('Needs')
 @ApiSecurity('flask-access-token')
@@ -29,8 +35,9 @@ export class NeedController {
   constructor(
     private needService: NeedService,
     private userService: UserService,
-    private syncService: SyncService,
-  ) { }
+    private ngoService: NgoService,
+    private ticketService: TicketService,
+  ) {}
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs from db 1' })
@@ -59,7 +66,6 @@ export class NeedController {
     }
     return await this.needService.getNeedById(needId);
   }
-
 
   @Get(`flask/random`)
   @ApiOperation({ description: 'Get a random need from flask' })
@@ -206,7 +212,7 @@ export class NeedController {
   }
 
   @Get('delete/candidates')
-  @ApiOperation({ description: 'Get duplicates need for confirming' })
+  @ApiOperation({ description: 'Get old needs to delete if not paid.' })
   async deleteCandidates(@Req() req: Request) {
     // delete old confirmed needs
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
@@ -221,6 +227,25 @@ export class NeedController {
     const deleteCandidates = await this.needService.getDeleteCandidates();
 
     return { list: deleteCandidates[0], total: deleteCandidates[1] };
+  }
+
+  @Get('update/candidates')
+  @ApiOperation({ description: 'Get arrived needs to update them' })
+  async updateArrivalsCandidates(@Req() req: Request) {
+    // delete old confirmed needs
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+      panelFlaskUserId !== SUPER_ADMIN_ID
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    const updateCandidates =
+      await this.needService.getArrivalUpdateCandidates();
+
+    return { list: updateCandidates[0], total: updateCandidates[1] };
   }
 
   @Get('delete/old')
@@ -246,5 +271,76 @@ export class NeedController {
       }
     }
     return { deleted: deleteCandidates[1] };
+  }
+
+  @Get('update/arrivals')
+  async updateNeedsStatus(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+      panelFlaskUserId !== SUPER_ADMIN_ID
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+
+    const swIds = await this.userService
+      .getFlaskSwIds()
+      .then((r) => r.map((s) => s.id)); // all ngos
+
+    const ngoIds = await this.ngoService
+      .getFlaskNgos()
+      .then((r) => r.map((s) => s.id));
+
+    const needs = await this.needService.getArrivalUpdateCandidates();
+
+    const token =
+      config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
+
+    const configs = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+    };
+    console.log(needs[1]);
+
+    for await (const need of needs[0]) {
+      const formData = new FormData();
+      if (
+        need.type === NeedTypeEnum.PRODUCT &&
+        need.status === ProductStatusEnum.PURCHASED_PRODUCT
+      ) {
+        const ticket = await this.ticketService.getTicketByNeed(need.id);
+        console.log('ticket');
+        console.log(ticket);
+        console.log(need.id);
+        try {
+          if (ticket && ticket.ticketHistories) {
+            const { data } = await axios.patch(
+              `https://api.sayapp.company/api/v2/need/update/needId=${need.id}`,
+              {
+                status: ProductStatusEnum.DELIVERED_TO_NGO,
+                ngo_delivery_date: format(
+                  new Date(
+                    ticket.ticketHistories.find(
+                      (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+                    ).announcedArrivalDate,
+                  ),
+                  'yyyy-MM-dd',
+                ),
+              },
+              configs,
+            );
+            console.log(data);
+            console.log(formData);
+            console.log(need.id);
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    }
   }
 }
