@@ -74,7 +74,7 @@ export class WalletController {
     private userService: UserService,
     private needService: NeedService,
     private ticketService: TicketService,
-  ) { }
+  ) {}
 
   @Get('nonce/:typeId')
   @ApiOperation({ description: 'Get SIWE nonce' })
@@ -302,7 +302,7 @@ export class WalletController {
         }
       });
 
-      if (counter - body.arrivedColumnNumber !== 0) {
+      if (body.arrivedColumnNumber - counter > 3) {
         throw new WalletExceptionFilter(
           418,
           'You have to announce arrivals first!',
