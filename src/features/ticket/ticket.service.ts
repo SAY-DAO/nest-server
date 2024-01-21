@@ -202,9 +202,7 @@ export class TicketService {
       where: {
         contributors: { flaskUserId: flaskUserId },
         need: {
-          signatures: {
-            hash: IsNull(),
-          },
+          signatures: IsNull(),
         },
       },
     });
