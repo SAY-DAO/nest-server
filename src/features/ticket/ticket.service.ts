@@ -6,10 +6,14 @@ import { TicketEntity } from 'src/entities/ticket.entity';
 import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 import { TicketViewEntity } from 'src/entities/ticketView.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
-import { AnnouncementEnum, Colors, ProductStatusEnum } from 'src/types/interfaces/interface';
+import {
+  AnnouncementEnum,
+  Colors,
+  ProductStatusEnum,
+} from 'src/types/interfaces/interface';
 import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
-import { Repository, UpdateResult } from 'typeorm';
+import { IsNull, MoreThan, Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class TicketService {
@@ -197,6 +201,11 @@ export class TicketService {
       },
       where: {
         contributors: { flaskUserId: flaskUserId },
+        need: {
+          signatures: {
+            hash: IsNull(),
+          },
+        },
       },
     });
   }
@@ -207,9 +216,9 @@ export class TicketService {
       },
       where: {
         contributors: { flaskUserId: flaskUserId },
-        need:{
-          status: ProductStatusEnum.PURCHASED_PRODUCT
-        }
+        need: {
+          status: ProductStatusEnum.PURCHASED_PRODUCT,
+        },
       },
     });
   }
