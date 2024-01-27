@@ -56,6 +56,29 @@ export class CampaignService {
   smsApi = new MelipayamakApi(process.env.SMS_USER, process.env.SMS_PASSWORD);
   smsRest = this.smsApi.sms();
 
+  async childrenWithNoNeed() {
+    const children = await this.childrenService.getFlaskActiveChildren();
+    const list = [];
+    for await (const child of children) {
+      const childUnpaidNeeds = await this.needService.getFlaskChildUnpaidNeeds(
+        child.id,
+      );
+      const childUnconfirmedNeeds =
+        await this.needService.getFlaskChildUnconfirmedNeeds(child.id);
+      const allUnpaidNeeds = childUnpaidNeeds.concat(childUnconfirmedNeeds);
+
+      if (!allUnpaidNeeds || !allUnpaidNeeds[0]) {
+        list.push({
+          swId: child.id_social_worker,
+          child,
+        });
+      }
+    }
+    // save in cache for admin dashboard
+    config().dataCache.updateChildrenNoNeeds(list.length);
+    this.logger.log(`Updated children with no need.`);
+    return list;
+  }
   async handleEmailCampaign(
     campaignEmailCode: string,
     tittle: string,
@@ -203,47 +226,32 @@ export class CampaignService {
   }
 
   async sendSwChildNoNeedReminder() {
-    const children = await this.childrenService.getFlaskActiveChildren();
-    const list = [];
-    for await (const child of children) {
-      const childUnpaidNeeds = await this.needService.getFlaskChildUnpaidNeeds(
-        child.id,
-      );
-      const childUnconfirmedNeeds =
-        await this.needService.getFlaskChildUnconfirmedNeeds(child.id);
-      const allUnpaidNeeds = childUnpaidNeeds.concat(childUnconfirmedNeeds);
-
-      if (!allUnpaidNeeds || !allUnpaidNeeds[0]) {
-        list.push({
-          swId: child.id_social_worker,
-          child,
+    const list = await this.childrenWithNoNeed();
+    const swIds = removeDuplicates(list.map((e) => e.swId));
+    try {
+      for await (const id of swIds) {
+        const selected = list.filter((e) => e.swId === id);
+        const socialWorker = await this.userService.getFlaskSw(Number(id));
+        const swChildren = selected.map((s) => s.child);
+        this.logger.warn(
+          `Emailing: Social worker ${socialWorker.id} of children with no need!`,
+        );
+        await this.mailerService.sendMail({
+          from: '"NGOs" <ngo@saydao.org>', // override default from
+          to: socialWorker.email,
+          bcc: process.env.SAY_ADMIN_EMAIL,
+          subject: `${swChildren.length} کودک بدون نیاز ثبت شده`,
+          template: './swRemindNoNeeds', // `.hbs` extension is appended automatically
+          context: {
+            children: swChildren,
+            userName: socialWorker.firstName
+              ? socialWorker.firstName
+              : socialWorker.userName,
+          },
         });
       }
-    }
-    // save in cache for admin dashboard
-    config().dataCache.updateChildrenNoNeeds(list.length);
-
-    const swIds = removeDuplicates(list.map((e) => e.swId));
-    for await (const id of swIds) {
-      const selected = list.filter((e) => e.swId === id);
-      const socialWorker = await this.userService.getFlaskSw(Number(id));
-      const swChildren = selected.map((s) => s.child);
-      this.logger.warn(
-        `Emailing: Social worker ${socialWorker.id} of children with no need!`,
-      );
-      await this.mailerService.sendMail({
-        from: '"NGOs" <ngo@saydao.org>', // override default from
-        to: socialWorker.email,
-        bcc: process.env.SAY_ADMIN_EMAIL,
-        subject: `${swChildren.length} کودک بدون نیاز ثبت شده`,
-        template: './swRemindNoNeeds', // `.hbs` extension is appended automatically
-        context: {
-          children: swChildren,
-          userName: socialWorker.firstName
-            ? socialWorker.firstName
-            : socialWorker.userName,
-        },
-      });
+    } catch (e) {
+      console.log(e);
     }
   }
 
@@ -347,7 +355,6 @@ export class CampaignService {
 
         // 4- send campaign users with no children
         if (!userChildren || !userChildren[0]) {
-          
           if (flaskUser.is_email_verified) {
             try {
               await this.mailerService.sendMail({

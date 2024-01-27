@@ -88,6 +88,7 @@ export class ScheduleService {
     this.logger.debug(
       'Called only once after 15 seconds of the server initiation',
     );
+    await this.campaignService.childrenWithNoNeed()
     this.completePays();
     this.rolesCount();
   }
@@ -148,8 +149,8 @@ export class ScheduleService {
     }
   }
 
-  @Cron('30 8 * * Mon', {
-    name: 'Reminders At 08:30 on Monday.',
+  @Cron('30 8 * * Sat', {
+    name: 'Reminders At 08:30 on Saturday.',
     timeZone: 'Asia/Tehran',
   })
   async handleReminderMailCron() {
