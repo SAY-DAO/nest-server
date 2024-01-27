@@ -63,6 +63,10 @@ export class CampaignService {
     emailReceivers: any[],
   ) {
     if (!emailCampaign && emailReceivers && emailReceivers[0]) {
+      console.log('email test...');
+      console.log(emailCampaign && emailCampaign.title);
+      console.log(emailReceivers  && emailReceivers[0]);
+      
       await this.createCampaign(
         campaignEmailCode,
         CampaignNameEnum.MONTHLY_CAMPAIGNS,
@@ -90,6 +94,9 @@ export class CampaignService {
     smsReceivers: any[],
   ) {
     if (!smsCampaign && smsReceivers && smsReceivers[0]) {
+      console.log('sms test...');
+      console.log(smsCampaign && smsCampaign.title);
+      console.log(smsReceivers  && smsReceivers[0]);
       await this.createCampaign(
         campaignSmsCode,
         CampaignNameEnum.MONTHLY_CAMPAIGNS,
