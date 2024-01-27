@@ -813,7 +813,6 @@ export class NeedService {
       .andWhere("need.name_translations -> 'en' = :nameTranslations", {
         nameTranslations: need.name_translations.en,
       })
-
       .andWhere('need.status < :statusPaid', {
         statusPaid: PaymentStatusEnum.COMPLETE_PAY,
       })
