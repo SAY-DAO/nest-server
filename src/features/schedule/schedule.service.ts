@@ -127,7 +127,7 @@ export class ScheduleService {
   }
   // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here
   // @Timeout(5000)
-  @Cron(' 00 00 13 * * Sat', {
+  @Cron(' 00 46 13 * * Sat', {
     name: 'MonthlyCampaigns try At 13:00 on Thursdays.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
     timeZone: 'Asia/Tehran',
   })
