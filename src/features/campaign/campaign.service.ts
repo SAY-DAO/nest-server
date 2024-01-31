@@ -101,7 +101,7 @@ export class CampaignService {
       this.logger.log(`EMAIL: Campaign Created - ${campaignEmailCode}`);
     }
 
-    if (emailCampaign && emailReceivers[0]) {
+    if (emailCampaign && emailReceivers && emailReceivers[0]) {
       await this.updateCampaignUsers(
         emailCampaign,
         emailCampaign.receivers,
