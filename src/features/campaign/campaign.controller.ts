@@ -67,7 +67,7 @@ export class CampaignController {
     return this.campaignService.shortenUrl(longUrl);
   }
 
-  @Get('send')
+  @Get('send/force')
   async SendCampaign(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
