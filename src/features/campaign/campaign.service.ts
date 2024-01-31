@@ -38,6 +38,11 @@ import { UrlEntity } from 'src/entities/url.entity';
 import { nanoid } from 'nanoid';
 import { ShortenURLDto } from 'src/types/dtos/url.dto';
 import MelipayamakApi from 'melipayamak';
+import {
+  PaginateQuery,
+  Paginated,
+  paginate as nestPaginate,
+} from 'nestjs-paginate';
 
 @Injectable()
 export class CampaignService {
@@ -133,11 +138,18 @@ export class CampaignService {
     }
   }
 
-  getCampaigns(): Promise<CampaignEntity[]> {
-    return this.campaignRepository.find({
-      relations: {
-        receivers: true,
-      },
+  async getCampaigns(
+    options: PaginateQuery,
+  ): Promise<Paginated<CampaignEntity>> {
+    const queryBuilder = this.campaignRepository
+      .createQueryBuilder('campaign')
+      .leftJoin('campaign.receivers', 'receiver')
+      .select(['campaign', 'receiver.id']);
+
+    return await nestPaginate<CampaignEntity>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['createdAt', 'DESC']],
+      nullSort: 'last',
     });
   }
 

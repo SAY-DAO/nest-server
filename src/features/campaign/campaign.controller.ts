@@ -30,6 +30,12 @@ export class CampaignController {
   getAvailableContributions(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+
+    const X_LIMIT = parseInt(req.headers['x-limit']);
+    const X_TAKE = parseInt(req.headers['x-take']);
+    const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
+    const page = X_TAKE ? X_TAKE + 1 : 1;
+
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       !(
@@ -40,7 +46,11 @@ export class CampaignController {
       throw new ForbiddenException('You Are not authorized');
     }
 
-    return this.campaignService.getCampaigns();
+    return this.campaignService.getCampaigns({
+      page: page,
+      limit: limit,
+      path: '/',
+    });
   }
 
   @Get(':code')
@@ -55,5 +65,24 @@ export class CampaignController {
   @Post('shorten')
   shortenUrl(@Body() longUrl: ShortenURLDto) {
     return this.campaignService.shortenUrl(longUrl);
+  }
+
+  @Get(':code')
+  async SendCampaign(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException('You Are not authorized');
+    }
+    // ############## BE CAREFUL #################
+    if (process.env.NODE_ENV === 'production') {
+      await this.campaignService.sendUserMonthlyCampaigns();
+    }
   }
 }
