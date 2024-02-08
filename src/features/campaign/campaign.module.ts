@@ -105,7 +105,7 @@ export class CampaignModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CampaignMiddleware)
-      // .exclude('campaign/:code')
+      .exclude('campaign/:code')
       .forRoutes('campaign');
   }
 }
