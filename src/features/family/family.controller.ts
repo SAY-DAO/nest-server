@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Patch,
+  Query,
   Req,
 } from '@nestjs/common';
 import { FamilyService } from './family.service';
@@ -47,7 +48,26 @@ export class FamilyController {
     private childrenService: ChildrenService,
     private needService: NeedService,
     private paymentService: PaymentService,
-  ) { }
+  ) {}
+
+  @Get('search')
+  async searchUsers(
+    @Req() req: Request,
+    @Query('q') query: string,
+  ): Promise<any> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    if (query.length > 3) {
+      const users = await this.familyService.searchUsers(query);
+      return { users };
+    }
+  }
 
   @Get(`my/children/:familyUserId`)
   @ApiOperation({ description: 'Get my children' })

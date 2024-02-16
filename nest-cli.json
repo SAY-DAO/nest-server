@@ -5,7 +5,8 @@
   "compilerOptions": {
     "assets": [
       "features/campaign/templates/**/*",
-      "features/children/**/*"
+      "features/children/**/*",
+      "features/midjourney/**/*"
     ],
     "watchAssets": true
   }

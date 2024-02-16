@@ -52,7 +52,7 @@ export class UserController {
     private walletService: WalletService,
     private ipfsService: IpfsService,
     private ngoService: NgoService,
-  ) { }
+  ) {}
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all users' })
@@ -259,7 +259,9 @@ export class UserController {
 
       // to avoid seeing an SW created need by the NGO supervisor in the fourth column / Could not find ypu role / when signing
       socialWorkerId =
-        role === SAYPlatformRoles.NGO_SUPERVISOR ? panelFlaskUserId : socialWorkerId;
+        role === SAYPlatformRoles.NGO_SUPERVISOR
+          ? panelFlaskUserId
+          : socialWorkerId;
 
       delivered = await this.needService.getDeliveredNeeds(
         {
@@ -370,10 +372,10 @@ export class UserController {
         paidCount === max
           ? paidCount
           : notPaidCount === max
-            ? notPaidCount
-            : purchasedCount === max
-              ? purchasedCount
-              : deliveredCount,
+          ? notPaidCount
+          : purchasedCount === max
+          ? purchasedCount
+          : deliveredCount,
       meta: {
         paid: paidCount,
         notPaid: notPaidCount,
@@ -416,5 +418,4 @@ export class UserController {
     theUser.contributions.forEach((c) => list.push(c.id));
     return await this.userService.deleteOneContributor(theUser.id, list);
   }
-
 }

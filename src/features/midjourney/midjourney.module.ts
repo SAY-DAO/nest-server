@@ -67,6 +67,7 @@ export class MidjourneyModule implements NestModule {
     consumer
       .apply(MidjourneyMiddleware)
       .exclude('midjourney/images/:flaskNeedId/:index')
+      .exclude('midjourney/bad/images/')
       .forRoutes(MidjourneyController);
   }
 }

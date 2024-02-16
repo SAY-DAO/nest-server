@@ -243,7 +243,6 @@ export function persianDay(value: Date) {
   );
 }
 
-
 export function persianMonth(value: Date) {
   if (!value) {
     return null;
@@ -923,7 +922,7 @@ export function fetchCampaginCode(
   type: CampaignTypeEnum,
 ) {
   const today = new Date();
-  const englishMonth = today.getMonth();
+  const englishMonth = today.getMonth(); // If it is January, getMonth() will return 0
   const englishYear = today.getFullYear();
   return `${type}:${name}-${englishMonth}/${englishYear}`;
 }

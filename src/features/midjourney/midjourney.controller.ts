@@ -25,6 +25,8 @@ import {
 } from 'src/types/interfaces/interface';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
 import { checkIfFileOrDirectoryExists } from 'src/utils/file';
+import fs from 'fs';
+import path from 'path';
 
 @ApiTags('Midjourney')
 @Controller('midjourney')
@@ -34,7 +36,7 @@ export class MidjourneyController {
     private readonly downloadService: DownloadService,
     private readonly needService: NeedService,
     private readonly familyService: FamilyService,
-  ) { }
+  ) {}
 
   @Get(`db/all`)
   @ApiSecurity('flask-access-token')
@@ -231,8 +233,49 @@ export class MidjourneyController {
     });
   }
 
-  @Delete(`images/:flaskNeedId`)
+  @Delete(`bad/images`)
   @ApiOperation({ description: 'Delete folder of need images' })
+  async deleteBadImages(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+      panelFlaskUserId !== SUPER_ADMIN_ID
+    ) {
+      throw new WalletExceptionFilter(403, 'You Are not the Super admin');
+    }
+    let ids;
+    const filePath = path.join(__dirname, 'bad-images-to-remove.txt');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        console.error('Error reading the file:', err);
+        return;
+      }
+      // Step 2: Parse the data (assuming it's a newline-separated list)
+      ids = data.trim().split('\n');
+    });
+
+    const list = [];
+    for await (const id of ids) {
+      const need = await this.needService.getNeedByFlaskId(id);
+      if (need) {
+        await this.needService.updateNeedMidjourney(need.id, '');
+      }
+
+      const path = `../midjourney-bot/main/need-images/need-${id}`;
+      if (checkIfFileOrDirectoryExists(path)) {
+        await rimraf(path);
+        list.push(path);
+      } else {
+        console.log(`Folder does not exist. Skipping...`);
+      }
+    }
+    return list;
+  }
+
+  @Delete(`bad/images/:flaskNeedId`)
+  @ApiOperation({ description: 'Add need Id to list of delete candidate' })
   async deleteSignature(
     @Req() req: Request,
     @Param('flaskNeedId') flaskNeedId: number,
@@ -246,23 +289,34 @@ export class MidjourneyController {
     ) {
       throw new WalletExceptionFilter(403, 'You Are not the Super admin');
     }
+    const filePath = 'src/features/midjourney/bad-images-to-remove.json';
 
-    const path = `../midjourney-bot/main/need-images/need-${flaskNeedId}`;
-    if (checkIfFileOrDirectoryExists(path)) {
-      const result = await rimraf(path);
-      const need = await this.needService.getNeedByFlaskId(flaskNeedId);
-      await this.needService.updateNeedMidjourney(need.id, '');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        console.error('Error reading the file:', err);
+        return;
+      }
+      try {
+        // Parse the JSON data
+        const jsonData = JSON.parse(data);
 
-      return {
-        result,
-        flaskNeedId,
-        message: `${flaskNeedId} is deleted`,
-      };
-    } else {
-      return {
-        flaskNeedId,
-        message: `Folder does not exist`,
-      };
-    }
+        // Add a new element to the list
+        jsonData.push(Number(flaskNeedId));
+
+        // Convert the updated data back to JSON format
+        const updatedJsonData = JSON.stringify(jsonData, null, 2);
+
+        // Write the updated JSON data back to the file
+        fs.writeFile(filePath, updatedJsonData, 'utf8', (err) => {
+          if (err) {
+            console.error('Error writing file:', err);
+          } else {
+            console.log('File updated successfully!');
+          }
+        });
+      } catch (parseError) {
+        console.error('Error parsing JSON:', parseError);
+      }
+    });
   }
 }

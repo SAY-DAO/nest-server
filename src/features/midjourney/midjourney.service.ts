@@ -66,9 +66,9 @@ export class MidjourneyService {
           flaskId: n.id,
           needRetailerImg: n.img,
           prompt:
-            'write word "SAY" over an unbearably cute, 3d isometric ' +
+            'write word "SAY" over a cute, 3d isometric ' +
             n.name_translations.en +
-            ',cartoon soft pastel colors illustration, clay render, blender 3d, physically based rendering, soft and light background, pastel background, colorful, toy like proportions --fast',
+            ',cartoon soft pastel colors illustration, clay render, blender 3d, physically based rendering, soft and light background, pastel background, colorful, toy like proportions',
         };
         list.push(data);
         listOfIds.push(n.id);
@@ -76,7 +76,7 @@ export class MidjourneyService {
         console.log(listOfIds);
       }
     });
-    config().dataCache.storeMidjourny(list);
+    config().dataCache.storeMidjourney(list);
     if (checkIfFileOrDirectoryExists('../midjourney-bot/midjourney.json')) {
       deleteFile('../midjourney-bot/midjourney.json');
     }

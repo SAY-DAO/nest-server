@@ -23,6 +23,7 @@ lerna-debug.log*
 # images
 /uploads
 midjourney.json
+src/features/midjourney/bad-images-to-remove.json
 
 # OS
 .DS_Store

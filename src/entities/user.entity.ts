@@ -68,8 +68,4 @@ export class AllUserEntity extends BaseEntity {
   @Column({ default: true })
   monthlyCampaign: boolean;
 
-  @OneToMany(() => CampaignEntity, (e) => e.receivers, {
-    eager: false,
-  })
-  receivedEmails: CampaignEntity[];
 }

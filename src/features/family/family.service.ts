@@ -33,6 +33,18 @@ export class FamilyService {
     private flaskUserFamilyRepository: Repository<UserFamily>,
   ) {}
 
+  async searchUsers(query: string): Promise<User[]> {
+    return this.flaskUserRepository
+      .createQueryBuilder('user')
+      .where(
+        'user.userName ILIKE :query OR user.emailAddress ILIKE :query OR user.phone_number ILIKE :query OR user.firstName ILIKE :query',
+        {
+          query: `%${query}%`,
+        },
+      )
+      .getMany();
+  }
+
   async getFamilyMembers(familyId: number): Promise<any> {
     return await this.flaskFamilyRepository
       .createQueryBuilder('family')

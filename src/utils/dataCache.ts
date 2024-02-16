@@ -77,7 +77,7 @@ export default class DataCache {
     };
   };
 
-  storeMidjourny = (list: any[]) => {
+  storeMidjourney = (list: any[]) => {
     list.forEach((e) => this.midjourneyList.push(e));
   };
 
