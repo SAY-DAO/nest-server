@@ -6,6 +6,8 @@ import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
 import { CampaignService } from '../campaign/campaign.service';
 import { persianDay } from 'src/utils/helpers';
+
+@Injectable()
 export class ScheduleService {
   constructor(
     private campaignService: CampaignService,
@@ -14,7 +16,7 @@ export class ScheduleService {
   ) {}
   private readonly logger = new Logger(ScheduleService.name);
 
-  async completePays() {
+  async completePays() {    
     const father = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.FATHER,
       0,

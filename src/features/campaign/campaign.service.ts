@@ -62,6 +62,7 @@ export class CampaignService {
   smsRest = this.smsApi.sms();
 
   async childrenWithNoNeed() {
+    this.logger.log(`Updating children with no needs.`);
     const children = await this.childrenService.getFlaskActiveChildren();
     const list = [];
     for await (const child of children) {
@@ -84,7 +85,7 @@ export class CampaignService {
     this.logger.log(`Updated children with no need.`);
     return list;
   }
-  
+
   async handleEmailCampaign(
     campaignEmailCode: string,
     tittle: string,

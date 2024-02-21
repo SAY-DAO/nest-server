@@ -53,12 +53,12 @@ import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
   ],
   controllers: [],
   providers: [
-    ScheduleService,
     NeedService,
     FamilyService,
     AnalyticService,
     NgoService,
     UserService,
+    ScheduleService,
   ],
 })
 export class ScheduleTaskModule {}
