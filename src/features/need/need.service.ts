@@ -343,7 +343,7 @@ export class NeedService {
     socialWorker: number,
     swIds: number[],
     ngoIds: number[],
-  ): Promise<any> {
+  ): Promise<[Need[], number]> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -367,45 +367,31 @@ export class NeedService {
         statusNotPaid: PaymentStatusEnum.NOT_PAID,
       })
       .select([
-        'child',
+        'child.sayname_translations',
         'ngo.id',
         'ngo.name',
-        'ngo.logoUrl',
         'need.id',
         'need.child_id',
         'need.created_by_id',
         'need.name_translations',
+        'need.description_translations',
         'need.title',
         'need.imageUrl',
         'need.category',
         'need.type',
-        'need.isUrgent',
         'need.link',
-        'need.affiliateLinkUrl',
-        'need.bank_track_id',
-        'need.doing_duration',
         'need.status',
         'need.img',
-        'need.purchase_cost',
         'need._cost',
-        'need.isConfirmed',
+        'need.isDeleted',
         'need.created',
-        'need.updated',
         'need.confirmDate',
-        'need.confirmUser',
-        'need.doneAt',
-        'need.ngo_delivery_date',
-        'need.child_delivery_date',
-        'need.purchase_date',
-        'need.expected_delivery_date',
-        'need.unavailable_from',
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');
-    const accurateCount = await queryBuilder.getCount();
-
-    return accurateCount;
+    return await queryBuilder.getManyAndCount();
   }
+
   async getNotPaidNeeds(
     options: PaginateQuery,
     socialWorker: number,
@@ -734,6 +720,7 @@ export class NeedService {
       // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds }) // e.g: sw: 1 used to be in Ngo:13, therefore some needs are created in an ngo where their sw is now active somewhere else.
       // .andWhere('need_receipt.deleted = :receiptDeleted', { receiptDeleted: null })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      // .andWhere('need._cost = :price', { price: 0 }) // only for test purposes
       .andWhere(
         new Brackets((qb) => {
           qb.where('need.type = :typeProduct', {
@@ -803,6 +790,12 @@ export class NeedService {
     const need = await this.getFlaskNeed(needId);
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
       // .where("need.unavailable_from > :startDate", { startDate: new Date(2021, 2, 3) })
       // .andWhere("need.unavailable_from < :endDate", { endDate: new Date(2023, 1, 3) })
       .andWhere('need.child_id = :childId', { childId: childId })
@@ -817,27 +810,24 @@ export class NeedService {
         statusPaid: PaymentStatusEnum.COMPLETE_PAY,
       })
       .select([
+        'child.sayname_translations',
         'need.id',
         'need.title',
         'need.imageUrl',
         'need.child_id',
         'need.name_translations',
+        'need.description_translations',
         'need.title',
+        'need._cost',
         'need.type',
         'need.link',
         'need.status',
+        'need.category',
         'need.isConfirmed',
-        'need.doing_duration',
-        'need.status',
         'need.created',
         'need.updated',
         'need.confirmDate',
-        'need.doneAt',
-        'need.ngo_delivery_date',
-        'need.child_delivery_date',
-        'need.purchase_date',
-        'need.expected_delivery_date',
-        'need.unavailable_from',
+        'need.created',
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');

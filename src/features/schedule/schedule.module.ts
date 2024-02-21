@@ -17,6 +17,11 @@ import { VariableEntity } from 'src/entities/variable.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
+import { NgoService } from '../ngo/ngo.service';
+import { UserService } from '../user/user.service';
+import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
+import { ContributorEntity } from 'src/entities/contributor.entity';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
 
 @Module({
   imports: [
@@ -39,10 +44,21 @@ import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
       NeedEntity,
       VariableEntity,
       PaymentEntity,
+      NgoEntity,
+      NgoArrivalEntity,
+      ContributorEntity,
       AllUserEntity,
+      EthereumAccountEntity
     ]),
   ],
   controllers: [],
-  providers: [ScheduleService, NeedService, FamilyService, AnalyticService],
+  providers: [
+    ScheduleService,
+    NeedService,
+    FamilyService,
+    AnalyticService,
+    NgoService,
+    UserService,
+  ],
 })
 export class ScheduleTaskModule {}

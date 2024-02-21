@@ -18,6 +18,7 @@ export default class DataCache {
   childActiveFamilies = null;
   medianList = [];
   midjourneyList = [];
+  ToBeConfirmedList = [];
   countChildrenNoNeeds = null;
 
   updateChildrenNoNeeds(count: number) {
@@ -81,6 +82,10 @@ export default class DataCache {
     list.forEach((e) => this.midjourneyList.push(e));
   };
 
+  storeToBeConfirmed = (list: any[]) => {
+    this.ToBeConfirmedList = list;
+  };
+
   // dApp user ratio in different roles / distance ratio
   storeFamilyData = ({
     fathersData,
@@ -123,7 +128,8 @@ export default class DataCache {
     };
   };
 
-  fetchMidjourney = () => (this.midjourneyList = this.midjourneyList);
+  fetchMidjourney = () => this.midjourneyList;
+  fetchToBeConfirmed = () => this.ToBeConfirmedList;
   fetchChildrenNoNeeds() {
     return this.countChildrenNoNeeds;
   }

@@ -192,9 +192,52 @@ export class NeedController {
     const socialWorker = await this.userService.getFlaskSocialWorker(
       socialWorkerId,
     ); // sw ngo
-    return await this.needService.getNotConfirmedNeeds(socialWorkerId, null, [
-      socialWorker.ngo_id,
-    ]);
+    const unconfirmedCount = await this.needService.getNotConfirmedNeeds(
+      socialWorkerId,
+      null,
+      [socialWorker.ngo_id],
+    );
+    return unconfirmedCount[1];
+  }
+
+  @Get(`auto/confirm`)
+  @ApiOperation({ description: 'Auto confirm needs' })
+  async autoConfirmedNeeds(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(401, 'You Are not authorized!');
+    }
+
+    const swIds = await this.userService
+      .getFlaskSwIds()
+      .then((r) => r.map((s) => s.id));
+
+    const ngoIds = await this.ngoService
+      .getFlaskNgos()
+      .then((r) => r.map((s) => s.id));
+
+    const toBeConfirmed = config().dataCache.fetchToBeConfirmed();
+    if (!toBeConfirmed || !toBeConfirmed[0]) {
+      const notConfirmed = await this.needService.getNotConfirmedNeeds(
+        null,
+        swIds,
+        ngoIds,
+      );
+
+      for await (const need of notConfirmed[0]) {
+        const duplicates = await this.needService.getDuplicateNeeds(
+          need.child_id,
+          need.id,
+        );
+        toBeConfirmed.push({ need, duplicates });
+      }
+
+      config().dataCache.storeToBeConfirmed(toBeConfirmed);
+    }
+
+    return toBeConfirmed;
   }
 
   @Get('duplicates/:flaskChildId/:flaskNeedId')
@@ -286,14 +329,6 @@ export class NeedController {
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
-
-    const swIds = await this.userService
-      .getFlaskSwIds()
-      .then((r) => r.map((s) => s.id)); // all ngos
-
-    const ngoIds = await this.ngoService
-      .getFlaskNgos()
-      .then((r) => r.map((s) => s.id));
 
     const needs = await this.needService.getArrivalUpdateCandidates();
 
