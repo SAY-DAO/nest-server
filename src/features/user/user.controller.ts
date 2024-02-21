@@ -209,11 +209,13 @@ export class UserController {
       const needsIdList = allSignaturesNeedFlaskId.map((s) => s.flaskNeedId);
 
       arrivals = await this.ngoService.getNgoArrivals(socialWorkerId, swIds);
-      notConfirmedCount = await this.needService.getNotConfirmedNeeds(
-        socialWorkerId,
-        swIds,
-        ngoIds,
-      );
+      notConfirmedCount = (
+        await this.needService.getNotConfirmedNeeds(
+          socialWorkerId,
+          swIds,
+          ngoIds,
+        )
+      )[1];
 
       notPaid = await this.needService.getNotPaidNeeds(
         {

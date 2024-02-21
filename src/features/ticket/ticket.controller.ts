@@ -49,7 +49,7 @@ export class TicketController {
     private needService: NeedService,
     private readonly syncService: SyncService,
     private userService: UserService,
-  ) { }
+  ) {}
 
   @Get('all')
   async findAll(@Req() req: Request) {
@@ -204,19 +204,22 @@ export class TicketController {
       );
     }
 
-    await this.ticketService.createTicketView(
-      createTicketDetails.flaskUserId,
-      ticket.id,
-    );
-
     // only when announce arrival
+    if (body.announcement !== AnnouncementEnum.ARRIVED_AT_NGO) {
+      await this.ticketService.createTicketView(
+        createTicketDetails.flaskUserId,
+        ticket.id,
+      );
+    }
+    
     if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO) {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));
       const contentDetails = {
         message: ` .به سمن رسید --- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
-        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
-          }-${new Date(body.arrivalDate).getDate()}`} `,
+        ).getFullYear()}-${
+          new Date(body.arrivalDate).getMonth() + 1
+        }-${new Date(body.arrivalDate).getDate()}`} `,
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.ARRIVED_AT_NGO,
@@ -234,8 +237,9 @@ export class TicketController {
       const contentDetails = {
         message: ` .مبلغ دریافت شد--- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
-        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
-          }-${new Date(body.arrivalDate).getDate()}`} `,
+        ).getFullYear()}-${
+          new Date(body.arrivalDate).getMonth() + 1
+        }-${new Date(body.arrivalDate).getDate()}`} `,
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.NGO_RECEIVED_MONEY,

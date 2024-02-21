@@ -6,8 +6,6 @@ import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
 import { CampaignService } from '../campaign/campaign.service';
 import { persianDay } from 'src/utils/helpers';
-
-@Injectable()
 export class ScheduleService {
   constructor(
     private campaignService: CampaignService,
@@ -88,7 +86,7 @@ export class ScheduleService {
     this.logger.debug(
       'Called only once after 15 seconds of the server initiation',
     );
-    await this.campaignService.childrenWithNoNeed()
+    await this.campaignService.childrenWithNoNeed();
     this.completePays();
     this.rolesCount();
   }
@@ -127,27 +125,26 @@ export class ScheduleService {
     }
   }
   // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here
-  // @Timeout(5000)
-  @Cron(' 00 00 13 * * Thu', {
-    name: 'MonthlyCampaigns try At 13:00 on Thursdays.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
-    timeZone: 'Asia/Tehran',
-  })
-  async handleSummaryMailCron() {
-    const farsiDay = persianDay(new Date());
-    if (farsiDay > 20) {
-      this.logger.warn(
-        `We are near the end of this month let's skip one more week`,
-      );
-      return;
-    }
-    // ############## BE CAREFUL #################
-    if (process.env.NODE_ENV === 'production') {
-      this.logger.debug(
-        'Sending user Campaigns at 01:00 PM, only on Thursdays',
-      );
-      await this.campaignService.sendUserMonthlyCampaigns();
-    }
-  }
+  // @Cron(' 00 00 13 * * Thu', {
+  //   name: 'MonthlyCampaigns try At 13:00 on Thursdays.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+  //   timeZone: 'Asia/Tehran',
+  // })
+  // async handleSummaryMailCron() {
+  //   const farsiDay = persianDay(new Date());
+  //   if (farsiDay > 20) {
+  //     this.logger.warn(
+  //       `We are near the end of this month let's skip one more week`,
+  //     );
+  //     return;
+  //   }
+  //   // ############## BE CAREFUL #################
+  //   if (process.env.NODE_ENV === 'production') {
+  //     this.logger.debug(
+  //       'Sending user Campaigns at 01:00 PM, only on Thursdays',
+  //     );
+  //     await this.campaignService.sendUserMonthlyCampaigns();
+  //   }
+  // }
 
   @Cron('30 8 * * Sat', {
     name: 'Reminders At 08:30 on Saturday.',
@@ -159,4 +156,31 @@ export class ScheduleService {
       await this.campaignService.sendSwChildNoNeedReminder();
     }
   }
+
+  // @Cron('30 8 * * Sat', {
+  //   name: 'Confirm Needs At 08:30 on Saturday.',
+  //   timeZone: 'Asia/Tehran',
+  // })
+  // @Timeout(5000)
+  // async handleNeedConfirmCron() {
+  //   this.logger.debug('Confirming Needs ...');
+  //   const swIds = await this.userService
+  //     .getFlaskSwIds()
+  //     .then((r) => r.map((s) => s.id));
+
+  //   const ngoIds = await this.ngoService
+  //     .getFlaskNgos()
+  //     .then((r) => r.map((s) => s.id));
+
+  //   const toBeConfirmed = await this.needService.getNotConfirmedNeeds(
+  //     null,
+  //     swIds,
+  //     ngoIds,
+  //   );
+  //   for await (const need of toBeConfirmed[0]) {
+  //     const duplicates = await this.needService.getDuplicateNeeds(need.child_id, need.id);
+  //   }
+
+  //   console.log(toBeConfirmed[1]);
+  // }
 }
