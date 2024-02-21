@@ -204,14 +204,17 @@ export class TicketController {
       );
     }
 
-    // only when announce arrival
-    if (body.announcement !== AnnouncementEnum.ARRIVED_AT_NGO) {
+    // only when not announcement
+    if (
+      body.announcement !== AnnouncementEnum.ARRIVED_AT_NGO &&
+      body.announcement !== AnnouncementEnum.NGO_RECEIVED_MONEY
+    ) {
       await this.ticketService.createTicketView(
         createTicketDetails.flaskUserId,
         ticket.id,
       );
     }
-    
+
     if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO) {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));
       const contentDetails = {

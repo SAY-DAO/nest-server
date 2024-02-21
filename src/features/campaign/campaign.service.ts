@@ -84,6 +84,7 @@ export class CampaignService {
     this.logger.log(`Updated children with no need.`);
     return list;
   }
+  
   async handleEmailCampaign(
     campaignEmailCode: string,
     tittle: string,
