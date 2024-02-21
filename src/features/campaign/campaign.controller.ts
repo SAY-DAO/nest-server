@@ -26,7 +26,7 @@ import { ServerError } from 'src/filters/server-exception.filter';
 export class CampaignController {
   constructor(private readonly campaignService: CampaignService) {}
 
-  @Get('/all')
+  @Get('all/sent')
   getAvailableContributions(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
