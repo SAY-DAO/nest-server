@@ -11,12 +11,13 @@ import { ServerError } from 'src/filters/server-exception.filter';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
 import {
-  fetchCampaginCode as fetchCampaignCode,
   isUnpayable,
+  fetchCampaignCode,
   persianMonthStringFarsi,
   prepareUrl,
   removeDuplicates,
   shuffleArray,
+  persianMonth,
 } from 'src/utils/helpers';
 import {
   CampaignNameEnum,
@@ -301,11 +302,11 @@ export class CampaignService {
       }
 
       // 0 -setup
-      const persianMonth = persianMonthStringFarsi(new Date());
-      if (!persianMonth) {
+      const persianStringMonth = persianMonthStringFarsi(new Date());
+      if (!persianStringMonth) {
         throw new ServerError('We need the month string');
       }
-      const tittle = `نیازهای ${persianMonth} ماه کودکان شما`;
+      const tittle = `نیازهای ${persianStringMonth} ماه کودکان شما`;
 
       const flaskUsers = await this.userService.getFlaskUsers();
       const shuffledUsers = shuffleArray(flaskUsers);
@@ -468,7 +469,7 @@ export class CampaignService {
           try {
             await this.mailerService.sendMail({
               to: flaskUser.emailAddress,
-              subject: `نیازهای ${persianMonth} ماه کودکان شما`,
+              subject: `نیازهای ${persianStringMonth} ماه کودکان شما`,
               template: './monthlyCampaign', // `.hbs` extension is appended automatically
               context: {
                 myChildren: eligibleChildren,
