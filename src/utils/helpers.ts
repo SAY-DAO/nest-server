@@ -917,12 +917,88 @@ export function captilizeFirstLetter(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-export function fetchCampaginCode(
+export function fetchCampaignCode(
   name: CampaignNameEnum,
   type: CampaignTypeEnum,
 ) {
   const today = new Date();
-  const englishMonth = today.getMonth(); // If it is January, getMonth() will return 0
-  const englishYear = today.getFullYear();
-  return `${type}:${name}-${englishMonth}/${englishYear}`;
+  const pMonth = persianMonth(today); // If it is January, getMonth() will return 0
+  const pYear = persianYear(today);
+  return `${type}:${name}-${pMonth}/${pYear}`;
+}
+
+export function getMonthsAgo(date: Date, priorMonths: number) {
+  // accessing month of the date
+  const month = date.getMonth();
+  // subtracting required number of months
+  date.setMonth(month - priorMonths);
+  return date;
+}
+
+export function urlSimilarityPercentage(url1: string, url2: string) {
+  // Convert URLs to lowercase to make the comparison case-insensitive
+  url1 = url1.toLowerCase();
+  url2 = url2.toLowerCase();
+
+  // Calculate Levenshtein distance
+  function levenshteinDistance(s1: string | any[], s2: string | any[]) {
+    const len1 = s1.length;
+    const len2 = s2.length;
+    const matrix = [];
+
+    // Initialize the matrix with default values
+    for (let i = 0; i <= len1; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= len2; j++) {
+      matrix[0][j] = j;
+    }
+
+    // Calculate Levenshtein distance
+    for (let j = 1; j <= len2; j++) {
+      for (let i = 1; i <= len1; i++) {
+        if (s1[i - 1] === s2[j - 1]) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1, // substitution
+            matrix[i][j - 1] + 1, // insertion
+            matrix[i - 1][j] + 1, // deletion
+          );
+        }
+      }
+    }
+
+    return matrix[len1][len2];
+  }
+
+  // Calculate similarity percentage
+  const distance = levenshteinDistance(url1, url2);
+  const maxLength = Math.max(url1.length, url2.length);
+  const similarityPercentage = ((maxLength - distance) / maxLength) * 100;
+
+  return similarityPercentage.toFixed(2);
+}
+
+export function getSimilarityPercentage(sentence1: string, sentence2: string) {
+  // Convert sentences to sets of words
+  const set1 = new Set(sentence1.split(' '));
+  const set2 = new Set(sentence2.split(' '));
+
+  // Calculate intersection and union of the sets
+  let intersection = 0;
+  set1.forEach((word) => {
+    if (set2.has(word)) {
+      intersection++;
+    }
+  });
+  const union = set1.size + set2.size - intersection;
+
+  // Calculate Jaccard similarity coefficient
+  const similarity = intersection / union;
+
+  // Convert similarity coefficient to percentage
+  const similarityPercentage = Math.round(similarity * 100);
+
+  return similarityPercentage;
 }
