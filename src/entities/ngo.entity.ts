@@ -1,52 +1,88 @@
-import { Entity, Column, OneToMany, Index } from 'typeorm'
-import { BaseEntity } from './BaseEntity'
-import { NeedEntity } from './need.entity'
-import { ChildrenEntity } from './children.entity'
-import { SocialWorkerEntity } from './user.entity'
+import { Entity, Column, OneToMany, Index, ManyToOne } from 'typeorm';
+import { BaseEntity } from './BaseEntity';
+import { NeedEntity } from './need.entity';
+import { ChildrenEntity } from './children.entity';
+import { LocationEntity } from './location.entity';
+import { ContributorEntity } from './contributor.entity';
+import { ChildrenPreRegisterEntity } from './childrenPreRegister.entity';
 
 @Entity()
 export class NgoEntity extends BaseEntity {
-    @Column({ nullable: true })
-    name: string
+  @Index({ unique: true })
+  @Column({ nullable: true })
+  flaskNgoId: number;
 
-    @Column({ nullable: true })
-    website: string
+  @Column({ nullable: true })
+  name: string;
 
-    @Index({ unique: true })
-    @Column()
-    flaskNgoId: number
+  @Column({ nullable: true })
+  website: string;
 
-    @Column({ nullable: true })
-    city: number
+  @Column({ nullable: true })
+  flaskCityId: number;
 
-    @Column({ nullable: true })
-    state: number
+  @Column({ nullable: true })
+  flaskStateId: number;
 
-    @Column({ nullable: true })
-    country: number
+  @Column({ nullable: true })
+  flaskCountryId: number;
 
-    @Column({ nullable: true })
-    postalAddress: string
+  @Column({ nullable: true })
+  postalAddress: string;
 
-    @Column({ nullable: true })
-    emailAddress: string
+  @Column({ nullable: true })
+  emailAddress: string;
 
-    @Column({ nullable: true })
-    phoneNumber: string
+  @Column({ nullable: true })
+  phoneNumber: string;
 
-    @Column({ nullable: true })
-    logoUrl: string
+  @Column({ nullable: true })
+  logoUrl: string;
 
-    @Column({ default: false })
-    isActive: boolean
+  @Column({ default: false })
+  isActive: boolean;
 
-    @OneToMany(() => NeedEntity, (need) => need.ngo)
-    needs: NeedEntity[];
+  @Column({ type: 'timestamptz', nullable: true })
+  registerDate?: Date;
 
-    @OneToMany(() => ChildrenEntity, (c) => c.ngo)
-    children?: ChildrenEntity[]
+  @Column({ type: 'timestamptz', nullable: true })
+  created?: Date;
 
-    @OneToMany(() => SocialWorkerEntity, (sw) => sw.ngo)
-    socialWorkers?: SocialWorkerEntity[]
+  @Column({ type: 'timestamptz', nullable: true })
+  updated?: Date;
+
+  @Column({ nullable: true })
+  isDeleted?: boolean;
+
+  @OneToMany(() => NeedEntity, (need) => need.ngo)
+  needs: NeedEntity[];
+
+  @OneToMany(() => ChildrenEntity, (c) => c.ngo)
+  children?: ChildrenEntity[];
+
+  @OneToMany(() => ContributorEntity, (sw) => sw.ngo)
+  socialWorkers?: ContributorEntity[];
+
+  @ManyToOne(() => LocationEntity, (n) => n.ngos, { eager: true })
+  location: LocationEntity;
+
+  @OneToMany(() => ChildrenPreRegisterEntity, (c) => c.ngo, {
+    eager: false,
+  })
+  preRegisters?: ChildrenPreRegisterEntity[];
 }
 
+@Entity()
+export class NgoArrivalEntity extends BaseEntity {
+  @Column({ nullable: false })
+  arrivalCode: string;
+
+  @Column({ nullable: false })
+  deliveryCode: string;
+
+  @Column({ nullable: true })
+  website: string;
+
+  @ManyToOne(() => NgoEntity)
+  ngo: NgoEntity;
+}

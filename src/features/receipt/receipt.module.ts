@@ -1,17 +1,38 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SocialWorkerEntity } from '../../entities/user.entity';
 import { NeedEntity } from '../../entities/need.entity';
 import { ReceiptEntity } from '../../entities/receipt.entity';
 import { NeedService } from '../need/need.service';
 import { ReceiptController } from './receipt.controller';
 import { ReceiptService } from './receipt.service';
+import { Need } from 'src/entities/flaskEntities/need.entity';
+import { ContributorEntity } from 'src/entities/contributor.entity';
+import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { ReceiptMiddleware } from './middlewares/receipt.middleware';
+import { VariableEntity } from 'src/entities/variable.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([ReceiptEntity, NeedEntity, SocialWorkerEntity])],
-    controllers: [ReceiptController],
-    providers: [ReceiptService, NeedService],
+  imports: [
+    TypeOrmModule.forFeature(
+      [Need, Child, Payment, SocialWorker, Receipt, NeedReceipt],
+      'flaskPostgres',
+    ),
+    TypeOrmModule.forFeature([
+      ReceiptEntity,
+      NeedEntity,
+      ContributorEntity,
+      VariableEntity,
+    ]),
+  ],
+  controllers: [ReceiptController],
+  providers: [ReceiptService, NeedService],
 })
-export class ReceiptModule {
-
+export class ReceiptModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ReceiptMiddleware).forRoutes('receipt');
+  }
 }

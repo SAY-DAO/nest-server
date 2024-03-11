@@ -1,4 +1,4 @@
-import { NeedTypeDefinitionEnum, NeedTypeEnum } from '../types/interface'
+import { NeedTypeDefinitionEnum, NeedTypeEnum } from '../types/interfaces/interface'
 import { Entity, Column, OneToMany } from 'typeorm'
 import { BaseEntity } from './BaseEntity'
 import { NeedEntity } from './need.entity'
@@ -13,6 +13,9 @@ export class ProviderEntity extends BaseEntity {
 
     @Column({ nullable: true })
     description: string
+
+    @Column({ nullable: true })
+    address: string
 
     @Column()
     city: number
@@ -34,7 +37,6 @@ export class ProviderEntity extends BaseEntity {
 
     @Column({ default: false })
     isActive: boolean
-
 
     @OneToMany(() => NeedEntity, (need) => need.provider)
     needs: NeedEntity[];
