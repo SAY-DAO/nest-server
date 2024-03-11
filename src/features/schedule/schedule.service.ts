@@ -16,7 +16,7 @@ export class ScheduleService {
   ) {}
   private readonly logger = new Logger(ScheduleService.name);
 
-  async completePays() {
+  async completePays() {    
     const father = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.FATHER,
       0,
@@ -127,27 +127,26 @@ export class ScheduleService {
     }
   }
   // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here
-  @Cron(' 00 00 19 * * Mon', {
-    name: 'MonthlyCampaigns try At 13:00 on Thursdays.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
-    timeZone: 'Asia/Tehran',
-  })
-  async handleSummaryMailCron() {
-    const farsiDay = persianDay(new Date());
-    // if (farsiDay > 20) {
-    //   this.logger.warn(
-    //     `We are near the end of this month let's skip one more week`,
-    //   );
-    //   return;
-    // }
-    this.logger.debug('Sending user Campaigns...');
-    // ############## BE CAREFUL #################
-    if (process.env.NODE_ENV === 'production') {
-      this.logger.debug(
-        'Sending user Campaigns at 01:00 PM, only on Thursdays',
-      );
-      await this.campaignService.sendUserMonthlyCampaigns();
-    }
-  }
+  // @Cron(' 00 00 13 * * Thu', {
+  //   name: 'MonthlyCampaigns try At 13:00 on Thursdays.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+  //   timeZone: 'Asia/Tehran',
+  // })
+  // async handleSummaryMailCron() {
+  //   const farsiDay = persianDay(new Date());
+  //   if (farsiDay > 20) {
+  //     this.logger.warn(
+  //       `We are near the end of this month let's skip one more week`,
+  //     );
+  //     return;
+  //   }
+  //   // ############## BE CAREFUL #################
+  //   if (process.env.NODE_ENV === 'production') {
+  //     this.logger.debug(
+  //       'Sending user Campaigns at 01:00 PM, only on Thursdays',
+  //     );
+  //     await this.campaignService.sendUserMonthlyCampaigns();
+  //   }
+  // }
 
   @Cron('30 8 * * Sat', {
     name: 'Reminders At 08:30 on Saturday.',
