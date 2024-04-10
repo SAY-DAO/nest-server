@@ -203,6 +203,11 @@ export class TicketController {
         uniqueParticipants,
       );
     }
+    
+    await this.ticketService.createTicketView(
+      createTicketDetails.flaskUserId,
+      ticket.id,
+    );
 
     // only when not announcement
     if (
