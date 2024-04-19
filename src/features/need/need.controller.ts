@@ -371,13 +371,13 @@ export class NeedController {
         );
         if (
           need.type === NeedTypeEnum.PRODUCT &&
-          filtered.length <= SIMILAR_NAME_LIMIT_PRODUCT
+          filtered.length < SIMILAR_NAME_LIMIT_PRODUCT
         ) {
           errorMsg = `Similar count error, only ${filtered.length}.`;
         }
         if (
           need.type === NeedTypeEnum.SERVICE &&
-          filtered.length <= SIMILAR_NAME_LIMIT_SERVICE
+          filtered.length < SIMILAR_NAME_LIMIT_SERVICE
         ) {
           errorMsg = `Similar count error, only ${filtered.length}.`;
         }
