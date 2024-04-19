@@ -242,7 +242,7 @@ export async function validateNeed(
       message: `Automated Message: Please check ${
         price < 500
           ? 'Price'
-          : !title || title.length < 5
+          : type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)
           ? 'Title'
           : !name_en || name_en.length < 3
           ? 'Name'

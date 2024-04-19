@@ -271,14 +271,17 @@ export class NeedController {
     const ngoIds = await this.ngoService
       .getFlaskNgos()
       .then((r) => r.filter((n) => n.isActive).map((n) => n.id));
-
+    const notConfirmed = await this.needService.getNotConfirmedNeeds(
+      null,
+      swIds,
+      ngoIds,
+    );
     let toBeConfirmed = config().dataCache.fetchToBeConfirmed();
-    if (!toBeConfirmed || !toBeConfirmed[0]) {
-      const notConfirmed = await this.needService.getNotConfirmedNeeds(
-        null,
-        swIds,
-        ngoIds,
-      );
+    if (
+      !toBeConfirmed ||
+      !toBeConfirmed[0] ||
+      toBeConfirmed.length !== notConfirmed[1]
+    ) {
       for await (const need of notConfirmed[0]) {
         console.log(`Mass Confirm preparation: ${need.id}`);
         // 1- sync & validate need
