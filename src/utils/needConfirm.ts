@@ -30,7 +30,8 @@ const BASE_AGE_OF_DUPLICATE_3 = 30;
 
 const SIMILAR_URL_PERCENTAGE = 57; // percentage
 const SIMILAR_TXT_PERCENTAGE = 15; // percentage
-export const SIMILAR_NAME_LIMIT = 20;
+export const SIMILAR_NAME_LIMIT_PRODUCT = 20;
+export const SIMILAR_NAME_LIMIT_SERVICE = 10;
 export const GRACE_PERIOD = 15; // days left after ticket to fix the problem mentioned in ticket
 export async function validateNeed(
   nestNeed: NeedEntity,
@@ -332,23 +333,34 @@ export function checkNeed(need: Need, duplicate: Need) {
       T = false;
       msg = 'Types are different';
     }
+    let titleResult: number;
     // compare only first 10 chars
-    const titleResult =
-      duplicate.title &&
-      Number(
-        getSimilarityPercentage(
-          title.length > 15 ? title.substring(0, 15) : title,
-          duplicate.title.length > 15
-            ? duplicate.title.substring(0, 15)
-            : duplicate.title,
-        ),
-      );
-    if (duplicate.title && titleResult > SIMILAR_TXT_PERCENTAGE) {
-      TT = true;
-    } else {
-      TT = false;
-      msg = 'title are not that similar';
+    if (type === NeedTypeEnum.PRODUCT) {
+      titleResult =
+        duplicate.title &&
+        Number(
+          getSimilarityPercentage(
+            title.length > 15 ? title.substring(0, 15) : title,
+            duplicate.title.length > 15
+              ? duplicate.title.substring(0, 15)
+              : duplicate.title,
+          ),
+        );
+      if (duplicate.title && titleResult > SIMILAR_TXT_PERCENTAGE) {
+        TT = true;
+      } else {
+        TT = false;
+        msg = 'title are not that similar';
+      }
+    } else if (type === NeedTypeEnum.SERVICE) {
+      if (!duplicate.title || duplicate.title.length < 1) {
+        TT = true;
+      } else {
+        TT = false;
+        msg = 'service should not have link';
+      }
     }
+
     // check icons similarity
     if (
       icon &&
@@ -372,11 +384,14 @@ export function checkNeed(need: Need, duplicate: Need) {
       msg = 'Price error';
     }
     if (
+      type === NeedTypeEnum.PRODUCT &&
       retailerLink &&
       retailerLink.length > 10 &&
       duplicate.link &&
       duplicate.link.length > 10
     ) {
+      R = true;
+    } else if (type === NeedTypeEnum.SERVICE) {
       R = true;
     } else {
       R = false;

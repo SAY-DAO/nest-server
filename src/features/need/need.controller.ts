@@ -30,7 +30,8 @@ import { TicketService } from '../ticket/ticket.service';
 import {
   checkNeed,
   GRACE_PERIOD,
-  SIMILAR_NAME_LIMIT,
+  SIMILAR_NAME_LIMIT_PRODUCT,
+  SIMILAR_NAME_LIMIT_SERVICE,
   validateNeed,
 } from 'src/utils/needConfirm';
 import { ValidatedDupType } from 'src/types/interfaces/Need';
@@ -271,17 +272,14 @@ export class NeedController {
     const ngoIds = await this.ngoService
       .getFlaskNgos()
       .then((r) => r.filter((n) => n.isActive).map((n) => n.id));
-    const notConfirmed = await this.needService.getNotConfirmedNeeds(
-      null,
-      swIds,
-      ngoIds,
-    );
+
     let toBeConfirmed = config().dataCache.fetchToBeConfirmed();
-    if (
-      !toBeConfirmed ||
-      !toBeConfirmed[0] ||
-      toBeConfirmed.length !== notConfirmed[1]
-    ) {
+    if (!toBeConfirmed || !toBeConfirmed[0]) {
+      const notConfirmed = await this.needService.getNotConfirmedNeeds(
+        null,
+        swIds,
+        ngoIds,
+      );
       for await (const need of notConfirmed[0]) {
         console.log(`Mass Confirm preparation: ${need.id}`);
         // 1- sync & validate need
@@ -371,7 +369,16 @@ export class NeedController {
         const filtered = similarNameNeeds.filter(
           (n) => n.category === need.category,
         );
-        if (filtered.length < SIMILAR_NAME_LIMIT) {
+        if (
+          need.type === NeedTypeEnum.PRODUCT &&
+          filtered.length <= SIMILAR_NAME_LIMIT_PRODUCT
+        ) {
+          errorMsg = `Similar count error, only ${filtered.length}.`;
+        }
+        if (
+          need.type === NeedTypeEnum.SERVICE &&
+          filtered.length <= SIMILAR_NAME_LIMIT_SERVICE
+        ) {
           errorMsg = `Similar count error, only ${filtered.length}.`;
         }
 
