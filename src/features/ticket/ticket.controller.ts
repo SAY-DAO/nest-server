@@ -188,7 +188,7 @@ export class TicketController {
     }
 
     let ticket: TicketEntity;
-    ticket = await this.ticketService.getTicketByNeed(body.flaskNeedId);
+    ticket = await this.ticketService.getTicketByFlaskNeedId(body.flaskNeedId);
     if (ticket) {
       console.log('\x1b[36m%s\x1b[0m', 'Updating The Ticket ...\n');
       ticket = await this.ticketService.updateTicketContributors(
@@ -203,22 +203,11 @@ export class TicketController {
         uniqueParticipants,
       );
     }
-    
+
     await this.ticketService.createTicketView(
       createTicketDetails.flaskUserId,
       ticket.id,
     );
-
-    // only when not announcement
-    if (
-      body.announcement !== AnnouncementEnum.ARRIVED_AT_NGO &&
-      body.announcement !== AnnouncementEnum.NGO_RECEIVED_MONEY
-    ) {
-      await this.ticketService.createTicketView(
-        createTicketDetails.flaskUserId,
-        ticket.id,
-      );
-    }
 
     if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO) {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));

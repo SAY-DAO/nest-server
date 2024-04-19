@@ -47,6 +47,7 @@ import {
 import { from } from 'rxjs';
 import { VariableEntity } from 'src/entities/variable.entity';
 import Decimal from 'decimal.js';
+import { getMonthsAgo } from 'src/utils/helpers';
 
 @Injectable()
 export class NeedService {
@@ -796,19 +797,17 @@ export class NeedService {
         'child',
         'child.id = need.child_id',
       )
-      // .where("need.unavailable_from > :startDate", { startDate: new Date(2021, 2, 3) })
-      // .andWhere("need.unavailable_from < :endDate", { endDate: new Date(2023, 1, 3) })
       .andWhere('need.child_id = :childId', { childId: childId })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.id != :needId', { needId: need.id })
-      // .andWhere('need.title = :title', { title: need.title })
-
       .andWhere("need.name_translations -> 'en' = :nameTranslations", {
         nameTranslations: need.name_translations.en,
       })
-      .andWhere('need.status < :statusPaid', {
-        statusPaid: PaymentStatusEnum.COMPLETE_PAY,
-      })
+      // .andWhere('need.status < :statusPaid', {
+      //   statusPaid: PaymentStatusEnum.COMPLETE_PAY,
+      // })
+      // .andWhere('need.confirmDate > :confirmDate', { confirmDate: date })
+
       .select([
         'child.sayname_translations',
         'need.id',
@@ -827,7 +826,6 @@ export class NeedService {
         'need.created',
         'need.updated',
         'need.confirmDate',
-        'need.created',
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');
@@ -1021,5 +1019,30 @@ export class NeedService {
       )
       .select(['need.id'])
       .getMany();
+  }
+
+  async getSimilarNeeds(name: string): Promise<Need[]> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .where("need.name_translations -> 'en' = :nameTranslations", {
+        nameTranslations: name,
+      })
+      .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
+      .select([
+        'need.id',
+        'need.title',
+        'need.child_id',
+        'need.name_translations',
+        'need.description_translations',
+        'need.title',
+        'need.category',
+        'need.isConfirmed',
+        'need.created',
+        'need.confirmDate',
+      ])
+      .cache(60000)
+      .orderBy('need.created', 'ASC');
+    return await queryBuilder.getMany();
   }
 }

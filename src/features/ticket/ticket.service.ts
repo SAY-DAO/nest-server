@@ -43,11 +43,25 @@ export class TicketService {
     return this.ticketRepository.save(newTicket);
   }
 
-  getTicketByNeed(flaskNeedId: number): Promise<TicketEntity> {
+  getTicketByFlaskNeedId(flaskNeedId: number): Promise<TicketEntity> {
     const ticket = this.ticketRepository.findOne({
       where: {
         need: {
           flaskId: flaskNeedId,
+        },
+      },
+      relations: {
+        need: true,
+      },
+    });
+    return ticket;
+  }
+
+  getTicketsByNeed(id: string): Promise<TicketEntity[]> {
+    const ticket = this.ticketRepository.find({
+      where: {
+        need: {
+          id,
         },
       },
       relations: {

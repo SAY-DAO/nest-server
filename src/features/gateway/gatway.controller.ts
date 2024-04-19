@@ -85,6 +85,8 @@ export class GateWayController implements OnModuleInit {
     this.checkConnection();
     console.log('\x1b[36m%s\x1b[0m', `Checking Unread Tickets...`);
     const myTickets = await this.ticketService.getUserTickets(body.flaskUserId);
+    console.log(myTickets.length);
+
     const unReads = ticketNotifications(myTickets, body.flaskUserId);
     if (unReads && unReads.length > 0) {
       console.log(

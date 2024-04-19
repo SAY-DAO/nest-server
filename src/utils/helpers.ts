@@ -527,9 +527,19 @@ export function ticketNotifications(
   flaskUserId: number,
 ) {
   const unReads = myTickets
-    .filter((t) => t.lastAnnouncement == AnnouncementEnum.NONE)
+    .filter(
+      (t) =>
+        t.lastAnnouncement !== AnnouncementEnum.ARRIVED_AT_NGO &&
+        t.lastAnnouncement !== AnnouncementEnum.NGO_RECEIVED_MONEY,
+    )
     .filter((t) => {
       // console.log(new Date(t.updatedAt));
+      console.log(
+        new Date(
+          t.views.find((v) => v.flaskUserId === flaskUserId) &&
+            t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
+        ),
+      );
 
       // when a user creates a ticket, the participants won't have a view assigned to them
       const myView = t.views.find((v) => v.flaskUserId === flaskUserId);

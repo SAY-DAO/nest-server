@@ -204,6 +204,7 @@ export class SyncService {
         flaskSocialWorker.birth_date && new Date(flaskSocialWorker.birth_date),
       panelRole: PanelContributors.SOCIAL_WORKER,
       userName: flaskSocialWorker.userName,
+      isActive: flaskSocialWorker.is_active,
     };
 
     if (!nestSocialWorker) {
@@ -660,6 +661,7 @@ export class SyncService {
       deliveryCode: flaskNeed.deliveryCode,
       doneAt: flaskNeed.doneAt,
       isConfirmed: flaskNeed.isConfirmed,
+      deletedAt: flaskNeed.deleted_at,
       unavailableFrom: flaskNeed.unavailable_from,
       created: flaskNeed.created,
       updated: flaskNeed.updated,

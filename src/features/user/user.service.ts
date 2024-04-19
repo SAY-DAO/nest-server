@@ -26,11 +26,11 @@ export class UserService {
     private flaskUserRepository: Repository<User>,
   ) {}
 
-
   getFlaskSwIds(): Promise<SocialWorker[]> {
     return this.flaskSocialWorkerRepository.find({
       select: {
         id: true,
+        is_active: true,
       },
     });
   }
