@@ -210,10 +210,9 @@ export async function validateNeed(
 
   // validate details
   if (
-    !title ||
     !name_en ||
     !description_en ||
-    (type === NeedTypeEnum.PRODUCT && title.length < 5) ||
+    (type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)) ||
     name_en.length < 3 ||
     description_en.length < 5 ||
     price < 500
