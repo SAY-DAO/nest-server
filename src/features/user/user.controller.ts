@@ -318,7 +318,7 @@ export class UserController {
           );
           // signatures only at the my page last column
           //  UPDATE: we decided to snot show signatures on page reload since they have a dedicated page
-          // If you removing the code, remember need.signatures need to be fixed on front-end side as well
+          // If you removing the code, remember need.signatures must be fixed on front-end side as well
           if (i === 3) {
             signatures = await this.walletService.getNeedSignatures(
               fetchedNeed.id,

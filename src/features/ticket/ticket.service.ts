@@ -205,6 +205,13 @@ export class TicketService {
       relations: {
         need: true,
       },
+      select: {
+        need: {
+          id: true,
+          flaskId: true,
+          name: true,
+        },
+      },
     });
   }
 

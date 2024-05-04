@@ -19,6 +19,7 @@ import {
   NeedTypeEnum,
   ProductStatusEnum,
   SAYPlatformRoles,
+  ServiceStatusEnum,
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
@@ -532,7 +533,7 @@ export class NeedController {
         contentType: false,
       },
     };
-
+    // Only for products: for service do a manual review for receipts
     for await (const need of needs[0]) {
       if (
         need.type === NeedTypeEnum.PRODUCT &&
@@ -548,22 +549,6 @@ export class NeedController {
               (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
             )
           ) {
-            const formData = new FormData();
-            formData.append('status', String(4));
-            formData.append(
-              'ngo_delivery_date',
-              String(
-                format(
-                  new Date(
-                    ticket.ticketHistories.find(
-                      (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
-                    ).announcedArrivalDate,
-                  ),
-                  'yyyy-MM-dd',
-                ),
-              ),
-            );
-
             const { data } = await axios.patch(
               `https://api.sayapp.company/api/v2/need/update/needId=${need.id}`,
               {
