@@ -139,7 +139,7 @@ export async function validateNeed(
         isValidNeed: false,
         participants: [nestNeed.socialWorker, SuperAdmin],
         ticketDetails: createTicketDetails,
-        message: `Automated Message: Please add the product link!`,
+        message: `Automated Message: Please add the product link or change to Service!`,
       };
       return result;
     }

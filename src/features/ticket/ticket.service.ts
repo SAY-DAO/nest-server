@@ -212,6 +212,7 @@ export class TicketService {
           },
           provider: true,
           socialWorker: true,
+          purchaser: true,
           auditor: true,
         },
       },
@@ -243,6 +244,10 @@ export class TicketService {
             id: true,
             flaskUserId: true,
           },
+          purchaser: {
+            id: true,
+            flaskUserId: true,
+          },
           auditor: {
             id: true,
             flaskUserId: true,
@@ -264,6 +269,7 @@ export class TicketService {
           },
           provider: true,
           socialWorker: true,
+          purchaser: true,
           auditor: true,
         },
       },
@@ -298,6 +304,10 @@ export class TicketService {
             },
           },
           socialWorker: {
+            id: true,
+            flaskUserId: true,
+          },
+          purchaser: {
             id: true,
             flaskUserId: true,
           },
