@@ -226,6 +226,13 @@ export class TicketService {
         //   signatures: IsNull(),
         // },
       },
+      select: {
+        need: {
+          id: true,
+          flaskId: true,
+          name: true,
+        },
+      },
     });
   }
   getUserOnlyArrivalTickets(flaskUserId: number): Promise<TicketEntity[]> {
