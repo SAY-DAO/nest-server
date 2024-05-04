@@ -203,13 +203,50 @@ export class TicketService {
   getTickets(): Promise<TicketEntity[]> {
     return this.ticketRepository.find({
       relations: {
-        need: true,
+        need: {
+          child: {
+            ngo: {
+              location: false,
+            },
+            socialWorker: true,
+          },
+          provider: true,
+          socialWorker: true,
+          auditor: true,
+        },
       },
       select: {
         need: {
           id: true,
           flaskId: true,
           name: true,
+          provider: {
+            id: true,
+          },
+          child: {
+            id: true,
+            flaskId: true,
+            sayNameTranslations: { en: true, fa: true },
+            ngo: {
+              id: true,
+              flaskNgoId: true,
+              location: {
+                id: true,
+              },
+            },
+            socialWorker: {
+              id: true,
+              flaskUserId: true,
+            },
+          },
+          socialWorker: {
+            id: true,
+            flaskUserId: true,
+          },
+          auditor: {
+            id: true,
+            flaskUserId: true,
+          },
         },
       },
     });
@@ -218,7 +255,17 @@ export class TicketService {
   getUserTickets(flaskUserId: number): Promise<TicketEntity[]> {
     return this.ticketRepository.find({
       relations: {
-        need: true,
+        need: {
+          child: {
+            ngo: {
+              location: false,
+            },
+            socialWorker: true,
+          },
+          provider: true,
+          socialWorker: true,
+          auditor: true,
+        },
       },
       where: {
         contributors: { flaskUserId: flaskUserId },
@@ -231,6 +278,33 @@ export class TicketService {
           id: true,
           flaskId: true,
           name: true,
+          provider: {
+            id: true,
+          },
+          child: {
+            id: true,
+            flaskId: true,
+            sayNameTranslations: { en: true, fa: true },
+            ngo: {
+              id: true,
+              flaskNgoId: true,
+              location: {
+                id: true,
+              },
+            },
+            socialWorker: {
+              id: true,
+              flaskUserId: true,
+            },
+          },
+          socialWorker: {
+            id: true,
+            flaskUserId: true,
+          },
+          auditor: {
+            id: true,
+            flaskUserId: true,
+          },
         },
       },
     });
