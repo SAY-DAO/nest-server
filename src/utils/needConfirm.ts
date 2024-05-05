@@ -45,6 +45,7 @@ export async function validateNeed(
   message: string;
 }> {
   const type = nestNeed.type;
+  const category = nestNeed.category;
   const retailerLink = nestNeed.link;
   const price = nestNeed.cost;
   const icon = nestNeed.imageUrl;
@@ -53,6 +54,9 @@ export async function validateNeed(
   const description_en = nestNeed.descriptionTranslations.en;
   const confirmDate = nestNeed.confirmDate;
   const isDeleted = nestNeed.isDeleted;
+  const information = nestNeed.information;
+  const details = nestNeed.details;
+
   let result = {
     needId: nestNeed.id,
     isValidNeed: true,
@@ -76,6 +80,53 @@ export async function validateNeed(
       participants: [SuperAdmin],
       ticketDetails: createTicketDetails,
       message: 'Automated Message: Check need confirmation and existence!',
+    };
+    return result;
+  }
+  // validate SW information/details
+  const list = [
+    'شلوار',
+    'لباس زیر',
+    'لباس',
+    'مانتو',
+    'کفش',
+    'دمپایی',
+    'شورت',
+    'سوتین',
+    'کاپشن',
+    'دمپایی',
+    'دستکش',
+    'جوراب',
+  ];
+  const listResult = [];
+  for (let i = 0; i < list.length; i++) {
+    const titleResult = Number(
+      title && Number(getSimilarityPercentage(title, list[i])),
+    );
+    listResult.push(titleResult);
+  }
+
+  if (
+    type === NeedTypeEnum.PRODUCT &&
+    category === CategoryEnum.GROWTH &&
+    Math.max(...listResult) > SIMILAR_TXT_PERCENTAGE &&
+    !details &&
+    !information
+  ) {
+    const createTicketDetails: CreateTicketParams = {
+      title: `More info`,
+      flaskNeedId: nestNeed.flaskId,
+      need: nestNeed,
+      flaskUserId: nestNeed.socialWorker.flaskUserId,
+      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
+      lastAnnouncement: AnnouncementEnum.ERROR,
+    };
+    result = {
+      needId: nestNeed.id,
+      isValidNeed: false,
+      participants: [nestNeed.socialWorker, SuperAdmin],
+      ticketDetails: createTicketDetails,
+      message: 'Automated Message: Please add the size, ...!',
     };
     return result;
   }
@@ -431,7 +482,7 @@ export function checkNeed(need: Need, duplicate: Need) {
       isValidNeed: true,
       isValidDuplicate,
       ageOfDup,
-      msg: isValidDuplicate ? 'All good!' : msg,
+      msg: isValidDuplicate ? 'Valid Duplicate!' : msg,
       status: 200,
     };
   } else {

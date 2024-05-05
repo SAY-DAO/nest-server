@@ -23,7 +23,7 @@ import {
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
-import { daysDifference } from 'src/utils/helpers';
+import { daysDifference, timeDifference } from 'src/utils/helpers';
 import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
@@ -275,14 +275,23 @@ export class NeedController {
       .then((r) => r.filter((n) => n.isActive).map((n) => n.id));
 
     let toBeConfirmed = config().dataCache.fetchToBeConfirmed();
-    if (!toBeConfirmed || !toBeConfirmed[0]) {
+
+    const expired =
+      !toBeConfirmed.createdAt ||
+      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 800;
+    if (!toBeConfirmed || !toBeConfirmed.list[0] || expired) {
       const notConfirmed = await this.needService.getNotConfirmedNeeds(
         null,
         swIds,
         ngoIds,
       );
+      const myList = [];
+      let counter = 0;
       for await (const need of notConfirmed[0]) {
-        console.log(`Mass Confirm preparation: ${need.id}`);
+        counter += 1;
+        console.log(
+          `${counter} / ${notConfirmed[0].length} Mass Confirm preparation: ${need.id}`,
+        );
         // 1- sync & validate need
         const { need: nestNeed } = await this.syncService.syncNeed(
           need,
@@ -334,7 +343,7 @@ export class NeedController {
             console.log('\x1b[36m%s\x1b[0m', 'Deleting need...\n');
             //delete
           }
-          toBeConfirmed.push({
+          toBeConfirmed.list.push({
             limit: null,
             validCount: null,
             need,
@@ -367,20 +376,24 @@ export class NeedController {
         const similarNameNeeds = await this.needService.getSimilarNeeds(
           need.name_translations.en,
         );
-        const filtered = similarNameNeeds.filter(
+        const sameCatSimilarity = similarNameNeeds.filter(
           (n) => n.category === need.category,
         );
+        const diffCatSimilarity = similarNameNeeds.filter(
+          (n) => n.category !== need.category,
+        );
+
         if (
           need.type === NeedTypeEnum.PRODUCT &&
-          filtered.length < SIMILAR_NAME_LIMIT_PRODUCT
+          sameCatSimilarity.length < SIMILAR_NAME_LIMIT_PRODUCT
         ) {
-          errorMsg = `Similar count error, only ${filtered.length}.`;
+          errorMsg = `Similar count error, only ${sameCatSimilarity.length}.`;
         }
         if (
           need.type === NeedTypeEnum.SERVICE &&
-          filtered.length < SIMILAR_NAME_LIMIT_SERVICE
+          sameCatSimilarity.length < SIMILAR_NAME_LIMIT_SERVICE
         ) {
-          errorMsg = `Similar count error, only ${filtered.length}.`;
+          errorMsg = `Similar count error, only ${sameCatSimilarity.length}.`;
         }
 
         // 3- if we have a milk for sara, only two more needs from the same category. eg: cheese, butter,...
@@ -414,16 +427,25 @@ export class NeedController {
             validatedDups.filter((v) => v.category !== nestNeed.category).length
           }`;
         }
-        toBeConfirmed.push({
+        myList.push({
           limit,
           validCount,
           need,
           duplicates: validatedDups,
           errorMsg,
+          possibleMissMatch: diffCatSimilarity.map((n) => {
+            return {
+              needId: n.id,
+              childId: n.child_id,
+              status: n.status,
+              category: n.category,
+            };
+          }),
         });
+        1;
       }
 
-      config().dataCache.storeToBeConfirmed(toBeConfirmed);
+      config().dataCache.storeToBeConfirmed(myList, new Date());
     }
     toBeConfirmed = config().dataCache.fetchToBeConfirmed();
 

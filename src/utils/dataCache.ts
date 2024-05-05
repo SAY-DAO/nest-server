@@ -18,7 +18,10 @@ export default class DataCache {
   childActiveFamilies = null;
   medianList = [];
   midjourneyList = [];
-  ToBeConfirmedList = [];
+  ToBeConfirmed = {
+    list: [],
+    createdAt: null,
+  };
   countChildrenNoNeeds = null;
 
   updateChildrenNoNeeds(count: number) {
@@ -82,8 +85,9 @@ export default class DataCache {
     list.forEach((e) => this.midjourneyList.push(e));
   };
 
-  storeToBeConfirmed = (list: any[]) => {
-    this.ToBeConfirmedList = list;
+  storeToBeConfirmed = (list: any[], createdAt: Date) => {
+    this.ToBeConfirmed.list = list;
+    this.ToBeConfirmed.createdAt = createdAt;
   };
 
   // dApp user ratio in different roles / distance ratio
@@ -129,7 +133,7 @@ export default class DataCache {
   };
 
   fetchMidjourney = () => this.midjourneyList;
-  fetchToBeConfirmed = () => this.ToBeConfirmedList;
+  fetchToBeConfirmed = () => this.ToBeConfirmed;
   fetchChildrenNoNeeds() {
     return this.countChildrenNoNeeds;
   }

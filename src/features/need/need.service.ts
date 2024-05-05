@@ -1032,10 +1032,10 @@ export class NeedService {
       .select([
         'need.id',
         'need.title',
+        'need.status',
         'need.child_id',
         'need.name_translations',
         'need.description_translations',
-        'need.title',
         'need.category',
         'need.isConfirmed',
         'need.created',
