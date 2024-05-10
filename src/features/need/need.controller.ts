@@ -293,20 +293,24 @@ export class NeedController {
           `${counter} / ${notConfirmed[0].length} Mass Confirm preparation: ${need.id}`,
         );
         // 1- sync & validate need
-        const { need: nestNeed } = await this.syncService.syncNeed(
-          need,
-          need.child_id,
-          panelFlaskUserId,
-          null,
-          null,
-          null,
-        );
+        let fetchedNeed = await this.needService.getNeedByFlaskId(need.id);
+        if (!fetchedNeed) {
+          const { need: nestNeed } = await this.syncService.syncNeed(
+            need,
+            need.child_id,
+            panelFlaskUserId,
+            null,
+            null,
+            null,
+          );
+          fetchedNeed = nestNeed;
+        }
 
         const superAdmin = await this.userService.getUserByFlaskId(
           SUPER_ADMIN_ID,
         );
 
-        const validatedNeed = await validateNeed(nestNeed, superAdmin);
+        const validatedNeed = await validateNeed(fetchedNeed, superAdmin);
         let ticket: TicketEntity;
 
         // 0-  ticket if not a valid need and not ticketed yet
@@ -420,11 +424,11 @@ export class NeedController {
         }
         if (
           validatedDups &&
-          validatedDups.filter((v) => v.category !== nestNeed.category).length >
+          validatedDups.filter((v) => v.category !== fetchedNeed.category).length >
             0
         ) {
           errorMsg = `Category error, ${
-            validatedDups.filter((v) => v.category !== nestNeed.category).length
+            validatedDups.filter((v) => v.category !== fetchedNeed.category).length
           }`;
         }
         myList.push({
@@ -439,6 +443,7 @@ export class NeedController {
               childId: n.child_id,
               status: n.status,
               category: n.category,
+              isConfirmed: n.confirmDate && true,
             };
           }),
         });
