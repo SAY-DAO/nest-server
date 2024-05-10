@@ -297,19 +297,20 @@ export class UserController {
     const time3 = new Date().getTime();
     // add IPFS + tickets for every need
     try {
-      let tickets: TicketEntity[];
       let signatures: SignatureEntity[];
       let ipfs: IpfsEntity;
-      if (role === SAYPlatformRoles.AUDITOR) {
-        tickets = await this.ticketService.getTickets();
-      } else {
-        tickets = await this.ticketService.getUserTickets(panelFlaskUserId);
-      }
+
+      const list: number[] = [];
+      allNeeds.forEach((column) => {
+        for (let i = 0; i < column.length; i++) {
+          list.push(column[i].id);
+        }
+      });
+      const tickets = await this.ticketService.getNeedsTickets(list);
       console.log(
         '\x1b[33m%s\x1b[0m',
         `Taking care of Need signatures + Tickets...\n`,
       );
-
       for (let i = 0; i < allNeeds.length; i++) {
         for (let k = 0; k < allNeeds[i].length; k++) {
           const fetchedNeed = allNeeds[i][k];

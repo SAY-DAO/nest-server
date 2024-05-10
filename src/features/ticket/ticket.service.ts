@@ -254,6 +254,10 @@ export class TicketService {
           },
         },
       },
+      order: {
+        createdAt: 'DESC',
+      },
+      take: 50,
     });
   }
 
@@ -317,8 +321,41 @@ export class TicketService {
           },
         },
       },
+      take: 50,
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
+
+  async getNeedsTickets(needIds: number[]): Promise<TicketEntity[]> {
+    const queryBuilder = this.ticketRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndMapOne(
+        'ticket.need',
+        NeedEntity,
+        'need',
+        ' need.flaskId = ticket.flaskNeedId',
+      )
+      .where('need.flaskId IN (:...needIds)', { needIds: needIds })
+      .select([
+        'ticket',
+        'need.id',
+        'need.nameTranslations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.status',
+        'need.cost',
+        'need.isDeleted',
+        'need.created',
+        'need.confirmDate',
+      ])
+      .cache(6000);
+    return await queryBuilder.getMany();
+  }
+
   getUserOnlyArrivalTickets(flaskUserId: number): Promise<TicketEntity[]> {
     return this.ticketRepository.find({
       relations: {
