@@ -297,6 +297,8 @@ export class NeedController {
         if (
           !fetchedNeed ||
           fetchedNeed.status !== need.status ||
+          fetchedNeed.category !== need.category ||
+          fetchedNeed.type !== need.type ||
           fetchedNeed.nameTranslations.en !== need.name_translations.en
         ) {
           const { need: nestNeed } = await this.syncService.syncNeed(
@@ -448,11 +450,11 @@ export class NeedController {
               childId: n.child_id,
               status: n.status,
               category: n.category,
+              type: n.type,
               isConfirmed: n.confirmDate && true,
             };
           }),
         });
-        1;
       }
 
       config().dataCache.storeToBeConfirmed(myList, new Date());

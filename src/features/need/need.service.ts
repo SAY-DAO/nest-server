@@ -1033,6 +1033,7 @@ export class NeedService {
         'need.id',
         'need.title',
         'need.status',
+        'need.type',
         'need.child_id',
         'need.name_translations',
         'need.description_translations',
