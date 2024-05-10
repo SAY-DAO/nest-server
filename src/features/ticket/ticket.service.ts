@@ -13,7 +13,7 @@ import {
 } from 'src/types/interfaces/interface';
 import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
-import { IsNull, MoreThan, Repository, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class TicketService {
@@ -328,30 +328,17 @@ export class TicketService {
     });
   }
 
-  async getNeedsTickets(needIds: number[]): Promise<TicketEntity[]> {
+  async getNeedsTickets(
+    needIds: number[],
+    flaskUserId: number,
+  ): Promise<TicketEntity[]> {
     const queryBuilder = this.ticketRepository
       .createQueryBuilder('ticket')
-      .leftJoinAndMapOne(
-        'ticket.need',
-        NeedEntity,
-        'need',
-        ' need.flaskId = ticket.flaskNeedId',
-      )
-      .where('need.flaskId IN (:...needIds)', { needIds: needIds })
-      .select([
-        'ticket',
-        'need.id',
-        'need.nameTranslations',
-        'need.title',
-        'need.imageUrl',
-        'need.category',
-        'need.type',
-        'need.status',
-        'need.cost',
-        'need.isDeleted',
-        'need.created',
-        'need.confirmDate',
-      ])
+      .leftJoinAndSelect('ticket.contributors', 'contributor')
+      .where('ticket.flaskNeedId IN (:...needIds)', { needIds: needIds })
+      .andWhere('contributor.flaskUserId = :flaskSwId', {
+        flaskSwId: flaskUserId,
+      })
       .cache(6000);
     return await queryBuilder.getMany();
   }

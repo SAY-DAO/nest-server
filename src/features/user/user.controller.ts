@@ -306,7 +306,15 @@ export class UserController {
           list.push(column[i].id);
         }
       });
-      const tickets = await this.ticketService.getNeedsTickets(list);
+      const tickets = await this.ticketService.getNeedsTickets(
+        list,
+        panelFlaskUserId,
+      );
+      // tickets = tickets.filter(
+      //   (t) =>
+      //     t.contributors &&
+      //     t.contributors.find((c) => c.flaskUserId === panelFlaskUserId),
+      // );
       console.log(
         '\x1b[33m%s\x1b[0m',
         `Taking care of Need signatures + Tickets...\n`,
@@ -317,6 +325,8 @@ export class UserController {
           const needTickets = tickets.filter(
             (t) => allNeeds[i][k].id === t.flaskNeedId,
           );
+          console.log(needTickets);
+
           // signatures only at the my page last column
           //  UPDATE: we decided to snot show signatures on page reload since they have a dedicated page
           // If you removing the code, remember need.signatures must be fixed on front-end side as well
