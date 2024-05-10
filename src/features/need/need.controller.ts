@@ -294,7 +294,11 @@ export class NeedController {
         );
         // 1- sync & validate need
         let fetchedNeed = await this.needService.getNeedByFlaskId(need.id);
-        if (!fetchedNeed) {
+        if (
+          !fetchedNeed ||
+          fetchedNeed.status !== need.status ||
+          fetchedNeed.nameTranslations.en !== need.name_translations.en
+        ) {
           const { need: nestNeed } = await this.syncService.syncNeed(
             need,
             need.child_id,
@@ -424,11 +428,12 @@ export class NeedController {
         }
         if (
           validatedDups &&
-          validatedDups.filter((v) => v.category !== fetchedNeed.category).length >
-            0
+          validatedDups.filter((v) => v.category !== fetchedNeed.category)
+            .length > 0
         ) {
           errorMsg = `Category error, ${
-            validatedDups.filter((v) => v.category !== fetchedNeed.category).length
+            validatedDups.filter((v) => v.category !== fetchedNeed.category)
+              .length
           }`;
         }
         myList.push({
