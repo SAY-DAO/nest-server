@@ -252,6 +252,7 @@ export class TicketService {
             id: true,
             flaskUserId: true,
           },
+          updatedAt: true,
         },
       },
       order: {
@@ -319,6 +320,7 @@ export class TicketService {
             id: true,
             flaskUserId: true,
           },
+          updatedAt: true,
         },
       },
       take: 80,
