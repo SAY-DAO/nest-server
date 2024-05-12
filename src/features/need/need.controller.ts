@@ -38,6 +38,7 @@ import {
 import { ValidatedDupType } from 'src/types/interfaces/Need';
 import { SyncService } from '../sync/sync.service';
 import { TicketEntity } from 'src/entities/ticket.entity';
+import { ProviderService } from '../provider/provider.service';
 
 const BASE_LIMIT_DUPLICATES_0 = 4; // when confirming a need 4 duplicates are allowed for the category 0
 const BASE_LIMIT_DUPLICATES_1 = 3;
@@ -59,6 +60,7 @@ export class NeedController {
     private ngoService: NgoService,
     private ticketService: TicketService,
     private syncService: SyncService,
+    private providerService: ProviderService,
   ) {}
 
   @Get(`all`)
@@ -179,6 +181,20 @@ export class NeedController {
       throw new ForbiddenException(401, 'You Are not authorized!');
     }
     return await this.needService.getNeedByFlaskId(needFlaskId);
+  }
+
+  @Get(`relation/:needFlaskId`)
+  @ApiOperation({ description: 'Get a need from db 2' })
+  async getProviderNeedRelationById(
+    @Req() req: Request,
+    @Param('needFlaskId') needFlaskId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(401, 'You Are not authorized!');
+    }
+    return await this.providerService.getProviderNeedRelationById(needFlaskId);
   }
 
   @Get('flask/preneeds/templates')
@@ -353,7 +369,10 @@ export class NeedController {
             daysDifference(ticketError.createdAt, new Date()) > GRACE_PERIOD
           ) {
             // when we use panel we take care of this in the taskCard component
-            console.log('\x1b[36m%s\x1b[0m', 'Need will be deleted from front-end...\n');
+            console.log(
+              '\x1b[36m%s\x1b[0m',
+              'Need will be deleted from front-end...\n',
+            );
           }
           toBeConfirmed.list.push({
             limit: null,
