@@ -339,9 +339,11 @@ export class NeedController {
                 message: validatedNeed.message,
                 from: superAdmin.flaskUserId,
                 announcement: validatedNeed.ticketDetails.lastAnnouncement,
+                color: validatedNeed.ticketDetails.color,
               },
               ticket,
             );
+            // Disable notification for admin
             await this.ticketService.createTicketView(
               superAdmin.flaskUserId,
               ticket.id,
@@ -350,8 +352,8 @@ export class NeedController {
             ticketError &&
             daysDifference(ticketError.createdAt, new Date()) > GRACE_PERIOD
           ) {
-            console.log('\x1b[36m%s\x1b[0m', 'Deleting need...\n');
-            //delete
+            // when we use panel we take care of this in the taskCard component
+            console.log('\x1b[36m%s\x1b[0m', 'Need will be deleted from front-end...\n');
           }
           toBeConfirmed.list.push({
             limit: null,

@@ -53,7 +53,7 @@ import { SyncService } from '../sync/sync.service';
 import { LocationEntity } from 'src/entities/location.entity';
 import { NgoParams } from 'src/types/parameters/NgoParammeters';
 import {
-  captilizeFirstLetter as capitalizeFirstLetter,
+  capitalizeFirstLetter,
   convertFlaskToSayAppRoles,
   convertFlaskToSayRoles,
   truncateString,

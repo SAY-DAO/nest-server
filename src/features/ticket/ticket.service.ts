@@ -36,7 +36,7 @@ export class TicketService {
   ): Promise<TicketEntity> {
     const newTicket = this.ticketRepository.create({
       ...ticketDetails,
-      color: Colors.YELLOW, // start with Warning,
+      color: !ticketDetails.color ? Colors.YELLOW : ticketDetails.color, // start with Warning,
     });
 
     newTicket.contributors = participants;

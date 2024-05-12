@@ -3,6 +3,7 @@ import { ServerError } from 'src/filters/server-exception.filter';
 import {
   AnnouncementEnum,
   CategoryEnum,
+  Colors,
   FlaskUserTypesEnum,
   NeedTypeEnum,
   PaymentStatusEnum,
@@ -73,6 +74,7 @@ export async function validateNeed(
       flaskUserId: SUPER_ADMIN_ID,
       role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
       lastAnnouncement: AnnouncementEnum.ERROR,
+      color: Colors.RED,
     };
     result = {
       needId: nestNeed.id,
@@ -120,6 +122,7 @@ export async function validateNeed(
       flaskUserId: nestNeed.socialWorker.flaskUserId,
       role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
       lastAnnouncement: AnnouncementEnum.ERROR,
+      color: Colors.RED,
     };
     result = {
       needId: nestNeed.id,
@@ -145,6 +148,7 @@ export async function validateNeed(
               flaskUserId: SUPER_ADMIN_ID,
               role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
               lastAnnouncement: AnnouncementEnum.ERROR,
+              color: Colors.RED,
             };
 
             result = {
@@ -164,6 +168,7 @@ export async function validateNeed(
             flaskUserId: SUPER_ADMIN_ID,
             role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
             lastAnnouncement: AnnouncementEnum.ERROR,
+            color: Colors.RED,
           };
 
           result = {
@@ -183,6 +188,7 @@ export async function validateNeed(
         flaskUserId: nestNeed.socialWorker.flaskUserId,
         role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
         lastAnnouncement: AnnouncementEnum.ERROR,
+        color: Colors.RED,
       };
       console.log('\x1b[36m%s\x1b[0m', 'Creating Social workerTicket ...\n');
       result = {
@@ -210,6 +216,7 @@ export async function validateNeed(
             flaskUserId: SUPER_ADMIN_ID,
             role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
             lastAnnouncement: AnnouncementEnum.ERROR,
+            color: Colors.RED,
           };
 
           result = {
@@ -230,6 +237,7 @@ export async function validateNeed(
           flaskUserId: SUPER_ADMIN_ID,
           role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
           lastAnnouncement: AnnouncementEnum.ERROR,
+          color: Colors.RED,
         };
         result = {
           needId: nestNeed.id,
@@ -248,6 +256,7 @@ export async function validateNeed(
       flaskUserId: nestNeed.socialWorker.flaskUserId,
       role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
       lastAnnouncement: AnnouncementEnum.ERROR,
+      color: Colors.RED,
     };
     console.log('\x1b[36m%s\x1b[0m', 'Creating Auditor Ticket ...\n');
     result = {
@@ -284,6 +293,7 @@ export async function validateNeed(
       flaskUserId: nestNeed.socialWorker.flaskUserId,
       role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
       lastAnnouncement: AnnouncementEnum.ERROR,
+      color: Colors.RED,
     };
     result = {
       needId: nestNeed.id,

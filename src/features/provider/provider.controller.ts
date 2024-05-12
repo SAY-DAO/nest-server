@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -40,7 +41,7 @@ import { isAuthenticated } from 'src/utils/auth';
 @ApiTags('Provider')
 @Controller('providers')
 export class ProviderController {
-  constructor(private providerService: ProviderService) { }
+  constructor(private providerService: ProviderService) {}
 
   @Get(`all`)
   @ApiSecurity('flask-access-token')
@@ -136,7 +137,16 @@ export class ProviderController {
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException('You Are not authorized');
     }
+
     let provider: ProviderEntity;
+    provider = await this.providerService.getProviderByName(request.name);
+    if (
+      provider &&
+      provider.city == request.city &&
+      provider.country == request.country
+    ) {
+      throw new BadRequestException('Already exist!');
+    }
     const newProvider = {
       name: request.name,
       description: request?.description,

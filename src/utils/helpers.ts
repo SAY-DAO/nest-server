@@ -921,7 +921,7 @@ export function shuffleArray(array: any[]) {
   return array;
 }
 
-export function captilizeFirstLetter(word: string) {
+export function capitalizeFirstLetter(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
