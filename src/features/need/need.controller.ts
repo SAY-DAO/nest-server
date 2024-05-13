@@ -311,6 +311,7 @@ export class NeedController {
         let fetchedNeed = await this.needService.getNeedByFlaskId(need.id);
         if (
           !fetchedNeed ||
+          !fetchedNeed.provider ||
           fetchedNeed.status !== need.status ||
           fetchedNeed.category !== need.category ||
           fetchedNeed.type !== need.type ||
