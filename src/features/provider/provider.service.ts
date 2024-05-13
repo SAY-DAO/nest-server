@@ -72,12 +72,13 @@ export class ProviderService {
     flaskNeedId: number,
     nestProviderId: string,
   ): Promise<ProviderJoinNeedEntity> {
-    const newProvider = this.providerJoinNeedRepository.create({
+    const rel = this.providerJoinNeedRepository.create({
       flaskNeedId,
       nestProviderId,
     });
-    return this.providerJoinNeedRepository.save(newProvider);
+    return this.providerJoinNeedRepository.save(rel);
   }
+
   // -------------------------------------------------------------------------------- //
   createProvider(providerDetails: ProviderParams): Promise<ProviderEntity> {
     const newProvider = this.providerRepository.create({

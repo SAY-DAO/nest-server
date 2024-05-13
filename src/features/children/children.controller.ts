@@ -696,7 +696,6 @@ export class ChildrenController {
     );
 
     const names = confirmedNames.concat(preNames);
-    console.log(names);
 
     // to minimize human mistakes, we also compare the last 3 chars - همادخت vs هُمادخت
     const found = names.filter((n) =>

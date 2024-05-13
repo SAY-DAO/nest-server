@@ -325,8 +325,6 @@ export class UserController {
           const needTickets = tickets.filter(
             (t) => allNeeds[i][k].id === t.flaskNeedId,
           );
-          console.log(needTickets);
-
           // signatures only at the my page last column
           //  UPDATE: we decided to snot show signatures on page reload since they have a dedicated page
           // If you removing the code, remember need.signatures must be fixed on front-end side as well

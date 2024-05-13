@@ -261,7 +261,6 @@ export class NeedController {
             contentType: false,
           },
         };
-        // create flask child
         const { data } = await axios.patch(
           `https://api.sayapp.company/api/v2/need/confirm/needId=${needId}`,
           {},
@@ -377,7 +376,7 @@ export class NeedController {
           toBeConfirmed.list.push({
             limit: null,
             validCount: null,
-            need,
+            need:fetchedNeed,
             duplicates: null,
             errorMsg: validatedNeed.message,
           });
@@ -462,7 +461,7 @@ export class NeedController {
         myList.push({
           limit,
           validCount,
-          need,
+          need: fetchedNeed,
           duplicates: validatedDups,
           errorMsg,
           possibleMissMatch: diffCatSimilarity.map((n) => {

@@ -599,42 +599,73 @@ export class SyncService {
     }
 
     //--------------------------------------------Provider-------------------------------------
+    // Social worker add the relationship when adding flask need at panel.
+    // We fetch the created relation to attach that provider to the nest need
     let theNestProvider: ProviderEntity;
     const nestProviderNeedRelation =
       await this.providerService.getProviderNeedRelationById(flaskNeed.id);
 
     // Needs before panel version 2.0.0 does not have providers, we create them here! sry :(
-    if (!nestProviderNeedRelation && flaskNeed.type === NeedTypeEnum.PRODUCT) {
-      theNestProvider = await this.providerService.getProviderByName(
-        'Digikala',
-      );
-      if (!theNestProvider) {
-        console.log('\x1b[36m%s\x1b[0m', 'Creating a provider ...\n');
+    if (flaskNeed.type === NeedTypeEnum.PRODUCT) {
+      if (!nestProviderNeedRelation) {
+        theNestProvider = await this.providerService.getProviderByName(
+          'Digikala',
+        );
+        if (!theNestProvider) {
+          console.log('\x1b[36m%s\x1b[0m', 'Creating a provider ...\n');
 
-        theNestProvider = await this.providerService.createProvider({
-          name: 'Digikala',
-          description: 'N/A',
-          address: 'N/A',
-          website: 'https://digikala.com',
-          type: NeedTypeEnum.PRODUCT,
-          typeName: NeedTypeDefinitionEnum.PRODUCT,
-          city: 135129,
-          state: 3945,
-          country: 103,
-          logoUrl: 'N/A',
-          isActive: true,
-        });
-        console.log('\x1b[36m%s\x1b[0m', 'Created a provider ...\n');
+          theNestProvider = await this.providerService.createProvider({
+            name: 'Digikala',
+            description: 'N/A',
+            address: 'N/A',
+            website: 'https://digikala.com',
+            type: NeedTypeEnum.PRODUCT,
+            typeName: NeedTypeDefinitionEnum.PRODUCT,
+            city: 135129,
+            state: 3945,
+            country: 103,
+            logoUrl: 'N/A',
+            isActive: true,
+          });
+          console.log('\x1b[36m%s\x1b[0m', 'Created a provider ...\n');
+        }
+      } else if (nestProviderNeedRelation) {
+        theNestProvider = await this.providerService.getProviderById(
+          nestProviderNeedRelation.nestProviderId,
+        );
+      } else if (theNestProvider) {
+        console.log('\x1b[36m%s\x1b[0m', 'Skipped provider ...\n');
       }
-    } else if (
-      nestProviderNeedRelation &&
-      flaskNeed.type === NeedTypeEnum.PRODUCT
-    ) {
-      theNestProvider = await this.providerService.getProviderById(
-        nestProviderNeedRelation.nestProviderId,
-      );
-    } else if (theNestProvider) {
-      console.log('\x1b[36m%s\x1b[0m', 'Skipped provider ...\n');
+    } else if (flaskNeed.type === NeedTypeEnum.SERVICE) {
+      if (!nestProviderNeedRelation) {
+        theNestProvider = await this.providerService.getProviderByName(
+          'NoName',
+        );
+        if (!theNestProvider) {
+          console.log('\x1b[36m%s\x1b[0m', 'Creating a provider ...\n');
+
+          theNestProvider = await this.providerService.createProvider({
+            name: 'NoName',
+            description: 'N/A',
+            address: 'N/A',
+            website: 'https://saydao.org',
+            type: NeedTypeEnum.SERVICE,
+            typeName: NeedTypeDefinitionEnum.PRODUCT,
+            city: 135129,
+            state: 3945,
+            country: 103,
+            logoUrl: 'N/A',
+            isActive: true,
+          });
+          console.log('\x1b[36m%s\x1b[0m', 'Created a provider ...\n');
+        }
+      } else if (nestProviderNeedRelation) {
+        theNestProvider = await this.providerService.getProviderById(
+          nestProviderNeedRelation.nestProviderId,
+        );
+      } else if (theNestProvider) {
+        console.log('\x1b[36m%s\x1b[0m', 'Skipped provider ...\n');
+      }
     }
     //--------------------------------------------Need-------------------------------------
     let nestNeed = await this.needService.getNeedByFlaskId(flaskNeed.id);
