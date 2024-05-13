@@ -18,9 +18,6 @@ export class ProviderService {
 
   async getProviders(): Promise<ProviderEntity[]> {
     return this.providerRepository.find({
-      relations: {
-        needs: true,
-      },
       order: {
         createdAt: 'DESC',
       },
