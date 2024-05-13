@@ -650,7 +650,7 @@ export class SyncService {
             address: 'N/A',
             website: 'https://saydao.org',
             type: NeedTypeEnum.SERVICE,
-            typeName: NeedTypeDefinitionEnum.PRODUCT,
+            typeName: NeedTypeDefinitionEnum.SERVICE,
             city: 135129,
             state: 3945,
             country: 103,
