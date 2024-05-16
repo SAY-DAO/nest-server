@@ -18,8 +18,6 @@ import {
   FlaskUserTypesEnum,
   NeedTypeEnum,
   ProductStatusEnum,
-  SAYPlatformRoles,
-  ServiceStatusEnum,
   SUPER_ADMIN_ID,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
@@ -291,9 +289,9 @@ export class NeedController {
 
     let toBeConfirmed = config().dataCache.fetchToBeConfirmed();
 
-    const expired =
-      !toBeConfirmed.createdAt ||
-      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 800;
+    const expired = !toBeConfirmed.createdAt;
+    // ||
+    // timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 800;
     if (!toBeConfirmed || !toBeConfirmed.list[0] || expired) {
       const notConfirmed = await this.needService.getNotConfirmedNeeds(
         null,
@@ -377,7 +375,7 @@ export class NeedController {
           toBeConfirmed.list.push({
             limit: null,
             validCount: null,
-            need:fetchedNeed,
+            need: fetchedNeed,
             duplicates: null,
             errorMsg: validatedNeed.message,
           });

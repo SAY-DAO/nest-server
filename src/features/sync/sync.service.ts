@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { LocationEntity } from 'src/entities/location.entity';
 import { NgoEntity } from 'src/entities/ngo.entity';
 import { PaymentEntity } from 'src/entities/payment.entity';
@@ -599,13 +599,13 @@ export class SyncService {
     }
 
     //--------------------------------------------Provider-------------------------------------
-    // Social worker add the relationship when adding flask need at panel.
+    // Social worker adds the relationship when adding flask need at panel.
     // We fetch the created relation to attach that provider to the nest need
     let theNestProvider: ProviderEntity;
     const nestProviderNeedRelation =
       await this.providerService.getProviderNeedRelationById(flaskNeed.id);
 
-    // Needs before panel version 2.0.0 does not have providers, we create them here! sry :(
+    // Needs before panel version 2.0.0 do not have providers, we create them here! sry :(
     if (flaskNeed.type === NeedTypeEnum.PRODUCT) {
       if (!nestProviderNeedRelation) {
         theNestProvider = await this.providerService.getProviderByName(
@@ -666,7 +666,10 @@ export class SyncService {
       } else if (theNestProvider) {
         console.log('\x1b[36m%s\x1b[0m', 'Skipped provider ...\n');
       }
+    } else {
+      throw new BadRequestException('Something wring with Provider');
     }
+
     //--------------------------------------------Need-------------------------------------
     let nestNeed = await this.needService.getNeedByFlaskId(flaskNeed.id);
     if (!nestSocialWorker || !nestSocialWorker.contributions) {
@@ -748,6 +751,9 @@ export class SyncService {
     }
     if (!nestNeed) {
       throw new console.error('no need...');
+    }
+    if (!nestNeed.provider || !nestNeed.provider.name) {
+      throw new console.error('no provider detected...');
     }
     return {
       nestCaller,

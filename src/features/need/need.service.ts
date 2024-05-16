@@ -230,7 +230,7 @@ export class NeedService {
   getNeedByFlaskId(flaskId: number): Promise<NeedEntity> {
     const need = this.needRepository.findOne({
       where: {
-        flaskId: flaskId,
+        flaskId,
         // verifiedPayments: { verified: Not(IsNull()) },
       },
       relations: {
