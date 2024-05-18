@@ -111,10 +111,44 @@ export class ProviderController {
         body.nestProviderId,
       );
     } catch (e) {
-      body;
       throw new ServerError(e.message, e.status);
     }
     return relation;
+  }
+
+  @Get('need/:needId')
+  @ApiSecurity('flask-access-token')
+  @ApiHeader({
+    name: 'flaskId',
+    description: 'to use cache and flask authentication',
+    required: true,
+  })
+  @ApiOperation({ description: 'Create one provider' })
+  async getProviderByNeed(
+    @Req() req: Request,
+    @Param('needId') needId,
+  ): Promise<ProviderEntity> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException('You Are not authorized');
+    }
+    let provider: ProviderEntity;
+    try {
+      const relation = await this.providerService.getProviderNeedRelationById(
+        needId,
+      );
+      if (relation) {
+        provider = await this.providerService.getProviderById(
+          relation.nestProviderId,
+        );
+        return provider;
+      } else {
+        throw new BadRequestException('No provider relation for this need');
+      }
+    } catch (e) {
+      throw new ServerError(e.message, e.status);
+    }
   }
 
   @Post('add')
