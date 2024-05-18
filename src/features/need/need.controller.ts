@@ -289,9 +289,9 @@ export class NeedController {
 
     let toBeConfirmed = config().dataCache.fetchToBeConfirmed();
 
-    const expired = !toBeConfirmed.createdAt;
-    // ||
-    // timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 800;
+    const expired =
+      !toBeConfirmed.createdAt ||
+      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 800;
     if (!toBeConfirmed || !toBeConfirmed.list[0] || expired) {
       const notConfirmed = await this.needService.getNotConfirmedNeeds(
         null,
