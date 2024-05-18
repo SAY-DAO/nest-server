@@ -249,6 +249,7 @@ export class NeedService {
     theAuditor: AllUserEntity,
     thePurchaser: AllUserEntity,
     needDetails: NeedParams,
+    theNestProvider: ProviderEntity,
   ): Promise<UpdateResult> {
     return this.needRepository.update(needId, {
       child: theChild,
@@ -256,6 +257,7 @@ export class NeedService {
       auditor: theAuditor,
       purchaser: thePurchaser,
       ngo: theNgo,
+      provider: theNestProvider,
       ...needDetails,
     });
   }

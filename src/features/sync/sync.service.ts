@@ -746,6 +746,7 @@ export class SyncService {
           nestAuditor,
           nestPurchaser,
           needDetails,
+          theNestProvider,
         )
         .then();
       nestNeed = await this.needService.getNeedByFlaskId(nestNeed.flaskId);
@@ -762,10 +763,7 @@ export class SyncService {
     if (!nestNeed) {
       throw new ServerError('no need...', 504);
     }
-    console.log(theNestProvider);
-    console.log("--------------------------------");
-    console.log(nestProviderNeedRelation);
-    
+
     if (!nestNeed.provider || !nestNeed.provider.name) {
       throw new ServerError('no provider detected...', 505);
     }
