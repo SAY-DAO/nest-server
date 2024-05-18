@@ -663,6 +663,7 @@ export class SyncService {
         theNestProvider = await this.providerService.getProviderById(
           nestProviderNeedRelation.nestProviderId,
         );
+        console.log('\x1b[36m%s\x1b[0m', 'got the provider ...');
       } else if (theNestProvider) {
         console.log('\x1b[36m%s\x1b[0m', 'Skipped provider ...\n');
       }
@@ -731,7 +732,10 @@ export class SyncService {
         nestReceipts,
         theNestProvider,
       );
-      console.log('\x1b[36m%s\x1b[0m', 'Created The Need  ...\n');
+      console.log(
+        '\x1b[36m%s\x1b[0m',
+        `Created The Need  ${nestNeed.flaskId} ...\n`,
+      );
     } else if (nestNeed && nestNeed.updated !== flaskNeed.updated) {
       await this.needService
         .updateNeed(
@@ -745,15 +749,25 @@ export class SyncService {
         )
         .then();
       nestNeed = await this.needService.getNeedByFlaskId(nestNeed.flaskId);
-      console.log('\x1b[36m%s\x1b[0m', ' The Need updated ...\n');
+      console.log(
+        '\x1b[36m%s\x1b[0m',
+        `The Need ${nestNeed.flaskId} updated ...\n`,
+      );
     } else {
-      console.log('\x1b[36m%s\x1b[0m', 'Skipped  The Need updating ...\n');
+      console.log(
+        '\x1b[36m%s\x1b[0m',
+        `Skipped  ${nestNeed.flaskId} The Need updating ...\n`,
+      );
     }
     if (!nestNeed) {
-      throw new console.error('no need...');
+      throw new ServerError('no need...', 504);
     }
+    console.log(theNestProvider);
+    console.log("--------------------------------");
+    console.log(nestProviderNeedRelation);
+    
     if (!nestNeed.provider || !nestNeed.provider.name) {
-      throw new console.error('no provider detected...');
+      throw new ServerError('no provider detected...', 505);
     }
     return {
       nestCaller,
