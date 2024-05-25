@@ -37,6 +37,7 @@ import { ValidatedDupType } from 'src/types/interfaces/Need';
 import { SyncService } from '../sync/sync.service';
 import { TicketEntity } from 'src/entities/ticket.entity';
 import { ProviderService } from '../provider/provider.service';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 const BASE_LIMIT_DUPLICATES_0 = 4; // when confirming a need 4 duplicates are allowed for the category 0
 const BASE_LIMIT_DUPLICATES_1 = 3;
@@ -249,22 +250,27 @@ export class NeedController {
 
     const token =
       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
-    if (body) {
-      for (const needId of body.needIds) {
-        const configs = {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: token,
-            processData: false,
-            contentType: false,
-          },
-        };
-        const { data } = await axios.patch(
-          `https://api.sayapp.company/api/v2/need/confirm/needId=${needId}`,
-          {},
-          configs,
-        );
+    try {
+      if (body) {
+        for (const needId of body.needIds) {
+          const configs = {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: token,
+              processData: false,
+              contentType: false,
+            },
+          };
+          const { data } = await axios.patch(
+            `https://api.sayapp.company/api/v2/need/confirm/needId=${needId}`,
+            {},
+            configs,
+          );
+        }
       }
+    } catch (e) {
+      console.log(e);
+      throw new ServerError(e.message);
     }
   }
 
