@@ -355,7 +355,9 @@ export class NeedController {
             validatedNeed.needId,
           );
           const ticketError = needTickets.find(
-            (t) => t.lastAnnouncement === AnnouncementEnum.ERROR,
+            (t) =>
+              t.lastAnnouncement === AnnouncementEnum.ERROR ||
+              t.color === Colors.RED,
           );
 
           // create ticket if already has not
