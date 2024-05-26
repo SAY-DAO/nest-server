@@ -335,10 +335,6 @@ export class CampaignService {
         if (!nestUser) {
           nestUser = await this.userService.createFamily(flaskUser.id);
         }
-        console.log('start...................');
-        console.log(flaskUser.id);
-        console.log(nestUser.flaskUserId);
-
         // 2- eligible to receive?
         if (!nestUser.monthlyCampaign) {
           turnedOffCount++;
@@ -375,8 +371,6 @@ export class CampaignService {
         if (!userChildren || !userChildren[0]) {
           if (flaskUser.is_email_verified) {
             try {
-              console.log(`گسترش خانواده مجازی`);
-              console.log(flaskUser.emailAddress);
               await this.mailerService.sendMail({
                 to: flaskUser.emailAddress,
                 subject: `گسترش خانواده مجازی`,
@@ -400,9 +394,6 @@ export class CampaignService {
           }
 
           if (flaskUser.is_phonenumber_verified) {
-            console.log('ر حال حاضر سرپرستی هیچ ک');
-            console.log(flaskUser.phone_number);
-            
             const to = flaskUser.phone_number;
             const from = process.env.SMS_FROM;
             const shortNeedUrl = await this.shortenUrl({
@@ -475,8 +466,6 @@ export class CampaignService {
             await this.familyService.getFamilyReadyToSignNeeds(flaskUser.id)
           ).filter((n) => n.midjourneyImage);
           try {
-            console.log(`گنیازهای.........`);
-            console.log(flaskUser.emailAddress);
             await this.mailerService.sendMail({
               to: flaskUser.emailAddress,
               subject: `نیازهای ${persianStringMonth} ماه کودکان شما`,
@@ -503,8 +492,6 @@ export class CampaignService {
         }
 
         if (flaskUser.is_phonenumber_verified) {
-          console.log(`خرین نیازهای کود.........`);
-          console.log(flaskUser.phone_number);
           const to = flaskUser.phone_number;
           const from = process.env.SMS_FROM;
           const shortNeedUrl = await this.shortenUrl({
