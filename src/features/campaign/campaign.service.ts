@@ -534,6 +534,8 @@ export class CampaignService {
         `All done for this month. - ${tittle} - SMS:${smsReceiversTotal} - Email:${emailReceiversTotal} - Out of ${flaskUsers.length}`,
       );
     } catch (e) {
+      console.log(e);
+      
       throw new ServerError(e.message, e.status);
     }
   }
