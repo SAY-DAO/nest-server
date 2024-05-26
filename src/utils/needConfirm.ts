@@ -22,7 +22,6 @@ import axios from 'axios';
 import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
 import { NeedEntity } from 'src/entities/need.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
-import { TicketEntity } from 'src/entities/ticket.entity';
 
 const BASE_AGE_OF_DUPLICATE_0 = 30;
 const BASE_AGE_OF_DUPLICATE_1 = 30;

@@ -106,10 +106,24 @@ export class ProviderController {
     }
     let relation: ProviderJoinNeedEntity;
     try {
-      relation = await this.providerService.createRelation(
+      relation = await this.providerService.getProviderNeedRelationById(
         body.flaskNeedId,
-        body.nestProviderId,
       );
+      if (!relation) {
+        relation = await this.providerService.createRelation(
+          body.flaskNeedId,
+          body.nestProviderId,
+        );
+      } else {
+        await this.providerService.updateProviderRelation(
+          relation.id,
+          body.flaskNeedId,
+          body.nestProviderId,
+        );
+        relation = await this.providerService.getProviderNeedRelationById(
+          body.flaskNeedId,
+        );
+      }
     } catch (e) {
       throw new ServerError(e.message, e.status);
     }
