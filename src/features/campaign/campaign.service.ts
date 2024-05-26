@@ -17,8 +17,6 @@ import {
   prepareUrl,
   removeDuplicates,
   shuffleArray,
-  persianMonth,
-  sleep,
 } from 'src/utils/helpers';
 import {
   CampaignNameEnum,
@@ -331,11 +329,15 @@ export class CampaignService {
 
       // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {
+        
         const eligibleChildren = [];
         let nestUser = await this.userService.getFamilyByFlaskId(flaskUser.id);
         if (!nestUser) {
           nestUser = await this.userService.createFamily(flaskUser.id);
         }
+        console.log('start...................');
+        console.log(flaskUser.id);
+        console.log(nestUser.flaskUserId);
 
         // 2- eligible to receive?
         if (!nestUser.monthlyCampaign) {
@@ -373,6 +375,8 @@ export class CampaignService {
         if (!userChildren || !userChildren[0]) {
           if (flaskUser.is_email_verified) {
             try {
+              console.log(`گسترش خانواده مجازی`);
+              console.log(flaskUser.emailAddress);
               await this.mailerService.sendMail({
                 to: flaskUser.emailAddress,
                 subject: `گسترش خانواده مجازی`,
@@ -389,8 +393,6 @@ export class CampaignService {
                 emailCampaign,
                 [nestUser],
               );
-              sleep(6000);
-              console.log('Slept 6 seconds');
             } catch (e) {
               console.log(e);
               continue;
@@ -398,6 +400,9 @@ export class CampaignService {
           }
 
           if (flaskUser.is_phonenumber_verified) {
+            console.log('ر حال حاضر سرپرستی هیچ ک');
+            console.log(flaskUser.phone_number);
+            
             const to = flaskUser.phone_number;
             const from = process.env.SMS_FROM;
             const shortNeedUrl = await this.shortenUrl({
@@ -470,6 +475,8 @@ export class CampaignService {
             await this.familyService.getFamilyReadyToSignNeeds(flaskUser.id)
           ).filter((n) => n.midjourneyImage);
           try {
+            console.log(`گنیازهای.........`);
+            console.log(flaskUser.emailAddress);
             await this.mailerService.sendMail({
               to: flaskUser.emailAddress,
               subject: `نیازهای ${persianStringMonth} ماه کودکان شما`,
@@ -492,12 +499,12 @@ export class CampaignService {
             [nestUser],
           );
           this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
-          sleep(6000);
-          console.log('Slept 6 seconds');
           emailReceiversTotal++;
         }
 
         if (flaskUser.is_phonenumber_verified) {
+          console.log(`خرین نیازهای کود.........`);
+          console.log(flaskUser.phone_number);
           const to = flaskUser.phone_number;
           const from = process.env.SMS_FROM;
           const shortNeedUrl = await this.shortenUrl({
@@ -516,8 +523,7 @@ export class CampaignService {
           ]);
 
           this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
-          sleep(6000);
-          console.log('Slept 6 seconds');
+
           smsReceiversTotal++;
         }
       }
