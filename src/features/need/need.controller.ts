@@ -253,19 +253,21 @@ export class NeedController {
     try {
       if (body) {
         for (const needId of body.needIds) {
-          const configs = {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization: token,
-              processData: false,
-              contentType: false,
-            },
-          };
-          const { data } = await axios.patch(
-            `https://api.sayapp.company/api/v2/need/confirm/needId=${needId}`,
-            {},
-            configs,
-          );
+          if (Number(needId) > 0) {
+            const configs = {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: token,
+                processData: false,
+                contentType: false,
+              },
+            };
+            const { data } = await axios.patch(
+              `https://api.sayapp.company/api/v2/need/confirm/needId=${needId}`,
+              {},
+              configs,
+            );
+          }
         }
       }
     } catch (e) {
