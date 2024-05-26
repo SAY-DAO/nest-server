@@ -37,11 +37,15 @@ import {
 import { ValidateProviderPipe } from './pipes/validate-provider.pipe';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 import { isAuthenticated } from 'src/utils/auth';
+import { NeedService } from '../need/need.service';
 
 @ApiTags('Provider')
 @Controller('providers')
 export class ProviderController {
-  constructor(private providerService: ProviderService) {}
+  constructor(
+    private providerService: ProviderService,
+    private needService: NeedService,
+  ) {}
 
   @Get(`all`)
   @ApiSecurity('flask-access-token')
@@ -123,6 +127,12 @@ export class ProviderController {
         relation = await this.providerService.getProviderNeedRelationById(
           body.flaskNeedId,
         );
+
+        const provider = await this.providerService.getProviderById(
+          relation.nestProviderId,
+        );
+        const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
+        await this.needService.updateNeedProvider(need.id, provider);
       }
     } catch (e) {
       throw new ServerError(e.message, e.status);

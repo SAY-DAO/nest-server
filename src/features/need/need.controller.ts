@@ -313,6 +313,7 @@ export class NeedController {
         );
         // 1- sync & validate need
         let fetchedNeed = await this.needService.getNeedByFlaskId(need.id);
+
         if (
           !fetchedNeed ||
           !fetchedNeed.provider ||

@@ -262,6 +262,12 @@ export class NeedService {
     });
   }
 
+  async updateNeedProvider(needId: string, provider: ProviderEntity) {
+    return this.needRepository.update(needId, {
+      provider,
+    });
+  }
+
   async updateIsResolved(needId: string, isResolved: boolean) {
     return this.needRepository.update(needId, {
       isResolved: isResolved,

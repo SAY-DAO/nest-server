@@ -10,14 +10,24 @@ import { ProviderService } from './provider.service';
 import { ProviderController } from './provider.controller';
 import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
 import { ProviderMiddleware } from './middlewares/provider.middleware';
+import { NeedService } from '../need/need.service';
+import { NeedEntity } from 'src/entities/need.entity';
+import { Need } from 'src/entities/flaskEntities/need.entity';
+import { VariableEntity } from 'src/entities/variable.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProviderEntity]),
-    TypeOrmModule.forFeature([ProviderEntity, ProviderJoinNeedEntity]),
+    TypeOrmModule.forFeature([Need], 'flaskPostgres'),
+    TypeOrmModule.forFeature([
+      ProviderEntity,
+      ProviderJoinNeedEntity,
+      ProviderEntity,
+      NeedEntity,
+      VariableEntity,
+    ]),
   ],
   controllers: [ProviderController],
-  providers: [ProviderService],
+  providers: [ProviderService, NeedService],
 })
 export class ProviderModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
