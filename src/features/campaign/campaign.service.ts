@@ -18,6 +18,7 @@ import {
   removeDuplicates,
   shuffleArray,
   persianMonth,
+  sleep,
 } from 'src/utils/helpers';
 import {
   CampaignNameEnum,
@@ -388,6 +389,8 @@ export class CampaignService {
                 emailCampaign,
                 [nestUser],
               );
+              sleep(4000);
+              console.log('Slept 4 seconds');
             } catch (e) {
               console.log(e);
               continue;
@@ -489,6 +492,8 @@ export class CampaignService {
             [nestUser],
           );
           this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
+          sleep(4000);
+          console.log('Slept 4 seconds');
           emailReceiversTotal++;
         }
 
@@ -511,6 +516,8 @@ export class CampaignService {
           ]);
 
           this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
+          sleep(4000);
+          console.log('Slept 4 seconds');
           smsReceiversTotal++;
         }
       }
@@ -535,7 +542,7 @@ export class CampaignService {
       );
     } catch (e) {
       console.log(e);
-      
+
       throw new ServerError(e.message, e.status);
     }
   }
