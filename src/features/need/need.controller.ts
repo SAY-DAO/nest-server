@@ -610,7 +610,7 @@ export class NeedController {
         contentType: false,
       },
     };
-    // Only for products: for service do a manual review for receipts
+    // Only for products: for service do a manual review
     for await (const need of needs[0]) {
       if (
         need.type === NeedTypeEnum.PRODUCT &&

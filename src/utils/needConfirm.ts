@@ -406,18 +406,21 @@ export function checkNeed(need: Need, duplicate: Need) {
               : duplicate.title,
           ),
         );
-      if (duplicate.title && titleResult > SIMILAR_TXT_PERCENTAGE) {
+      if (
+        !duplicate.title || duplicate.title.length < 1||
+        (duplicate.title && titleResult > SIMILAR_TXT_PERCENTAGE)
+      ) {
         TT = true;
       } else {
         TT = false;
-        msg = 'title are not that similar';
+        msg = 'title is not correct';
       }
     } else if (type === NeedTypeEnum.SERVICE) {
       if (!duplicate.title || duplicate.title.length < 1) {
         TT = true;
       } else {
         TT = false;
-        msg = 'service should not have link';
+        msg = 'title is not correct';
       }
     }
 
