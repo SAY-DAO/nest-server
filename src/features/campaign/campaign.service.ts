@@ -389,8 +389,8 @@ export class CampaignService {
                 emailCampaign,
                 [nestUser],
               );
-              sleep(4000);
-              console.log('Slept 4 seconds');
+              sleep(6000);
+              console.log('Slept 6 seconds');
             } catch (e) {
               console.log(e);
               continue;
@@ -492,8 +492,8 @@ export class CampaignService {
             [nestUser],
           );
           this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
-          sleep(4000);
-          console.log('Slept 4 seconds');
+          sleep(6000);
+          console.log('Slept 6 seconds');
           emailReceiversTotal++;
         }
 
@@ -516,8 +516,8 @@ export class CampaignService {
           ]);
 
           this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
-          sleep(4000);
-          console.log('Slept 4 seconds');
+          sleep(6000);
+          console.log('Slept 6 seconds');
           smsReceiversTotal++;
         }
       }
