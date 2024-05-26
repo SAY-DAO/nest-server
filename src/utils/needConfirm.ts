@@ -29,7 +29,7 @@ const BASE_AGE_OF_DUPLICATE_2 = 30;
 const BASE_AGE_OF_DUPLICATE_3 = 30;
 
 const SIMILAR_URL_PERCENTAGE = 57; // percentage
-const SIMILAR_TXT_PERCENTAGE = 15; // percentage
+const SIMILAR_TXT_PERCENTAGE = 10; // percentage
 export const SIMILAR_NAME_LIMIT_PRODUCT = 20;
 export const SIMILAR_NAME_LIMIT_SERVICE = 10;
 export const GRACE_PERIOD = 15; // days left after ticket to fix the problem mentioned in ticket
@@ -84,7 +84,7 @@ export async function validateNeed(
     };
     return result;
   }
-  // validate SW information/details
+  // validate need information/details
   const list = [
     'شلوار',
     'لباس زیر',
@@ -110,9 +110,9 @@ export async function validateNeed(
   if (
     type === NeedTypeEnum.PRODUCT &&
     category === CategoryEnum.GROWTH &&
-    Math.max(...listResult) > SIMILAR_TXT_PERCENTAGE &&
-    !details &&
-    !information
+    Math.max(...listResult) >= SIMILAR_TXT_PERCENTAGE &&
+    (!details || details.split(' ').join('').length < 3) &&
+    (!information || information.split(' ').join('').length < 3)
   ) {
     const createTicketDetails: CreateTicketParams = {
       title: `More info`,

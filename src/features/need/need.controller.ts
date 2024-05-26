@@ -314,9 +314,14 @@ export class NeedController {
         // 1- sync & validate need
         let fetchedNeed = await this.needService.getNeedByFlaskId(need.id);
 
+        // Just in case
+        const fetchedProviderRel =
+          await this.providerService.getProviderNeedRelationById(need.id);
         if (
           !fetchedNeed ||
           !fetchedNeed.provider ||
+          (fetchedProviderRel &&
+            fetchedNeed.provider.id != fetchedProviderRel.nestProviderId) ||
           fetchedNeed.status !== need.status ||
           fetchedNeed.category !== need.category ||
           fetchedNeed.type !== need.type ||
@@ -342,12 +347,13 @@ export class NeedController {
 
         // 0-  ticket if not a valid need and not ticketed yet
         if (!validatedNeed.isValidNeed) {
-          const needTickets = await this.ticketService.getTicketsByNeed(
+          let needTickets = await this.ticketService.getTicketsByNeed(
             validatedNeed.needId,
           );
           const ticketError = needTickets.find(
             (t) => t.lastAnnouncement === AnnouncementEnum.ERROR,
           );
+
           // create ticket if already has not
           if (!ticketError) {
             console.log('\x1b[36m%s\x1b[0m', 'Creating Ticket Content ...\n');
@@ -379,12 +385,20 @@ export class NeedController {
               'Need will be deleted from front-end...\n',
             );
           }
-          toBeConfirmed.list.push({
+          needTickets = await this.ticketService.getTicketsByNeed(
+            validatedNeed.needId,
+          );
+          ticket = needTickets.find(
+            (t) => t.lastAnnouncement === AnnouncementEnum.ERROR,
+          );
+          myList.push({
             limit: null,
             validCount: null,
             need: fetchedNeed,
             duplicates: null,
             errorMsg: validatedNeed.message,
+            possibleMissMatch: [],
+            ticket,
           });
           console.log('\x1b[36m%s\x1b[0m', 'Skipping need...\n');
           continue;
@@ -480,6 +494,7 @@ export class NeedController {
               isConfirmed: n.confirmDate && true,
             };
           }),
+          ticket,
         });
       }
 
