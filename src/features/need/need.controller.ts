@@ -269,6 +269,8 @@ export class NeedController {
             );
           }
         }
+        // to reset prepare
+        config().dataCache.storeToBeConfirmed([], new Date());
       }
     } catch (e) {
       console.log(e);
@@ -297,10 +299,10 @@ export class NeedController {
 
     let toBeConfirmed = config().dataCache.fetchToBeConfirmed();
 
-    const expired =
-      !toBeConfirmed.createdAt ||
+    const expired = !toBeConfirmed || !toBeConfirmed.list[0];
+    !toBeConfirmed.createdAt ||
       timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 5;
-    if (!toBeConfirmed || !toBeConfirmed.list[0] || expired) {
+    if (expired) {
       const notConfirmed = await this.needService.getNotConfirmedNeeds(
         null,
         swIds,
@@ -610,7 +612,7 @@ export class NeedController {
         contentType: false,
       },
     };
-    // Only for products: for service do a manual review
+    // Only for products: for service do a manual review for receipts
     for await (const need of needs[0]) {
       if (
         need.type === NeedTypeEnum.PRODUCT &&
