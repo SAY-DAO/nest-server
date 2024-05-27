@@ -61,31 +61,6 @@ export class CampaignService {
   smsApi = new MelipayamakApi(process.env.SMS_USER, process.env.SMS_PASSWORD);
   smsRest = this.smsApi.sms();
 
-  async childrenWithNoNeed() {
-    this.logger.log(`Updating children with no needs.`);
-    const children = await this.childrenService.getFlaskActiveChildren();
-    const list = [];
-    for await (const child of children) {
-      const childUnpaidNeeds = await this.needService.getFlaskChildUnpaidNeeds(
-        child.id,
-      );
-      const childUnconfirmedNeeds =
-        await this.needService.getFlaskChildUnconfirmedNeeds(child.id);
-      const allUnpaidNeeds = childUnpaidNeeds.concat(childUnconfirmedNeeds);
-
-      if (!allUnpaidNeeds || !allUnpaidNeeds[0]) {
-        list.push({
-          swId: child.id_social_worker,
-          child,
-        });
-      }
-    }
-    // save in cache for admin dashboard
-    config().dataCache.updateChildrenNoNeeds(list.length);
-    this.logger.log(`Updated children with no need.`);
-    return list;
-  }
-
   async handleEmailCampaign(
     campaignEmailCode: string,
     tittle: string,
@@ -138,6 +113,31 @@ export class CampaignService {
       );
       this.logger.log(`SMS: Campaign Updated - ${campaignSmsCode}`);
     }
+  }
+
+  async childrenWithNoNeed() {
+    this.logger.log(`Updating children with no needs.`);
+    const children = await this.childrenService.getFlaskActiveChildren();
+    const list = [];
+    for await (const child of children) {
+      const childUnpaidNeeds = await this.needService.getFlaskChildUnpaidNeeds(
+        child.id,
+      );
+      const childUnconfirmedNeeds =
+        await this.needService.getFlaskChildUnconfirmedNeeds(child.id);
+      const allUnpaidNeeds = childUnpaidNeeds.concat(childUnconfirmedNeeds);
+
+      if (!allUnpaidNeeds || !allUnpaidNeeds[0]) {
+        list.push({
+          swId: child.id_social_worker,
+          child,
+        });
+      }
+    }
+    // save in cache for admin dashboard
+    config().dataCache.updateChildrenNoNeeds(list.length);
+    this.logger.log(`Updated children with no need.`);
+    return list;
   }
 
   async getCampaigns(
@@ -329,7 +329,6 @@ export class CampaignService {
 
       // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {
-        
         const eligibleChildren = [];
         let nestUser = await this.userService.getFamilyByFlaskId(flaskUser.id);
         if (!nestUser) {
@@ -371,6 +370,7 @@ export class CampaignService {
         if (!userChildren || !userChildren[0]) {
           if (flaskUser.is_email_verified) {
             try {
+              this.logger.warn(`Sending expand family Email to: ${flaskUser.emailAddress}`);
               await this.mailerService.sendMail({
                 to: flaskUser.emailAddress,
                 subject: `گسترش خانواده مجازی`,
@@ -399,6 +399,7 @@ export class CampaignService {
             const shortNeedUrl = await this.shortenUrl({
               longUrl: `https://dapp.saydao.org/main/search?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.SMS}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignSmsCode}`,
             });
+            this.logger.warn(`Sending expand family SMS to: ${to}`);
 
             const text = `سلام ${
               flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
@@ -466,6 +467,8 @@ export class CampaignService {
             await this.familyService.getFamilyReadyToSignNeeds(flaskUser.id)
           ).filter((n) => n.midjourneyImage);
           try {
+            this.logger.warn(`Sending campaign Email to: ${flaskUser.emailAddress}`);
+
             await this.mailerService.sendMail({
               to: flaskUser.emailAddress,
               subject: `نیازهای ${persianStringMonth} ماه کودکان شما`,
@@ -497,6 +500,7 @@ export class CampaignService {
           const shortNeedUrl = await this.shortenUrl({
             longUrl: `https://dapp.saydao.org/child/${eligibleChildren[0].id}/needs/${eligibleChildren[0].unPaidNeeds[0].id}?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.SMS}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignSmsCode}`,
           });
+          this.logger.warn(`Sending campaign SMS to: ${to}`);
 
           const text = `سلام ${
             flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
