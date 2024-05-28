@@ -370,7 +370,9 @@ export class CampaignService {
         if (!userChildren || !userChildren[0]) {
           if (flaskUser.is_email_verified) {
             try {
-              this.logger.warn(`Sending expand family Email to: ${flaskUser.emailAddress}`);
+              this.logger.warn(
+                `Sending expand family Email to: ${flaskUser.emailAddress}`,
+              );
               await this.mailerService.sendMail({
                 to: flaskUser.emailAddress,
                 subject: `گسترش خانواده مجازی`,
@@ -404,7 +406,11 @@ export class CampaignService {
             const text = `سلام ${
               flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
             }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
-            await this.smsRest.send(to, from, text);
+            const result = await this.smsRest.send(to, from, text);
+            console.log("result");
+            console.log(result);
+            console.log("result");
+            
           }
           await this.handleSmsCampaign(campaignSmsCode, tittle, smsCampaign, [
             nestUser,
@@ -467,7 +473,9 @@ export class CampaignService {
             await this.familyService.getFamilyReadyToSignNeeds(flaskUser.id)
           ).filter((n) => n.midjourneyImage);
           try {
-            this.logger.warn(`Sending campaign Email to: ${flaskUser.emailAddress}`);
+            this.logger.warn(
+              `Sending campaign Email to: ${flaskUser.emailAddress}`,
+            );
 
             await this.mailerService.sendMail({
               to: flaskUser.emailAddress,
@@ -508,7 +516,10 @@ export class CampaignService {
             eligibleChildren[0].sayName
           }: ${shortNeedUrl} لغو۱۱`;
 
-          await this.smsRest.send(to, from, text);
+          const result=await this.smsRest.send(to, from, text);
+          console.log("result");
+          console.log(result);
+          console.log("result");
           await this.handleSmsCampaign(campaignSmsCode, tittle, smsCampaign, [
             nestUser,
           ]);
