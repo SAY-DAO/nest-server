@@ -534,6 +534,7 @@ export class CampaignService {
             eligibleChildren[0].sayName
           }: ${shortNeedUrl} لغو۱۱`;
 
+          
           let smsResult: {
             Value: string;
             RetStatus: number;
