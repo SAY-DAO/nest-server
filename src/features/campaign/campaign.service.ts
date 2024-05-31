@@ -412,7 +412,7 @@ export class CampaignService {
               flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
             }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
             try {
-              await sleep(50000);
+              await sleep(5000);
               console.log('Woke Up...');
 
               smsResult = await this.smsRest.send(to, from, text);
@@ -423,7 +423,7 @@ export class CampaignService {
               console.log(e);
             }
           }
-          if (Number(smsResult.RetStatus) === 1) {
+          if (smsResult && Number(smsResult.RetStatus) === 1) {
             await this.handleSmsCampaign(campaignSmsCode, title, smsCampaign, [
               nestUser,
             ]);
@@ -541,7 +541,7 @@ export class CampaignService {
           };
 
           try {
-            await sleep(50000);
+            await sleep(5000);
             console.log('Woke Up...');
             smsResult = await this.smsRest.send(to, from, text);
           } catch (e) {
@@ -550,7 +550,7 @@ export class CampaignService {
             );
             console.log(e);
           }
-          if (Number(smsResult.RetStatus) === 1) {
+          if (smsResult && Number(smsResult.RetStatus) === 1) {
             await this.handleSmsCampaign(campaignSmsCode, title, smsCampaign, [
               nestUser,
             ]);
