@@ -28,8 +28,10 @@ export const CONTRIBUTION_COEFFICIENT = 1.2;
 const PARENTS_DELIVERED_RANGE = 1;
 const RELETIVES_DELIVERED_RANGE = 3;
 
-export const sleep = time => new Promise((resolve) => setTimeout(resolve, time));
-
+export function sleep(time) {
+    console.log('Sleeping...');
+  return new Promise(resolve => setTimeout(resolve, time));
+} 
 export function getAllFilesFromFolder(dir: string) {
   let results = [];
   if (checkIfFileOrDirectoryExists(dir)) {

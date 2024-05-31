@@ -413,12 +413,14 @@ export class CampaignService {
             }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
             try {
               sleep(50000);
+              console.log('Woke Up...');
+
               smsResult = await this.smsRest.send(to, from, text);
             } catch (e) {
               this.logger.error(
                 `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
               );
-              this.logger.error(`Error: ${smsResult.StrRetStatus}`);
+              console.log(e);
             }
           }
           if (Number(smsResult.RetStatus) === 1) {
@@ -540,12 +542,13 @@ export class CampaignService {
 
           try {
             sleep(50000);
+            console.log('Woke Up...');
             smsResult = await this.smsRest.send(to, from, text);
           } catch (e) {
             this.logger.error(
               `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
             );
-            this.logger.error(`Error: ${smsResult.StrRetStatus}`);
+            console.log(e);
           }
           if (Number(smsResult.RetStatus) === 1) {
             await this.handleSmsCampaign(campaignSmsCode, title, smsCampaign, [
