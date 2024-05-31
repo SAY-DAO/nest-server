@@ -17,6 +17,7 @@ import {
   prepareUrl,
   removeDuplicates,
   shuffleArray,
+  sleep,
 } from 'src/utils/helpers';
 import {
   CampaignNameEnum,
@@ -407,10 +408,10 @@ export class CampaignService {
               flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
             }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
             const result = await this.smsRest.send(to, from, text);
-            console.log("result");
+            console.log('result');
             console.log(result);
-            console.log("result");
-            
+            console.log('result');
+            sleep(50000);
           }
           await this.handleSmsCampaign(campaignSmsCode, tittle, smsCampaign, [
             nestUser,
@@ -516,10 +517,12 @@ export class CampaignService {
             eligibleChildren[0].sayName
           }: ${shortNeedUrl} لغو۱۱`;
 
-          const result=await this.smsRest.send(to, from, text);
-          console.log("result");
+          const result = await this.smsRest.send(to, from, text);
+          console.log('result');
           console.log(result);
-          console.log("result");
+          console.log('result');
+          sleep(50000);
+
           await this.handleSmsCampaign(campaignSmsCode, tittle, smsCampaign, [
             nestUser,
           ]);
