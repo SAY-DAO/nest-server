@@ -415,10 +415,10 @@ export class CampaignService {
               sleep(50000);
               smsResult = await this.smsRest.send(to, from, text);
             } catch (e) {
-              console.log(e);
               this.logger.error(
                 `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
               );
+              this.logger.error(`Error: ${smsResult.StrRetStatus}`);
             }
           }
           if (Number(smsResult.RetStatus) === 1) {
@@ -531,7 +531,7 @@ export class CampaignService {
           }،\n از آخرین نیازهای کودک شما، ${
             eligibleChildren[0].sayName
           }: ${shortNeedUrl} لغو۱۱`;
-          
+
           let smsResult: {
             Value: string;
             RetStatus: number;
@@ -542,10 +542,10 @@ export class CampaignService {
             sleep(50000);
             smsResult = await this.smsRest.send(to, from, text);
           } catch (e) {
-            console.log(e);
             this.logger.error(
               `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
             );
+            this.logger.error(`Error: ${smsResult.StrRetStatus}`);
           }
           if (Number(smsResult.RetStatus) === 1) {
             await this.handleSmsCampaign(campaignSmsCode, title, smsCampaign, [
