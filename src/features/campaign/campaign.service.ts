@@ -64,7 +64,7 @@ export class CampaignService {
 
   async handleEmailCampaign(
     campaignEmailCode: string,
-    tittle: string,
+    title: string,
     emailCampaign: CampaignEntity,
     emailReceivers: any[],
   ) {
@@ -73,7 +73,7 @@ export class CampaignService {
         campaignEmailCode,
         CampaignNameEnum.MONTHLY_CAMPAIGNS,
         CampaignTypeEnum.EMAIL,
-        tittle,
+        title,
         emailReceivers,
       );
       this.logger.log(`EMAIL: Campaign Created - ${campaignEmailCode}`);
@@ -91,7 +91,7 @@ export class CampaignService {
 
   async handleSmsCampaign(
     campaignSmsCode: string,
-    tittle: string,
+    title: string,
     smsCampaign: CampaignEntity,
     smsReceivers: any[],
   ) {
@@ -100,7 +100,7 @@ export class CampaignService {
         campaignSmsCode,
         CampaignNameEnum.MONTHLY_CAMPAIGNS,
         CampaignTypeEnum.SMS,
-        tittle,
+        title,
         smsReceivers,
       );
       this.logger.log(`SMS: Campaign Created - ${campaignSmsCode}`);
@@ -306,7 +306,7 @@ export class CampaignService {
       if (!persianStringMonth) {
         throw new ServerError('We need the month string');
       }
-      const tittle = `نیازهای ${persianStringMonth} ماه کودکان شما`;
+      const title = `نیازهای ${persianStringMonth} ماه کودکان شما`;
 
       const flaskUsers = await this.userService.getFlaskUsers();
       const shuffledUsers = shuffleArray(flaskUsers);
@@ -386,7 +386,7 @@ export class CampaignService {
               });
               await this.handleEmailCampaign(
                 campaignEmailCode,
-                tittle,
+                title,
                 emailCampaign,
                 [nestUser],
               );
@@ -395,7 +395,11 @@ export class CampaignService {
               continue;
             }
           }
-
+          let smsResult: {
+            Value: string;
+            RetStatus: number;
+            StrRetStatus: string;
+          };
           if (flaskUser.is_phonenumber_verified) {
             const to = flaskUser.phone_number;
             const from = process.env.SMS_FROM;
@@ -407,16 +411,27 @@ export class CampaignService {
             const text = `سلام ${
               flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
             }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
-            const result = await this.smsRest.send(to, from, text);
-            console.log('result');
-            console.log(result);
-            console.log('result');
-            sleep(50000);
+            try {
+              sleep(50000);
+              smsResult = await this.smsRest.send(to, from, text);
+            } catch (e) {
+              console.log(e);
+              this.logger.error(
+                `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
+              );
+            }
           }
-          await this.handleSmsCampaign(campaignSmsCode, tittle, smsCampaign, [
-            nestUser,
-          ]);
-          skippedUsersNoChildren++;
+          if (Number(smsResult.RetStatus) === 1) {
+            await this.handleSmsCampaign(campaignSmsCode, title, smsCampaign, [
+              nestUser,
+            ]);
+            skippedUsersNoChildren++;
+          } else {
+            this.logger.warn(
+              `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
+            );
+          }
+
           continue;
         }
 
@@ -495,7 +510,7 @@ export class CampaignService {
 
           await this.handleEmailCampaign(
             campaignEmailCode,
-            tittle,
+            title,
             emailCampaign,
             [nestUser],
           );
@@ -516,20 +531,33 @@ export class CampaignService {
           }،\n از آخرین نیازهای کودک شما، ${
             eligibleChildren[0].sayName
           }: ${shortNeedUrl} لغو۱۱`;
+          
+          let smsResult: {
+            Value: string;
+            RetStatus: number;
+            StrRetStatus: string;
+          };
 
-          const result = await this.smsRest.send(to, from, text);
-          console.log('result');
-          console.log(result);
-          console.log('result');
-          sleep(50000);
-
-          await this.handleSmsCampaign(campaignSmsCode, tittle, smsCampaign, [
-            nestUser,
-          ]);
-
-          this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
-
-          smsReceiversTotal++;
+          try {
+            sleep(50000);
+            smsResult = await this.smsRest.send(to, from, text);
+          } catch (e) {
+            console.log(e);
+            this.logger.error(
+              `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
+            );
+          }
+          if (Number(smsResult.RetStatus) === 1) {
+            await this.handleSmsCampaign(campaignSmsCode, title, smsCampaign, [
+              nestUser,
+            ]);
+            this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
+            smsReceiversTotal++;
+          } else {
+            this.logger.error(
+              `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
+            );
+          }
         }
       }
 
@@ -549,7 +577,7 @@ export class CampaignService {
         `Did Not reach: ${turnedOffCount} users have turned off monthly campaign`,
       );
       this.logger.log(
-        `All done for this month. - ${tittle} - SMS:${smsReceiversTotal} - Email:${emailReceiversTotal} - Out of ${flaskUsers.length}`,
+        `All done for this month. - ${title} - SMS:${smsReceiversTotal} - Email:${emailReceiversTotal} - Out of ${flaskUsers.length}`,
       );
     } catch (e) {
       console.log(e);
