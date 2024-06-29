@@ -6,7 +6,6 @@ export type UserParams = {
   typeId?: number;
   birthDate?: Date;
   flaskUserId: number;
-  isActive?: boolean;
   wallet?: EthereumAccountEntity;
   firstName?: string;
   lastName?: string;

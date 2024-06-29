@@ -306,10 +306,17 @@ export class FamilyService {
       .getMany();
   }
 
-  async updateEmailMarketing(user: AllUserEntity): Promise<UpdateResult> {
+  async updateMonthlyCampaign(user: AllUserEntity): Promise<UpdateResult> {
     const newStatus = user.monthlyCampaign ? false : true;
     return this.allUserRepository.update(user.id, {
       monthlyCampaign: newStatus,
+    });
+  }
+
+  async updateNewsLetterCampaign(user: AllUserEntity): Promise<UpdateResult> {
+    const newStatus = user.newsLetterCampaign ? false : true;
+    return this.allUserRepository.update(user.id, {
+      newsLetterCampaign: newStatus,
     });
   }
 }

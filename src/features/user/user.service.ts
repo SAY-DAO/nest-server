@@ -213,7 +213,6 @@ export class UserService {
     const userDetails: UserParams = {
       birthDate: flaskUser.birthDate,
       flaskUserId: flaskUser.flaskUserId,
-      isActive: flaskUser.isActive,
       wallet: flaskUser.wallet,
       firstName: flaskUser.firstName,
       lastName: flaskUser.lastName,
@@ -240,7 +239,6 @@ export class UserService {
     const userDetails: UserParams = {
       birthDate: flaskUser.birthDate,
       flaskUserId: flaskUser.flaskUserId,
-      isActive: flaskUser.isActive,
       wallet: flaskUser.wallet,
       firstName: flaskUser.firstName,
       lastName: flaskUser.lastName,

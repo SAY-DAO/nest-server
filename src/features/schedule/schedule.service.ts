@@ -126,12 +126,13 @@ export class ScheduleService {
       this.logger.debug('Reading from cache');
     }
   }
+
   // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here
   @Cron('37 18 * * Sun', {
     name: 'MonthlyCampaigns try At 17:25 on Sunday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
     timeZone: 'Asia/Tehran',
   })
-  async handleSummaryMailCron() {
+  async handleMonthlyCampaignsCron() {
     const farsiDay = persianDay(new Date());
     if (farsiDay > 20) {
       this.logger.warn(

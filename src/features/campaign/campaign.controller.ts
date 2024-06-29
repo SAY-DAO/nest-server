@@ -14,6 +14,8 @@ import { isAuthenticated } from 'src/utils/auth';
 import { CampaignService } from './campaign.service';
 import { ShortenURLDto } from 'src/types/dtos/url.dto';
 import { ServerError } from 'src/filters/server-exception.filter';
+import { CreateSendNewsLetterDto } from 'src/types/dtos/CreateSendNewsLetter.dto';
+import { ValidateNewsLetterPipe } from './pipes/validate-campaign.pipe';
 
 @ApiTags('Campaign')
 @ApiSecurity('flask-access-token')
@@ -83,6 +85,28 @@ export class CampaignController {
     // ############## BE CAREFUL #################
     if (process.env.NODE_ENV === 'production') {
       await this.campaignService.sendUserMonthlyCampaigns();
+    }
+  }
+
+  @Post('send/newsLetter')
+  async SendNewsLetter(
+    @Req() req: Request,
+    @Body(ValidateNewsLetterPipe) body: CreateSendNewsLetterDto,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException('You Are not authorized');
+    }
+    // ############## BE CAREFUL #################
+    if (process.env.NODE_ENV === 'production') {
+      await this.campaignService.sendNewsLetter(body);
     }
   }
 }

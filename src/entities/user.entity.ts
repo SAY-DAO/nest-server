@@ -68,4 +68,6 @@ export class AllUserEntity extends BaseEntity {
   @Column({ default: true })
   monthlyCampaign: boolean;
 
+  @Column({ default: true })
+  newsLetterCampaign: boolean;
 }

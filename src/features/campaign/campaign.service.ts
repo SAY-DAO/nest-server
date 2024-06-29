@@ -44,6 +44,7 @@ import {
   Paginated,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
+import { CreateSendNewsLetterDto } from 'src/types/dtos/CreateSendNewsLetter.dto';
 
 @Injectable()
 export class CampaignService {
@@ -106,7 +107,7 @@ export class CampaignService {
       this.logger.log(`SMS: Campaign Created - ${campaignSmsCode}`);
     }
 
-    if (smsCampaign && smsReceivers[0]) {
+    if (smsCampaign && smsReceivers && smsReceivers[0]) {
       await this.updateCampaignUsers(
         smsCampaign,
         smsCampaign.receivers,
@@ -309,7 +310,7 @@ export class CampaignService {
       const title = `نیازهای ${persianStringMonth} ماه کودکان شما`;
 
       const flaskUsers = await this.userService.getFlaskUsers();
-      const shuffledUsers = shuffleArray(flaskUsers);
+      let shuffledUsers = shuffleArray(flaskUsers);
 
       let alreadyReceivedEmailCount = 0;
       let alreadyReceivedSmsCount = 0;
@@ -319,14 +320,14 @@ export class CampaignService {
       let emailReceiversTotal = 0;
       let smsReceiversTotal = 0;
 
-      // const testUsers = [
-      //   await this.userService.getFlaskUser(12687),
-      //   await this.userService.getFlaskUser(115),
-      // ];
-      // shuffledUsers = testUsers;
-      // if (shuffledUsers.length > 2) {
-      //   return;
-      // }
+      const testUsers = [
+        await this.userService.getFlaskUser(12687),
+        await this.userService.getFlaskUser(115),
+      ];
+      shuffledUsers = testUsers;
+      if (shuffledUsers.length > 2) {
+        return;
+      }
 
       // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {
@@ -369,7 +370,7 @@ export class CampaignService {
 
         // 4- send campaign users with no children
         if (!userChildren || !userChildren[0]) {
-          if (flaskUser.is_email_verified) {
+          if (flaskUser.is_email_verified && flaskUser.emailAddress) {
             try {
               this.logger.warn(
                 `Sending expand family Email to: ${flaskUser.emailAddress}`,
@@ -482,7 +483,7 @@ export class CampaignService {
         }
 
         // 7 - Send Campaign
-        if (flaskUser.is_email_verified) {
+        if (flaskUser.is_email_verified && flaskUser.emailAddress) {
           const googleCampaignBuilder = String(
             `?utm_source=monthly_campaign&utm_medium=${CampaignTypeEnum.EMAIL}&utm_campaign=${CampaignNameEnum.MONTHLY_CAMPAIGNS}&utm_id=${campaignEmailCode}`,
           );
@@ -505,22 +506,22 @@ export class CampaignService {
                 googleCampaignBuilder,
               },
             });
+            await this.handleEmailCampaign(
+              campaignEmailCode,
+              title,
+              emailCampaign,
+              [nestUser],
+            );
+            this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
+            emailReceiversTotal++;
           } catch (e) {
             console.log(e);
             continue;
           }
-
-          await this.handleEmailCampaign(
-            campaignEmailCode,
-            title,
-            emailCampaign,
-            [nestUser],
-          );
-          this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
-          emailReceiversTotal++;
-        }
-
-        if (flaskUser.is_phonenumber_verified) {
+        } else if (
+          flaskUser.is_phonenumber_verified &&
+          flaskUser.phone_number
+        ) {
           const to = flaskUser.phone_number;
           const from = process.env.SMS_FROM;
           const shortNeedUrl = await this.shortenUrl({
@@ -534,7 +535,6 @@ export class CampaignService {
             eligibleChildren[0].sayName
           }: ${shortNeedUrl} لغو۱۱`;
 
-          
           let smsResult: {
             Value: string;
             RetStatus: number;
@@ -562,6 +562,10 @@ export class CampaignService {
               `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
             );
           }
+        } else {
+          this.logger.error(
+            `This user has not email or phonNumber:${flaskUser.id}`,
+          );
         }
       }
 
@@ -627,6 +631,201 @@ export class CampaignService {
       if (url) return url;
     } catch (e) {
       throw new NotFoundException('Resource Not Found');
+    }
+  }
+
+  async sendNewsLetter(campaignDetails: CreateSendNewsLetterDto) {
+    try {
+      // campaign codes
+      const campaignEmailCode = fetchCampaignCode(
+        CampaignNameEnum.NEWS_LETTER,
+        CampaignTypeEnum.EMAIL,
+      );
+      const campaignSmsCode = fetchCampaignCode(
+        CampaignNameEnum.NEWS_LETTER,
+        CampaignTypeEnum.SMS,
+      );
+
+      const emailCampaign = await this.getCampaignByCampaignCode(
+        campaignEmailCode,
+        CampaignTypeEnum.EMAIL,
+      );
+      const smsCampaign = await this.getCampaignByCampaignCode(
+        campaignSmsCode,
+        CampaignTypeEnum.SMS,
+      );
+
+      // Notify admin if running out of sms credit
+      const credit = await this.smsRest.getCredit();
+      if (Number(credit.Value) < 500) {
+        const to = process.env.SAY_ADMIN_SMS;
+        const from = process.env.SMS_FROM;
+        const text = `سلام،\nتعداد پیامک باقی‌ مانده شما کمتر از ۵۰۰ عدد است. \n با احترام \n SAY \n لغو۱۱`;
+        await this.smsRest.send(to, from, text);
+      }
+      if (Number(credit.Value) < 150) {
+        const to = process.env.SAY_ADMIN_SMS;
+        const from = process.env.SMS_FROM;
+        const text = `سلام،\nتعداد پیامک شما رو به پایان است. \n با احترام \n SAY \n لغو۱۱`;
+        await this.smsRest.send(to, from, text);
+        throw new ForbiddenException('We need to charge the sms provider');
+      }
+
+      // 0 -setup
+      const persianStringMonth = persianMonthStringFarsi(new Date());
+      if (!persianStringMonth) {
+        throw new ServerError('We need the month string');
+      }
+
+      const flaskUsers = await this.userService.getFlaskUsers();
+      let shuffledUsers = shuffleArray(flaskUsers);
+
+      let alreadyReceivedEmailCount = 0;
+      let alreadyReceivedSmsCount = 0;
+      let turnedOffCount = 0;
+      let emailReceiversTotal = 0;
+      let smsReceiversTotal = 0;
+      if (campaignDetails.isTest) {
+        shuffledUsers = [
+          await this.userService.getFlaskUser(12687),
+          await this.userService.getFlaskUser(115),
+        ];
+      }
+
+      if (campaignDetails.isTest && shuffledUsers.length > 2) {
+        return;
+      }
+      // 1- loop shuffled users
+      for await (const flaskUser of shuffledUsers) {
+        this.logger.warn(`Looking at: ${flaskUser.id} ...`);
+        let nestUser = await this.userService.getFamilyByFlaskId(flaskUser.id);
+        if (!nestUser) {
+          nestUser = await this.userService.createFamily(flaskUser.id);
+        }
+        // 2- eligible to receive?
+        if (!nestUser.newsLetterCampaign) {
+          turnedOffCount++;
+          continue;
+        }
+        if (emailCampaign) {
+          const alreadyReceivedEmail =
+            emailCampaign.receivers &&
+            emailCampaign.receivers.find((r) => r.flaskUserId === flaskUser.id);
+          if (alreadyReceivedEmail) {
+            this.logger.warn(`Already Received Email: ${nestUser.flaskUserId}`);
+            alreadyReceivedEmailCount++;
+            continue;
+          }
+        }
+
+        if (smsCampaign) {
+          const alreadyReceivedSms = smsCampaign.receivers.find(
+            (r) => r.flaskUserId === flaskUser.id,
+          );
+          if (alreadyReceivedSms) {
+            this.logger.warn(`Already Received Sms: ${nestUser.flaskUserId}`);
+            alreadyReceivedSmsCount++;
+            continue;
+          }
+        }
+
+        // 3 - Send NewsLetter
+        if (flaskUser.is_email_verified && flaskUser.emailAddress) {
+          try {
+            this.logger.warn(
+              `Sending NewsLetter Email to: ${flaskUser.emailAddress}`,
+            );
+
+            await this.mailerService.sendMail({
+              to: flaskUser.emailAddress,
+              subject: campaignDetails.title,
+              template: `./${campaignDetails.fileName}`, // `.hbs` extension is appended automatically
+              context: {
+                userName: flaskUser.firstName
+                  ? flaskUser.firstName
+                  : flaskUser.userName,
+              },
+            });
+
+            await this.handleEmailCampaign(
+              campaignEmailCode,
+              campaignDetails.title,
+              emailCampaign,
+              [nestUser],
+            );
+            this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
+            emailReceiversTotal++;
+          } catch (e) {
+            console.log(e);
+            continue;
+          }
+        } else if (
+          flaskUser.is_phonenumber_verified &&
+          flaskUser.phone_number
+        ) {
+          const to = flaskUser.phone_number;
+          const from = process.env.SMS_FROM;
+
+          this.logger.warn(`Sending campaign SMS to: ${to}`);
+
+          const text = `سلام ${
+            flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+          }،\n ${campaignDetails.smsContent}\n  ${
+            campaignDetails.smsLink
+          } لغو۱۱`;
+
+          let smsResult: {
+            Value: string;
+            RetStatus: number;
+            StrRetStatus: string;
+          };
+
+          try {
+            await sleep(2000);
+            console.log('Woke Up...');
+            smsResult = await this.smsRest.send(to, from, text);
+          } catch (e) {
+            this.logger.error(
+              `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
+            );
+            console.log(e);
+          }
+          if (smsResult && Number(smsResult.RetStatus) === 1) {
+            await this.handleSmsCampaign(
+              campaignSmsCode,
+              campaignDetails.title,
+              smsCampaign,
+              [nestUser],
+            );
+            this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
+            smsReceiversTotal++;
+          } else {
+            this.logger.error(
+              `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
+            );
+          }
+        } else {
+          this.logger.error(
+            `This user has not email or phonNumber:${flaskUser.id}`,
+          );
+        }
+      }
+
+      this.logger.warn(
+        `Did Not reach: ${alreadyReceivedEmailCount} users have already received Email`,
+      );
+      this.logger.warn(
+        `Did Not reach: ${alreadyReceivedSmsCount} users have already received Sms`,
+      );
+      this.logger.warn(
+        `Did Not reach: ${turnedOffCount} users have turned off monthly campaign`,
+      );
+      this.logger.log(
+        `All done for this NewsLetter. - ${campaignDetails.title} - SMS:${smsReceiversTotal} - Email:${emailReceiversTotal} - Out of ${flaskUsers.length}`,
+      );
+    } catch (e) {
+      console.log(e);
+      throw new ServerError(e.message, e.status);
     }
   }
 }
