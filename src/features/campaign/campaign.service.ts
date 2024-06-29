@@ -712,7 +712,7 @@ export class CampaignService {
           const alreadyReceivedEmail =
             emailCampaign.receivers &&
             emailCampaign.receivers.find((r) => r.flaskUserId === flaskUser.id);
-          if (alreadyReceivedEmail) {
+          if (alreadyReceivedEmail && !campaignDetails.isTest) {
             this.logger.warn(`Already Received Email: ${nestUser.flaskUserId}`);
             alreadyReceivedEmailCount++;
             continue;
@@ -723,7 +723,7 @@ export class CampaignService {
           const alreadyReceivedSms = smsCampaign.receivers.find(
             (r) => r.flaskUserId === flaskUser.id,
           );
-          if (alreadyReceivedSms) {
+          if (alreadyReceivedSms && !campaignDetails.isTest) {
             this.logger.warn(`Already Received Sms: ${nestUser.flaskUserId}`);
             alreadyReceivedSmsCount++;
             continue;
