@@ -542,7 +542,7 @@ export class CampaignService {
           };
 
           try {
-            await sleep(2000);
+            await sleep(1000);
             console.log('Woke Up...');
             smsResult = await this.smsRest.send(to, from, text);
           } catch (e) {
@@ -697,6 +697,7 @@ export class CampaignService {
       }
       // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {
+        sleep(1000);
         this.logger.warn(`Looking at: ${flaskUser.id} ...`);
         let nestUser = await this.userService.getFamilyByFlaskId(flaskUser.id);
         if (!nestUser) {
@@ -746,15 +747,16 @@ export class CampaignService {
                   : flaskUser.userName,
               },
             });
-
-            await this.handleEmailCampaign(
-              campaignEmailCode,
-              campaignDetails.title,
-              emailCampaign,
-              [nestUser],
-            );
-            this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
-            emailReceiversTotal++;
+            if (!campaignDetails.isTest) {
+              await this.handleEmailCampaign(
+                campaignEmailCode,
+                campaignDetails.title,
+                emailCampaign,
+                [nestUser],
+              );
+              this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
+              emailReceiversTotal++;
+            }
           } catch (e) {
             console.log(e);
             continue;
@@ -791,14 +793,16 @@ export class CampaignService {
             console.log(e);
           }
           if (smsResult && Number(smsResult.RetStatus) === 1) {
-            await this.handleSmsCampaign(
-              campaignSmsCode,
-              campaignDetails.title,
-              smsCampaign,
-              [nestUser],
-            );
-            this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
-            smsReceiversTotal++;
+            if (!campaignDetails.isTest) {
+              await this.handleSmsCampaign(
+                campaignSmsCode,
+                campaignDetails.title,
+                smsCampaign,
+                [nestUser],
+              );
+              this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
+              smsReceiversTotal++;
+            }
           } else {
             this.logger.error(
               `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
