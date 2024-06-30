@@ -18,6 +18,7 @@ import {
   removeDuplicates,
   shuffleArray,
   sleep,
+  convertFlaskToSayPanelRoles,
 } from 'src/utils/helpers';
 import {
   CampaignNameEnum,
@@ -45,6 +46,7 @@ import {
   paginate as nestPaginate,
 } from 'nestjs-paginate';
 import { CreateSendNewsLetterDto } from 'src/types/dtos/CreateSendNewsLetter.dto';
+import { SyncService } from '../sync/sync.service';
 
 @Injectable()
 export class CampaignService {
@@ -58,6 +60,7 @@ export class CampaignService {
     private familyService: FamilyService,
     private mailerService: MailerService,
     private childrenService: ChildrenService,
+    private syncService: SyncService,
   ) {}
   private readonly logger = new Logger(CampaignService.name);
   smsApi = new MelipayamakApi(process.env.SMS_USER, process.env.SMS_PASSWORD);
@@ -783,7 +786,7 @@ export class CampaignService {
           };
 
           try {
-            await sleep(2000);
+            await sleep(1000);
             console.log('Woke Up...');
             smsResult = await this.smsRest.send(to, from, text);
           } catch (e) {
@@ -827,6 +830,175 @@ export class CampaignService {
       this.logger.log(
         `All done for this NewsLetter. - ${campaignDetails.title} - SMS:${smsReceiversTotal} - Email:${emailReceiversTotal} - Out of ${flaskUsers.length}`,
       );
+
+      // extra: loop shuffled sws
+      if (!campaignDetails.isTest) {
+        let contributorAlreadyReceivedEmailCount = 0;
+        let contributorAlreadyReceivedSmsCount = 0;
+        let contributorTurnedOffCount = 0;
+        let contributorEmailReceiversTotal = 0;
+        let contributorSmsReceiversTotal = 0;
+        const flaskSws = await this.userService.getActiveFlaskSws();
+        for await (const sw of flaskSws) {
+          sleep(1000);
+          const role = convertFlaskToSayPanelRoles(sw.type_id);
+          let nestContributor = await this.userService.getContributorByFlaskId(
+            sw.id,
+            role,
+          );
+          const swDetails = {
+            typeId: sw.type_id,
+            firstName: sw.firstName,
+            lastName: sw.lastName,
+            avatarUrl: sw.avatar_url,
+            flaskUserId: sw.id,
+            birthDate: sw.birth_date && new Date(sw.birth_date),
+            panelRole: convertFlaskToSayPanelRoles(sw.type_id),
+            userName: sw.userName,
+          };
+
+          if (!nestContributor) {
+            const swNgo = await this.syncService.syncContributorNgo(sw);
+            nestContributor = await this.userService.createContributor(
+              swDetails,
+              swNgo,
+            );
+          }
+          this.logger.warn(
+            `Looking at contributor: ${nestContributor.flaskUserId} ...`,
+          );
+
+          if (!nestContributor.isContributor) {
+            this.logger.warn(
+              `Not a contributor: ${nestContributor.flaskUserId} ...`,
+            );
+            continue;
+          }
+          // 2- eligible to receive?
+          if (!nestContributor.newsLetterCampaign) {
+            contributorTurnedOffCount++;
+            continue;
+          }
+          if (emailCampaign) {
+            const alreadyReceivedEmail =
+              emailCampaign.receivers &&
+              emailCampaign.receivers.find((r) => r.id === nestContributor.id);
+            if (alreadyReceivedEmail) {
+              this.logger.warn(
+                `Already Received Email: ${nestContributor.flaskUserId}`,
+              );
+              contributorAlreadyReceivedEmailCount++;
+              continue;
+            }
+          }
+
+          if (smsCampaign) {
+            const alreadyReceivedSms = smsCampaign.receivers.find(
+              (r) => r.id === nestContributor.id,
+            );
+            if (alreadyReceivedSms) {
+              this.logger.warn(
+                `Already Received Sms: ${nestContributor.flaskUserId}`,
+              );
+              contributorAlreadyReceivedSmsCount++;
+              continue;
+            }
+          }
+
+          // 3 - Send NewsLetter
+          if (sw.email) {
+            try {
+              this.logger.warn(`Sending NewsLetter Email to: ${sw.email}`);
+
+              // await this.mailerService.sendMail({
+              //   to: sw.email,
+              //   subject: campaignDetails.title,
+              //   template: `./${campaignDetails.fileName}`, // `.hbs` extension is appended automatically
+              //   context: {
+              //     userName: sw.firstName ? sw.firstName : sw.userName,
+              //   },
+              // });
+              if (!campaignDetails.isTest) {
+                await this.handleEmailCampaign(
+                  campaignEmailCode,
+                  campaignDetails.title,
+                  emailCampaign,
+                  [nestContributor],
+                );
+                this.logger.log(
+                  `Email Sent to User: ${nestContributor.flaskUserId}`,
+                );
+                contributorEmailReceiversTotal++;
+              }
+            } catch (e) {
+              console.log(e);
+              continue;
+            }
+          } else if (sw.phone_number) {
+            const to = sw.phone_number;
+            const from = process.env.SMS_FROM;
+
+            this.logger.warn(`Sending campaign SMS to: ${to}`);
+
+            const text = `سلام ${
+              sw.firstName ? sw.firstName : sw.userName
+            }،\n ${campaignDetails.smsContent}\n  ${
+              campaignDetails.smsLink
+            } لغو۱۱`;
+
+            let smsResult: {
+              Value: string;
+              RetStatus: number;
+              StrRetStatus: string;
+            };
+
+            try {
+              await sleep(1000);
+              console.log('Woke Up...');
+              smsResult = await this.smsRest.send(to, from, text);
+            } catch (e) {
+              this.logger.error(
+                `Could not send SMS to: ${sw.phone_number} for Contributor: ${sw.id} `,
+              );
+              console.log(e);
+            }
+            if (smsResult && Number(smsResult.RetStatus) === 1) {
+              if (!campaignDetails.isTest) {
+                await this.handleSmsCampaign(
+                  campaignSmsCode,
+                  campaignDetails.title,
+                  smsCampaign,
+                  [nestContributor],
+                );
+                this.logger.log(
+                  `SMS Sent to Contributor: ${nestContributor.flaskUserId}`,
+                );
+                contributorSmsReceiversTotal++;
+              }
+            } else {
+              this.logger.error(
+                `Could not send SMS to: ${sw.phone_number} for user: ${sw.id} `,
+              );
+            }
+          } else {
+            this.logger.error(
+              `This Contributor does not have email or phonNumber:${sw.id}`,
+            );
+          }
+        }
+        this.logger.warn(
+          `Did Not reach: ${contributorAlreadyReceivedEmailCount} Contributors have already received Email`,
+        );
+        this.logger.warn(
+          `Did Not reach: ${contributorAlreadyReceivedSmsCount} Contributors have already received Sms`,
+        );
+        this.logger.warn(
+          `Did Not reach: ${contributorTurnedOffCount} Contributors have turned off monthly campaign`,
+        );
+        this.logger.log(
+          `All done for this Contributors NewsLetter. - ${campaignDetails.title} - SMS:${contributorSmsReceiversTotal} - Email:${contributorEmailReceiversTotal} - Out of ${flaskSws.length}`,
+        );
+      }
     } catch (e) {
       console.log(e);
       throw new ServerError(e.message, e.status);

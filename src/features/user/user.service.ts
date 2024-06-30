@@ -57,6 +57,14 @@ export class UserService {
     return this.allUserRepository.find();
   }
 
+  getActiveFlaskSws(): Promise<SocialWorker[]> {
+    return this.flaskSocialWorkerRepository.find({
+      where: {
+        is_active: true,
+      },
+    });
+  }
+
   getFlaskUsers(): Promise<User[]> {
     return this.flaskUserRepository.find();
   }
@@ -281,6 +289,7 @@ export class UserService {
     const user = this.allUserRepository.findOne({
       where: {
         id,
+        isContributor: false,
       },
     });
     return user;

@@ -31,6 +31,23 @@ import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 import { UrlEntity } from 'src/entities/url.entity';
 import { CampaignMiddleware } from './middlewares/campaign.middleware';
+import { SyncService } from '../sync/sync.service';
+import { NgoService } from '../ngo/ngo.service';
+import { ReceiptService } from '../receipt/receipt.service';
+import { PaymentService } from '../payment/payment.service';
+import { StatusService } from '../status/status.service';
+import { ProviderService } from '../provider/provider.service';
+import { LocationService } from '../location/location.service';
+import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
+import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import { ReceiptEntity } from 'src/entities/receipt.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { StatusEntity } from 'src/entities/status.entity';
+import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { ProviderEntity } from 'src/entities/provider.entity';
+import { LocationEntity } from 'src/entities/location.entity';
+import { Cities } from 'src/entities/flaskEntities/cities.entity';
+import { Countries } from 'src/entities/flaskEntities/countries.entity';
 
 @Global() // 👈 global module
 @Module({
@@ -71,6 +88,10 @@ import { CampaignMiddleware } from './middlewares/campaign.middleware';
         UserFamily,
         Receipt,
         NeedReceipt,
+        NGO,
+        Payment,
+        Cities,
+        Countries,
       ],
       'flaskPostgres',
     ),
@@ -87,6 +108,14 @@ import { CampaignMiddleware } from './middlewares/campaign.middleware';
       AllUserEntity,
       CampaignEntity,
       UrlEntity,
+      NgoEntity,
+      NgoArrivalEntity,
+      ReceiptEntity,
+      PaymentEntity,
+      StatusEntity,
+      ProviderJoinNeedEntity,
+      ProviderEntity,
+      LocationEntity,
     ]),
   ],
   providers: [
@@ -97,6 +126,13 @@ import { CampaignMiddleware } from './middlewares/campaign.middleware';
     WalletService,
     FamilyService,
     MineService,
+    SyncService,
+    NgoService,
+    ReceiptService,
+    PaymentService,
+    StatusService,
+    ProviderService,
+    LocationService,
   ],
   controllers: [CampaignController],
   exports: [CampaignService],
