@@ -299,9 +299,19 @@ export class NeedController {
 
     let toBeConfirmed = config().dataCache.fetchToBeConfirmed();
 
-    const expired = !toBeConfirmed || !toBeConfirmed.list[0];
-    !toBeConfirmed.createdAt ||
-      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 5;
+    const expired =
+      !toBeConfirmed ||
+      !toBeConfirmed.list[0] ||
+      !toBeConfirmed.createdAt ||
+      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 1;
+    console.log(`Mass prepare expired: ${expired}`);
+    console.log(
+      `Last prepare: ${
+        toBeConfirmed.createdAt &&
+        timeDifference(toBeConfirmed.createdAt, new Date()).mm
+      } ago`,
+    );
+
     if (expired) {
       const notConfirmed = await this.needService.getNotConfirmedNeeds(
         null,
