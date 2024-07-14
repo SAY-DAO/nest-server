@@ -19,13 +19,17 @@ import {
   shuffleArray,
   sleep,
   convertFlaskToSayPanelRoles,
+  daysDifference,
 } from 'src/utils/helpers';
 import {
+  AnnouncementEnum,
   CampaignNameEnum,
   CampaignTypeEnum,
   ChildExistence,
   NeedTypeEnum,
   PanelContributors,
+  ProductStatusEnum,
+  ServiceStatusEnum,
 } from 'src/types/interfaces/interface';
 import { FamilyService } from '../family/family.service';
 import { CampaignEntity } from 'src/entities/campaign.entity';
@@ -47,6 +51,7 @@ import {
 } from 'nestjs-paginate';
 import { CreateSendNewsLetterDto } from 'src/types/dtos/CreateSendNewsLetter.dto';
 import { SyncService } from '../sync/sync.service';
+import { TicketService } from '../ticket/ticket.service';
 
 @Injectable()
 export class CampaignService {
@@ -61,6 +66,7 @@ export class CampaignService {
     private mailerService: MailerService,
     private childrenService: ChildrenService,
     private syncService: SyncService,
+    private ticketService: TicketService,
   ) {}
   private readonly logger = new Logger(CampaignService.name);
   smsApi = new MelipayamakApi(process.env.SMS_USER, process.env.SMS_PASSWORD);
@@ -244,6 +250,61 @@ export class CampaignService {
     });
   }
 
+  async sendSwAnnounceReminder() {
+    function findSwById(
+      objects: { swId: number; counter: number }[],
+      id: number,
+    ): { swId: number; counter: number } {
+      return objects.find((object) => object.swId === id);
+    }
+    try {
+      const list: [{ swId: number; counter: number }] = [
+        { swId: 0, counter: 0 },
+      ];
+      const needs = await this.needService.getArrivalUpdateCandidates();
+      console.log(`Number of needs: ${needs[1]}`);
+      for await (const need of needs[0]) {
+        if (
+          (need.type === NeedTypeEnum.PRODUCT &&
+            need.status === ProductStatusEnum.PURCHASED_PRODUCT) ||
+          (need.type === NeedTypeEnum.SERVICE &&
+            need.status === ServiceStatusEnum.MONEY_TO_NGO)
+        ) {
+          const ticket = await this.ticketService.getTicketByFlaskNeedId(
+            need.id,
+          );
+
+          if (
+            // (daysDifference(need.purchase_date, new Date()) > 1 && !ticket) ||
+            !ticket ||
+            !ticket.ticketHistories ||
+            (ticket.ticketHistories &&
+              !ticket.ticketHistories.find(
+                (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
+              ))
+          ) {
+            console.log(`Adding need: ${need.id} Sw Id: ${need.created_by_id}`);
+
+            let foundObject: { counter: any; swId: number };
+            if (!list || list.length < 1) {
+              foundObject = null;
+            } else {
+              foundObject = findSwById(list, need.created_by_id);
+            }
+            if (foundObject) {
+              foundObject.counter++;
+            } else {
+              list.push({ swId: need.created_by_id, counter: 1 });
+            }
+          }
+        }
+      }
+      console.log(list);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async sendSwChildNoNeedReminder() {
     const list = await this.childrenWithNoNeed();
     const swIds = removeDuplicates(list.map((e) => e.swId));
@@ -313,7 +374,7 @@ export class CampaignService {
       const title = `نیازهای ${persianStringMonth} ماه کودکان شما`;
 
       const flaskUsers = await this.userService.getFlaskUsers();
-      let shuffledUsers = shuffleArray(flaskUsers);
+      const shuffledUsers = shuffleArray(flaskUsers);
 
       let alreadyReceivedEmailCount = 0;
       let alreadyReceivedSmsCount = 0;
@@ -323,14 +384,14 @@ export class CampaignService {
       let emailReceiversTotal = 0;
       let smsReceiversTotal = 0;
 
-      const testUsers = [
-        await this.userService.getFlaskUser(12687),
-        await this.userService.getFlaskUser(115),
-      ];
-      shuffledUsers = testUsers;
-      if (shuffledUsers.length > 2) {
-        return;
-      }
+      // const testUsers = [
+      //   await this.userService.getFlaskUser(12687),
+      //   await this.userService.getFlaskUser(115),
+      // ];
+      // shuffledUsers = testUsers;
+      // if (shuffledUsers.length > 2) {
+      //   return;
+      // }
 
       // 1- loop shuffled users
       for await (const flaskUser of shuffledUsers) {

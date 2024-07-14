@@ -48,6 +48,10 @@ import { ProviderEntity } from 'src/entities/provider.entity';
 import { LocationEntity } from 'src/entities/location.entity';
 import { Cities } from 'src/entities/flaskEntities/cities.entity';
 import { Countries } from 'src/entities/flaskEntities/countries.entity';
+import { TicketService } from '../ticket/ticket.service';
+import { TicketViewEntity } from 'src/entities/ticketView.entity';
+import { TicketEntity } from 'src/entities/ticket.entity';
+import { TicketContentEntity } from 'src/entities/ticketContent.entity';
 
 @Global() // 👈 global module
 @Module({
@@ -116,6 +120,9 @@ import { Countries } from 'src/entities/flaskEntities/countries.entity';
       ProviderJoinNeedEntity,
       ProviderEntity,
       LocationEntity,
+      TicketViewEntity,
+      TicketEntity,
+      TicketContentEntity,
     ]),
   ],
   providers: [
@@ -133,6 +140,7 @@ import { Countries } from 'src/entities/flaskEntities/countries.entity';
     StatusService,
     ProviderService,
     LocationService,
+    TicketService,
   ],
   controllers: [CampaignController],
   exports: [CampaignService],

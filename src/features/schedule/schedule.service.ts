@@ -16,7 +16,7 @@ export class ScheduleService {
   ) {}
   private readonly logger = new Logger(ScheduleService.name);
 
-  async completePays() {    
+  async completePays() {
     const father = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.FATHER,
       0,
@@ -128,18 +128,18 @@ export class ScheduleService {
   }
 
   // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here
-  @Cron('37 18 * * Sun', {
-    name: 'MonthlyCampaigns try At 17:25 on Sunday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+  @Cron('37 17 * * Sun', {
+    name: 'MonthlyCampaigns try At 17:37 on Sunday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
     timeZone: 'Asia/Tehran',
   })
   async handleMonthlyCampaignsCron() {
     const farsiDay = persianDay(new Date());
-    if (farsiDay > 20) {
-      this.logger.warn(
-        `We are near the end of this month let's skip one more week`,
-      );
-      return;
-    }
+    // if (farsiDay > 20) {
+    //   this.logger.warn(
+    //     `We are near the end of this month let's skip one more week`,
+    //   );
+    //   return;
+    // }
     // ############## BE CAREFUL #################
     if (process.env.NODE_ENV === 'production') {
       this.logger.debug(
@@ -160,6 +160,13 @@ export class ScheduleService {
     }
   }
 
+  @Timeout(5000)
+  async handleAnnounceArrivalCron() {
+    if (process.env.NODE_ENV === 'production') {
+      // this.logger.debug('Sending Reminder to Social workers to announce arrivals');
+      // await this.campaignService.sendSwAnnounceReminder();
+    }
+  }
   // @Cron('30 8 * * Sat', {
   //   name: 'Confirm Needs At 08:30 on Saturday.',
   //   timeZone: 'Asia/Tehran',
