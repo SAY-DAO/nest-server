@@ -86,7 +86,7 @@ export class ChildrenController {
 
   @UsePipes(new ValidationPipe()) // validation for dto files
   @Patch(`preregister/approve/:id`)
-  @ApiOperation({ description: 'Delete a pre register' })
+  @ApiOperation({ description: 'Approve a pre register' })
   @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
   async approvePreregister(
     @Req() req: Request,
@@ -546,7 +546,26 @@ export class ChildrenController {
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
-
+// if(body.flaskChildId>0){
+//   const token =
+//   config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
+//   const configs = {
+//     headers: {
+//       'Content-Type': 'multipart/form-data',
+//       Authorization: token,
+//       processData: false,
+//       contentType: false,
+//     },
+//   };
+//   const formData = new FormData();
+//   formData.append('ngo_id', String(preRegister.flaskNgoId));
+//   // create flask child
+//   const { data } = await axios.post(
+//     'https://api.sayapp.company/api/v2/child/add/',
+//     formData,
+//     configs,
+//   );
+// }
     try {
       return await this.childrenService.preRegisterUpdate(body.id, {
         bio: { fa: body.bio, en: '' },

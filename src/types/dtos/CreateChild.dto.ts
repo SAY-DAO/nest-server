@@ -66,6 +66,7 @@ export class PreparePreRegisterChildDto {
 
 
 export class UpdatePreRegisterChildDto {
+  flaskChildId: number;
   @IsNotEmpty()
   id: string;
   @IsNotEmpty()

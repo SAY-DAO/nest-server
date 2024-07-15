@@ -252,14 +252,14 @@ export class CampaignService {
 
   async sendSwAnnounceReminder() {
     function findSwById(
-      objects: { swId: number; counter: number }[],
+      objects: { swId: number; eligible: number; total: number }[],
       id: number,
-    ): { swId: number; counter: number } {
+    ): { swId: number; eligible: number; total: number } {
       return objects.find((object) => object.swId === id);
     }
     try {
-      const list: [{ swId: number; counter: number }] = [
-        { swId: 0, counter: 0 },
+      const list: [{ swId: number; eligible: number; total: number }] = [
+        { swId: null, eligible: null, total: null },
       ];
       const needs = await this.needService.getArrivalUpdateCandidates();
       console.log(`Number of needs: ${needs[1]}`);
@@ -285,20 +285,69 @@ export class CampaignService {
           ) {
             console.log(`Adding need: ${need.id} Sw Id: ${need.created_by_id}`);
 
-            let foundObject: { counter: any; swId: number };
+            let foundObject: { swId: number; eligible: number; total: any };
             if (!list || list.length < 1) {
               foundObject = null;
             } else {
               foundObject = findSwById(list, need.created_by_id);
             }
             if (foundObject) {
-              foundObject.counter++;
+              foundObject.total++;
+              let isEligible: boolean;
+              if (need.type === NeedTypeEnum.PRODUCT) {
+                isEligible =
+                  daysDifference(need.expected_delivery_date, new Date()) > 1;
+              }
+              if (need.type === NeedTypeEnum.SERVICE) {
+                isEligible =
+                  daysDifference(need.expected_delivery_date, new Date()) > 1;
+              }
+              isEligible && foundObject.eligible++;
             } else {
-              list.push({ swId: need.created_by_id, counter: 1 });
+              let isEligible: boolean;
+              if (need.type === NeedTypeEnum.PRODUCT) {
+                isEligible =
+                  daysDifference(need.expected_delivery_date, new Date()) > 1;
+              }
+              if (need.type === NeedTypeEnum.SERVICE) {
+                isEligible =
+                  daysDifference(need.expected_delivery_date, new Date()) > 1;
+              }
+
+              list.push({
+                swId: need.created_by_id,
+                eligible: isEligible ? 1 : 0,
+                total: 1,
+              });
             }
           }
         }
       }
+      let once = true;
+      list.forEach(async (object) => {
+        if (object.swId) {
+          const sw = await this.userService.getFlaskSocialWorker(object.swId);
+          const to = sw.phone_number;
+          const from = process.env.SMS_FROM;
+
+          const text = `سلام ${sw.firstName}،\nدر حال حاضر ${object.eligible} از ${object.total} نیاز ثبت شده توسط شما در انتظار <<اعلام رسیدن>> هستند.\n لطفا وارد پنل شوید و از ستون سوم صفحه من در پنل، نیاز را پیدا کنید و از طریق منوی هر یک از نیازها گزینه اعلام رسیدن را انتخاب کنید.\n در صورتی که کالا یا مبلغ به شما تحویل داده نشده است، لطفا تیکتی جدید به نیاز اضافه کنید. \n با احترام، \n SAY \nپنل: https://panel.saydao.org \n لغو۱۱`;
+
+          await this.smsRest.send(to, from, text);
+          console.log(to);
+          console.log(from);
+          console.log(text);
+          if (once) {
+            once = false;
+            await this.smsRest.send(
+              process.env.SAY_ADMIN_SMS,
+              from,
+              'just sent the arrival updates!',
+            );
+            sleep(2000);
+          }
+          console.log('------------------------\n');
+        }
+      });
       console.log(list);
     } catch (e) {
       console.log(e);

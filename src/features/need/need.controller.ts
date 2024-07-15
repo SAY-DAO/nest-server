@@ -309,7 +309,7 @@ export class NeedController {
       `Last prepare: ${
         toBeConfirmed.createdAt &&
         timeDifference(toBeConfirmed.createdAt, new Date()).mm
-      } ago`,
+      } minutes ago`,
     );
 
     if (expired) {
