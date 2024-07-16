@@ -83,6 +83,30 @@ export class ChildrenController {
     private downloadService: DownloadService,
     private campaignService: CampaignService,
   ) {}
+  @Get(`preregister/:childFlaskId`)
+  @ApiOperation({ description: 'Get child preregister' })
+  async getChildPreregister(
+    @Req() req: Request,
+    @Param('childFlaskId') childFlaskId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
+        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException('You Are not the Authorized!');
+    }
+
+    return await this.childrenService.getChildrenPreRegisterByFlaskId(
+      childFlaskId,
+    );
+  }
 
   @UsePipes(new ValidationPipe()) // validation for dto files
   @Patch(`preregister/approve/:id`)
@@ -318,7 +342,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
-      throw new ForbiddenException('You Are not the Super admin');
+      throw new ForbiddenException('You Are not the Authorized!');
     }
 
     if (!files) {
@@ -546,26 +570,26 @@ export class ChildrenController {
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
-// if(body.flaskChildId>0){
-//   const token =
-//   config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
-//   const configs = {
-//     headers: {
-//       'Content-Type': 'multipart/form-data',
-//       Authorization: token,
-//       processData: false,
-//       contentType: false,
-//     },
-//   };
-//   const formData = new FormData();
-//   formData.append('ngo_id', String(preRegister.flaskNgoId));
-//   // create flask child
-//   const { data } = await axios.post(
-//     'https://api.sayapp.company/api/v2/child/add/',
-//     formData,
-//     configs,
-//   );
-// }
+    // if(body.flaskChildId>0){
+    //   const token =
+    //   config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
+    //   const configs = {
+    //     headers: {
+    //       'Content-Type': 'multipart/form-data',
+    //       Authorization: token,
+    //       processData: false,
+    //       contentType: false,
+    //     },
+    //   };
+    //   const formData = new FormData();
+    //   formData.append('ngo_id', String(preRegister.flaskNgoId));
+    //   // create flask child
+    //   const { data } = await axios.post(
+    //     'https://api.sayapp.company/api/v2/child/add/',
+    //     formData,
+    //     configs,
+    //   );
+    // }
     try {
       return await this.childrenService.preRegisterUpdate(body.id, {
         bio: { fa: body.bio, en: '' },

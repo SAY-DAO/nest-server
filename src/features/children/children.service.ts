@@ -314,7 +314,7 @@ export class ChildrenService {
       options,
       queryBuilder,
       {
-        sortableColumns: ['id'],
+        sortableColumns: ['createdAt'],
         nullSort: 'last',
       },
     );
