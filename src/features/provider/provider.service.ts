@@ -19,7 +19,7 @@ export class ProviderService {
   async getProviders(): Promise<ProviderEntity[]> {
     return this.providerRepository.find({
       order: {
-        createdAt: 'DESC',
+        type: 'DESC',
       },
     });
   }
