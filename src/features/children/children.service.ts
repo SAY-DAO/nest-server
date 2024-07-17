@@ -7,6 +7,7 @@ import { NeedSummary } from 'src/types/interfaces/Need';
 import {
   ChildParams,
   PreRegisterChildPrepareParams,
+  PreRegisterChildUpdateApprovedParams,
   PreRegisterChildUpdateParams,
   createFlaskChildParams,
 } from 'src/types/parameters/ChildParameters';
@@ -205,6 +206,17 @@ export class ChildrenService {
     );
   }
 
+  preRegisterUpdateApproved(
+    flaskChildId: number,
+    theId: string,
+    childDetails: PreRegisterChildUpdateApprovedParams,
+  ): Promise<UpdateResult> {
+    return this.preRegisterChildrenRepository.update(
+      { id: theId },
+      { flaskChildId, ...childDetails },
+    );
+  }
+
   createChild(
     childDetails: ChildParams,
     ngo: NgoEntity,
@@ -314,7 +326,8 @@ export class ChildrenService {
       options,
       queryBuilder,
       {
-        sortableColumns: ['createdAt'],
+        defaultSortBy: [['createdAt', 'DESC']],
+        sortableColumns: ['id'],
         nullSort: 'last',
       },
     );

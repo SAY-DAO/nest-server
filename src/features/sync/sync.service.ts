@@ -419,7 +419,7 @@ export class SyncService {
         ),
       );
       console.log('\x1b[36m%s\x1b[0m', 'Created a Child ...\n');
-    } else if (nestChild && nestChild.updated === flaskNeed.updated) {
+    } else if (nestChild && nestChild.updated !== flaskChild.updated) {
       await this.childrenService.updateChild(childDetails, nestChild).then();
       nestChild = await this.childrenService.getChildById(childId);
 

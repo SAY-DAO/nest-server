@@ -37,6 +37,7 @@ export class ChildrenPreRegisterEntity extends BaseEntity {
   @Column({ nullable: true })
   birthPlaceId: number;
 
+  @Index({ unique: true })
   @Column({ nullable: true })
   flaskChildId: number;
 

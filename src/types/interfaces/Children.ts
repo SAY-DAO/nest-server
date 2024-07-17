@@ -1,8 +1,4 @@
 import { EducationEnum, HousingEnum } from './interface';
-export class CreateChildrenDto {
-    childData: Children[];
-}
-
 
 export class ChildrenData {
     totalCount: number;

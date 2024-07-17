@@ -3,6 +3,7 @@ import {
   HousingEnum,
   PreRegisterStatusEnum,
   SchoolTypeEnum,
+  SexEnum,
 } from '../interfaces/interface';
 
 export type ChildParams = {
@@ -92,4 +93,25 @@ export type PreRegisterChildUpdateParams = {
   schoolType: SchoolTypeEnum;
   firstName: { fa: string; en: string };
   lastName: { fa: string; en: string };
+};
+
+export type PreRegisterChildUpdateApprovedParams = {
+  awakeUrl: string;
+  sleptUrl: string;
+  sayName:  { fa: string; en: string };
+  firstName:  { fa: string; en: string };
+  lastName:  { fa: string; en: string };
+  bio:  { fa: string; en: string };
+  birthDate: Date;
+  birthPlaceId: number;
+  city: number;
+  state: number;
+  country: number;
+  sex: SexEnum;
+  educationLevel: EducationEnum;
+  housingStatus: HousingEnum;
+  address: string;
+  familyCount: number;
+  phoneNumber: string;
+  voiceUrl: string;
 };

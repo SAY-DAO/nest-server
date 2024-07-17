@@ -33,6 +33,7 @@ import { UserService } from '../user/user.service';
 import {
   CreateFlaskChildDto,
   PreparePreRegisterChildDto,
+  UpdateApprovedPreRegisterDto,
   UpdatePreRegisterChildDto,
 } from 'src/types/dtos/CreateChild.dto';
 import { ValidateChildTsPipe } from './pipes/validate-child.ts/validate-child.ts.pipe';
@@ -64,6 +65,7 @@ import { checkIfFileOrDirectoryExists, moveFile } from 'src/utils/file';
 import fs from 'fs';
 import { CampaignService } from '../campaign/campaign.service';
 import { File } from '@web-std/file';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -551,6 +553,142 @@ export class ChildrenController {
   @ApiOperation({
     description: 'update pre register',
   })
+  @Patch(`preregister/update-approved/:flaskChildId`)
+  @UsePipes(new ValidationPipe())
+  async preRegisterUpdateApproved(
+    @Param('flaskChildId') flaskChildId: number,
+    @Req() req: Request,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
+        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    let preRegister: ChildrenPreRegisterEntity;
+    try {
+      const flaskChild = await this.childrenService.getFlaskChild(flaskChildId);
+      preRegister = await this.childrenService.getChildrenPreRegisterByFlaskId(
+        flaskChildId,
+      );
+      if (!preRegister) {
+        preRegister = await this.childrenService.createPreRegisterChild(
+          flaskChild.awakeAvatarUrl,
+          flaskChild.sleptAvatarUrl,
+          {
+            fa: flaskChild.sayname_translations.fa,
+            en: flaskChild.sayname_translations.en,
+          },
+          flaskChild.gender === false ? SexEnum.FEMALE : SexEnum.MALE,
+        );
+        console.log(preRegister);
+      }
+      const preRegisterDetails = {
+        birthDate: new Date(flaskChild.birthDate),
+        firstName: {
+          fa: flaskChild.firstName_translations.fa,
+          en: flaskChild.firstName_translations.en,
+        },
+        lastName: {
+          fa: flaskChild.lastName_translations.fa,
+          en: flaskChild.lastName_translations.en,
+        },
+        sayName: {
+          fa: flaskChild.sayname_translations.fa,
+          en: flaskChild.sayname_translations.en,
+        },
+        birthPlaceId: Number(flaskChild.nationality),
+        phoneNumber: flaskChild.phoneNumber,
+        address: flaskChild.address,
+        country: Number(flaskChild.country),
+        city: Number(flaskChild.country),
+        state: Number(flaskChild.city),
+        awakeUrl: flaskChild.awakeAvatarUrl,
+        sleptUrl: flaskChild.sleptAvatarUrl,
+        voiceUrl: flaskChild.voiceUrl,
+        sex: flaskChild.gender === false ? SexEnum.FEMALE : SexEnum.MALE,
+        bio: {
+          fa: flaskChild.bio_translations.fa,
+          en: flaskChild.bio_translations.en,
+        },
+        housingStatus: Number(flaskChild.housingStatus),
+        educationLevel: Number(flaskChild.education),
+        familyCount: Number(flaskChild.familyCount),
+      };
+      console.log('\x1b[36m%s\x1b[0m', 'Updating the preRegister ...\n');
+
+      await this.childrenService.preRegisterUpdateApproved(
+        flaskChildId,
+        preRegister.id,
+        preRegisterDetails,
+      );
+
+      preRegister = await this.childrenService.getChildrenPreRegisterByFlaskId(
+        flaskChildId,
+      );
+      console.log(preRegister);
+      console.log('preRegister--------------------');
+
+      const childDetails = {
+        flaskId: flaskChild.id,
+        sayName: flaskChild.sayname_translations.en,
+        sayNameTranslations: flaskChild.sayname_translations,
+        nationality: flaskChild.nationality,
+        country: flaskChild.country,
+        city: flaskChild.city,
+        awakeAvatarUrl: flaskChild.awakeAvatarUrl,
+        sleptAvatarUrl: flaskChild.sleptAvatarUrl,
+        adultAvatarUrl: flaskChild.adult_avatar_url,
+        bioSummaryTranslations: flaskChild.bio_summary_translations,
+        bioTranslations: flaskChild.bio_translations,
+        voiceUrl: flaskChild.voiceUrl,
+        birthPlace: flaskChild.birthPlace,
+        housingStatus: flaskChild.housingStatus,
+        familyCount: flaskChild.familyCount,
+        sayFamilyCount: flaskChild.sayFamilyCount,
+        education: flaskChild.education,
+        created: flaskChild.created,
+        updated: flaskChild.updated,
+        isDeleted: flaskChild.isDeleted,
+        isConfirmed: flaskChild.isConfirmed,
+        flaskConfirmUser: flaskChild.confirmUser,
+        confirmDate: flaskChild.confirmDate,
+        existenceStatus: flaskChild.existence_status,
+        generatedCode: flaskChild.generatedCode,
+        isMigrated: flaskChild.isMigrated,
+        migratedId: flaskChild.migratedId,
+        birthDate: flaskChild.birthDate && new Date(flaskChild.birthDate),
+        migrateDate: flaskChild.migrateDate && new Date(flaskChild.migrateDate),
+      };
+
+      const nestChild = await this.childrenService.getChildById(flaskChildId);
+      console.log(
+        '\x1b[36m%s\x1b[0m',
+        'Updated the preRegister, Now updating Nest child ...\n',
+      );
+
+      if (!nestChild) {
+        throw new ServerError('Hmmm... No child was found', 500);
+      } else if (nestChild && nestChild.updated !== flaskChild.updated) {
+        await this.childrenService.updateChild(childDetails, nestChild).then();
+        console.log('\x1b[36m%s\x1b[0m', 'Child updated ...\n');
+      }
+      return preRegister;
+    } catch (e) {
+      throw new ServerError(e.message, e.status);
+    }
+  }
+
+  @ApiOperation({
+    description: 'update pre register',
+  })
   @Patch(`preregister/update`)
   @UsePipes(new ValidationPipe())
   async preRegisterUpdate(
@@ -570,26 +708,6 @@ export class ChildrenController {
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
-    // if(body.flaskChildId>0){
-    //   const token =
-    //   config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
-    //   const configs = {
-    //     headers: {
-    //       'Content-Type': 'multipart/form-data',
-    //       Authorization: token,
-    //       processData: false,
-    //       contentType: false,
-    //     },
-    //   };
-    //   const formData = new FormData();
-    //   formData.append('ngo_id', String(preRegister.flaskNgoId));
-    //   // create flask child
-    //   const { data } = await axios.post(
-    //     'https://api.sayapp.company/api/v2/child/add/',
-    //     formData,
-    //     configs,
-    //   );
-    // }
     try {
       return await this.childrenService.preRegisterUpdate(body.id, {
         bio: { fa: body.bio, en: '' },
@@ -710,6 +828,44 @@ export class ChildrenController {
       throw new ForbiddenException('You Are not the Super admin');
     }
     return await this.childrenService.getFlaskActiveChildren();
+  }
+
+  @ApiOperation({
+    description: 'update child',
+  })
+  @Patch(`flaskChildId=:flaskChildId`)
+  @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
+  @UsePipes(new ValidationPipe())
+  async updateChild(
+    @Req() req: Request,
+    @UploadedFile() voiceFile: Express.Multer.File,
+    @Body() body,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) &&
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    let theVoiceFile: File;
+    if (voiceFile) {
+      const fileBuffer = await fs.promises.readFile(
+        `uploads/children/voices/${voiceFile.filename}`,
+      );
+
+      theVoiceFile = new File([fileBuffer], `${voiceFile.filename}`, {
+        type: voiceFile.mimetype,
+      });
+    }
+    console.log(body);
+    console.log(theVoiceFile);
+
+    return theVoiceFile;
   }
 
   @Get(`check/names/:newName/:lang`)
