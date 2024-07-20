@@ -10,6 +10,7 @@ import {
   NeedTypeEnum,
   PanelContributors,
   PaymentStatusEnum,
+  SchoolTypeEnum,
 } from 'src/types/interfaces/interface';
 import { NgoParams } from 'src/types/parameters/NgoParammeters';
 import { PaymentParams } from 'src/types/parameters/PaymentParameters';
@@ -35,6 +36,8 @@ import { Need } from 'src/entities/flaskEntities/need.entity';
 import { CreateReceiptDto } from 'src/types/dtos/CreateReceipt.dto';
 import { CreatePaymentDto } from 'src/types/dtos/CreatePayment.dto';
 import { CreateStatusDto } from 'src/types/dtos/CreateStatus.dto';
+import { Child } from 'src/entities/flaskEntities/child.entity';
+import { ChildrenEntity } from 'src/entities/children.entity';
 
 @Injectable()
 export class SyncService {
@@ -775,5 +778,137 @@ export class SyncService {
       need: nestNeed,
       child: nestChild,
     };
+  }
+
+  async syncChild(
+    flaskChild: Child,
+    addedState: number,
+    schoolType: SchoolTypeEnum,
+  ) {
+    //--------------------------------------------Child-------------------------------------
+    let nestChild = await this.childrenService.getChildById(flaskChild.id);
+
+    const childDetails = {
+      flaskId: flaskChild.id,
+      sayName: flaskChild.sayname_translations.en,
+      sayNameTranslations: flaskChild.sayname_translations,
+      nationality: flaskChild.nationality,
+      country: flaskChild.country,
+      city: flaskChild.city,
+      state: addedState,
+      awakeAvatarUrl: flaskChild.awakeAvatarUrl,
+      sleptAvatarUrl: flaskChild.sleptAvatarUrl,
+      adultAvatarUrl: flaskChild.adult_avatar_url,
+      bioSummaryTranslations: flaskChild.bio_summary_translations,
+      bioTranslations: flaskChild.bio_translations,
+      voiceUrl: flaskChild.voiceUrl,
+      birthPlace: flaskChild.birthPlace,
+      housingStatus: flaskChild.housingStatus,
+      familyCount: flaskChild.familyCount,
+      sayFamilyCount: flaskChild.sayFamilyCount,
+      education: flaskChild.education,
+      created: flaskChild.created,
+      updated: flaskChild.updated,
+      isDeleted: flaskChild.isDeleted,
+      isConfirmed: flaskChild.isConfirmed,
+      flaskConfirmUser: flaskChild.confirmUser,
+      confirmDate: flaskChild.confirmDate,
+      existenceStatus: flaskChild.existence_status,
+      generatedCode: flaskChild.generatedCode,
+      isMigrated: flaskChild.isMigrated,
+      migratedId: flaskChild.migratedId,
+      birthDate: flaskChild.birthDate && new Date(flaskChild.birthDate),
+      migrateDate: flaskChild.migrateDate && new Date(flaskChild.migrateDate),
+      schoolType,
+      flaskNgoId: flaskChild.id_ngo,
+      flaskSwId: flaskChild.id_social_worker,
+    };
+
+    if (!nestChild) {
+      //-------------------------------------------- Social worker-------------------------------------
+      let nestSocialWorker: AllUserEntity;
+      let swNgo: NgoEntity;
+      nestSocialWorker = await this.userService.getContributorByFlaskId(
+        flaskChild.id_social_worker,
+        PanelContributors.SOCIAL_WORKER,
+      );
+
+      const flaskSocialWorker = await this.userService.getFlaskSocialWorker(
+        flaskChild.id_social_worker,
+      );
+
+      const swDetails = {
+        typeId: flaskSocialWorker.type_id,
+        firstName: flaskSocialWorker.firstName,
+        lastName: flaskSocialWorker.lastName,
+        avatarUrl: flaskSocialWorker.avatar_url,
+        flaskUserId: flaskSocialWorker.id,
+        birthDate:
+          flaskSocialWorker.birth_date &&
+          new Date(flaskSocialWorker.birth_date),
+        panelRole: PanelContributors.SOCIAL_WORKER,
+        userName: flaskSocialWorker.userName,
+        isActive: flaskSocialWorker.is_active,
+      };
+
+      if (!nestSocialWorker) {
+        swNgo = await this.syncContributorNgo(flaskSocialWorker);
+        console.log('\x1b[36m%s\x1b[0m', 'Creating a Social Worker ...\n');
+        nestSocialWorker = await this.userService.createContributor(
+          swDetails,
+          swNgo,
+        );
+        console.log('\x1b[36m%s\x1b[0m', 'Created a Social Worker ...\n');
+      } else if (nestSocialWorker) {
+        swNgo = nestSocialWorker.contributions.find(
+          (c) => c.flaskUserId == nestSocialWorker.flaskUserId,
+        ).ngo;
+        await this.userService
+          .updateContributor(nestSocialWorker.id, swDetails)
+          .then();
+        nestSocialWorker = await this.userService.getContributorByFlaskId(
+          flaskChild.id_social_worker,
+          PanelContributors.SOCIAL_WORKER,
+        );
+        console.log('\x1b[36m%s\x1b[0m', 'Social Worker updated ...\n');
+      } else {
+        swNgo = nestSocialWorker.contributions.find(
+          (c) => c.flaskUserId == nestSocialWorker.flaskUserId,
+        ).ngo;
+        console.log(
+          '\x1b[36m%s\x1b[0m',
+          'Skipped Social Worker updating ...\n',
+        );
+      }
+      // Create Child
+      console.log('\x1b[36m%s\x1b[0m', 'Creating a Child ...\n');
+
+      if (!nestSocialWorker || !nestSocialWorker.contributions) {
+        throw new ObjectNotFound(
+          'Something went wrong while trying to create a child!',
+        );
+      }
+      const childNgo = await this.ngoService.getNgoById(
+        nestSocialWorker.contributions.find(
+          (c) => c.flaskUserId == nestSocialWorker.flaskUserId,
+        ).flaskNgoId,
+      );
+      nestChild = await this.childrenService.createChild(
+        childDetails,
+        childNgo,
+        nestSocialWorker.contributions.find(
+          (c) => c.flaskUserId == nestSocialWorker.flaskUserId,
+        ),
+      );
+      console.log('\x1b[36m%s\x1b[0m', 'Created a Child ...\n');
+    } else if (nestChild && nestChild.updated !== flaskChild.updated) {
+      await this.childrenService.updateChild(childDetails, nestChild).then();
+      nestChild = await this.childrenService.getChildById(flaskChild.id);
+
+      console.log('\x1b[36m%s\x1b[0m', 'Child updated ...\n');
+    } else {
+      console.log('\x1b[36m%s\x1b[0m', 'Skipped Child updating ...\n');
+    }
+    return nestChild;
   }
 }

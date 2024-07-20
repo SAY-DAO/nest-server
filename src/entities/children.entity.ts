@@ -1,7 +1,11 @@
 import { Entity, Column, Index, OneToMany, ManyToOne } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
-import { EducationEnum, HousingEnum } from '../types/interfaces/interface';
+import {
+  EducationEnum,
+  HousingEnum,
+  SchoolTypeEnum,
+} from '../types/interfaces/interface';
 import { NgoEntity } from './ngo.entity';
 import { ContributorEntity } from './contributor.entity';
 
@@ -34,6 +38,9 @@ export class ChildrenEntity extends BaseEntity {
   @Column({ nullable: true })
   city: number;
 
+  @Column({ nullable: true })
+  state: number;
+
   @Column({ type: 'timestamptz', nullable: true })
   confirmDate: Date;
 
@@ -45,6 +52,9 @@ export class ChildrenEntity extends BaseEntity {
 
   @Column({ nullable: true })
   education: EducationEnum;
+
+  @Column({ nullable: true })
+  schoolType: SchoolTypeEnum;
 
   @Column({ nullable: true })
   existenceStatus: number;
@@ -78,6 +88,9 @@ export class ChildrenEntity extends BaseEntity {
 
   @Column({ nullable: true })
   sayFamilyCount: number;
+
+  @Column({ nullable: true })
+  familyCount: number;
 
   @Column({ nullable: true })
   sayName: string;

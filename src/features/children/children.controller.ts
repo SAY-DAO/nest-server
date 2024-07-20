@@ -56,7 +56,9 @@ import { NgoParams } from 'src/types/parameters/NgoParammeters';
 import {
   capitalizeFirstLetter,
   convertFlaskToSayAppRoles,
+  convertFlaskToSayPanelRoles,
   convertFlaskToSayRoles,
+  formatDate,
   truncateString,
 } from 'src/utils/helpers';
 import axios from 'axios';
@@ -66,6 +68,7 @@ import fs from 'fs';
 import { CampaignService } from '../campaign/campaign.service';
 import { File } from '@web-std/file';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -181,7 +184,7 @@ export class ChildrenController {
       formData.append('city', String(preRegister.city));
       formData.append('country', String(preRegister.country));
       formData.append('phoneNumber', preRegister.phoneNumber);
-      formData.append('birthDate', String('2015-05-20'));
+      formData.append('birthDate', formatDate(preRegister.birthDate)); //'2015-05-20'
       formData.append(
         'sayname_translations',
         JSON.stringify({
@@ -557,6 +560,7 @@ export class ChildrenController {
   @UsePipes(new ValidationPipe())
   async preRegisterUpdateApproved(
     @Param('flaskChildId') flaskChildId: number,
+    @Body() body: { schoolType: SchoolTypeEnum; addedState: number },
     @Req() req: Request,
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
@@ -608,8 +612,8 @@ export class ChildrenController {
         phoneNumber: flaskChild.phoneNumber,
         address: flaskChild.address,
         country: Number(flaskChild.country),
-        city: Number(flaskChild.country),
-        state: Number(flaskChild.city),
+        city: Number(flaskChild.city),
+        state: Number(body.addedState),
         awakeUrl: flaskChild.awakeAvatarUrl,
         sleptUrl: flaskChild.sleptAvatarUrl,
         voiceUrl: flaskChild.voiceUrl,
@@ -620,6 +624,7 @@ export class ChildrenController {
         },
         housingStatus: Number(flaskChild.housingStatus),
         educationLevel: Number(flaskChild.education),
+        schoolType: body.schoolType,
         familyCount: Number(flaskChild.familyCount),
       };
       console.log('\x1b[36m%s\x1b[0m', 'Updating the preRegister ...\n');
@@ -633,54 +638,12 @@ export class ChildrenController {
       preRegister = await this.childrenService.getChildrenPreRegisterByFlaskId(
         flaskChildId,
       );
-      console.log(preRegister);
-      console.log('preRegister--------------------');
 
-      const childDetails = {
-        flaskId: flaskChild.id,
-        sayName: flaskChild.sayname_translations.en,
-        sayNameTranslations: flaskChild.sayname_translations,
-        nationality: flaskChild.nationality,
-        country: flaskChild.country,
-        city: flaskChild.city,
-        awakeAvatarUrl: flaskChild.awakeAvatarUrl,
-        sleptAvatarUrl: flaskChild.sleptAvatarUrl,
-        adultAvatarUrl: flaskChild.adult_avatar_url,
-        bioSummaryTranslations: flaskChild.bio_summary_translations,
-        bioTranslations: flaskChild.bio_translations,
-        voiceUrl: flaskChild.voiceUrl,
-        birthPlace: flaskChild.birthPlace,
-        housingStatus: flaskChild.housingStatus,
-        familyCount: flaskChild.familyCount,
-        sayFamilyCount: flaskChild.sayFamilyCount,
-        education: flaskChild.education,
-        created: flaskChild.created,
-        updated: flaskChild.updated,
-        isDeleted: flaskChild.isDeleted,
-        isConfirmed: flaskChild.isConfirmed,
-        flaskConfirmUser: flaskChild.confirmUser,
-        confirmDate: flaskChild.confirmDate,
-        existenceStatus: flaskChild.existence_status,
-        generatedCode: flaskChild.generatedCode,
-        isMigrated: flaskChild.isMigrated,
-        migratedId: flaskChild.migratedId,
-        birthDate: flaskChild.birthDate && new Date(flaskChild.birthDate),
-        migrateDate: flaskChild.migrateDate && new Date(flaskChild.migrateDate),
-      };
-
-      const nestChild = await this.childrenService.getChildById(flaskChildId);
-      console.log(
-        '\x1b[36m%s\x1b[0m',
-        'Updated the preRegister, Now updating Nest child ...\n',
+      return await this.syncService.syncChild(
+        flaskChild,
+        body.addedState,
+        body.schoolType,
       );
-
-      if (!nestChild) {
-        throw new ServerError('Hmmm... No child was found', 500);
-      } else if (nestChild && nestChild.updated !== flaskChild.updated) {
-        await this.childrenService.updateChild(childDetails, nestChild).then();
-        console.log('\x1b[36m%s\x1b[0m', 'Child updated ...\n');
-      }
-      return preRegister;
     } catch (e) {
       throw new ServerError(e.message, e.status);
     }
