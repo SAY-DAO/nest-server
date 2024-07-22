@@ -341,7 +341,7 @@ export class CampaignService {
             await this.smsRest.send(
               process.env.SAY_ADMIN_SMS,
               from,
-              'just sent the arrival updates!',
+              'سلام، یادآوری به مددکاران انجام شد.',
             );
             sleep(2000);
           }

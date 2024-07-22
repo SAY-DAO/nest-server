@@ -407,20 +407,25 @@ export function checkNeed(need: Need, duplicate: Need) {
           ),
         );
       if (
-        !duplicate.title || duplicate.title.length < 1||
+        !duplicate.title ||
+        duplicate.title.length < 1 ||
         (duplicate.title && titleResult > SIMILAR_TXT_PERCENTAGE)
       ) {
         TT = true;
       } else {
         TT = false;
-        msg = 'title is not correct';
+        msg = 'title is not That similar';
       }
     } else if (type === NeedTypeEnum.SERVICE) {
-      if (!duplicate.title || duplicate.title.length < 1) {
+      if (
+        !duplicate.name_translations ||
+        !duplicate.name_translations.fa ||
+        duplicate.name_translations.fa.length < 1
+      ) {
         TT = true;
       } else {
         TT = false;
-        msg = 'title is not correct';
+        msg = 'title is not That similar';
       }
     }
 
