@@ -252,7 +252,7 @@ export class NeedController {
       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
     try {
       if (body) {
-        for (const needId of body.needIds) {
+        for await (const needId of body.needIds) {
           if (Number(needId) > 0) {
             const configs = {
               headers: {
