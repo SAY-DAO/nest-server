@@ -160,8 +160,8 @@ export class ScheduleService {
     }
   }
 
-  @Cron('50 12 * * Sat', {
-    name: 'Reminders to announce arrivals At 12:50 on Sat.',
+  @Cron('50 9 * * Wed', {
+    name: 'Reminders to announce arrivals At 9:50 on Wednesday.',
     timeZone: 'Asia/Tehran',
   })
   async handleAnnounceArrivalCron() {

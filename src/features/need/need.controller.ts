@@ -360,18 +360,16 @@ export class NeedController {
 
         const validatedNeed = await validateNeed(fetchedNeed, superAdmin);
         let ticket: TicketEntity;
-
+        let needTickets = await this.ticketService.getTicketsByNeed(
+          validatedNeed.needId,
+        );
+        const ticketError = needTickets.find(
+          (t) =>
+            t.lastAnnouncement === AnnouncementEnum.ERROR ||
+            t.color === Colors.RED,
+        );
         // 0-  ticket if not a valid need and not ticketed yet
         if (!validatedNeed.isValidNeed) {
-          let needTickets = await this.ticketService.getTicketsByNeed(
-            validatedNeed.needId,
-          );
-          const ticketError = needTickets.find(
-            (t) =>
-              t.lastAnnouncement === AnnouncementEnum.ERROR ||
-              t.color === Colors.RED,
-          );
-
           // create ticket if already has not
           if (!ticketError) {
             console.log('\x1b[36m%s\x1b[0m', 'Creating Ticket Content ...\n');
@@ -422,6 +420,18 @@ export class NeedController {
           continue;
         }
         /// -------------------------------- If Valid Need --------------------------------------------///
+        if (ticketError) {
+          // since it is a valid need with an old ticket, we need to update the ticket
+          await this.ticketService.updateTicketAnnouncement(
+            ticketError.id,
+            AnnouncementEnum.NONE,
+          );
+
+          await this.ticketService.updateTicketColor(
+            ticketError.id,
+            Colors.BLUE,
+          );
+        }
         // 1- get duplicates for the child / same name-translations.en
         const duplicates = await this.needService.getDuplicateNeeds(
           need.child_id,

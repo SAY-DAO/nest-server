@@ -189,7 +189,7 @@ export class TicketService {
     }
   }
 
-  createTicketContent(
+  async createTicketContent(
     contentDetails: CreateTicketContentParams,
     ticket: TicketEntity,
   ): Promise<TicketContentEntity> {
