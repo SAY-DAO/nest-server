@@ -375,27 +375,29 @@ export class NeedService {
       .andWhere('need.status = :statusNotPaid', {
         statusNotPaid: PaymentStatusEnum.NOT_PAID,
       })
-      .select([
-        'child.sayname_translations',
-        'ngo.id',
-        'ngo.name',
-        'need.id',
-        'need.child_id',
-        'need.created_by_id',
-        'need.name_translations',
-        'need.description_translations',
-        'need.title',
-        'need.imageUrl',
-        'need.category',
-        'need.type',
-        'need.link',
-        'need.status',
-        'need.img',
-        'need._cost',
-        'need.isDeleted',
-        'need.created',
-        'need.confirmDate',
-      ])
+      // .select([
+      //   'child.sayname_translations',
+      //   'ngo.id',
+      //   'ngo.name',
+      //   'need.id',
+      //   'need.child_id',
+      //   'need.created_by_id',
+      //   'need.name_translations',
+      //   'need.description_translations',
+      //   'need.title',
+      //   'need.imageUrl',
+      //   'need.category',
+      //   'need.type',
+      //   'need.link',
+      //   'need.status',
+      //   'need.img',
+      //   'need._cost',
+      //   'need.details',
+      //   'need.informations',
+      //   'need.isDeleted',
+      //   'need.created',
+      //   'need.confirmDate',
+      // ])
       .cache(60000)
       .orderBy('need.created', 'ASC');
     return await queryBuilder.getManyAndCount();

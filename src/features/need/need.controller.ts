@@ -303,7 +303,7 @@ export class NeedController {
       !toBeConfirmed ||
       !toBeConfirmed.list[0] ||
       !toBeConfirmed.createdAt ||
-      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 1;
+      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 5;
     console.log(`Mass prepare expired: ${expired}`);
     console.log(
       `Last prepare: ${
@@ -339,6 +339,8 @@ export class NeedController {
           fetchedNeed.status !== need.status ||
           fetchedNeed.category !== need.category ||
           fetchedNeed.type !== need.type ||
+          fetchedNeed.details !== need.details ||
+          fetchedNeed.information !== need.informations ||
           fetchedNeed.nameTranslations.en !== need.name_translations.en
         ) {
           const { need: nestNeed } = await this.syncService.syncNeed(
