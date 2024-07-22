@@ -258,7 +258,7 @@ export class TicketService {
       order: {
         updatedAt: 'DESC',
       },
-      take: 150,
+      take: 250,
     });
   }
 
@@ -323,7 +323,7 @@ export class TicketService {
           updatedAt: true,
         },
       },
-      take: 150,
+      take: 250,
       order: {
         updatedAt: 'DESC',
       },
