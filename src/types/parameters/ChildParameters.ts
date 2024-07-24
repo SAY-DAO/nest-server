@@ -88,6 +88,7 @@ export type PreRegisterChildPrepareParams = {
 
 export type PreRegisterChildUpdateParams = {
   bio: { fa: string; en: string };
+  voiceUrl?: string;
   housingStatus: HousingEnum;
   educationLevel: EducationEnum;
   schoolType: SchoolTypeEnum;

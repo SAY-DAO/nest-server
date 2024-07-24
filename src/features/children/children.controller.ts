@@ -553,9 +553,44 @@ export class ChildrenController {
     }
   }
 
-  @ApiOperation({
-    description: 'update pre register',
-  })
+  @ApiOperation({ description: 'update pre register' })
+  @Patch(`preregister/update`)
+  @UsePipes(new ValidationPipe())
+  @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
+  async preRegisterUpdate(
+    @Req() req: Request,
+    @UploadedFile() voiceFile,
+    @Body(ValidateChildTsPipe) body: UpdatePreRegisterChildDto,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
+        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    try {
+      return await this.childrenService.preRegisterUpdate(body.id, {
+        bio: { fa: body.bio, en: '' },
+        voiceUrl: voiceFile.filename,
+        housingStatus: Number(body.housingStatus),
+        educationLevel: Number(body.educationLevel),
+        schoolType: Number(body.schoolType),
+        lastName: { fa: body.lastName, en: '' },
+        firstName: { fa: body.firstName, en: '' },
+      });
+    } catch (e) {
+      throw new ServerError(e.message, e.status);
+    }
+  }
+
+  @ApiOperation({ description: 'update approved pre register' })
   @Patch(`preregister/update-approved/:flaskChildId`)
   @UsePipes(new ValidationPipe())
   async preRegisterUpdateApproved(
@@ -644,42 +679,6 @@ export class ChildrenController {
         body.addedState,
         body.schoolType,
       );
-    } catch (e) {
-      throw new ServerError(e.message, e.status);
-    }
-  }
-
-  @ApiOperation({
-    description: 'update pre register',
-  })
-  @Patch(`preregister/update`)
-  @UsePipes(new ValidationPipe())
-  async preRegisterUpdate(
-    @Req() req: Request,
-    @Body(ValidateChildTsPipe) body: UpdatePreRegisterChildDto,
-  ) {
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      !(
-        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
-        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
-        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
-        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
-      )
-    ) {
-      throw new ForbiddenException('You Are not the Super admin');
-    }
-    try {
-      return await this.childrenService.preRegisterUpdate(body.id, {
-        bio: { fa: body.bio, en: '' },
-        housingStatus: Number(body.housingStatus),
-        educationLevel: Number(body.educationLevel),
-        schoolType: Number(body.schoolType),
-        lastName: { fa: body.lastName, en: '' },
-        firstName: { fa: body.firstName, en: '' },
-      });
     } catch (e) {
       throw new ServerError(e.message, e.status);
     }
