@@ -26,6 +26,9 @@ export class User extends BaseEntity {
   updated?: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
+  created?: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
   birthDate?: Date;
 
   @Column()

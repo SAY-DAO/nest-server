@@ -578,7 +578,7 @@ export class ChildrenController {
     try {
       return await this.childrenService.preRegisterUpdate(body.id, {
         bio: { fa: body.bio, en: '' },
-        voiceUrl: voiceFile.filename,
+        voiceUrl: voiceFile && voiceFile.filename,
         housingStatus: Number(body.housingStatus),
         educationLevel: Number(body.educationLevel),
         schoolType: Number(body.schoolType),
