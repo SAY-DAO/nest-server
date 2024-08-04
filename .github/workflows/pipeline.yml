@@ -116,7 +116,7 @@ jobs:
       - name: Prepare Stack File
         run: >
           ENVIRONMENT=${{ env.DEVELOPMENT }} DOMAIN=${{ env.DEV_DOMAIN }} CONTAINER_IMAGE=${IMAGE_ID} STACK_NAME=${{ env.DEV_STACK_NAME }}
-          docker-compose
+          docker compose
           -f ${{ env.DOCKER_STACK_PATH }}
           config
           > ${{ env.STACK_FILE }}
@@ -164,7 +164,7 @@ jobs:
       - name: Prepare Stack File
         run: >
           ENVIRONMENT=${{ env.STAGING }} DOMAIN=${{ env.STAGING_DOMAIN }} CONTAINER_IMAGE=${IMAGE_ID} STACK_NAME=${{ env.STAGING_STACK_NAME }}
-          docker-compose
+          docker compose
           -f ${{ env.DOCKER_STACK_PATH }}
           config
           > ${{ env.STACK_FILE }}
