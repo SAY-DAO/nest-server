@@ -1,4 +1,4 @@
-FROM node:18.14-alpine as builder
+FROM node:22.6.0-alpine as builder
 
 ENV NODE_ENV build
 
