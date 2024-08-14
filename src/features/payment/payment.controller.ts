@@ -21,6 +21,20 @@ import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 export class PaymentController {
   constructor(private paymentService: PaymentService) { }
 
+  @Get(`new`)
+  @ApiOperation({ description: 'Get all needs payments' })
+  async newPayments(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    return await this.paymentService.getPayments();
+  }
+
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs payments' })
   async getPayments(@Req() req: Request) {
