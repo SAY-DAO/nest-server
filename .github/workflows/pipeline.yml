@@ -228,10 +228,10 @@ jobs:
           target: '/tmp'
 
       - name: Deploy Stack
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v0.1.4
         with:
           host: ${{ secrets.PROD_SERVER_ADDR }}
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: ${{ secrets.PROD_SERVER_PORT }}
-          script: docker stack deploy --prune --resolve-image=changed --with-registry-auth -c /tmp/${{ env.STACK_FILE }} ${{ env.PRODUCTION_STACK_NAME }}
+          # script: docker stack deploy --prune --resolve-image=always --with-registry-auth -c /tmp/${{ env.STACK_FILE }} ${{ env.PRODUCTION_STACK_NAME }}
