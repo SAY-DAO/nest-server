@@ -1,4 +1,5 @@
 version: '3.6'
+
 services:
   api:
     image: ${CONTAINER_IMAGE:-backend}
@@ -64,6 +65,7 @@ services:
 volumes:
   postgres_volume:
   uploads_volume:
+
 
 networks:
   traefik-public:
