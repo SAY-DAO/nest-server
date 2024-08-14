@@ -215,11 +215,8 @@ jobs:
           docker compose
           -f ${{ env.DOCKER_STACK_PATH }}
           config
-          > ${{ env.STACK_FILE }}
+          > ${{ env.STACK_FILE }} | sed '/^name:*/d' >  ${{ env.STACK_FILE }}
 
-      - name: Remove the first line
-        run: docker compose config | sed '/^name:*/d' >  ${{ env.STACK_FILE }}
-          
       - name: Move Stack File to Server
         uses: appleboy/scp-action@v0.1.1
         with:
