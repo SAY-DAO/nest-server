@@ -32,7 +32,7 @@ jobs:
       test_image_id: ${{ steps.image_id.outputs.test_image_id }}
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - id: image_id
         name: Generate Image ID
