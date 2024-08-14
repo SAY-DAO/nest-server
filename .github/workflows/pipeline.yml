@@ -119,7 +119,7 @@ jobs:
           docker compose
           -f ${{ env.DOCKER_STACK_PATH }}
           config
-          > ${{ env.STACK_FILE }}
+          > ${{ env.STACK_FILE }} && docker compose config  |   sed '/^name:*/d' > /target
 
       - name: Move Stack File to Server
         uses: appleboy/scp-action@v0.1.1
@@ -234,4 +234,4 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: ${{ secrets.PROD_SERVER_PORT }}
-          script: docker stack deploy --prune --resolve-image=always --with-registry-auth -c /tmp/${{ env.STACK_FILE }} ${{ env.PRODUCTION_STACK_NAME }}
+          script: docker stack deploy --prune --resolve-image=changed --with-registry-auth -c /tmp/${{ env.STACK_FILE }} ${{ env.PRODUCTION_STACK_NAME }}

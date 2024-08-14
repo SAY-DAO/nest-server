@@ -1,81 +1,79 @@
-# version: '3.8'
 services:
   api:
     image: ${CONTAINER_IMAGE:-backend}
     volumes:
       - uploads_volume:/usr/src/app/uploads
-#     environment:
-#       PORT: 3000
-#       DB_HOST: db
-#       DB_USER: postgres
-#       DB_NAME: say_dapp
-#       DB_PASS_FILE: /run/secrets/postgres-password
-#     secrets:
-#       - postgres-password
-#     networks:
-#       - default
-#       - traefik-public
-#     configs:
-#       - source: nest-config
-#         target: /usr/src/app/.env
-#     deploy:
-#       replicas: 1
-#       update_config:
-#         parallelism: 1
-#         order: start-first
-#       placement:
-#         constraints:
-#           - node.labels.${ENVIRONMENT} == true
-#       mode: replicated
-#       labels:
-#         - traefik.enable=true
-#         - traefik.docker.network=traefik-public
-#         - traefik.constraint-label=traefik-public
-#         - traefik.http.routers.${STACK_NAME}-api-http.entrypoints=http
-#         - traefik.http.routers.${STACK_NAME}-api-http.rule=Host(`${DOMAIN?Variable not set}`)
-#         - traefik.http.routers.${STACK_NAME}-api-http.service=${STACK_NAME}-api
-#         - traefik.http.routers.${STACK_NAME}-api-http.middlewares=https-redirect
-#         - traefik.http.routers.${STACK_NAME}-api.entrypoints=https
-#         - traefik.http.routers.${STACK_NAME}-api.rule=Host(`${DOMAIN?Variable not set}`)
-#         - traefik.http.routers.${STACK_NAME}-api.service=${STACK_NAME}-api
-#         - traefik.http.routers.${STACK_NAME}-api.tls=true
-#         - traefik.http.routers.${STACK_NAME}-api.tls.certresolver=le
-#         - traefik.http.services.${STACK_NAME}-api.loadbalancer.server.port=3000
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_USER: postgres
+      DB_NAME: say_dapp
+      DB_PASS_FILE: /run/secrets/postgres-password
+    secrets:
+      - postgres-password
+    networks:
+      - default
+      - traefik-public
+    configs:
+      - source: nest-config
+        target: /usr/src/app/.env
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+      placement:
+        constraints:
+          - node.labels.${ENVIRONMENT} == true
+      mode: replicated
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.${STACK_NAME}-api-http.entrypoints=http
+        - traefik.http.routers.${STACK_NAME}-api-http.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.${STACK_NAME}-api-http.service=${STACK_NAME}-api
+        - traefik.http.routers.${STACK_NAME}-api-http.middlewares=https-redirect
+        - traefik.http.routers.${STACK_NAME}-api.entrypoints=https
+        - traefik.http.routers.${STACK_NAME}-api.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.${STACK_NAME}-api.service=${STACK_NAME}-api
+        - traefik.http.routers.${STACK_NAME}-api.tls=true
+        - traefik.http.routers.${STACK_NAME}-api.tls.certresolver=le
+        - traefik.http.services.${STACK_NAME}-api.loadbalancer.server.port=3000
 
-#   db:
-#     image: postgres:12
-#     secrets:
-#       - postgres-password
-#     environment:
-#       POSTGRES_DB: say_dapp
-#       POSTGRES_USER: postgres
-#       POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
-#     volumes:
-#       - postgres_volume:/var/lib/postgresql/data
-#     deploy:
-#       replicas: 1
-#       update_config:
-#         parallelism: 1
-#         order: stop-first
-#       placement:
-#         constraints:
-#           - node.labels.${ENVIRONMENT} == true
+  db:
+    image: postgres:12
+    secrets:
+      - postgres-password
+    environment:
+      POSTGRES_DB: say_dapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: stop-first
+      placement:
+        constraints:
+          - node.labels.${ENVIRONMENT} == true
 
 volumes:
   postgres_volume:
   uploads_volume:
 
+networks:
+  traefik-public:
+    external: true
 
-# networks:
-#   traefik-public:
-#     external: true
+secrets:
+  postgres-password:
+    name: ${STACK_NAME}-postgres-password
+    external: true
 
-# secrets:
-#   postgres-password:
-#     name: ${STACK_NAME}-postgres-password
-#     external: true
-
-# configs:
-#   nest-config:
-#     name: ${STACK_NAME}.env
-#     external: true
+configs:
+  nest-config:
+    name: ${STACK_NAME}.env
+    external: true
