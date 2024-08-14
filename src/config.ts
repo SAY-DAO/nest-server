@@ -34,7 +34,7 @@ function loadConfig() {
       database: process.env.DB_NAME ?? 'say_dapp',
       enabled: true,
       synchronize: NODE_ENV === 'development' ? false : false, // true shouldn't be used in production - otherwise you can lose production data.
-      logging: false,
+      logging: true,
       logLevel: 'error',
       dropSchema: false,
       autoLoadEntities: true,
