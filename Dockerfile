@@ -11,7 +11,7 @@ RUN yarn install --frozen-lockfile \
 
 # ---
 
-FROM node:18.14-alpine as production
+FROM node:22.6.0-alpine as production
 
 WORKDIR /usr/src/app
 
