@@ -215,7 +215,7 @@ jobs:
           docker compose
           -f ${{ env.DOCKER_STACK_PATH }}
           config
-          > ${{ env.STACK_FILE }} && docker compose config  |   sed '/^name:*/d' > /target
+          > ${{ env.STACK_FILE }} && usermod -aG docker $USER && docker compose config | sed '/^name:*/d' > /target
 
       - name: Move Stack File to Server
         uses: appleboy/scp-action@v0.1.1
