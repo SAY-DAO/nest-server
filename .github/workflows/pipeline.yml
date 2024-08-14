@@ -228,7 +228,7 @@ jobs:
           target: '/tmp'
 
       - name: Deploy Stack
-        uses: appleboy/ssh-action@v0.1.4
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.PROD_SERVER_ADDR }}
           username: ${{ secrets.PROD_SERVER_USER }}
