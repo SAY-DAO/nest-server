@@ -212,7 +212,7 @@ jobs:
       - name: Prepare Stack File
         run: >
           ENVIRONMENT=${{ env.PRODUCTION }} DOMAIN=${{ env.PRODUCTION_DOMAIN }} CONTAINER_IMAGE=${IMAGE_ID} STACK_NAME=${{ env.PRODUCTION_STACK_NAME }}
-          docker compose -f ${{ env.DOCKER_STACK_PATH }} config > ${{ env.STACK_FILE }} | sed '/^name:*/d' >  ${{ env.STACK_FILE }}
+          docker compose -f ${{ env.DOCKER_STACK_PATH }} config > ${{ env.STACK_FILE }} 
 
       - name: Move Stack File to Server
         uses: appleboy/scp-action@v0.1.1
