@@ -31,7 +31,7 @@ function loadConfig() {
       host: NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,
       username: process.env.DB_USER ?? 'postgres',
       password: process.env.DB_PASS ?? 'postgres',
-      database: process.env.DB_NAME ?? 'say_dapp',
+      database: process.env.DB_NAME ?? 'postgres',
       enabled: true,
       synchronize: NODE_ENV === 'development' ? false : false, // true shouldn't be used in production - otherwise you can lose production data.
       logging: true,
