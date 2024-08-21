@@ -22,5 +22,5 @@
     "useDefineForClassFields": true, // for discord package
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts", "src/test.js"]
+  "exclude": ["node_modules", "**/*.spec.ts", "src/test.js", "src/features/schedule/backup.js"]
 }

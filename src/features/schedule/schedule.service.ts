@@ -6,6 +6,7 @@ import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
 import { CampaignService } from '../campaign/campaign.service';
 import { persianDay } from 'src/utils/helpers';
+import { execute } from '@getvim/execute';
 
 @Injectable()
 export class ScheduleService {
@@ -172,30 +173,64 @@ export class ScheduleService {
       await this.campaignService.sendSwAnnounceReminder();
     }
   }
-  // @Cron('30 8 * * Sat', {
-  //   name: 'Confirm Needs At 08:30 on Saturday.',
-  //   timeZone: 'Asia/Tehran',
-  // })
-  // @Timeout(5000)
-  // async handleNeedConfirmCron() {
-  //   this.logger.debug('Confirming Needs ...');
-  //   const swIds = await this.userService
-  //     .getFlaskSwIds()
-  //     .then((r) => r.map((s) => s.id));
 
-  //   const ngoIds = await this.ngoService
-  //     .getFlaskNgos()
-  //     .then((r) => r.map((s) => s.id));
+  @Cron('00 10 * * *', {
+    name: 'Reminders to announce arrivals At 10:00 everyday.',
+    timeZone: 'Asia/Tehran',
+  })
+  async handleNeedConfirmCron() {
+    if (process.env.NODE_ENV === 'development') {
+      this.logger.debug('Backing up data base ...');
 
-  //   const toBeConfirmed = await this.needService.getNotConfirmedNeeds(
-  //     null,
-  //     swIds,
-  //     ngoIds,
-  //   );
-  //   for await (const need of toBeConfirmed[0]) {
-  //     const duplicates = await this.needService.getDuplicateNeeds(need.child_id, need.id);
-  //   }
+      // getting db connection parameters from environment file
+      const username_flask = process.env.DB_FLASK_USER;
+      const database_flask = process.env.DB_FLASK_NAME;
+      const dbHost_flask = process.env.DB_FLASK_HOST;
+      const dbPort_flask = process.env.DB_FLASK_PORT;
 
-  //   console.log(toBeConfirmed[1]);
-  // }
+      const username_nest = process.env.DB_USER;
+      const database_nest = process.env.DB_NAME;
+      const dbPort_nest = 3000;
+
+      // defining backup file name
+      const date = new Date();
+      const today = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+      const backupFileFlask = `../../backup/flask/pg-flask-backup-${today}.tar`;
+      const backupFileNest = `../../backup/nest/pg-nest-backup-${today}.tar`;
+
+      // flask
+      const flaskPGBackup = () => {
+        execute(
+          `pg_dump -U ${username_flask} -h ${dbHost_flask} -p ${dbPort_flask} -f ${backupFileFlask} -F t -d ${database_flask}`,
+        )
+          .then(async () => {
+            console.log(`Backup created successfully`);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      };
+
+      //nest
+      const nestPGBackup = () => {
+        console.log(
+          `pg_dump -U ${username_nest} -h ${dbHost_flask} -p ${dbPort_nest} -f ${backupFileNest} -F t -d ${database_nest}`,
+        );
+
+        execute(
+          `pg_dump -U ${username_nest} -h ${dbHost_flask} -p ${dbPort_nest} -f ${backupFileNest} -F t -d ${database_nest}`,
+        )
+          .then(async () => {
+            console.log(`Backup created successfully`);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      };
+
+      // calling postgresql backup function
+      // nestPGBackup();
+      flaskPGBackup();
+    }
+  }
 }

@@ -27,7 +27,7 @@ function loadConfig() {
     documentUrl: '',
     db1: {
       type: 'postgres' as const,
-      port: 5432,
+      port: Number(process.env.DB_PORT),
       host: NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,
       username: process.env.DB_USER ?? 'postgres',
       password: process.env.DB_PASS ?? 'postgres',
@@ -44,7 +44,7 @@ function loadConfig() {
     db2: {
       name: 'flaskPostgres',
       type: 'postgres' as const,
-      port: 35432,
+      port: Number(process.env.DB_FLASK_PORT),
       host: process.env.DB_FLASK_HOST,
       username: process.env.DB_FLASK_USER,
       password: process.env.DB_FLASK_PASS,

@@ -49,7 +49,7 @@ services:
       - postgres-password
     environment:
       POSTGRES_DB: say_dapp
-      POSTGRES_USER: postgres
+      POSTGRES_USER: nestserver
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
     volumes:
       - postgres_volume:/var/lib/postgresql/data
@@ -64,9 +64,9 @@ services:
 
 volumes:
   postgres_volume:
-    name: "say-nest1_postgres_volume"
+    name: "${STACK_NAME}_postgres_volume"
   uploads_volume:
-    name: "say-nest1_uploads_volume"
+    name: "${STACK_NAME}_uploads_volume"
 
 networks:
   traefik-public:
