@@ -64,7 +64,9 @@ services:
 
 volumes:
   postgres_volume:
+    name: "say-nest1_postgres_volume"
   uploads_volume:
+    name: "say-nest1_uploads_volume"
 
 networks:
   traefik-public:
