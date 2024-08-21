@@ -12,9 +12,7 @@ async function startServer() {
   console.log('Host:' + config().host);
   console.log('Port:' + config().serverPort);
   console.log('db Host:' + config().db1.host);
-  console.log('db Port:' + config().db1.port);
-  console.log('db u:' + config().db1.username);
-  console.log('db p:' + config().db1.password);
+  
   console.log(__filename);
   console.log(__dirname);
 
