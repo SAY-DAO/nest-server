@@ -64,9 +64,9 @@ services:
 
 volumes:
   postgres_volume:
-    # name: "${STACK_NAME}_postgres_volume"
+    name: "${STACK_NAME}_postgres_volume"
   uploads_volume:
-    # name: "${STACK_NAME}_uploads_volume"
+    name: "${STACK_NAME}_uploads_volume"
 
 networks:
   traefik-public:
