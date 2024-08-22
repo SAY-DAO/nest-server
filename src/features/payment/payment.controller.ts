@@ -5,7 +5,11 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { PaymentService } from './payment.service';
@@ -13,6 +17,12 @@ import { isAuthenticated } from 'src/utils/auth';
 import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import axios from 'axios';
+import { ValidatePaymentPipe } from './pipes/validate-campaign.pipe';
+import {
+  CreateFlaskPaymentDto,
+  VerifyFlaskPaymentDto,
+} from 'src/types/dtos/CreatePayment.dto';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Payments')
 @ApiSecurity('flask-access-token')
@@ -21,22 +31,16 @@ import axios from 'axios';
   description: 'to use cache and flask authentication',
   required: true,
 })
+@UsePipes(new ValidationPipe())
 @Controller('payment')
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post(`new`)
   @ApiOperation({ description: 'Get all needs payments' })
-  async newPayments(
+  async newPayment(
     @Req() req: Request,
-    @Body()
-    body: {
-      needId: number;
-      gateway: number;
-      amount: number;
-      donate: number;
-      useCredit: boolean;
-    },
+    @Body(ValidatePaymentPipe) body: CreateFlaskPaymentDto,
   ) {
     const dappFlaskUserId = Number(req.headers['dappFlaskUserId']);
 
@@ -45,26 +49,49 @@ export class PaymentController {
     }
 
     const token =
-      config().dataCache.fetchPanelAuthentication(dappFlaskUserId).token;
+      config().dataCache.fetchDappAuthentication(dappFlaskUserId).token;
     const configs = {
       headers: {
         'Content-Type': 'application/json',
         Authorization: token,
       },
     };
+    try {
+      // create flask payment
+      const { data } = await axios.post(
+        'https://api.sayapp.company/api/v2/payment',
+        {
+          need_id: Number(body.needId),
+          amount: Number(body.amount),
+          donate: Number(body.donation),
+          use_credit: Boolean(body.useCredit),
+          gateWay: Number(body.gateWay),
+        },
+        configs,
+      );
+      console.log(data);
+      return data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
-    // create flask child
-    // const { data } = await axios.post(
-    //   'https://api.sayapp.company/api/v2/child/add/',
-    //   {
-    //     needId: body.amount,
-    //     amount: body.amount,
-    //     donate: body.donate,
-    //     useCredit: body.useCredit,
-    //   },
-    //   configs,
-    // );
-    console.log(body);
+  @Get(`verify`)
+  @ApiOperation({ description: 'Zibal calls the callback' })
+  async verifyPayment(
+    @Req() req: Request,
+    // callback: https://yourcallbackurl.com/callback?trackId=9900&success=1&status=2&orderId=1
+    @Query('trackId') trackId: string,
+    @Query('orderId') orderId: string,
+  ) {
+    try {
+      const { data } = await axios.get(
+        `https://api.sayapp.company/api/v2/payment/verify?trackId=${trackId}&orderId=${orderId}`,
+      );
+      console.log(data);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   @Get(`all`)

@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AllUserEntity } from '../../entities/user.entity';
 import { NeedEntity } from '../../entities/need.entity';
@@ -55,6 +60,9 @@ import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 })
 export class PaymentModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(PaymentMiddleware).forRoutes('payment');
+    consumer
+      .apply(PaymentMiddleware)
+      .exclude({ path: 'payment/verify', method: RequestMethod.GET })
+      .forRoutes(PaymentController);
   }
 }
