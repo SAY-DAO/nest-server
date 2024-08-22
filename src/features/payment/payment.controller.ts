@@ -88,7 +88,7 @@ export class PaymentController {
       const { data } = await axios.get(
         `https://api.sayapp.company/api/v2/payment/verify?trackId=${trackId}&orderId=${orderId}`,
       );
-      console.log(data);
+      return data;
     } catch (e) {
       console.log(e);
     }
