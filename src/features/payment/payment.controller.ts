@@ -19,6 +19,7 @@ import config from 'src/config';
 import axios from 'axios';
 import { ValidatePaymentPipe } from './pipes/validate-campaign.pipe';
 import {
+  CreateFlaskCartPaymentDto,
   CreateFlaskPaymentDto,
   VerifyFlaskPaymentDto,
 } from 'src/types/dtos/CreatePayment.dto';
@@ -98,7 +99,7 @@ export class PaymentController {
   @ApiOperation({ description: 'Create new cart payment' })
   async newCartPayment(
     @Req() req: Request,
-    @Body(ValidatePaymentPipe) body: CreateFlaskPaymentDto,
+    @Body(ValidatePaymentPipe) body: CreateFlaskCartPaymentDto,
   ) {
     const dappFlaskUserId = Number(req.headers['dappFlaskUserId']);
 
@@ -119,8 +120,8 @@ export class PaymentController {
       const { data } = await axios.put(
         'https://api.sayapp.company/api/v2/mycart/payment',
         {
-          donate: Number(body.donation),
-          useCredit: Boolean(body.useCredit),
+          donation: Number(body.donation),
+          use_credit: Boolean(body.useCredit),
           gateWay: Number(body.gateWay),
         },
         configs,

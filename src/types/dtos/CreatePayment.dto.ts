@@ -30,6 +30,16 @@ export class CreateFlaskPaymentDto {
   useCredit: boolean;
 }
 
+
+export class CreateFlaskCartPaymentDto {
+  @IsNotEmpty()
+  gateWay: number;
+  @IsNotEmpty()
+  donation: number;
+  @IsNotEmpty()
+  useCredit: boolean;
+}
+
 export class VerifyFlaskPaymentDto {
   // idpay
   @IsNotEmpty()
