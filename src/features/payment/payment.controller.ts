@@ -37,7 +37,7 @@ export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post(`new`)
-  @ApiOperation({ description: 'Get all needs payments' })
+  @ApiOperation({ description: 'Create new payment' })
   async newPayment(
     @Req() req: Request,
     @Body(ValidatePaymentPipe) body: CreateFlaskPaymentDto,
@@ -77,7 +77,7 @@ export class PaymentController {
   }
 
   @Get(`verify`)
-  @ApiOperation({ description: 'Zibal calls the callback' })
+  @ApiOperation({ description: 'Zibal calls this callback' })
   async verifyPayment(
     @Req() req: Request,
     // callback: https://yourcallbackurl.com/callback?trackId=9900&success=1&status=2&orderId=1
@@ -94,6 +94,61 @@ export class PaymentController {
     }
   }
 
+  @Post(`new/cart`)
+  @ApiOperation({ description: 'Create new cart payment' })
+  async newCartPayment(
+    @Req() req: Request,
+    @Body(ValidatePaymentPipe) body: CreateFlaskPaymentDto,
+  ) {
+    const dappFlaskUserId = Number(req.headers['dappFlaskUserId']);
+
+    if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+      throw new ForbiddenException('You Are not authorized');
+    }
+
+    const token =
+      config().dataCache.fetchDappAuthentication(dappFlaskUserId).token;
+    const configs = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+    };
+    try {
+      // create flask payment
+      const { data } = await axios.put(
+        'https://api.sayapp.company/api/v2/mycart/payment',
+        {
+          donate: Number(body.donation),
+          useCredit: Boolean(body.useCredit),
+          gateWay: Number(body.gateWay),
+        },
+        configs,
+      );
+      console.log(data);
+      return data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  @Get(`verify/cart`)
+  @ApiOperation({ description: 'Zibal calls this callback' })
+  async verifyCartPayment(
+    @Req() req: Request,
+    // callback: https://yourcallbackurl.com/callback?trackId=9900&success=1&status=2&orderId=1
+    @Query('trackId') trackId: string,
+    @Query('orderId') orderId: string,
+  ) {
+    try {
+      const { data } = await axios.get(
+        `https://api.sayapp.company/api/v2/mycart/payment/verify?trackId=${trackId}&orderId=${orderId}`,
+      );
+      return data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs payments' })
   async getPayments(@Req() req: Request) {
