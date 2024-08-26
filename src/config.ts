@@ -33,7 +33,7 @@ function loadConfig() {
       password: process.env.DB_PASS ?? 'postgres',
       database: process.env.DB_NAME ?? 'postgres',
       synchronize: NODE_ENV === 'development' ? false : false, // true shouldn't be used in production - otherwise you can lose production data.
-      logging: true,
+      logging: false,
       dropSchema: false, //  Don't use this in production - Drops the schema each time data source is being initialized.
       migrationsRun: true, // if migrations should be auto run on every application launch. As an alternative, you can use CLI and run migration:run command.
       migrations: [`dist/db/migrations/*.js`], // list of migrations that need to be loaded by TypeORM
