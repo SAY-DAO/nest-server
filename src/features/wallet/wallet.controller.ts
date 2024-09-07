@@ -282,20 +282,16 @@ export class WalletController {
     let transaction: SwSignatureResult;
     try {
       const flaskUserId = session.siwe.flaskUserId;
-      const userTickets = await this.ticketService.getUserTickets(flaskUserId);
       let counter = 0;
 
       const purchasedNeeds = await this.needService.getPurchasedNeedsCount(
         flaskUserId,
       );
-      purchasedNeeds.forEach((need) => {
+      purchasedNeeds.forEach(async (need) => {
+        const ticket = await this.ticketService.getTicketByFlaskNeedId(need.id);
         if (
-          userTickets.find(
-            (t) =>
-              t.need.flaskId === need.id &&
-              t.ticketHistories.find(
-                (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
-              ),
+          ticket.ticketHistories.find(
+            (h) => h.announcement == AnnouncementEnum.ARRIVED_AT_NGO,
           )
         ) {
           counter++;

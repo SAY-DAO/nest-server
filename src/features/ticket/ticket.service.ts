@@ -202,59 +202,6 @@ export class TicketService {
 
   getTickets(): Promise<TicketEntity[]> {
     return this.ticketRepository.find({
-      relations: {
-        need: {
-          child: {
-            ngo: {
-              location: false,
-            },
-            socialWorker: true,
-          },
-          provider: true,
-          socialWorker: true,
-          purchaser: true,
-          auditor: true,
-        },
-      },
-      select: {
-        need: {
-          id: true,
-          flaskId: true,
-          name: true,
-          provider: {
-            id: true,
-          },
-          child: {
-            id: true,
-            flaskId: true,
-            sayNameTranslations: { en: true, fa: true },
-            ngo: {
-              id: true,
-              flaskNgoId: true,
-              location: {
-                id: true,
-              },
-            },
-            socialWorker: {
-              id: true,
-              flaskUserId: true,
-            },
-          },
-          socialWorker: {
-            id: true,
-            flaskUserId: true,
-          },
-          purchaser: {
-            id: true,
-            flaskUserId: true,
-          },
-          auditor: {
-            id: true,
-            flaskUserId: true,
-          },
-          updatedAt: true,
-        },
-      },
       order: {
         updatedAt: 'DESC',
       },
@@ -264,64 +211,8 @@ export class TicketService {
 
   getUserTickets(flaskUserId: number): Promise<TicketEntity[]> {
     return this.ticketRepository.find({
-      relations: {
-        need: {
-          child: {
-            ngo: {
-              location: false,
-            },
-            socialWorker: true,
-          },
-          provider: true,
-          socialWorker: true,
-          purchaser: true,
-          auditor: true,
-        },
-      },
       where: {
         contributors: { flaskUserId: flaskUserId },
-        // need: {
-        //   signatures: IsNull(),
-        // },
-      },
-      select: {
-        need: {
-          id: true,
-          flaskId: true,
-          name: true,
-          provider: {
-            id: true,
-          },
-          child: {
-            id: true,
-            flaskId: true,
-            sayNameTranslations: { en: true, fa: true },
-            ngo: {
-              id: true,
-              flaskNgoId: true,
-              location: {
-                id: true,
-              },
-            },
-            socialWorker: {
-              id: true,
-              flaskUserId: true,
-            },
-          },
-          socialWorker: {
-            id: true,
-            flaskUserId: true,
-          },
-          purchaser: {
-            id: true,
-            flaskUserId: true,
-          },
-          auditor: {
-            id: true,
-            flaskUserId: true,
-          },
-          updatedAt: true,
-        },
       },
       take: 250,
       order: {
