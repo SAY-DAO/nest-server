@@ -29,9 +29,9 @@ const PARENTS_DELIVERED_RANGE = 1;
 const RELETIVES_DELIVERED_RANGE = 3;
 
 export function sleep(time) {
-    console.log('Sleeping...');
-  return new Promise(resolve => setTimeout(resolve, time));
-} 
+  console.log('Sleeping...');
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
 export function getAllFilesFromFolder(dir: string) {
   let results = [];
   if (checkIfFileOrDirectoryExists(dir)) {
@@ -537,14 +537,6 @@ export function ticketNotifications(
         t.lastAnnouncement !== AnnouncementEnum.NGO_RECEIVED_MONEY,
     )
     .filter((t) => {
-      // console.log(new Date(t.updatedAt));
-      console.log(
-        new Date(
-          t.views.find((v) => v.flaskUserId === flaskUserId) &&
-            t.views.find((v) => v.flaskUserId === flaskUserId).viewed,
-        ),
-      );
-
       // when a user creates a ticket, the participants won't have a view assigned to them
       const myView = t.views.find((v) => v.flaskUserId === flaskUserId);
       const latestView = t.views.find(
@@ -552,7 +544,6 @@ export function ticketNotifications(
           Date.parse(v.viewed.toUTCString()) ===
           Math.max(...t.views.map((t) => Date.parse(t.viewed.toUTCString()))),
       );
-
       // if (myView) {
       //   const { diff } = timeDifference(
       //     new Date(

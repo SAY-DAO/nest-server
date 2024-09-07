@@ -110,68 +110,68 @@ export class GateWayController implements OnModuleInit {
     }
   }
 
-  @UseFilters(new BadRequestTransformationFilter())
-  @UsePipes(new ValidationPipe())
-  @SubscribeMessage('new:ticket:message')
-  async onNewTicketContent(
-    @MessageBody(ValidateGatewayPipe) body: CreateTicketContentDto,
-  ) {
-    this.checkConnection();
-    const { ticket } = await this.ticketService.getTicketById(
-      body.ticketId,
-      body.from,
-    );
-    console.log('\x1b[36m%s\x1b[0m', 'Socket Creating Ticket Content ...\n');
-    const content = await this.ticketService.createTicketContent(
-      {
-        message: body.message,
-        from: body.from,
-        announcement: AnnouncementEnum.NONE,
-      },
-      ticket,
-    );
-    await this.ticketService.updateTicketTime(ticket, body.from);
+  // @UseFilters(new BadRequestTransformationFilter())
+  // @UsePipes(new ValidationPipe())
+  // @SubscribeMessage('new:ticket:message')
+  // async onNewTicketContent(
+  //   @MessageBody(ValidateGatewayPipe) body: CreateTicketContentDto,
+  // ) {
+  //   this.checkConnection();
+  //   const { ticket } = await this.ticketService.getTicketById(
+  //     body.ticketId,
+  //     body.from,
+  //   );
+  //   console.log('\x1b[36m%s\x1b[0m', 'Socket Creating Ticket Content ...\n');
+  //   const content = await this.ticketService.createTicketContent(
+  //     {
+  //       message: body.message,
+  //       from: body.from,
+  //       announcement: AnnouncementEnum.NONE,
+  //     },
+  //     ticket,
+  //   );
+  //   await this.ticketService.updateTicketTime(ticket, body.from);
 
-    if (this.socket.connected) {
-      console.log(
-        '\x1b[36m%s\x1b[0m',
-        `Sending back the content for ticket: ${body.ticketId}...`,
-      );
-      // send message to the room
-      this.server
-        .to(`room:${ticket.id}`)
-        .emit(`onTicketMessage${body.ticketId}`, {
-          socketId: this.socket.id,
-          content: content,
-        });
-      return content;
-    }
-  }
+  //   if (this.socket.connected) {
+  //     console.log(
+  //       '\x1b[36m%s\x1b[0m',
+  //       `Sending back the content for ticket: ${body.ticketId}...`,
+  //     );
+  //     // send message to the room
+  //     this.server
+  //       .to(`room:${ticket.id}`)
+  //       .emit(`onTicketMessage${body.ticketId}`, {
+  //         socketId: this.socket.id,
+  //         content: content,
+  //       });
+  //     return content;
+  //   }
+  // }
 
-  @UseFilters(new BadRequestTransformationFilter())
-  @UsePipes(new ValidationPipe())
-  @SubscribeMessage('new:ticket:view')
-  async onNewTicketView(
-    @MessageBody(ValidateGatewayPipe) body: CreateTicketViewDto,
-    @ConnectedSocket() client: Socket,
-  ) {
-    console.log('\x1b[36m%s\x1b[0m', 'Socket Updating Views...\n');
-    const { ticket, myView } = await this.ticketService.getTicketById(
-      body.ticketId,
-      body.flaskUserId,
-    );
-    console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
-    if (this.socket.connected) {
-      console.log('\x1b[36m%s\x1b[0m', 'Sending back view details ...\n');
-      client.emit(`onViewMessage${myView.flaskUserId}`, {
-        ticketId: ticket.id,
-        viewId: myView.id,
-        flaskUserId: myView.flaskUserId,
-        lastView: myView.viewed,
-        socketId: this.socket.id,
-      });
-    }
-  }
+  // @UseFilters(new BadRequestTransformationFilter())
+  // @UsePipes(new ValidationPipe())
+  // @SubscribeMessage('new:ticket:view')
+  // async onNewTicketView(
+  //   @MessageBody(ValidateGatewayPipe) body: CreateTicketViewDto,
+  //   @ConnectedSocket() client: Socket,
+  // ) {
+  //   console.log('\x1b[36m%s\x1b[0m', 'Socket Updating Views...\n');
+  //   const { ticket, myView } = await this.ticketService.getTicketById(
+  //     body.ticketId,
+  //     body.flaskUserId,
+  //   );
+  //   console.log('\x1b[36m%s\x1b[0m', 'Updated my view ...\n');
+  //   if (this.socket.connected) {
+  //     console.log('\x1b[36m%s\x1b[0m', 'Sending back view details ...\n');
+  //     client.emit(`onViewMessage${myView.flaskUserId}`, {
+  //       ticketId: ticket.id,
+  //       viewId: myView.id,
+  //       flaskUserId: myView.flaskUserId,
+  //       lastView: myView.viewed,
+  //       socketId: this.socket.id,
+  //     });
+  //   }
+  // }
 
   @UseFilters(new BadRequestTransformationFilter())
   @UsePipes(new ValidationPipe())

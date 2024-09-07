@@ -93,7 +93,7 @@ export class TicketController {
     return ticket;
   }
 
-  @Post('messages/add')
+  @Post('content/add')
   @UsePipes(new ValidationPipe()) // validation for dto files
   async createTicketMsg(
     @Req() req: Request,
@@ -104,19 +104,28 @@ export class TicketController {
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException('You Are not authorized!');
     }
-    const { ticket } = await this.ticketService.getTicketById(
-      body.ticketId,
-      body.from,
-    );
-    const msg = body.message;
-    const from = body.from;
+    try {
+      const { ticket } = await this.ticketService.getTicketById(
+        body.ticketId,
+        panelFlaskUserId,
+      );
+      const msg = body.message;
+      const from = panelFlaskUserId;
 
-    const contentDetails = {
-      message: msg,
-      from,
-      announcement: AnnouncementEnum.NONE,
-    };
-    return await this.ticketService.createTicketContent(contentDetails, ticket);
+      const contentDetails = {
+        message: msg,
+        from,
+        announcement: AnnouncementEnum.NONE,
+      };
+
+      await this.ticketService.updateTicketTime(ticket, panelFlaskUserId);
+      return await this.ticketService.createTicketContent(
+        contentDetails,
+        ticket,
+      );
+    } catch (e) {
+      throw new ServerError(e.msg, 500);
+    }
   }
 
   @UseInterceptors(AddTicketInterceptor)

@@ -5,7 +5,5 @@ export class CreateTicketContentDto {
     ticketId: string
     @IsNotEmpty()
     message: string
-    @IsNotEmpty()
-    from: number
 }
 
