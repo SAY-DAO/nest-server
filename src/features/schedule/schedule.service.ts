@@ -146,7 +146,7 @@ export class ScheduleService {
       this.logger.debug(
         'Sending user Campaigns at 01:00 PM, only on Thursdays',
       );
-      await this.campaignService.sendUserMonthlyCampaigns();
+      // await this.campaignService.sendUserMonthlyCampaigns();
     }
   }
 
@@ -175,10 +175,10 @@ export class ScheduleService {
   }
 
   @Cron('00 10 * * *', {
-    name: 'Reminders to announce arrivals At 10:00 everyday.',
+    name: 'Backup.',
     timeZone: 'Asia/Tehran',
   })
-  async handleNeedConfirmCron() {
+  async handleBackupCron() {
     if (process.env.NODE_ENV === 'development') {
       this.logger.debug('Backing up data base ...');
 

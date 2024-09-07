@@ -146,6 +146,7 @@ export function isAuthenticated(
     if (!dappAuthentication || dappAuthentication.isExpired === true) {
       return false;
     } else {
+      console.log('Authenticated...');
       return true;
     }
   } else {
@@ -154,6 +155,7 @@ export function isAuthenticated(
     if (!panelAuthentication || panelAuthentication.isExpired === true) {
       return false;
     } else {
+      console.log('Authenticated...');
       return true;
     }
   }

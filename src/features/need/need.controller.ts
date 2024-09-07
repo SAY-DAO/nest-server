@@ -289,7 +289,7 @@ export class NeedController {
     }
 
     // 0- Fetch only active SW + NGO
-    const swIds = await this.userService
+    const activeSwIds = await this.userService
       .getFlaskSwIds()
       .then((r) => r.filter((s) => s.is_active).map((s) => s.id));
 
@@ -315,7 +315,7 @@ export class NeedController {
     if (expired) {
       const notConfirmed = await this.needService.getNotConfirmedNeeds(
         null,
-        swIds,
+        activeSwIds,
         ngoIds,
       );
       const myList = [];
