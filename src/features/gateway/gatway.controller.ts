@@ -250,20 +250,20 @@ export class GateWayController implements OnModuleInit {
     }
   }
 
-  @UseFilters(new BadRequestTransformationFilter())
-  @UsePipes(new ValidationPipe())
-  @SubscribeMessage('leave:room')
-  async onLeaveRoom(
-    @MessageBody(ValidateGatewayPipe) body: CreateJoinRoomDto,
-    @ConnectedSocket() client: Socket,
-  ) {
-    if (this.socket.connected) {
-      const { ticket } = await this.ticketService.getTicketById(
-        body.ticketId,
-        body.flaskUserId,
-      );
-      console.log('\x1b[36m%s\x1b[0m', `leaving room:${ticket.id}...\n`);
-      client.leave(`room:${ticket.id}`);
-    }
-  }
+  // @UseFilters(new BadRequestTransformationFilter())
+  // @UsePipes(new ValidationPipe())
+  // @SubscribeMessage('leave:room')
+  // async onLeaveRoom(
+  //   @MessageBody(ValidateGatewayPipe) body: CreateJoinRoomDto,
+  //   @ConnectedSocket() client: Socket,
+  // ) {
+  //   if (this.socket.connected) {
+  //     const { ticket } = await this.ticketService.getTicketById(
+  //       body.ticketId,
+  //       body.flaskUserId,
+  //     );
+  //     console.log('\x1b[36m%s\x1b[0m', `leaving room:${ticket.id}...\n`);
+  //     client.leave(`room:${ticket.id}`);
+  //   }
+  // }
 }
