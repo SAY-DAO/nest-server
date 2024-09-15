@@ -113,12 +113,17 @@ export class ProviderController {
       relation = await this.providerService.getProviderNeedRelationById(
         body.flaskNeedId,
       );
+      
       if (!relation) {
         relation = await this.providerService.createRelation(
           body.flaskNeedId,
           body.nestProviderId,
         );
-      } else {
+      console.log("relation1");
+      console.log(relation.id);
+    } else {
+      console.log("relation2");
+      console.log(relation.id);
         await this.providerService.updateProviderRelation(
           relation.id,
           body.flaskNeedId,
@@ -131,7 +136,12 @@ export class ProviderController {
         const provider = await this.providerService.getProviderById(
           relation.nestProviderId,
         );
+
         const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
+        console.log("relation2");
+        console.log(body.flaskNeedId);
+        console.log(need.id);
+        console.log("end");
         await this.needService.updateNeedProvider(need.id, provider);
       }
     } catch (e) {
