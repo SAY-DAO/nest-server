@@ -129,8 +129,8 @@ export class ScheduleService {
   }
 
   // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here
-  @Cron('00 10 * * Thu', {
-    name: 'MonthlyCampaigns try At 10:00 on Thursdays.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
+  @Cron('00 09 * * Sun', {
+    name: 'MonthlyCampaigns try At 09:00 on Sunday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
     timeZone: 'Asia/Tehran',
   })
   async handleMonthlyCampaignsCron() {
@@ -146,7 +146,7 @@ export class ScheduleService {
       this.logger.debug(
         'Sending user Campaigns at 01:00 PM, only on Thursdays',
       );
-      // await this.campaignService.sendUserMonthlyCampaigns();
+      await this.campaignService.sendUserMonthlyCampaigns();
     }
   }
 
