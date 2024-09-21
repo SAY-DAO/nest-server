@@ -340,6 +340,7 @@ export class NeedController {
           fetchedNeed.category !== need.category ||
           fetchedNeed.type !== need.type ||
           fetchedNeed.details !== need.details ||
+          fetchedNeed.title !== need.title ||
           fetchedNeed.information !== need.informations ||
           fetchedNeed.nameTranslations.en !== need.name_translations.en
         ) {

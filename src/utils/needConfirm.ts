@@ -27,7 +27,7 @@ const BASE_AGE_OF_DUPLICATE_0 = 30;
 const BASE_AGE_OF_DUPLICATE_1 = 30;
 const BASE_AGE_OF_DUPLICATE_2 = 30;
 const BASE_AGE_OF_DUPLICATE_3 = 30;
-
+const MIN_TITLE_LENGTH = 5;
 const SIMILAR_URL_PERCENTAGE = 57; // percentage
 const SIMILAR_TXT_PERCENTAGE = 10; // percentage
 export const SIMILAR_NAME_LIMIT_PRODUCT = 20;
@@ -302,7 +302,7 @@ export async function validateNeed(
       message: `Automated Message: Please check ${
         price < 500
           ? 'Price'
-          : type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)
+          : type === NeedTypeEnum.PRODUCT && (!title || title.length < MIN_TITLE_LENGTH)
           ? 'Title'
           : !name_en || name_en.length < 3
           ? 'Name'
