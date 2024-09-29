@@ -117,7 +117,7 @@ export class PaymentController {
     };
     try {
       // create flask payment
-      const { data } = await axios.put(
+      const { data } = await axios.post(
         'https://api.sayapp.company/api/v2/mycart/payment',
         {
           donation: Number(body.donation),

@@ -63,6 +63,7 @@ export class PaymentModule implements NestModule {
     consumer
       .apply(PaymentMiddleware)
       .exclude({ path: 'payment/verify', method: RequestMethod.GET })
+      .exclude({ path: 'payment/verify/cart', method: RequestMethod.GET })
       .forRoutes(PaymentController);
   }
 }
