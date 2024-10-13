@@ -39,6 +39,7 @@ async function startServer() {
       'Access-Control-Allow-Origin',
       'flaskUserId',
       'flaskId',
+      'flaskDappId'
     ],
 
     methods: ['GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'],

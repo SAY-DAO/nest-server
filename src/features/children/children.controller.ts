@@ -36,7 +36,7 @@ import {
   UpdateApprovedPreRegisterDto,
   UpdatePreRegisterChildDto,
 } from 'src/types/dtos/CreateChild.dto';
-import { ValidateChildTsPipe } from './pipes/validate-child.ts/validate-child.ts.pipe';
+import { ValidateChildPipe } from './pipes/validate-child.ts/validate-child.ts.pipe';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
@@ -121,7 +121,7 @@ export class ChildrenController {
     @Req() req: Request,
     @UploadedFile() voiceFile: Express.Multer.File,
     @Param('id') id: string,
-    @Body(ValidateChildTsPipe) body: CreateFlaskChildDto,
+    @Body(ValidateChildPipe) body: CreateFlaskChildDto,
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
@@ -412,7 +412,7 @@ export class ChildrenController {
   async preRegisterPrepare(
     @Req() req: Request,
     @UploadedFile() voiceFile,
-    @Body(ValidateChildTsPipe) body: PreparePreRegisterChildDto,
+    @Body(ValidateChildPipe) body: PreparePreRegisterChildDto,
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
@@ -560,7 +560,7 @@ export class ChildrenController {
   async preRegisterUpdate(
     @Req() req: Request,
     @UploadedFile() voiceFile,
-    @Body(ValidateChildTsPipe) body: UpdatePreRegisterChildDto,
+    @Body(ValidateChildPipe) body: UpdatePreRegisterChildDto,
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];

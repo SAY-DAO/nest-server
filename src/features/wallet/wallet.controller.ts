@@ -23,7 +23,7 @@ import {
   FlaskUserTypesEnum,
   PanelContributors,
   SAYPlatformRoles,
-  SUPER_ADMIN_ID,
+  SUPER_ADMIN_ID_PANEL,
   SwSignatureResult,
   eEthereumNetworkChainId,
 } from '../../types/interfaces/interface';
@@ -842,7 +842,7 @@ export class WalletController {
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
     ) {
       throw new WalletExceptionFilter(403, 'You Are not the Super admin');
     }

@@ -18,7 +18,7 @@ import {
   FlaskUserTypesEnum,
   NeedTypeEnum,
   ProductStatusEnum,
-  SUPER_ADMIN_ID,
+  SUPER_ADMIN_ID_PANEL,
 } from 'src/types/interfaces/interface';
 import config from 'src/config';
 import { daysDifference, timeDifference } from 'src/utils/helpers';
@@ -176,10 +176,14 @@ export class NeedController {
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException(401, 'You Are not authorized!');
     }
-    return await this.needService.getNeedByFlaskId(needFlaskId);
+
+    const theNeed = await this.needService.getNeedByFlaskId(needFlaskId)
+
+    return theNeed;
   }
 
   @Get(`relation/:needFlaskId`)
@@ -356,7 +360,7 @@ export class NeedController {
         }
 
         const superAdmin = await this.userService.getUserByFlaskId(
-          SUPER_ADMIN_ID,
+          SUPER_ADMIN_ID_PANEL,
         );
 
         const validatedNeed = await validateNeed(fetchedNeed, superAdmin);
@@ -559,7 +563,7 @@ export class NeedController {
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
@@ -577,7 +581,7 @@ export class NeedController {
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
@@ -596,7 +600,7 @@ export class NeedController {
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
@@ -619,7 +623,7 @@ export class NeedController {
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }

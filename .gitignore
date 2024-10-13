@@ -31,6 +31,7 @@ src/features/midjourney/bad-images-to-remove.json
 # Tests
 /coverage
 /.nyc_output
+temp.json
 
 # IDEs and editors
 /.idea

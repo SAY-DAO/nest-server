@@ -14,7 +14,7 @@ import { ServerError } from '../../filters/server-exception.filter';
 import {
   FlaskUserTypesEnum,
   SAYPlatformRoles,
-  SUPER_ADMIN_ID,
+  SUPER_ADMIN_ID_PANEL,
 } from 'src/types/interfaces/interface';
 import {
   convertFlaskToSayRoles,
@@ -420,7 +420,7 @@ export class UserController {
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }

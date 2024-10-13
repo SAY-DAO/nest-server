@@ -1,5 +1,6 @@
 export const SAY_DAPP_ID = 208;
-export const SUPER_ADMIN_ID = 25;
+export const SUPER_ADMIN_ID_PANEL = 25;
+export const SUPER_ADMIN_ID_DAPP = 115;
 export enum eEthereumNetworkChainId {
   mainnet = 1,
   goerli = 5,

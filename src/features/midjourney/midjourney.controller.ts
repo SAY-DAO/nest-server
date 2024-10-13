@@ -21,7 +21,7 @@ import { rimraf } from 'rimraf';
 import { isAuthenticated } from 'src/utils/auth';
 import {
   FlaskUserTypesEnum,
-  SUPER_ADMIN_ID,
+  SUPER_ADMIN_ID_PANEL,
 } from 'src/types/interfaces/interface';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
 import { checkIfFileOrDirectoryExists } from 'src/utils/file';
@@ -241,7 +241,7 @@ export class MidjourneyController {
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
     ) {
       throw new WalletExceptionFilter(403, 'You Are not the Super admin');
     }
@@ -285,7 +285,7 @@ export class MidjourneyController {
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
-      panelFlaskUserId !== SUPER_ADMIN_ID
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
     ) {
       throw new WalletExceptionFilter(403, 'You Are not the Super admin');
     }

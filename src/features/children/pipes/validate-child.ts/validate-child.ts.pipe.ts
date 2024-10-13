@@ -2,7 +2,7 @@ import { ArgumentMetadata, HttpException, HttpStatus, Injectable, PipeTransform 
 import { Children } from 'src/types/interfaces/Children';
 
 @Injectable()
-export class ValidateChildTsPipe implements PipeTransform {
+export class ValidateChildPipe implements PipeTransform {
   transform(value: Children, metadata: ArgumentMetadata) {
     console.log("Validating Children...")
 

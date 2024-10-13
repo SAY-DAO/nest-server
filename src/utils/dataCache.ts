@@ -156,16 +156,16 @@ export default class DataCache {
     }
   };
 
-  deletePanelAccessToken = (flaskSwId: number) =>
-    (this.authentication[String(flaskSwId)] = {
-      ...this.authentication[String(flaskSwId)],
-      isExpired: true,
-    });
-  deleteDappAccessToken = (flaskFamilyId: number) =>
-    (this.authentication[String(flaskFamilyId)] = {
-      ...this.authentication[String(flaskFamilyId)],
-      isExpired: true,
-    });
+  expirePanelAccessToken = (flaskSwId: number) =>
+  (this.authentication[String(flaskSwId)] = {
+    ...this.authentication[String(flaskSwId)],
+    isExpired: true,
+  });
+  expireDappAccessToken = (flaskFamilyId: number) =>
+  (this.authentication[String(flaskFamilyId)] = {
+    ...this.authentication[String(flaskFamilyId)],
+    isExpired: true,
+  });
 
   // panel analytic scatter chart
   roleScatteredData() {

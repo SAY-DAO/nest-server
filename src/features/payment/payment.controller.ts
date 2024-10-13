@@ -57,7 +57,7 @@ export class PaymentController {
         Authorization: token,
       },
     };
-    try {
+      try {
       // create flask payment
       const { data } = await axios.post(
         'https://api.sayapp.company/api/v2/payment',
@@ -65,12 +65,11 @@ export class PaymentController {
           need_id: Number(body.needId),
           amount: Number(body.amount),
           donate: Number(body.donation),
-          use_credit: Boolean(body.useCredit),
+          use_credit: body.useCredit,
           gateWay: Number(body.gateWay),
         },
         configs,
       );
-      console.log(data);
       return data;
     } catch (e) {
       console.log(e);
@@ -121,12 +120,11 @@ export class PaymentController {
         'https://api.sayapp.company/api/v2/mycart/payment',
         {
           donation: Number(body.donation),
-          use_credit: Boolean(body.useCredit),
+          use_credit: body.useCredit,
           gateWay: Number(body.gateWay),
         },
         configs,
       );
-      console.log(data);
       return data;
     } catch (e) {
       console.log(e);
