@@ -1,8 +1,9 @@
-import { NeedTypeDefinitionEnum, NeedTypeEnum } from "../interface";
+import { NeedTypeDefinitionEnum, NeedTypeEnum } from "../interfaces/interface";
 
 export type ProviderParams = {
     name: string;
     description: string;
+    address: string;
     website: string;
     type: NeedTypeEnum;
     typeName: NeedTypeDefinitionEnum;

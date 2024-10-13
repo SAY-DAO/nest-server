@@ -1,4 +1,5 @@
-version: '3.6'
+version: '3.9'
+
 services:
   api:
     image: ${CONTAINER_IMAGE:-backend}
@@ -7,7 +8,7 @@ services:
     environment:
       PORT: 3000
       DB_HOST: db
-      DB_USER: postgres
+      DB_USER: nestserver
       DB_NAME: say_dapp
       DB_PASS_FILE: /run/secrets/postgres-password
     secrets:
@@ -48,7 +49,7 @@ services:
       - postgres-password
     environment:
       POSTGRES_DB: say_dapp
-      POSTGRES_USER: postgres
+      POSTGRES_USER: nestserver
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
     volumes:
       - postgres_volume:/var/lib/postgresql/data
@@ -63,7 +64,9 @@ services:
 
 volumes:
   postgres_volume:
+    name: "${STACK_NAME}_postgres_volume"
   uploads_volume:
+    name: "${STACK_NAME}_uploads_volume"
 
 networks:
   traefik-public:

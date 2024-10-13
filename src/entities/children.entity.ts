@@ -1,44 +1,33 @@
-import {
-  Entity,
-  Column,
-  Index,
-  OneToMany,
-  JoinColumn,
-  OneToOne,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, Column, Index, OneToMany, ManyToOne } from 'typeorm';
 import { NeedEntity } from './need.entity';
 import { BaseEntity } from './BaseEntity';
-import { EducationEnum, HousingEnum } from '../types/interface';
+import {
+  EducationEnum,
+  HousingEnum,
+  SchoolTypeEnum,
+} from '../types/interfaces/interface';
 import { NgoEntity } from './ngo.entity';
-import { SocialWorkerEntity } from './user.entity';
+import { ContributorEntity } from './contributor.entity';
 
 @Entity()
 export class ChildrenEntity extends BaseEntity {
-  @Index({ unique: true })
   @Column()
-  flaskChildId: number;
+  flaskId: number;
 
   @Column({ nullable: true })
-  flaskSupervisorId?: number; //confirmUser from flask
-
-  @Column({ nullable: true })
-  address: string;
+  flaskConfirmUser?: number; //confirmUser from flask
 
   @Column({ nullable: true })
   awakeAvatarUrl: string;
 
   @Column({ nullable: true })
-  bio: string;
+  adultAvatarUrl: string;
 
-  @Column({ nullable: true })
-  bioSummary: string;
+  @Column({ type: 'hstore', hstoreType: 'object' })
+  bioSummaryTranslations: Record<string, string>;
 
-  @Column("simple-json", { nullable: true })
-  bioSummaryTranslations: { en: string; fa: string };
-
-  @Column("simple-json", { nullable: true })
-  bioTranslations: { en: string; fa: string };
+  @Column({ type: 'hstore', hstoreType: 'object' })
+  bioTranslations: Record<string, string>;
 
   @Column({ type: 'timestamptz', nullable: true })
   birthDate: Date;
@@ -48,6 +37,9 @@ export class ChildrenEntity extends BaseEntity {
 
   @Column({ nullable: true })
   city: number;
+
+  @Column({ nullable: true })
+  state: number;
 
   @Column({ type: 'timestamptz', nullable: true })
   confirmDate: Date;
@@ -59,16 +51,13 @@ export class ChildrenEntity extends BaseEntity {
   created: Date;
 
   @Column({ nullable: true })
-  doneNeedsCount: number;
-
-  @Column({ nullable: true })
   education: EducationEnum;
 
   @Column({ nullable: true })
-  existenceStatus: number;
+  schoolType: SchoolTypeEnum;
 
   @Column({ nullable: true })
-  familyCount: number;
+  existenceStatus: number;
 
   @Column({ nullable: true })
   generatedCode: string;
@@ -88,9 +77,6 @@ export class ChildrenEntity extends BaseEntity {
   @Column({ nullable: true })
   isMigrated: boolean;
 
-  @Column({ nullable: true })
-  isGone: boolean;
-
   @Column({ type: 'timestamptz', nullable: true })
   migrateDate: Date;
 
@@ -98,22 +84,25 @@ export class ChildrenEntity extends BaseEntity {
   migratedId: number;
 
   @Column({ nullable: true })
-  nationality: string;
+  nationality: number;
 
   @Column({ nullable: true })
   sayFamilyCount: number;
 
   @Column({ nullable: true })
+  familyCount: number;
+
+  @Column({ nullable: true })
   sayName: string;
 
-  @Column("simple-json", { nullable: true })
-  sayNameTranslations: { en: string; fa: string };
+  @Column({ type: 'hstore', hstoreType: 'object' })
+  sayNameTranslations: Record<string, string>;
 
   @Column({ nullable: true })
   sleptAvatarUrl: string;
 
   @Column({ nullable: true })
-  status: number;
+  flaskNgoId: number;
 
   @Column({ type: 'timestamptz', nullable: true })
   updated: Date;
@@ -122,15 +111,14 @@ export class ChildrenEntity extends BaseEntity {
   voiceUrl: string;
 
   @OneToMany(() => NeedEntity, (need) => need.child)
-  needs?: NeedEntity[]
+  needs?: NeedEntity[];
 
-  @ManyToOne(() => NgoEntity, (n) => n.children, { eager: false })
+  @ManyToOne(() => NgoEntity, (n) => n.children, {
+    eager: true,
+    nullable: false,
+  })
   ngo: NgoEntity;
 
-  @ManyToOne(() => SocialWorkerEntity, (s) => s.children, { eager: false })
-  socialWorker: SocialWorkerEntity;
-
-  @ManyToOne(() => SocialWorkerEntity, (s) => s.children, { eager: false })
-  supervisor: SocialWorkerEntity;
+  @ManyToOne(() => ContributorEntity, (s) => s.children, { eager: true })
+  socialWorker: ContributorEntity;
 }
-

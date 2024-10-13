@@ -1,218 +1,432 @@
-import { Controller, Get, Param, ParseIntPipe, Query, Req } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { NeedEntity } from '../../entities/need.entity';
-import { FamilyEntity } from '../../entities/user.entity';
+import {
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  Param,
+  ParseIntPipe,
+  Req,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { NEEDS_URL } from '../need/need.controller';
+import { ServerError } from '../../filters/server-exception.filter';
+import {
+  FlaskUserTypesEnum,
+  SAYPlatformRoles,
+  SUPER_ADMIN_ID_PANEL,
+} from 'src/types/interfaces/interface';
+import {
+  convertFlaskToSayRoles,
+  getOrganizedNeeds,
+  timeDifferenceWithComment,
+} from 'src/utils/helpers';
+import { MyPageInterceptor } from './interceptors/mypage.interceptors';
+import { TicketService } from '../ticket/ticket.service';
+import { WalletService } from '../wallet/wallet.service';
+import { IpfsService } from '../ipfs/ipfs.service';
 import { NeedService } from '../need/need.service';
-import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 import { ChildrenService } from '../children/children.service';
-import { ChildrenEntity } from '../../entities/children.entity';
-import { NeedTypeEnum, PaymentStatusEnum, ProductStatusEnum, RolesEnum, ServiceStatusEnum } from 'src/types/interface';
-import { NeedAPIApi, NeedModel, SocialWorkerAPIApi } from 'src/generated-sources/openapi';
-import { NeedDto, NeedsDataDto } from 'src/types/dtos/CreateNeed.dto';
+import { Need } from 'src/entities/flaskEntities/need.entity';
+import { Paginated } from 'nestjs-paginate';
+import { NgoService } from '../ngo/ngo.service';
+import { TicketEntity } from 'src/entities/ticket.entity';
+import { SignatureEntity } from 'src/entities/signature.entity';
+import { IpfsEntity } from 'src/entities/ipfs.entity';
+import { isAuthenticated } from 'src/utils/auth';
 
 @ApiTags('Users')
+@ApiSecurity('flask-access-token')
+@ApiHeader({
+  name: 'flaskId',
+  description: 'to use cache and flask authentication',
+  required: true,
+})
 @Controller('users')
 export class UserController {
-    constructor(
-        private userService: UserService,
-        private needService: NeedService,
-        private childrenService: ChildrenService,
-    ) { }
+  constructor(
+    private userService: UserService,
+    private needService: NeedService,
+    private childrenService: ChildrenService,
+    private ticketService: TicketService,
+    private walletService: WalletService,
+    private ipfsService: IpfsService,
+    private ngoService: NgoService,
+  ) {}
 
-    @Get(`all`)
-    @ApiOperation({ description: 'Get a single transaction by ID' })
-    async getFamilies() {
-        const families = await this.userService.getFamilies();
-        const socialWorkers = await this.userService.getSocialWorkers();
-        return { 'families': families, 'socialWorkers': socialWorkers }
-    }
-
-    @Get(`done`)
-    @ApiOperation({ description: 'Get all done needs' })
-    async getUserChildDoneNeeds(
-        @Query('childId', ParseIntPipe) childId: number,
-        @Query('userId', ParseIntPipe) userId: number,
+  @Get(`all`)
+  @ApiOperation({ description: 'Get all users' })
+  async getUsers(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
-        let user: FamilyEntity
-        user = await this.userService.getUserDoneNeeds(userId);
-        if (!user) {
-            user = await this.userService.createFamilyMember({ flaskUserId: userId });
-        }
-        let filteredNeeds = [];
-        function isMatched(doneNeed: NeedEntity) {
-            return doneNeed.flaskChildId === childId;
-        }
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    return await this.userService.getUsers();
+  }
 
-        // user is not found when there is no done needs
-        if (user && user.doneNeeds) {
-            filteredNeeds = user.doneNeeds.filter(isMatched);
-        }
+  @Get(`all/contributor`)
+  @ApiOperation({ description: 'Get all contributors' })
+  async getContributors(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    return await this.userService.getContributors();
+  }
 
-        // urgent ==> index 0
-        // growth 0 ==> index 1
-        // joy 1 ==> index 2
-        // health 2 ==> index 3
-        // surroundings 3 ==> index 4
-        // all ==> index 5
+  @Get(`flask/sw/:flaskUserId`)
+  @ApiOperation({ description: 'Get all contributors' })
+  async getFlaskSw(
+    @Req() req: Request,
+    @Param('flaskUserId', ParseIntPipe) flaskUserId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    return await this.userService.getFlaskSw(flaskUserId);
+  }
 
-        const needData = [[], [], [], [], [], []];
-        for (let i = 0; i < filteredNeeds.length; i += 1) {
-            if (filteredNeeds[i].isUrgent) {
-                needData[0].push(filteredNeeds[i]);
-            } else {
-                needData[filteredNeeds[i].category + 1].push(filteredNeeds[i]);
-            }
-        }
-        needData[5].push(...filteredNeeds);
-        console.log(filteredNeeds);
+  @UseInterceptors(MyPageInterceptor)
+  @Get('myPage/:userId/:typeId')
+  @ApiOperation({ description: 'Get user My page' })
+  async fetchMyPage(
+    @Req() req: Request,
+    @Param('typeId', ParseIntPipe) typeId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException('You Are not authorized!');
+    }
+    const time1 = new Date().getTime();
 
-        return {
-            flaskUserId: userId,
-            id: user.id,
-            flaskChildId: childId,
-            doneNeeds: needData,
-            total: filteredNeeds.length,
-        };
+    const X_LIMIT = parseInt(req.headers['x-limit']);
+    const X_TAKE = parseInt(req.headers['x-take']);
+    const limit = X_LIMIT > 100 ? 100 : X_LIMIT;
+    const page = X_TAKE + 1;
+
+    let allNeeds: Need[][];
+    let notConfirmedCount: number;
+    let paid: Paginated<Need>;
+    let notPaid: Paginated<Need>;
+    let purchased: Paginated<Need>;
+    let delivered: Paginated<Need>;
+    let children: number;
+    let arrivals: any;
+
+    const role = convertFlaskToSayRoles(typeId);
+
+    try {
+      let socialWorkerId: number;
+      let auditorId: number;
+      let purchaserId: number;
+      let supervisorId: number;
+      let ngoIds: number[];
+      let swIds: number[];
+
+      if (role === SAYPlatformRoles.SOCIAL_WORKER) {
+        console.log(
+          '\x1b[33m%s\x1b[0m',
+          `Role for my Page is SOCIAL_WORKER...\n`,
+        );
+        socialWorkerId = panelFlaskUserId;
+        auditorId = null;
+        purchaserId = null;
+        supervisorId = null;
+        const socialWorker = await this.userService.getFlaskSocialWorker(
+          panelFlaskUserId,
+        ); // sw ngo
+        ngoIds = [socialWorker.ngo_id];
+        children = await this.childrenService.countChildren(ngoIds);
+      }
+      if (role === SAYPlatformRoles.AUDITOR) {
+        console.log('\x1b[33m%s\x1b[0m', `Role for my Page is AUDITOR...\n`);
+        socialWorkerId = null;
+        auditorId = panelFlaskUserId;
+        purchaserId = null;
+        supervisorId = null;
+
+        // for auditor - admin
+        swIds = await this.userService
+          .getFlaskSwIds()
+          .then((r) => r.map((s) => s.id)); // all ngos
+        ngoIds = await this.ngoService
+          .getFlaskNgos()
+          .then((r) => r.map((s) => s.id));
+        children = await this.childrenService.countChildren(ngoIds);
+      }
+      if (role === SAYPlatformRoles.PURCHASER) {
+        console.log('\x1b[33m%s\x1b[0m', `Role for my Page is PURCHASER...\n`);
+        socialWorkerId = null;
+        auditorId = null;
+        purchaserId = panelFlaskUserId;
+        supervisorId = null;
+        swIds = await this.userService
+          .getFlaskSwIds()
+          .then((r) => r.map((s) => s.id));
+        ngoIds = await this.ngoService
+          .getFlaskNgos()
+          .then((r) => r.map((s) => s.id)); // all ngos
+        children = await this.childrenService.countChildren(ngoIds);
+      }
+
+      if (role === SAYPlatformRoles.NGO_SUPERVISOR) {
+        console.log(
+          '\x1b[33m%s\x1b[0m',
+          `Role for my Page is NGO_SUPERVISOR...\n`,
+        );
+        socialWorkerId = null;
+        auditorId = null;
+        purchaserId = null;
+        supervisorId = panelFlaskUserId;
+
+        // for ngo supervisor
+        const supervisor = await this.userService.getFlaskSocialWorker(
+          panelFlaskUserId,
+        );
+        swIds = await this.userService
+          .getFlaskSocialWorkersByNgo(supervisor.ngo_id)
+          .then((r) => r.map((s) => s.id));
+
+        ngoIds = [supervisor.ngo_id];
+        children = await this.childrenService.countChildren(ngoIds);
+      }
+      const allSignaturesNeedFlaskId =
+        await this.walletService.getSignaturesFlaskNeedId();
+      const needsIdList = allSignaturesNeedFlaskId.map((s) => s.flaskNeedId);
+
+      arrivals = await this.ngoService.getNgoArrivals(socialWorkerId, swIds);
+      notConfirmedCount = (
+        await this.needService.getNotConfirmedNeeds(
+          socialWorkerId,
+          swIds,
+          ngoIds,
+        )
+      )[1];
+
+      notPaid = await this.needService.getNotPaidNeeds(
+        {
+          page: page,
+          limit: limit,
+          path: '/',
+        },
+        socialWorkerId,
+        auditorId,
+        purchaserId,
+        supervisorId,
+        swIds,
+        ngoIds,
+      );
+
+      paid = await this.needService.getPaidNeeds(
+        {
+          page: page,
+          limit: limit,
+          path: '',
+        },
+        socialWorkerId,
+        auditorId,
+        purchaserId,
+        supervisorId,
+        swIds,
+        ngoIds,
+      );
+
+      purchased = await this.needService.getPurchasedNeeds(
+        {
+          page: page,
+          limit: limit,
+          path: '',
+        },
+        socialWorkerId,
+        auditorId,
+        purchaserId,
+        supervisorId,
+        swIds,
+        ngoIds,
+      );
+
+      // to avoid seeing an SW created need by the NGO supervisor in the fourth column / Could not find ypu role / when signing
+      socialWorkerId =
+        role === SAYPlatformRoles.NGO_SUPERVISOR
+          ? panelFlaskUserId
+          : socialWorkerId;
+
+      delivered = await this.needService.getDeliveredNeeds(
+        {
+          page: page,
+          limit: limit,
+          path: '',
+        },
+        socialWorkerId,
+        auditorId,
+        purchaserId,
+        supervisorId,
+        swIds,
+        ngoIds,
+        needsIdList,
+      );
+
+      allNeeds = [
+        [...notPaid.data],
+        [...paid.data],
+        [...purchased.data],
+        [...delivered.data],
+      ];
+
+      const time2 = new Date().getTime();
+      timeDifferenceWithComment(time1, time2, 'Fetched Flask In ');
+    } catch (e) {
+      throw new ServerError(e.message, e.status);
     }
 
+    const modifiedNeedList = [];
+    const time3 = new Date().getTime();
+    // add IPFS + tickets for every need
+    try {
+      let signatures: SignatureEntity[];
+      let ipfs: IpfsEntity;
 
-    @Get(`myPage/:ngoId/:swId`)
-    @ApiOperation({ description: 'Get social worker created needs' })
-    async fetchMyPage(@Req() req: Request, @Param('ngoId') ngoId: number, @Param('swId') swId: number) {
-        const accessToken = req.headers["authorization"]
-        const X_SKIP = req.headers["x-skip"]
-        const X_TAKE = req.headers["x-take"]
-        let needsData: NeedsDataDto
-        try {
-
-            needsData = await this.needService.getNeeds({ accessToken, X_SKIP, X_TAKE }, { ngoId:1 })
-        } catch (e) {
-            throw new ObjectNotFound();
+      const list: number[] = [];
+      allNeeds.forEach((column) => {
+        for (let i = 0; i < column.length; i++) {
+          list.push(column[i].id);
         }
-        console.log(needsData.needs.length)
-
-        const filteredNeeds = needsData.needs.filter((n) => n.created_by_id === 27)
-
-        console.log(filteredNeeds.length)
-
-        const organizedNeeds = [[], [], [], []]; // [[not paid], [payment], [purchased/delivered Ngo], [Done]]
-        if (filteredNeeds) {
-            for (let i = 0; i < filteredNeeds.length; i++) {
-                // not Paid
-                if (filteredNeeds[i].status === 0) {
-                    organizedNeeds[0].push(filteredNeeds[i]);
-                }
-                // Payment Received
-                else if (
-                    filteredNeeds[i].status === PaymentStatusEnum.PARTIAL_PAY ||
-                    filteredNeeds[i].status === PaymentStatusEnum.COMPLETE_PAY
-                ) {
-                    organizedNeeds[1].push(filteredNeeds[i]);
-                }
-
-                if (filteredNeeds[i].type === NeedTypeEnum.SERVICE) {
-                    // Payment sent to NGO
-                    if (filteredNeeds[i].status === ServiceStatusEnum.MONEY_TO_NGO) {
-                        organizedNeeds[2].push(filteredNeeds[i]);
-                    }
-                    // Delivered to child
-                    if (filteredNeeds[i].status === ServiceStatusEnum.DELIVERED) {
-                        organizedNeeds[3].push(filteredNeeds[i]);
-                    }
-                } else if (filteredNeeds[i].type === NeedTypeEnum.PRODUCT) {
-                    // Purchased
-                    if (filteredNeeds[i].status === ProductStatusEnum.PURCHASED_PRODUCT) {
-                        organizedNeeds[2].push(filteredNeeds[i]);
-                    }
-                    // Delivered to Ngo
-                    if (filteredNeeds[i].status === ProductStatusEnum.DELIVERED_TO_NGO) {
-                        organizedNeeds[2].push(filteredNeeds[i]);
-                    }
-                    // Delivered to child
-                    if (filteredNeeds[i].status === ProductStatusEnum.DELIVERED) {
-                        organizedNeeds[3].push(filteredNeeds[i]);
-                    }
-                }
+      });
+      const tickets = await this.ticketService.getNeedsTickets(
+        list,
+        panelFlaskUserId,
+      );
+      // tickets = tickets.filter(
+      //   (t) =>
+      //     t.contributors &&
+      //     t.contributors.find((c) => c.flaskUserId === panelFlaskUserId),
+      // );
+      console.log(
+        '\x1b[33m%s\x1b[0m',
+        `Taking care of Need signatures + Tickets...\n`,
+      );
+      for (let i = 0; i < allNeeds.length; i++) {
+        for (let k = 0; k < allNeeds[i].length; k++) {
+          const fetchedNeed = allNeeds[i][k];
+          const needTickets = tickets.filter(
+            (t) => allNeeds[i][k].id === t.flaskNeedId,
+          );
+          // signatures only at the my page last column
+          //  UPDATE: we decided to snot show signatures on page reload since they have a dedicated page
+          // If you removing the code, remember need.signatures must be fixed on front-end side as well
+          if (i === 3) {
+            signatures = await this.walletService.getNeedSignatures(
+              fetchedNeed.id,
+            );
+            ipfs = null;
+            if (
+              signatures &&
+              signatures.length > 0 &&
+              signatures.find((s) => s.role === SAYPlatformRoles.AUDITOR)
+            ) {
+              ipfs = await this.ipfsService.getNeedIpfs(fetchedNeed.id);
             }
-            return organizedNeeds
+          }
+          // End of UPDATE ------------------------------------------------------
+
+          const modifiedNeed = {
+            tickets: needTickets,
+            signatures,
+            ipfs,
+            ...fetchedNeed,
+          };
+          modifiedNeedList.push(modifiedNeed);
         }
+      }
+    } catch (e) {
+      throw new ServerError(e.message, e.status);
     }
 
-    @Get(`social-worker/:flaskId/confirmedNeeds`)
-    @ApiOperation({ description: 'Get supervisor confirmed needs' })
-    async getSwConfirmedNeeds(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
-        let needs: any
-        limit = limit > 100 ? 100 : limit;
-        const supervisor = await this.userService.getSocialWorker(flaskId);
+    const time4 = new Date().getTime();
+    timeDifferenceWithComment(time3, time4, 'First organize In ');
 
-        if (supervisor && supervisor.role === RolesEnum.SAY_SUPERVISOR) {
-            try {
-                needs = await this.needService.getSupervisorConfirmedNeeds(supervisor.flaskSwId, {
-                    limit: Number(limit),
-                    page: Number(page),
-                    route: NEEDS_URL
-                })
-            } catch (e) {
-                throw new ObjectNotFound();
-            }
-        }
-        return needs;
+    const time5 = new Date().getTime();
+    const organizedNeeds = getOrganizedNeeds(modifiedNeedList);
+    const time6 = new Date().getTime();
+    timeDifferenceWithComment(time5, time6, 'Second organize In ');
+
+    const paidCount = paid.meta.totalItems;
+    const notPaidCount = notPaid.meta.totalItems;
+    const purchasedCount = purchased.meta.totalItems;
+    const deliveredCount = delivered.meta.totalItems;
+
+    const max = Math.max(
+      paidCount,
+      notPaidCount,
+      purchasedCount,
+      deliveredCount,
+    );
+
+    return {
+      page,
+      limit,
+      max:
+        paidCount === max
+          ? paidCount
+          : notPaidCount === max
+          ? notPaidCount
+          : purchasedCount === max
+          ? purchasedCount
+          : deliveredCount,
+      meta: {
+        paid: paidCount,
+        notPaid: notPaidCount,
+        purchased: purchasedCount,
+        delivered: deliveredCount,
+        total: notPaidCount + paidCount + purchasedCount + deliveredCount,
+        realNotConfirmCount: notConfirmedCount,
+        realConfirmCount:
+          notPaidCount +
+          paidCount +
+          purchasedCount +
+          deliveredCount -
+          notConfirmedCount,
+      },
+      panelFlaskUserId,
+      typeId,
+      needs: organizedNeeds,
+      children,
+      arrivals,
+    };
+  }
+
+  @Delete(`contributor/:flaskUserId`)
+  @ApiOperation({ description: 'Delete a contributor' })
+  async deleteOneContributor(
+    @Req() req: Request,
+    @Param('flaskUserId') flaskUserId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN ||
+      panelFlaskUserId !== SUPER_ADMIN_ID_PANEL
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
     }
-
-    @Get(`social-worker/:flaskId/confirmedChildren`)
-    @ApiOperation({ description: 'Get supervisor confirmed children' })
-    async getSwConfirmedChildren(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
-        let needs: any
-        limit = limit > 100 ? 100 : limit;
-        const supervisor = await this.userService.getSocialWorker(flaskId);
-
-        if (supervisor && supervisor.role === RolesEnum.SAY_SUPERVISOR) {
-            try {
-                needs = await this.childrenService.getSupervisorConfirmedChildren(supervisor.flaskSwId, {
-                    limit: Number(limit),
-                    page: Number(page),
-                    route: NEEDS_URL
-                })
-            } catch (e) {
-                throw new ObjectNotFound();
-            }
-        }
-
-        return needs;
-    }
-    // Nyaz -purchasing,...
-    // @Get(`social-worker/:flaskId/confirmedNeeds`)
-    // @ApiOperation({ description: 'Get social worker created needs' })
-    // async getContributorContribution(@Param('flaskId') flaskId: number, @Query('page') page = 1, @Query('limit') limit = 100) {
-    //     let needs: any
-    //     limit = limit > 100 ? 100 : limit;
-    //     const socialWorker = await this.userService.getSocialWorker(flaskId);
-    //     if (socialWorker && socialWorker.role === RolesEnum.SUPER_ADMIN) {
-    //         try {
-    //             needs = await this.needService.getSocialWorkerConfirmedNeeds(socialWorker.flaskSwId, {
-    //                 limit: Number(limit),
-    //                 page: Number(page),
-    //                 route: NEEDS_URL
-    //             })
-    //         } catch (e) {
-    //             throw new ObjectNotFound();
-    //         }
-    //     }
-    //     return needs;
-    // }
+    const theUser = await this.userService.getUserByFlaskId(flaskUserId);
+    const list = [];
+    theUser.contributions.forEach((c) => list.push(c.id));
+    return await this.userService.deleteOneContributor(theUser.id, list);
+  }
 }
-
-
-// export enum RolesEnum {
-//     NO_ROLE = 0,
-//     SUPER_ADMIN = 1,
-//     SOCIAL_WORKER = 2,
-//     COORDINATOR = 3, // contributor
-//     NGO_SUPERVISOR = 4,
-//     SAY_SUPERVISOR = 5,
-//     ADMIN = 6, // team lead
-//     FAMILY = 7,
-//     FRIEND = 8,
-// };

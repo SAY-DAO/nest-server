@@ -1,3 +1,4 @@
 {
-    "verifyContractAddress": "0xa2C97eDE74Fac8B8C1D39622E5EA2de180bCB621"
+  "sepolia": { "verifyVoucherAddress": "0x1699378878CF5864E1bc3D88c4eA55E3a8A466FA" },
+  "mainnet": { "verifyVoucherAddress": "0xAe9ae5ACdad18927Bd039ebBFDB8E3be4dbf5De3" }
 }

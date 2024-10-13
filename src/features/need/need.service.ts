@@ -1,220 +1,1059 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from '../../entities/need.entity';
-import { Repository, UpdateResult } from 'typeorm';
-import { from, map, Observable } from 'rxjs';
+import { Need } from '../../entities/flaskEntities/need.entity';
 import {
-  Pagination,
-  IPaginationOptions,
-  paginate,
-} from 'nestjs-typeorm-paginate';
-import { Configuration, NeedAPIApi, PreneedAPIApi, PreneedSummary, PublicAPIApi, PublicNeed } from "../../generated-sources/openapi";
-import { ChildrenEntity } from '../../entities/children.entity';
-import { NeedParams } from '../../types/parameters/NeedParameters';
-import { PaymentEntity } from '../../entities/payment.entity';
-import { FamilyEntity } from '../../entities/user.entity';
-import { ReceiptEntity } from '../../entities/receipt.entity';
-import { HeaderOptions, NeedApiParams } from 'src/types/interface';
-import { NeedDto, NeedsDataDto } from 'src/types/dtos/CreateNeed.dto';
+  Brackets,
+  LessThan,
+  MoreThan,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
+import {
+  Configuration,
+  NeedAPIApi,
+  PreneedAPIApi,
+  PreneedSummary,
+  PublicAPIApi,
+  PublicNeed,
+} from '../../generated-sources/openapi';
+import {
+  ChildExistence,
+  NeedTypeEnum,
+  PaymentStatusEnum,
+  ProductStatusEnum,
+  ServiceStatusEnum,
+} from 'src/types/interfaces/interface';
+import { ChildrenEntity } from 'src/entities/children.entity';
+import { NeedParams } from 'src/types/parameters/NeedParameters';
+import { NgoEntity } from 'src/entities/ngo.entity';
+import { StatusEntity } from 'src/entities/status.entity';
+import { PaymentEntity } from 'src/entities/payment.entity';
+import { ReceiptEntity } from 'src/entities/receipt.entity';
+import { IpfsEntity } from 'src/entities/ipfs.entity';
+import { ProviderEntity } from 'src/entities/provider.entity';
+import { Child } from 'src/entities/flaskEntities/child.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
+import { NeedStatusUpdate } from 'src/entities/flaskEntities/NeedStatusUpdate.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import {
+  Paginated,
+  PaginateQuery,
+  paginate as nestPaginate,
+} from 'nestjs-paginate';
+import { from } from 'rxjs';
+import { VariableEntity } from 'src/entities/variable.entity';
+import Decimal from 'decimal.js';
+import { getMonthsAgo } from 'src/utils/helpers';
 
 @Injectable()
 export class NeedService {
   constructor(
+    @InjectRepository(Need, 'flaskPostgres')
+    private flaskNeedRepository: Repository<Need>,
     @InjectRepository(NeedEntity)
     private needRepository: Repository<NeedEntity>,
-  ) { }
+    @InjectRepository(VariableEntity)
+    private variableRepository: Repository<VariableEntity>,
+  ) {}
 
-  async getRandomNeed(
-  ): Promise<PublicNeed> {
-    const configuration = new Configuration({
-      basePath: "https://api.s.sayapp.company",
-    });
-
-    const publicApi = new PublicAPIApi(configuration, "https://api.s.sayapp.company",
-      (url: "https://api.s.sayapp.company/api"): Promise<Response> => {
-        console.log(url)
-        return fetch(url)
-      });
-
-    const need: Promise<PublicNeed> = publicApi.apiV2PublicRandomNeedGet().then((r) => r
-    ).catch((e) => e)
-
-    return need;
-  }
-
-  async getNeeds(options: HeaderOptions, params: NeedApiParams
-  ): Promise<NeedsDataDto> {
-    const publicApi = new NeedAPIApi();
-    console.log(options.accessToken, options.X_SKIP, options.X_TAKE, params.ngoId)
-
-    const needs: Promise<NeedsDataDto> = publicApi.apiV2NeedsGet(options.accessToken, options.X_SKIP, options.X_TAKE, params.isConfirmed, params.isDone, params.isReported, params.status, params.type, params.ngoId).then((r) => r
-    ).catch((e) => e)
-    return needs;
-  }
-
-
-
-
-  async getLastNeed(): Promise<NeedEntity> {
-    const lastNeed = await this.needRepository.findOne({
+  async getFlaskNeed(flaskNeedId: number): Promise<Need> {
+    return this.flaskNeedRepository.findOne({
       where: {
-        isDeleted: false,
-        isConfirmed: true,
-      },
-      select: ['id', 'createdAt', 'socialWorker', 'title',],
-      order: { createdAt: "DESC" },
-    })
-    return lastNeed;
-  }
-
-  async getDoneNeeds(): Promise<NeedEntity[]> {
-    const doneNeeds = await this.needRepository.find({
-      where: {
-        isDone: true,
+        id: flaskNeedId,
       },
     });
-    return doneNeeds;
   }
 
-  async getNeedById(flaskNeedId: number): Promise<NeedEntity> {
-    const need = await this.needRepository.findOne({
+  async getFlaskAuditorNeeds(flaskUserId: number): Promise<Need[]> {
+    return this.flaskNeedRepository.find({
       where: {
-        flaskNeedId: flaskNeedId,
+        confirmUser: flaskUserId,
+      },
+      select: {
+        id: true,
+        title: true,
+      },
+    });
+  }
+  async getNestAuditorNeeds(flaskUserId: number): Promise<NeedEntity[]> {
+    return this.needRepository.find({
+      where: {
+        auditor: {
+          flaskUserId,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
       },
       relations: {
+        child: false,
+      },
+    });
+  }
+  async getNestPurchaserNeeds(flaskUserId: number): Promise<NeedEntity[]> {
+    return this.needRepository.find({
+      where: {
+        purchaser: {
+          flaskUserId,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+      },
+      relations: {
+        child: false,
+      },
+    });
+  }
+  getFlaskNeedsByDeliveryCode(code: string): Promise<Need[]> {
+    return this.flaskNeedRepository.find({
+      where: {
+        deliveryCode: code,
+      },
+    });
+  }
+
+  getFlaskChildUnpaidNeeds(flaskChildId: number): Promise<Need[]> {
+    return this.flaskNeedRepository.find({
+      where: {
+        child_id: flaskChildId,
+        status: LessThan(PaymentStatusEnum.COMPLETE_PAY),
+        isConfirmed: true,
+        isDeleted: false,
+      },
+    });
+  }
+
+  getFlaskChildUnconfirmedNeeds(flaskChildId: number): Promise<Need[]> {
+    return this.flaskNeedRepository.find({
+      where: {
+        child_id: flaskChildId,
+        isConfirmed: false,
+        isDeleted: false,
+      },
+    });
+  }
+
+  getFlaskPreNeed(accessToken: any): Promise<PreneedSummary> {
+    const preneedApi = new PreneedAPIApi();
+    const preneeds = preneedApi.apiV2PreneedsGet(accessToken);
+    return preneeds;
+  }
+
+  async getNeedIpfs(id: number): Promise<IpfsEntity> {
+    const need = await this.needRepository.findOne({
+      where: {
+        flaskId: id,
+      },
+    });
+    if (!need) {
+      return;
+    }
+
+    return need.ipfs;
+  }
+
+  getNeeds(): Promise<NeedEntity[]> {
+    return this.needRepository.find({
+      relations: {
+        child: true,
+        verifiedPayments: true,
+      },
+    });
+  }
+
+  getNeedsWithSignatures(): Promise<NeedEntity[]> {
+    return this.needRepository.find({
+      relations: {
+        child: true,
+        verifiedPayments: true,
         signatures: true,
-        payments: true,
+      },
+      where: {
+        status: MoreThan(PaymentStatusEnum.PARTIAL_PAY),
+        signatures: {
+          flaskNeedId: MoreThan(0),
+        },
+      },
+    });
+  }
+
+  getNeedById(needId: string): Promise<NeedEntity> {
+    const user = this.needRepository.findOne({
+      where: {
+        id: needId,
+      },
+      relations: {
+        verifiedPayments: true,
+        signatures: true,
+      },
+    });
+    return user;
+  }
+
+  async updateNeedRatios(
+    need: NeedEntity,
+    distanceRatio: Decimal,
+    difficultyRatio: Decimal,
+    contributionRatio: Decimal,
+    flaskUserId: number,
+  ) {
+    const variablesObject = this.variableRepository.create({
+      distanceRatio,
+      difficultyRatio,
+      contributionRatio,
+      needFlaskId: need.flaskId,
+      flaskUserId,
+      need,
+    });
+
+    return await this.variableRepository.save(variablesObject);
+  }
+
+  updateNeedContributors(
+    needId: string,
+    theAuditor: AllUserEntity,
+    thePurchaser: AllUserEntity,
+  ) {
+    return this.needRepository.update(needId, {
+      auditor: theAuditor,
+      purchaser: thePurchaser,
+    });
+  }
+
+  getNeedByFlaskId(flaskId: number): Promise<NeedEntity> {
+    const need = this.needRepository.findOne({
+      where: {
+        flaskId,
+        // verifiedPayments: { verified: Not(IsNull()) },
+      },
+      relations: {
+        verifiedPayments: true,
+        signatures: true,
       },
     });
     return need;
+  }
+
+  updateNeed(
+    needId: string,
+    theChild: ChildrenEntity,
+    theNgo: NgoEntity,
+    theSw: AllUserEntity,
+    theAuditor: AllUserEntity,
+    thePurchaser: AllUserEntity,
+    needDetails: NeedParams,
+    theNestProvider: ProviderEntity,
+  ): Promise<UpdateResult> {
+    return this.needRepository.update(needId, {
+      child: theChild,
+      socialWorker: theSw,
+      auditor: theAuditor,
+      purchaser: thePurchaser,
+      ngo: theNgo,
+      provider: theNestProvider,
+      ...needDetails,
+    });
+  }
+
+  async updateNeedProvider(needId: string, provider: ProviderEntity) {
+    return this.needRepository.update(needId, {
+      provider,
+    });
+  }
+
+  async updateIsResolved(needId: string, isResolved: boolean) {
+    return this.needRepository.update(needId, {
+      isResolved: isResolved,
+    });
+  }
+
+  updateNeedMidjourney(
+    needId: string,
+    selectedImage: string,
+  ): Promise<UpdateResult> {
+    return this.needRepository.update(needId, {
+      midjourneyImage: selectedImage,
+    });
   }
 
   createNeed(
     theChild: ChildrenEntity,
+    theNgo: NgoEntity,
+    theSw: AllUserEntity,
+    theAuditor: AllUserEntity,
+    thePurchaser: AllUserEntity,
     needDetails: NeedParams,
-    receiptList?: ReceiptEntity[],
-    paymentList?: PaymentEntity[],
-    participantList?: FamilyEntity[],
+    statusUpdates: StatusEntity[],
+    verifiedPayments: PaymentEntity[],
+    receipts: ReceiptEntity[],
+    provider: ProviderEntity,
   ): Promise<NeedEntity> {
+    if (
+      !theSw ||
+      (needDetails.status >= ProductStatusEnum.PARTIAL_PAY && !theAuditor) ||
+      (needDetails.isConfirmed && !theAuditor) ||
+      (needDetails.type === NeedTypeEnum.PRODUCT &&
+        needDetails.status >= ProductStatusEnum.PURCHASED_PRODUCT &&
+        !thePurchaser) ||
+      (needDetails.status >= ProductStatusEnum.PARTIAL_PAY &&
+        (!verifiedPayments || !verifiedPayments[0])) ||
+      !theNgo
+    ) {
+      throw new ForbiddenException(
+        'Can not Create need without contributors or NGO',
+      );
+    }
     const newNeed = this.needRepository.create({
       child: theChild,
-      flaskChildId: needDetails.flaskChildId,
-      flaskNeedId: needDetails.flaskNeedId,
-      flaskNgoId: needDetails.flaskNgoId,
-      flaskSupervisorId: needDetails.flaskSupervisorId,
-      title: needDetails.title,
-      affiliateLinkUrl: needDetails.affiliateLinkUrl,
-      link: needDetails.link,
-      bankTrackId: needDetails.bankTrackId,
-      category: needDetails.category,
-      childGeneratedCode: needDetails?.childGeneratedCode,
-      childSayName: needDetails.childSayName,
-      childDeliveryDate:
-        needDetails.childDeliveryDate &&
-        new Date(needDetails.childDeliveryDate),
-      confirmDate:
-        needDetails.confirmDate && new Date(needDetails?.confirmDate),
-      supervisor: needDetails.supervisor,
-      cost: needDetails.cost,
-      created: needDetails.created && new Date(needDetails?.created),
-      socialWorker: needDetails.socialWorker,
-      flaskSwId: needDetails.flaskSwId,
-      deletedAt: needDetails.deletedAt && new Date(needDetails?.deletedAt),
-      description: needDetails.description, // { en: '' , fa: ''}
-      descriptionTranslations: needDetails.descriptionTranslations, // { en: '' , fa: ''}
-      titleTranslations: needDetails.titleTranslations,
-      details: needDetails.details,
-      doingDuration: needDetails.doingDuration,
-      donated: needDetails.donated,
-      doneAt: needDetails.doneAt && new Date(needDetails?.doneAt),
-      expectedDeliveryDate:
-        needDetails.expectedDeliveryDate &&
-        new Date(needDetails?.expectedDeliveryDate),
-      information: needDetails.information,
-      isConfirmed: needDetails.isConfirmed,
-      isDeleted: needDetails.isDeleted,
-      isDone: needDetails.isDone,
-      isReported: needDetails.isReported,
-      isUrgent: needDetails.isUrgent,
-      ngo: needDetails.ngo,
-      ngoAddress: needDetails.ngoAddress,
-      ngoName: needDetails.ngoName,
-      ngoDeliveryDate:
-        needDetails.ngoDeliveryDate && new Date(needDetails?.ngoDeliveryDate),
-      oncePurchased: needDetails.oncePurchased,
-      paid: needDetails.paid,
-      purchaseCost: needDetails.purchaseCost,
-      purchaseDate:
-        needDetails.purchaseDate && new Date(needDetails?.purchaseDate),
-      receiptCount: needDetails.receiptCount,
-      status: needDetails.status,
-      statusDescription: needDetails.statusDescription,
-      statusUpdatedAt:
-        needDetails.statusUpdatedAt && new Date(needDetails?.statusUpdatedAt),
-      type: needDetails.type,
-      typeName: needDetails.typeName,
-      unavailableFrom:
-        needDetails.unavailableFrom && new Date(needDetails?.unavailableFrom),
-      unconfirmedAt:
-        needDetails.unconfirmedAt && new Date(needDetails?.unconfirmedAt),
-      unpaidCost: needDetails.unpaidCost,
-      unpayable: needDetails.unpayable,
-      unpayableFrom:
-        needDetails.unpayableFrom && new Date(needDetails?.unpayableFrom),
-      updated: needDetails.updated && new Date(needDetails?.updated),
-      imageUrl: needDetails.imageUrl,
-      needRetailerImg: needDetails.needRetailerImg,
-      progress: needDetails?.progress,
+      socialWorker: theSw,
+      auditor: theAuditor,
+      purchaser: thePurchaser,
+      ngo: theNgo,
+      flaskNgoId: theNgo.flaskNgoId,
+      ...needDetails,
     });
-    newNeed.participants = participantList;
-    newNeed.payments = paymentList;
-    newNeed.receipts = receiptList;
+    newNeed.statusUpdates = statusUpdates;
+    newNeed.verifiedPayments = verifiedPayments;
+    newNeed.receipts = receipts;
+    newNeed.provider = provider;
+
     return this.needRepository.save(newNeed);
   }
 
-  updateSyncNeed(
-    need: NeedEntity,
-    updateNeedDetails: NeedParams,
-    receiptList?: ReceiptEntity[],
-    paymentList?: PaymentEntity[],
-    participantList?: FamilyEntity[],
-  ): Promise<UpdateResult> {
-    need.payments = paymentList;
-    need.participants = participantList;
-    need.receipts = receiptList;
-    this.needRepository.save(need);
-    return this.needRepository.update(
-      { id: need.id },
-      { ...updateNeedDetails },
+  async getFlaskRandomNeed(): Promise<PublicNeed> {
+    const configuration = new Configuration({
+      basePath: 'https://api.s.sayapp.company',
+    });
+
+    const publicApi = new PublicAPIApi(
+      configuration,
+      'https://api.s.sayapp.company',
+      (url: 'https://api.s.sayapp.company/api'): Promise<Response> => {
+        return fetch(url);
+      },
     );
+
+    const need: Promise<PublicNeed> = publicApi
+      .apiV2PublicRandomNeedGet()
+      .then((r) => r)
+      .catch((e) => e);
+
+    return need;
   }
 
-  getPreNeed(accessToken: any): Promise<PreneedSummary> {
-    const preneedApi = new PreneedAPIApi()
-    const preneeds = preneedApi.apiV2PreneedsGet(accessToken)
-    return preneeds
+  async getNotConfirmedNeeds(
+    socialWorker: number,
+    swIds: number[],
+    ngoIds: number[],
+  ): Promise<[Need[], number]> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
+      .andWhere('child.existence_status IN (:...existenceStatus)', {
+        existenceStatus: [ChildExistence.AlivePresent],
+      })
+      .andWhere('need.isConfirmed = :needConfirmed', { needConfirmed: false })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
+      .andWhere('need.status = :statusNotPaid', {
+        statusNotPaid: PaymentStatusEnum.NOT_PAID,
+      })
+      // .select([
+      //   'child.sayname_translations',
+      //   'ngo.id',
+      //   'ngo.name',
+      //   'need.id',
+      //   'need.child_id',
+      //   'need.created_by_id',
+      //   'need.name_translations',
+      //   'need.description_translations',
+      //   'need.title',
+      //   'need.imageUrl',
+      //   'need.category',
+      //   'need.type',
+      //   'need.link',
+      //   'need.status',
+      //   'need.img',
+      //   'need._cost',
+      //   'need.details',
+      //   'need.informations',
+      //   'need.isDeleted',
+      //   'need.created',
+      //   'need.confirmDate',
+      // ])
+      .cache(60000)
+      .orderBy('need.created', 'ASC');
+    return await queryBuilder.getManyAndCount();
   }
 
+  async getNotPaidNeeds(
+    options: PaginateQuery,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoSupervisor: number,
+    swIds: number[],
+    ngoIds: number[],
+  ): Promise<Paginated<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      // .where('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .where('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
+      .andWhere('child.existence_status IN (:...existenceStatus)', {
+        existenceStatus: [ChildExistence.AlivePresent],
+      })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
+      .andWhere('need.status = :statusNotPaid', {
+        statusNotPaid: PaymentStatusEnum.NOT_PAID,
+      })
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.details',
+        'need.informations',
+        'need.unavailable_from',
+      ])
+      .cache(60000);
 
-  async getSupervisorConfirmedNeeds(flaskSwId: number,
-    options: IPaginationOptions,
-  ): Promise<Observable<Pagination<NeedEntity>>> {
-    return from(
-      paginate<NeedEntity>(this.needRepository, options, {
-        relations: {
-          payments: true,
-          receipts: true,
-          child: true,
-          provider: true,
-          supervisor: true
-        },
-        where: {
-          isDeleted: false,
-          isConfirmed: true,
-          flaskSupervisorId: flaskSwId
-        },
-      }),
-    ).pipe(map((needs: Pagination<NeedEntity>) => needs));
+    return await nestPaginate<Need>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['isConfirmed', 'ASC']],
+      nullSort: 'last',
+    });
   }
 
+  async getPaidNeeds(
+    options: PaginateQuery,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoId: number,
+    swIds: number[],
+    ngoIds: number[],
+  ): Promise<Paginated<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .where('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.status IN (:...statuses)', {
+        statuses: [
+          PaymentStatusEnum.COMPLETE_PAY,
+          PaymentStatusEnum.PARTIAL_PAY,
+        ],
+      })
+      .andWhere('payment.id IS NOT NULL')
+      .andWhere('payment.verified IS NOT NULL')
+      .andWhere('payment.order_id IS NOT NULL')
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.details',
+        'need.informations',
+        'need.unavailable_from',
+        'payment',
+      ])
+      .cache(60000);
+
+    return await nestPaginate<Need>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['doneAt', 'DESC']],
+      nullSort: 'last',
+    });
+  }
+
+  async getPurchasedNeeds(
+    options: PaginateQuery,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoId: number,
+    swIds: number[],
+    ngoIds: number[],
+  ): Promise<Paginated<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.receipts_',
+        NeedReceipt,
+        'need_receipt',
+        'need_receipt.need_id = need.id',
+      )
+
+      .leftJoinAndMapMany(
+        'need_receipt.receipt',
+        Receipt,
+        'receipt',
+        'receipt.id = need_receipt.receipt_id',
+      )
+      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
+      .where('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
+            .andWhere('need.status = :productStatus', {
+              productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
+            })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
+            .andWhere('need.status = :serviceStatus', {
+              serviceStatus: ServiceStatusEnum.MONEY_TO_NGO,
+            });
+        }),
+      )
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
+
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.details',
+        'need.informations',
+        'need.unavailable_from',
+        'need_status_updates',
+        'payment',
+        'receipt',
+        'need_receipt',
+      ])
+      .cache(60000);
+    return await nestPaginate<Need>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['updated', 'DESC']],
+      nullSort: 'last',
+    });
+  }
+
+  async getDeliveredNeeds(
+    options: PaginateQuery,
+    socialWorker: number,
+    auditor: number,
+    purchaser: number,
+    ngoId: number,
+    swIds: number[],
+    ngoIds: number[],
+    needWithSignatures: number[],
+  ): Promise<Paginated<Need>> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+
+      .leftJoinAndMapMany(
+        'need.receipts_',
+        NeedReceipt,
+        'need_receipt',
+        'need_receipt.need_id = need.id',
+      )
+
+      .leftJoinAndMapMany(
+        'need_receipt.receipt',
+        Receipt,
+        'receipt',
+        'receipt.id = need_receipt.receipt_id',
+      )
+      .where('need.id NOT IN (:...needWithSignatures)', {
+        needWithSignatures: needWithSignatures[0]
+          ? [...needWithSignatures]
+          : [0],
+      })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: socialWorker ? [socialWorker] : [...swIds],
+      })
+      // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds }) // e.g: sw: 1 used to be in Ngo:13, therefore some needs are created in an ngo where their sw is now active somewhere else.
+      // .andWhere('need_receipt.deleted = :receiptDeleted', { receiptDeleted: null })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      // .andWhere('need._cost = :price', { price: 0 }) // only for test purposes
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
+            .andWhere('need.status = :productStatus', {
+              productStatus: ProductStatusEnum.DELIVERED,
+            })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
+            .andWhere('need.status = :serviceStatus', {
+              serviceStatus: ServiceStatusEnum.DELIVERED,
+            });
+        }),
+      )
+
+      .select([
+        'child',
+        'ngo.id',
+        'ngo.name',
+        'ngo.logoUrl',
+        'need.id',
+        'need.child_id',
+        'need.created_by_id',
+        'need.name_translations',
+        'need.title',
+        'need.imageUrl',
+        'need.category',
+        'need.type',
+        'need.isUrgent',
+        'need.link',
+        'need.affiliateLinkUrl',
+        'need.bank_track_id',
+        'need.doing_duration',
+        'need.status',
+        'need.img',
+        'need.purchase_cost',
+        'need._cost',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.confirmUser',
+        'need.doneAt',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+        'need.purchase_date',
+        'need.expected_delivery_date',
+        'need.unavailable_from',
+        'need.details',
+        'need.informations',
+        'need_status_updates',
+        'receipt',
+        'need_receipt',
+        'payment',
+      ])
+      .cache(60000);
+    return await nestPaginate<Need>(options, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['child_delivery_date', 'DESC']],
+      nullSort: 'last',
+    });
+  }
+
+  async getDuplicateNeeds(childId: number, needId: number) {
+    const need = await this.getFlaskNeed(needId);
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .andWhere('need.child_id = :childId', { childId: childId })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.id != :needId', { needId: need.id })
+      .andWhere("need.name_translations -> 'en' = :nameTranslations", {
+        nameTranslations: need.name_translations.en,
+      })
+      // .andWhere('need.status < :statusPaid', {
+      //   statusPaid: PaymentStatusEnum.COMPLETE_PAY,
+      // })
+      // .andWhere('need.confirmDate > :confirmDate', { confirmDate: date })
+
+      .select([
+        'child.sayname_translations',
+        'need.id',
+        'need.title',
+        'need.imageUrl',
+        'need.child_id',
+        'need.name_translations',
+        'need.description_translations',
+        'need.title',
+        'need._cost',
+        'need.type',
+        'need.link',
+        'need.status',
+        'need.category',
+        'need.isConfirmed',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+      ])
+      .cache(60000)
+      .orderBy('need.created', 'ASC');
+    return await queryBuilder.getMany();
+  }
+
+  async getDeleteCandidates(): Promise<[Need[], number]> {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 3); // three months ago
+    return this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .where('need.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
+      .andWhere('need.confirmDate > :startDate', {
+        startDate: new Date(2019, 1, 1),
+      })
+      .andWhere('need.confirmDate < :endDate', { endDate: date })
+      .andWhere('need.status <= :statusNotPaid', {
+        statusNotPaid: PaymentStatusEnum.PARTIAL_PAY,
+      })
+      .select([
+        'need.id',
+        'need.status',
+        'need.isConfirmed',
+        'need.deleted_at',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+      ])
+      .cache(60000)
+      .limit(500)
+      .orderBy('need.created', 'ASC')
+      .getManyAndCount();
+  }
+
+  async getArrivalUpdateCandidates(): Promise<[Need[], number]> {
+    return this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .where(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
+            .andWhere('need.status = :productStatus', {
+              productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
+            })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
+            .andWhere('need.status = :serviceStatus', {
+              serviceStatus: ServiceStatusEnum.MONEY_TO_NGO,
+            });
+        }),
+      )
+      .getManyAndCount();
+  }
+
+  async deleteOneNeed(id: string) {
+    return from(this.needRepository.delete(id));
+  }
+
+  async deleteFlaskOneNeed(flaskNeedId: number, accessToken: string) {
+    const needApi = new NeedAPIApi();
+    const deleted = needApi.apiV2NeedDeleteNeedIdneedIdPatch(
+      accessToken,
+      flaskNeedId,
+    );
+    return deleted;
+  }
+
+  async getMidjourneyNeeds(): Promise<Need[]> {
+    return await this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.status >= :statusPaid', {
+        statusPaid: PaymentStatusEnum.COMPLETE_PAY,
+      })
+      .select([
+        'need.id',
+        'need.imageUrl',
+        'need.name_translations',
+        'need.title',
+        'need.img',
+        'need.link',
+        'need.status',
+        'need.created',
+        'need.updated',
+        'need.confirmDate',
+        'need.doneAt',
+      ])
+      .cache(60000)
+      .orderBy('need.created', 'DESC')
+      .getMany();
+  }
+
+  async getConfirmsInRange(
+    confirmDate: Date,
+    needCategory: number,
+    needType: number,
+    month: number,
+  ): Promise<[Need[], number]> {
+    const d = new Date(confirmDate);
+    d.setMonth(d.getMonth() - month); // 1 months ago
+
+    const d2 = new Date(confirmDate);
+    d2.setMonth(d2.getMonth() + month); // 1 months after
+
+    return await this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .where('need.category = :needCategory', { needCategory })
+      .andWhere('need.type = :needType', { needType })
+      .andWhere('need.confirmDate > :startDate', {
+        startDate: new Date(d),
+      })
+      .andWhere('need.confirmDate <= :endDate', {
+        endDate: new Date(d2),
+      })
+      .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
+      .getManyAndCount();
+  }
+
+  async getPurchasedNeedsCount(socialWorker: number): Promise<Need[]> {
+    return this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .leftJoinAndMapOne(
+        'need.child',
+        Child,
+        'child',
+        'child.id = need.child_id',
+      )
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .leftJoinAndMapMany(
+        'need.payments',
+        Payment,
+        'payment',
+        'payment.id_need = need.id',
+      )
+      .leftJoinAndMapMany(
+        'need.status_updates',
+        NeedStatusUpdate,
+        'need_status_updates',
+        'need_status_updates.need_id = need.id',
+      )
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.created_by_id IN (:...swIds)', {
+        swIds: [socialWorker],
+      })
+      .where(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
+            .andWhere('need.status = :productStatus', {
+              productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
+            })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
+            .andWhere('need.status = :serviceStatus', {
+              serviceStatus: ServiceStatusEnum.MONEY_TO_NGO,
+            });
+        }),
+      )
+      .select(['need.id'])
+      .getMany();
+  }
+
+  async getSimilarNeeds(name: string): Promise<Need[]> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .where("need.name_translations -> 'en' = :nameTranslations", {
+        nameTranslations: name,
+      })
+      .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
+      .select([
+        'need.id',
+        'need.title',
+        'need.status',
+        'need.type',
+        'need.child_id',
+        'need.name_translations',
+        'need.description_translations',
+        'need.category',
+        'need.isConfirmed',
+        'need.created',
+        'need.confirmDate',
+      ])
+      .cache(60000)
+      .orderBy('need.created', 'ASC');
+    return await queryBuilder.getMany();
+  }
 }
