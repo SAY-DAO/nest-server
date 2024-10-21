@@ -109,4 +109,5 @@ export class CampaignController {
       await this.campaignService.sendNewsLetter(body);
     }
   }
+  
 }

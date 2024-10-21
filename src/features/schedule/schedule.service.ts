@@ -154,7 +154,7 @@ export class ScheduleService {
     name: 'Reminders At 08:30 on Saturday.',
     timeZone: 'Asia/Tehran',
   })
-  async handleReminderMailCron() {
+  async handleChildNoNeedReminderMailCron() {
     if (process.env.NODE_ENV === 'production') {
       this.logger.debug('Sending Reminder to Social workers');
       await this.campaignService.sendSwChildNoNeedReminder();

@@ -14,6 +14,7 @@ import {
   UploadedFiles,
   Delete,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ChildrenService } from './children.service';
@@ -63,7 +64,7 @@ import {
 } from 'src/utils/helpers';
 import axios from 'axios';
 import { AllUserEntity } from 'src/entities/user.entity';
-import { checkIfFileOrDirectoryExists, moveFile } from 'src/utils/file';
+import { checkIfDirectoryExists, getCurrentFilenames, moveFile, renameFile } from 'src/utils/file';
 import fs from 'fs';
 import { CampaignService } from '../campaign/campaign.service';
 import { File } from '@web-std/file';
@@ -87,7 +88,7 @@ export class ChildrenController {
     private locationService: LocationService,
     private downloadService: DownloadService,
     private campaignService: CampaignService,
-  ) {}
+  ) { }
   @Get(`preregister/:childFlaskId`)
   @ApiOperation({ description: 'Get child preregister' })
   async getChildPreregister(
@@ -285,6 +286,111 @@ export class ChildrenController {
     }
   }
 
+  @Post(`preregister`)
+  @ApiOperation({ description: 'Create children pre register' })
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'awakeFile', maxCount: 1 },
+        { name: 'sleptFile', maxCount: 1 },
+      ],
+      avatarStorage,
+    ),
+  )
+  @UsePipes(new ValidationPipe())
+  async preRegisterAdminCreate(
+    @Req() req: Request,
+    @UploadedFiles()
+    files: {
+      awakeFile?: Express.Multer.File[];
+      sleptFile?: Express.Multer.File[];
+    },
+    @Body()
+    body: { sex: SexEnum; sayNameFa: string; sayNameEn: string },
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
+        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException('You Are not the Authorized!');
+    }
+
+    if (!files || !files.awakeFile || !files.sleptFile) {
+      throw new BadRequestException('No files were uploaded!');
+    }
+
+    // for local purposes - organized folders and files
+    if (process.env.NODE_ENV === 'development') {
+      const preRegistersByName = await this.childrenService.getPreChildrenByName(body.sayNameFa)
+
+      if (preRegistersByName && preRegistersByName.length > 0) {
+        throw new BadRequestException('Can not have similar names!');
+      }
+
+      const originalAwakeGirl = `../../Docs/children/girls/${files.awakeFile[0].filename.split('-s-')[0]
+        }.png`;
+      const originalAwakeBoy = `../../Docs/children/boys/${files.awakeFile[0].filename.split('-s-')[0]
+        }.png`;
+      const originalSleptGirl = `../../Docs/children/girls/${files.sleptFile[0].filename.split('-s-')[0]
+        }.png`;
+      const originalSleptBoy = `../../Docs/children/boys/${files.sleptFile[0].filename.split('-s-')[0]
+        }.png`;
+
+
+      const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
+      const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
+
+      try {
+
+        let preRegister: ChildrenPreRegisterEntity
+        if (
+          checkIfDirectoryExists(originalAwakeGirl) ||
+          checkIfDirectoryExists(originalAwakeBoy)
+        ) {
+          preRegister = await this.childrenService.createPreRegisterChild(
+            files.awakeFile[0].filename,
+            files.sleptFile[0].filename,
+            { fa: body.sayNameFa, en: body.sayNameEn },
+            body.sex,
+          );
+
+          const newChildFolder = `../../Docs/children${Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
+            }organized/${capitalizeFirstLetter(body.sayNameEn)}_${preRegister.id}`;
+
+          if (!checkIfDirectoryExists(newChildFolder)) {
+            console.log('Creating the child organized folder ...');
+            fs.mkdirSync(newChildFolder);
+            if (!checkIfDirectoryExists(newChildFolder)) {
+              throw new ServerError('could not find the folder');
+            }
+          }
+          if (Number(body.sex) === SexEnum.MALE) {
+            moveFile(originalAwakeBoy, `${newChildFolder}/${newAwakeName}`);
+            moveFile(originalSleptBoy, `${newChildFolder}/${newSleepName}`);
+          }
+          if (Number(body.sex) === SexEnum.FEMALE) {
+            moveFile(originalAwakeGirl, `${newChildFolder}/${newAwakeName}`);
+            moveFile(originalSleptGirl, `${newChildFolder}/${newSleepName}`);
+          }
+        } else {
+          throw new ServerError('could not find the file');
+        }
+        return preRegister;
+
+
+      } catch (e) {
+        throw new ServerError(e.msg);
+      }
+    }
+  }
+
   @Delete(`preregister/:id`)
   @ApiOperation({ description: 'Delete a pre register' })
   async deletePreRegister(@Req() req: Request, @Param('id') id: string) {
@@ -314,102 +420,96 @@ export class ChildrenController {
     }
   }
 
-  @Post(`preregister`)
-  @ApiOperation({ description: 'Create children pre register' })
-  @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'awakeFile', maxCount: 1 },
-        { name: 'sleptFile', maxCount: 1 },
-      ],
-      avatarStorage,
-    ),
-  )
+  @Get(`complete-delete`)
+  @ApiOperation({
+    description: 'After delete we need to move back the avatars to their folders',
+  })
   @UsePipes(new ValidationPipe())
-  async preRegisterAdd(
-    @Req() req: Request,
-    @UploadedFiles()
-    files: {
-      awakeFile?: Express.Multer.File[];
-      sleptFile?: Express.Multer.File[];
-    },
-    @Body()
-    body: { sex: SexEnum; sayNameFa: string; sayNameEn: string },
-  ) {
+  async preRegisterCompleteDelete(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       !(
-        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
-        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
         panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
         panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
       )
     ) {
       throw new ForbiddenException('You Are not the Authorized!');
     }
-
-    if (!files) {
-      throw new ServerError('No files were uploaded!');
-    }
-
     // for local purposes - organized folders and files
     if (process.env.NODE_ENV === 'development') {
-      const newChildFolder = `../../Docs/children${
-        Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
-      }organized/${capitalizeFirstLetter(body.sayNameEn)}-${body.sayNameFa}`;
+      try {
+        const token =
+          config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
+        const configs = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: token,
+            contentType: false,
+            flaskId: panelFlaskUserId,
+            'X-TAKE': 0,
+            'X-LIMIT': 100,
+          },
+        };
+        const result1 = await axios.get(
+          `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.PRE_REGISTERED}`,
+          configs,
+        );
+        const result2 = await axios.get(
+          `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.CONFIRMED}`,
+          configs,
+        );
+        const result3 = await axios.get(
+          `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.NOT_REGISTERED}`,
+          configs,
+        );
+        const allPreRegisters = result1.data.data.concat(result2.data.data).concat(result3.data.data);
 
-      const originalAwakeGirl = `../../Docs/children/girls/${
-        files.awakeFile[0].filename.split('-s-')[0]
-      }.png`;
-      const originalAwakeBoy = `../../Docs/children/boys/${
-        files.awakeFile[0].filename.split('-s-')[0]
-      }.png`;
-      const originalSleptGirl = `../../Docs/children/girls/${
-        files.sleptFile[0].filename.split('-s-')[0]
-      }.png`;
-      const originalSleptBoy = `../../Docs/children/boys/${
-        files.sleptFile[0].filename.split('-s-')[0]
-      }.png`;
+        // remove the path which has a preregister id. return the paths left in array -> those which were deleted, ...
+        function removeItemOnce(arr: any[], value: string) {
+          const index = arr.indexOf(value);
+          if (index > -1) {
+            arr.splice(index, 1);
+          }
+          return arr;
+        }
+        let path: string;
+        const boysFiles = fs.readdirSync(`../../Docs/children/boys/organized`);
+        const girlsFiles = fs.readdirSync(`../../Docs/children/girls/organized`);
+        const filesDir = boysFiles.concat(girlsFiles);
 
-      const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
-      const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
+        for (const p of allPreRegisters) {
+          path = filesDir.find(
+            (d) => d.split(`_`)[1] === p.id
+          );
+          if (!path) {
+            // This one is deleted and we need to restore the child folder
+            continue
+          } else {
+            removeItemOnce(filesDir, path)
+          }
+        }
 
-      if (
-        checkIfFileOrDirectoryExists(originalAwakeGirl) ||
-        checkIfFileOrDirectoryExists(originalAwakeBoy)
-      ) {
-        if (!checkIfFileOrDirectoryExists(newChildFolder)) {
-          fs.mkdirSync(newChildFolder);
+        if (girlsFiles.length + boysFiles.length !== (boysFiles.concat(girlsFiles)).length) {
+          throw new ServerError('The arrays are different');
         }
-        if (Number(body.sex) === SexEnum.MALE) {
-          moveFile(originalAwakeBoy, `${newChildFolder}/${newAwakeName}`);
-          moveFile(originalSleptBoy, `${newChildFolder}/${newSleepName}`);
-        }
-        if (Number(body.sex) === SexEnum.FEMALE) {
-          moveFile(originalAwakeGirl, `${newChildFolder}/${newAwakeName}`);
-          moveFile(originalSleptGirl, `${newChildFolder}/${newSleepName}`);
-        }
-      } else {
-        throw new ServerError('could not find the file');
+
+        return { "FoldersToBeManaged": filesDir };
+      } catch (e) {
+        console.log(e);
+        throw new ServerError(e.message);
       }
     }
-    return await this.childrenService.createPreRegisterChild(
-      files.awakeFile[0].filename,
-      files.sleptFile[0].filename,
-      { fa: body.sayNameFa, en: body.sayNameEn },
-      body.sex,
-    );
   }
 
   @ApiOperation({
     description: 'NGO / SW add a child by updating pre register',
   })
-  @Patch(`preregister/prepare`)
+  @Patch(`preregister/assign`)
   @UsePipes(new ValidationPipe())
   @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
-  async preRegisterPrepare(
+  async preRegisterAssignChild(
     @Req() req: Request,
     @UploadedFile() voiceFile,
     @Body(ValidateChildPipe) body: PreparePreRegisterChildDto,
@@ -521,7 +621,7 @@ export class ChildrenController {
       if (!nestSocialWorker || !ngo || !contributor) {
         throw new ServerError('This social worker has not contributed yet');
       }
-      return await this.childrenService.preRegisterPrepare(
+      return await this.childrenService.preRegisterAssignChild(
         candidate.id,
         {
           phoneNumber: body.phoneNumber,
@@ -862,8 +962,8 @@ export class ChildrenController {
     const found = names.filter((n) =>
       lang === 'en'
         ? n.en.toUpperCase() === newName.toUpperCase() ||
-          (n.en &&
-            n.en.slice(-3).toUpperCase() === newName.slice(-3).toUpperCase())
+        (n.en &&
+          n.en.slice(-3).toUpperCase() === newName.slice(-3).toUpperCase())
         : n.fa === newName || (n.fa && n.fa.slice(-3) === newName.slice(-3)),
     );
 
@@ -979,13 +1079,25 @@ export class ChildrenController {
     return await this.childrenService.getChildNeedsSummery(token, childId);
   }
 
+  @Get(`no-need`)
+  @ApiOperation({ description: 'Get children with no need' })
+  async childrenWithNoNeed(@Req() req: Request) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException('You Are not authorized');
+    }
+
+    return await this.campaignService.childrenWithNoNeed();
+  }
+
   @Get('/network')
   getAvailableContributions(@Req() req: Request) {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
       throw new ForbiddenException('You Are not authorized');
     }
-    return this.childrenService.gtTheNetwork();
+    return this.childrenService.getTheNetwork();
   }
 
   @Get('avatars/images/:fileName')

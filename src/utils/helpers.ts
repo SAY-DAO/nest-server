@@ -18,7 +18,7 @@ import {
   AnnouncementEnum,
 } from 'src/types/interfaces/interface';
 import fs from 'fs';
-import { checkIfFileOrDirectoryExists } from './file';
+import { checkIfDirectoryExists } from './file';
 
 export const Q1_LOWER_COEFFICIENT = 0.75;
 export const Q1_TO_Q2_COEFFICIENT = 1;
@@ -31,20 +31,6 @@ const RELETIVES_DELIVERED_RANGE = 3;
 export function sleep(time) {
   console.log('Sleeping...');
   return new Promise((resolve) => setTimeout(resolve, time));
-}
-export function getAllFilesFromFolder(dir: string) {
-  let results = [];
-  if (checkIfFileOrDirectoryExists(dir)) {
-    fs.readdirSync(dir).forEach(function (file) {
-      file = dir + '/' + file;
-      const stat = fs.statSync(file);
-      if (stat && stat.isDirectory()) {
-        results = results.concat(getAllFilesFromFolder(file));
-      } else results.push(file);
-    });
-  }
-
-  return results;
 }
 
 // {id: 44 }
@@ -213,28 +199,28 @@ export function persianMonthStringFarsi(value: Date) {
   return pm === 'Farvardin'
     ? 'فروردین'
     : pm === 'Ordibehesht'
-    ? 'اردیبهست'
-    : pm === 'Khordad'
-    ? 'خرداد'
-    : pm === 'Tir'
-    ? 'تیر'
-    : pm === 'Mordad'
-    ? 'مرداد'
-    : pm === 'Shahrivar'
-    ? 'شهریور'
-    : pm === 'Mehr'
-    ? 'مهر'
-    : pm === 'Aban'
-    ? 'آبان'
-    : pm === 'Azar'
-    ? 'آذر'
-    : pm === 'Dey'
-    ? 'دی'
-    : pm === 'Bahman'
-    ? 'بهمن'
-    : pm === 'Esfand'
-    ? 'اسفند'
-    : null;
+      ? 'اردیبهست'
+      : pm === 'Khordad'
+        ? 'خرداد'
+        : pm === 'Tir'
+          ? 'تیر'
+          : pm === 'Mordad'
+            ? 'مرداد'
+            : pm === 'Shahrivar'
+              ? 'شهریور'
+              : pm === 'Mehr'
+                ? 'مهر'
+                : pm === 'Aban'
+                  ? 'آبان'
+                  : pm === 'Azar'
+                    ? 'آذر'
+                    : pm === 'Dey'
+                      ? 'دی'
+                      : pm === 'Bahman'
+                        ? 'بهمن'
+                        : pm === 'Esfand'
+                          ? 'اسفند'
+                          : null;
 }
 
 export function persianDay(value: Date) {
@@ -561,7 +547,7 @@ export function ticketNotifications(
         !myView ||
         (latestView.flaskUserId !== myView.flaskUserId &&
           Date.parse(myView.viewed.toUTCString()) <
-            Date.parse(latestView.viewed.toUTCString()))
+          Date.parse(latestView.viewed.toUTCString()))
       );
     });
 
@@ -572,7 +558,7 @@ export function isUnpayable(need: Need) {
   return (
     need.unavailable_from &&
     timeDifference(new Date(), need.unavailable_from).hh <
-      PRODUCT_UNPAYABLE_PERIOD
+    PRODUCT_UNPAYABLE_PERIOD
   );
 }
 

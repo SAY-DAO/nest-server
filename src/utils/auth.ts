@@ -14,8 +14,6 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
   const requestDappFlaskId = Number(req.headers['flaskdappid']);
   const requestPanelFlaskId = Number(req.headers['flaskid']);
 
-  console.log(requestDappFlaskId);
-  console.log(accessToken);
   if (!accessToken || (!requestPanelFlaskId && !requestDappFlaskId)) {
     throw new ForbiddenException('Access Token and the ID is required!');
   }
@@ -103,6 +101,8 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
           accessToken,
           Number(requestPanelFlaskId),
         );
+        console.log('here2');
+
         if (!socialWorker) {
           throw new ForbiddenException('You Do not have Access!');
         }

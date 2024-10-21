@@ -43,7 +43,7 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-  ) {}
+  ) { }
 
   async countChildren(ngoIds: number[]) {
     return this.flaskChildRepository
@@ -164,7 +164,7 @@ export class ChildrenService {
     );
   }
 
-  preRegisterPrepare(
+  preRegisterAssignChild(
     theId: string,
     childDetails: PreRegisterChildPrepareParams,
     location: LocationEntity,
@@ -344,6 +344,8 @@ export class ChildrenService {
     });
   }
 
+
+
   async getFlaskChildren(
     options: PaginateQuery,
     body: {
@@ -365,8 +367,8 @@ export class ChildrenService {
           body.isConfirmed === ChildConfirmation.CONFIRMED
             ? [true]
             : ChildConfirmation.NOT_CONFIRMED
-            ? [false]
-            : ChildConfirmation.BOTH && [true, false],
+              ? [false]
+              : ChildConfirmation.BOTH && [true, false],
       })
       .andWhere('child.id_social_worker IN (:...socialWorkerIds)', {
         socialWorkerIds: [...socialWorkerIds],
@@ -376,11 +378,11 @@ export class ChildrenService {
           body.statuses[0] >= 0
             ? [...body.statuses]
             : [
-                ChildExistence.DEAD,
-                ChildExistence.AlivePresent,
-                ChildExistence.AliveGone,
-                ChildExistence.TempGone,
-              ],
+              ChildExistence.DEAD,
+              ChildExistence.AlivePresent,
+              ChildExistence.AliveGone,
+              ChildExistence.TempGone,
+            ],
       })
 
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
@@ -429,6 +431,19 @@ export class ChildrenService {
       .getMany();
   }
 
+  async getPreChildrenByName(sayNameEn: string): Promise<ChildrenPreRegisterEntity[]> {
+    return await this.preRegisterChildrenRepository
+      .createQueryBuilder('child')
+      // .where('child.status != :status', {
+      //   status: PreRegisterStatusEnum.CONFIRMED,
+      // })
+      .where("child.sayName -> 'en' = :sayName", {
+        sayName: sayNameEn,
+      })
+      .select(['child.sayName'])
+      .getMany();
+  }
+
   getChildPreRegisterById(id: string): Promise<ChildrenPreRegisterEntity> {
     const child = this.preRegisterChildrenRepository.findOne({
       where: {
@@ -472,7 +487,7 @@ export class ChildrenService {
       .getMany();
   }
 
-  async gtTheNetwork(): Promise<any> {
+  async getTheNetwork(): Promise<any> {
     return this.flaskChildRepository
       .createQueryBuilder('child')
       .leftJoinAndMapOne(

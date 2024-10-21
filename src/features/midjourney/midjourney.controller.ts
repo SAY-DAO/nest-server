@@ -24,7 +24,7 @@ import {
   SUPER_ADMIN_ID_PANEL,
 } from 'src/types/interfaces/interface';
 import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
-import { checkIfFileOrDirectoryExists } from 'src/utils/file';
+import { checkIfDirectoryExists } from 'src/utils/file';
 import fs from 'fs';
 import path from 'path';
 
@@ -36,7 +36,7 @@ export class MidjourneyController {
     private readonly downloadService: DownloadService,
     private readonly needService: NeedService,
     private readonly familyService: FamilyService,
-  ) {}
+  ) { }
 
   @Get(`db/all`)
   @ApiSecurity('flask-access-token')
@@ -264,7 +264,7 @@ export class MidjourneyController {
       }
 
       const path = `../midjourney-bot/main/need-images/need-${id}`;
-      if (checkIfFileOrDirectoryExists(path)) {
+      if (checkIfDirectoryExists(path)) {
         await rimraf(path);
         list.push(path);
       } else {

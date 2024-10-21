@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { NeedEntity } from 'src/entities/need.entity';
 import fs from 'fs';
 import config from 'src/config';
-import { checkIfFileOrDirectoryExists, deleteFile } from 'src/utils/file';
+import { checkIfDirectoryExists, deleteFile } from 'src/utils/file';
 import { NeedService } from '../need/need.service';
 import { FamilyService } from '../family/family.service';
 import { SAYPlatformRoles } from 'src/types/interfaces/interface';
@@ -27,7 +27,7 @@ export class MidjourneyService {
     private readonly midjourneyRepository: Repository<MidjourneyEntity>,
     private readonly familyService: FamilyService,
     private readonly needService: NeedService,
-  ) {}
+  ) { }
 
   async getAllImages(): Promise<MidjourneyEntity[]> {
     return this.midjourneyRepository.find();
@@ -77,7 +77,7 @@ export class MidjourneyService {
       }
     });
     config().dataCache.storeMidjourney(list);
-    if (checkIfFileOrDirectoryExists('../midjourney-bot/midjourney.json')) {
+    if (checkIfDirectoryExists('../midjourney-bot/midjourney.json')) {
       deleteFile('../midjourney-bot/midjourney.json');
     }
     fs.appendFile(
