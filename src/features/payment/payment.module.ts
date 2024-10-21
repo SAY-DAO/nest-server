@@ -1,6 +1,11 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { FamilyEntity, SocialWorkerEntity } from '../../entities/user.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import { NeedEntity } from '../../entities/need.entity';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { NeedService } from '../need/need.service';
@@ -9,11 +14,56 @@ import { PaymentService } from './payment.service';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { ChildrenService } from '../children/children.service';
 import { PaymentController } from './payment.controller';
+import { Need } from 'src/entities/flaskEntities/need.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
+import { ContributorEntity } from 'src/entities/contributor.entity';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
+import { PaymentMiddleware } from './middlewares/payment.middleware';
+import { VariableEntity } from 'src/entities/variable.entity';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([PaymentEntity, NeedEntity, FamilyEntity, SocialWorkerEntity, ChildrenEntity])],
-    controllers: [PaymentController],
-    providers: [PaymentService, UserService, NeedService, ChildrenService],
+  imports: [
+    TypeOrmModule.forFeature(
+      [
+        Need,
+        SocialWorker,
+        Child,
+        Payment,
+        UserFamily,
+        Family,
+        User,
+        Receipt,
+        NeedReceipt,
+      ],
+      'flaskPostgres',
+    ),
+    TypeOrmModule.forFeature([
+      PaymentEntity,
+      NeedEntity,
+      VariableEntity,
+      AllUserEntity,
+      ContributorEntity,
+      ChildrenEntity,
+      EthereumAccountEntity,
+      ChildrenPreRegisterEntity,
+    ]),
+  ],
+  controllers: [PaymentController],
+  providers: [PaymentService, UserService, NeedService, ChildrenService],
 })
-
-export class PaymentModule { }
+export class PaymentModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(PaymentMiddleware)
+      .exclude({ path: 'payment/new/cart', method: RequestMethod.POST })
+      .exclude({ path: 'payment/verify(.*)', method: RequestMethod.GET })
+      .forRoutes(PaymentController);
+  }
+}

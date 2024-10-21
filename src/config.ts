@@ -1,5 +1,5 @@
 import 'dotenv/config'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
-import { readFileSync } from 'fs';
+import DataCache from './utils/dataCache';
 
 let configObject;
 
@@ -11,40 +11,50 @@ const Environments = {
 };
 
 function loadConfig() {
-  let dbPassword = undefined;
   const NODE_ENV = process.env.NODE_ENV ?? Environments.development;
-  try {
-    if (process.env.DB_PASS_FILE)
-      dbPassword = readFileSync(process.env.DB_PASS_FILE, 'utf-8');
-  } catch {
-    console.log(`${process.env.DB_PASS_FILE} DOES NOT EXISTS!`);
-  }
 
   const configs = {
     serverPort: process.env.PORT || 8002,
     host:
-      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === undefined
         ? 'localHost'
         : process.env.NODE_ENV === 'docker-local'
-          ? 'localHost'
-          : process.env.NODE_ENV === 'staging' ? process.env.AUTHORIZED_HOST_STAGING : process.env.AUTHORIZED_HOST_PRODUCTION,
-    logLevel: 'debug',
+        ? 'localHost'
+        : process.env.NODE_ENV === 'staging'
+        ? process.env.AUTHORIZED_HOST_STAGING
+        : process.env.NEST_SERVER_PROD,
     documentUrl: '',
-    db: {
+    db1: {
       type: 'postgres' as const,
-      port: 5432,
+      port: Number(process.env.DB_PORT),
       host: NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,
       username: process.env.DB_USER ?? 'postgres',
-      password: dbPassword ?? process.env.DB_PASS ?? 'postgres',
-      database: process.env.DB_NAME ?? 'say_dapp',
+      password: process.env.DB_PASS ?? 'postgres',
+      database: process.env.DB_NAME ?? 'postgres',
+      synchronize: NODE_ENV === 'development' ? false : false, // true shouldn't be used in production - otherwise you can lose production data.
+      logging: false,
+      dropSchema: false, //  Don't use this in production - Drops the schema each time data source is being initialized.
+      migrationsRun: true, // if migrations should be auto run on every application launch. As an alternative, you can use CLI and run migration:run command.
+      migrations: [`dist/db/migrations/*.js`], // list of migrations that need to be loaded by TypeORM
+    },
+    db2: {
+      name: 'flaskPostgres',
+      type: 'postgres' as const,
+      port: Number(process.env.DB_FLASK_PORT),
+      host: process.env.DB_FLASK_HOST,
+      username: process.env.DB_FLASK_USER,
+      password: process.env.DB_FLASK_PASS,
+      database: process.env.DB_FLASK_NAME,
       enabled: true,
-      synchronize: true,
-      logging: true,
+      synchronize: false,
+      logging: false,
       dropSchema: false,
       autoLoadEntities: true,
-      entities: [`${__dirname}/entity/*.js`],
+      // entities: [`${__dirname}/entities/flaskEntities/*.js`],
     },
-    logPretty: 'LOG_PRETTY_PRINT',
+    // logPretty: 'LOG_PRETTY_PRINT',
+    dataCache: new DataCache(),
   };
 
   configs.documentUrl =
@@ -54,7 +64,6 @@ function loadConfig() {
 
   return configs;
 }
-
 export type ConfigType = ReturnType<typeof loadConfig>;
 
 export default function config(): ConfigType {
@@ -64,3 +73,5 @@ export default function config(): ConfigType {
 
   return configObject;
 }
+
+export const PRODUCT_UNPAYABLE_PERIOD = 24;

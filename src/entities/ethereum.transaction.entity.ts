@@ -1,83 +1,96 @@
-import { Entity, Column, ManyToOne } from 'typeorm'
-import { BaseEntity } from './BaseEntity'
-import { EthereumAccount } from './ethereum.account.entity'
+import { Entity, Column, ManyToOne } from 'typeorm';
+import { BaseEntity } from './BaseEntity';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { NeedEntity } from './need.entity';
 
 @Entity()
 export class EthereumTransaction extends BaseEntity {
   @Column({ nullable: true })
-  transactionHash: string
+  transactionHash: string;
 
   @Column({ nullable: true })
-  transactionStatus: string
+  transactionStatus: string;
 
   @Column({ nullable: true })
-  createdTimestamp: Date
+  createdTimestamp: Date;
 
   @Column({ nullable: true })
-  submittedTimestamp: Date
+  submittedTimestamp: Date;
 
   @Column({ nullable: true })
-  signedTimestamp: Date
+  signedTimestamp: Date;
 
   @Column({ nullable: true })
-  abortedTimestamp: Date
+  abortedTimestamp: Date;
 
   @Column({ nullable: true })
-  failedTimestamp: Date
+  failedTimestamp: Date;
 
   @Column({ nullable: true })
-  minedTimestamp: Date
+  minedTimestamp: Date;
 
   @Column({ nullable: true })
-  failureReason: string
+  failureReason: string;
 
   @Column({ nullable: true })
-  to: string
+  to: string;
 
   @Column({ nullable: true })
-  from: string
+  from: string;
 
   @Column({ nullable: true })
-  value: string
+  value: string;
 
   @Column({ nullable: true })
-  data: string
+  data: string;
 
   @Column({ nullable: true })
-  gasUsed: string
+  gasUsed: string;
 
   @Column({ nullable: true })
-  fees: string
+  fees: string;
 
   @Column({ nullable: true })
-  gasLimit: string
+  gasLimit: string;
 
   @Column({ nullable: true })
-  gasPrice?: string
+  gasPrice?: string;
 
   @Column({ nullable: true })
-  maxPriorityFeePerGas?: string
+  maxPriorityFeePerGas?: string;
 
   @Column({ nullable: true })
-  maxFeePerGas?: string
+  maxFeePerGas?: string;
 
   @Column({ nullable: true })
-  network: string
+  network: string;
 
   @Column({ nullable: true })
-  nonce: string
+  nonce: string;
 
   @Column({ nullable: true })
-  signedRawTransaction: string
+  signedRawTransaction: string;
 
-  @ManyToOne(() => EthereumAccount, (account) => account.ethereumTransactions, {
-    eager: true,
+  @Column({ nullable: true })
+  userId: string;
+
+  @Column({ nullable: true })
+  needId: string;
+
+  @ManyToOne(
+    () => EthereumAccountEntity,
+    (account) => account.ethereumTransactions,
+    {
+      eager: true,
+    },
+  )
+  ethereumAccount: EthereumAccountEntity;
+
+  @ManyToOne(() => NeedEntity, (n) => n.ethereumTransactions, {
+    eager: false,
   })
-  ethereumAccount: EthereumAccount
+  need: NeedEntity;
 
   @Column({ nullable: true })
-  userId: string
-
-  @Column({ nullable: true })
-  type: string
+  type: string;
 }

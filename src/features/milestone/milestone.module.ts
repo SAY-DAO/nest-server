@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HttpModule } from '@nestjs/axios';
@@ -13,19 +13,49 @@ import { StepEntity } from '../../entities/step.entity';
 import { StepService } from '../step/step.service';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
-import { FamilyEntity, SocialWorkerEntity } from '../../entities/user.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
+import { Need } from 'src/entities/flaskEntities/need.entity';
+import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
+import { ContributorEntity } from 'src/entities/contributor.entity';
+import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { Child } from 'src/entities/flaskEntities/child.entity';
+import { Payment } from 'src/entities/flaskEntities/payment.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { Family } from 'src/entities/flaskEntities/family.entity';
+import { MileStoneMiddleware } from './middlewares/milestone.middleware';
+import { VariableEntity } from 'src/entities/variable.entity';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature(
+      [
+        Need,
+        SocialWorker,
+        Child,
+        Payment,
+        UserFamily,
+        Family,
+        User,
+        Receipt,
+        NeedReceipt,
+      ],
+      'flaskPostgres',
+    ),
     TypeOrmModule.forFeature([
       MileStoneEntity,
       ChildrenEntity,
+      VariableEntity,
       NeedEntity,
       StepEntity,
-      FamilyEntity,
-      SocialWorkerEntity,
-      PaymentEntity
+      ContributorEntity,
+      AllUserEntity,
+      PaymentEntity,
+      EthereumAccountEntity,
+      ChildrenPreRegisterEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -37,7 +67,11 @@ import { UserService } from '../user/user.service';
     NeedService,
     UserService,
     StepService,
-    PaymentService
+    PaymentService,
   ],
 })
-export class MilestoneModule { }
+export class MilestoneModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MileStoneMiddleware).forRoutes('milestone');
+  }
+}

@@ -1,46 +1,118 @@
-import { NgoEntity } from "../../entities/ngo.entity";
-import { NeedEntity } from "../../entities/need.entity";
-import { EducationEnum, HousingEnum } from "../interface";
-import { SocialWorkerEntity } from "src/entities/user.entity";
+import {
+  EducationEnum,
+  HousingEnum,
+  PreRegisterStatusEnum,
+  SchoolTypeEnum,
+  SexEnum,
+} from '../interfaces/interface';
 
 export type ChildParams = {
-    flaskChildId: number;
-    flaskSupervisorId?: number;
-    awakeAvatarUrl?: string;
-    bio?: string;
-    bioSummary?: string;
-    bioSummaryTranslations?: { en: string; fa: string };
-    bioTranslations?: { en: string; fa: string };
-    birthDate?: Date;
-    birthPlace?: string;
-    city?: number;
-    confirmDate?: Date;
-    country?: number;
-    created?: Date;
-    doneNeedsCount?: number;
-    education?: EducationEnum;
-    existenceStatus?: number;
-    familyCount?: number;
-    generatedCode?: string;
-    housingStatus?: HousingEnum;
-    flaskSwId?: number;
-    ngo: NgoEntity;
-    socialWorker: SocialWorkerEntity;
-    supervisor?: SocialWorkerEntity;
-    isConfirmed?: boolean;
-    isDeleted?: boolean;
-    isMigrated?: boolean;
-    isGone?: boolean;
-    migrateDate?: Date;
-    migratedId?: number;
-    nationality?: string;
-    sayFamilyCount?: number;
-    sayName?: string;
-    sayNameTranslations?: { en: string; fa: string };
-    sleptAvatarUrl?: string;
-    status?: number;
-    updated?: Date;
-    voiceUrl?: string;
-    needs?: NeedEntity[]
-}
+  flaskId: number;
+  sayNameTranslations: Record<string, string>;
+  sayName: string;
+  phoneNumber?: string;
+  nationality?: number;
+  country?: number;
+  city?: number;
+  awakeAvatarUrl: string;
+  sleptAvatarUrl: string;
+  adultAvatarUrl?: string;
+  bioSummaryTranslations?: Record<string, string>;
+  bioTranslations?: Record<string, string>;
+  voiceUrl?: string;
+  birthPlace?: string;
+  birthDate?: Date;
+  housingStatus?: number;
+  familyCount?: number;
+  sayFamilyCount?: number;
+  education?: number;
+  status?: number;
+  spentCredit?: number;
+  created?: Date;
+  updated?: Date;
+  isDeleted?: boolean;
+  isConfirmed?: boolean;
+  flaskConfirmUser?: number;
+  confirmDate?: Date;
+  generatedCode?: string;
+  isMigrated?: boolean;
+  migratedId?: number;
+  migrateDate?: Date;
+};
+export type createFlaskChildParams = {
+  awakeAvatarUrl: any;
+  sleptAvatarUrl: any;
+  voiceUrl: any;
+  saynameTranslations: any;
+  bioTranslations: any;
+  bioSummaryTranslations: any;
+  phoneNumber: string;
+  country: number;
+  city: number;
+  gender: boolean;
+  ngoId?: number;
+  swId?: number;
+  firstNameTranslations?: any;
+  lastNameTranslations?: any;
+  nationalityId?: number;
+  birthPlace?: string;
+  birthDate?: string;
+  address?: string;
+  housingStatus?: HousingEnum;
+  familyCount?: number;
+  education?: number;
+};
 
+export type PreRegisterChildPrepareParams = {
+  phoneNumber: string;
+  address: string;
+  country: number;
+  state: number;
+  city: number;
+  status: PreRegisterStatusEnum;
+  bio: { fa: string; en: string };
+  voiceUrl: string;
+  birthPlaceId: number;
+  flaskChildId?: number;
+  birthPlaceName: string;
+  birthDate: Date;
+  housingStatus: HousingEnum;
+  familyCount: number;
+  educationLevel: EducationEnum;
+  schoolType: SchoolTypeEnum;
+  flaskNgoId: number;
+  flaskSwId: number;
+  firstName: { fa: string; en: string };
+  lastName: { fa: string; en: string };
+};
+
+export type PreRegisterChildUpdateParams = {
+  bio: { fa: string; en: string };
+  voiceUrl?: string;
+  housingStatus: HousingEnum;
+  educationLevel: EducationEnum;
+  schoolType: SchoolTypeEnum;
+  firstName: { fa: string; en: string };
+  lastName: { fa: string; en: string };
+};
+
+export type PreRegisterChildUpdateApprovedParams = {
+  awakeUrl: string;
+  sleptUrl: string;
+  sayName:  { fa: string; en: string };
+  firstName:  { fa: string; en: string };
+  lastName:  { fa: string; en: string };
+  bio:  { fa: string; en: string };
+  birthDate: Date;
+  birthPlaceId: number;
+  city: number;
+  state: number;
+  country: number;
+  sex: SexEnum;
+  educationLevel: EducationEnum;
+  housingStatus: HousingEnum;
+  address: string;
+  familyCount: number;
+  phoneNumber: string;
+  voiceUrl: string;
+};

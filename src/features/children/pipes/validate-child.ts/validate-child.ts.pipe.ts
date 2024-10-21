@@ -1,9 +1,9 @@
 import { ArgumentMetadata, HttpException, HttpStatus, Injectable, PipeTransform } from '@nestjs/common';
-import { CreateChildDto } from 'src/types/dtos/CreateChildren.dto';
+import { Children } from 'src/types/interfaces/Children';
 
 @Injectable()
-export class ValidateChildTsPipe implements PipeTransform {
-  transform(value: CreateChildDto, metadata: ArgumentMetadata) {
+export class ValidateChildPipe implements PipeTransform {
+  transform(value: Children, metadata: ArgumentMetadata) {
     console.log("Validating Children...")
 
     return value;

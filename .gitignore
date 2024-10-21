@@ -1,8 +1,16 @@
+build_local
+Thumbs.db
+.DS_Store
+npm-debug.log
+yarn-error.log
 # compiled output
+.vscode
+.idea
 /dist
-/node_modules
+node_modules
 /data
-
+/.yarn
+yarn.lock
 # Logs
 logs
 *.log
@@ -14,6 +22,8 @@ lerna-debug.log*
 
 # images
 /uploads
+midjourney.json
+src/features/midjourney/bad-images-to-remove.json
 
 # OS
 .DS_Store
@@ -21,6 +31,7 @@ lerna-debug.log*
 # Tests
 /coverage
 /.nyc_output
+temp.json
 
 # IDEs and editors
 /.idea
@@ -37,3 +48,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.vscode
+
+# db

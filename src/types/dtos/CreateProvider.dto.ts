@@ -1,14 +1,21 @@
-import { NeedTypeDefinitionEnum } from '../interface';
+import { NeedTypeDefinitionEnum } from '../interfaces/interface';
 
 export class CreateProviderDto {
     name: string;
     description: string;
+    address: string;
     website: string;
-    type: number;
+    type: string;
     typeName: NeedTypeDefinitionEnum;
     city: number;
     state: number;
     country: number;
     logoUrl: ImageData;
     isActive: boolean
+}
+
+export class CreateProviderJoinNeedDto {
+    nestProviderId: string;
+    flaskNeedId: number;
+   
 }
