@@ -327,6 +327,13 @@ export class ChildrenController {
       throw new BadRequestException('No files were uploaded!');
     }
 
+    const preRegister = await this.childrenService.createPreRegisterChild(
+      files.awakeFile[0].filename,
+      files.sleptFile[0].filename,
+      { fa: body.sayNameFa, en: body.sayNameEn },
+      body.sex,
+    );
+
     // for local purposes - organized folders and files
     if (process.env.NODE_ENV === 'development') {
       const preRegistersByName = await this.childrenService.getPreChildrenByName(body.sayNameFa)
@@ -349,18 +356,11 @@ export class ChildrenController {
       const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
 
       try {
-
-        let preRegister: ChildrenPreRegisterEntity
         if (
           checkIfDirectoryExists(originalAwakeGirl) ||
           checkIfDirectoryExists(originalAwakeBoy)
         ) {
-          preRegister = await this.childrenService.createPreRegisterChild(
-            files.awakeFile[0].filename,
-            files.sleptFile[0].filename,
-            { fa: body.sayNameFa, en: body.sayNameEn },
-            body.sex,
-          );
+  
 
           const newChildFolder = `../../Docs/children${Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
             }organized/${capitalizeFirstLetter(body.sayNameEn)}_${preRegister.id}`;
