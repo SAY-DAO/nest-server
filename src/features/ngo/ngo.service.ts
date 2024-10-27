@@ -113,7 +113,6 @@ export class NgoService {
       (n: { deliveryCode: string }) => n.deliveryCode,
     );
     const uniqueCodes = Array.from(new Set(codesArray));
-    console.log(uniqueCodes);
 
     const arrivalCodes = [];
     for await (const c of uniqueCodes) {
