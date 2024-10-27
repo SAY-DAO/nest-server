@@ -27,7 +27,7 @@ export class NgoService {
     private needFlaskRepository: Repository<Need>,
     @InjectRepository(SocialWorker, 'flaskPostgres')
     private flaskSocialWorkerRepository: Repository<SocialWorker>,
-  ) {}
+  ) { }
 
   getNgos(): Promise<NgoEntity[]> {
     return this.ngoRepository.find();
@@ -62,7 +62,7 @@ export class NgoService {
 
   async getNgoArrivals(socialWorker: number, swIds: number[]) {
     const today = new Date();
-    const daysAgo = today.setDate(today.getDate() - 30);
+    const daysAgo = today.setDate(today.getDate() - 60);
 
     const needs = await this.needFlaskRepository
       .createQueryBuilder('need')
@@ -73,15 +73,16 @@ export class NgoService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      // .where(
-      //   new Brackets((qb) => {
-      //     qb.where('need.type = :typeProduct', {
-      //       typeProduct: NeedTypeEnum.PRODUCT,
-      //     }).andWhere('need.status = :productStatus', {
-      //       productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
-      //     });
-      //   }),
-      // )
+      .where(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
+          // .andWhere('need.status = :productStatus', {
+          //   productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
+          // });
+        }),
+      )
       .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('need.isConfirmed = :needConfirmed', { needConfirmed: true })
       .andWhere('need.expected_delivery_date > :startDate', {
@@ -102,6 +103,7 @@ export class NgoService {
         'need.type',
         'need.status',
         'need.created_by_id',
+        'need.purchase_date',
         'need.expected_delivery_date',
       ])
       .getMany();
@@ -111,6 +113,7 @@ export class NgoService {
       (n: { deliveryCode: string }) => n.deliveryCode,
     );
     const uniqueCodes = Array.from(new Set(codesArray));
+    console.log(uniqueCodes);
 
     const arrivalCodes = [];
     for await (const c of uniqueCodes) {
