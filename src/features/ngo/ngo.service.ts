@@ -62,7 +62,7 @@ export class NgoService {
 
   async getNgoArrivals(socialWorker: number, swIds: number[]) {
     const today = new Date();
-    const daysAgo = today.setDate(today.getDate() - 90);
+    const daysAgo = today.setDate(today.getDate() - 30);
 
     const needs = await this.needFlaskRepository
       .createQueryBuilder('need')
@@ -73,16 +73,16 @@ export class NgoService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where(
-        new Brackets((qb) => {
-          qb.where('need.type = :typeProduct', {
-            typeProduct: NeedTypeEnum.PRODUCT,
-          }).andWhere('need.status = :productStatus', {
-            productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
-          });
-        }),
-      )
-      .andWhere('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      // .where(
+      //   new Brackets((qb) => {
+      //     qb.where('need.type = :typeProduct', {
+      //       typeProduct: NeedTypeEnum.PRODUCT,
+      //     }).andWhere('need.status = :productStatus', {
+      //       productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
+      //     });
+      //   }),
+      // )
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .andWhere('need.isConfirmed = :needConfirmed', { needConfirmed: true })
       .andWhere('need.expected_delivery_date > :startDate', {
         startDate: new Date(daysAgo),
