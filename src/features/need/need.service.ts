@@ -649,6 +649,7 @@ export class NeedService {
         'need.img',
         'need.purchase_cost',
         'need._cost',
+        'need.deliveryCode',
         'need.isConfirmed',
         'need.created',
         'need.updated',

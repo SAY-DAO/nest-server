@@ -80,7 +80,10 @@ export const deleteFile = async (path: string): Promise<void> => {
 };
 
 export const moveFile = async (oldPath: string, newPath: string) => {
-  fs.rename(oldPath, newPath, () => console.log('Moved a file...'));
+  fs.rename(oldPath, newPath, (err) => {
+    if (err) throw err;
+    console.log('Rename complete!');
+  });
 };
 
 

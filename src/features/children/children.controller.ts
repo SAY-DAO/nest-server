@@ -70,6 +70,7 @@ import { CampaignService } from '../campaign/campaign.service';
 import { File } from '@web-std/file';
 import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
 import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import { forEach } from 'mathjs';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -478,6 +479,7 @@ export class ChildrenController {
         const boysFiles = fs.readdirSync(`../../Docs/children/boys/organized`);
         const girlsFiles = fs.readdirSync(`../../Docs/children/girls/organized`);
         const filesDir = boysFiles.concat(girlsFiles);
+        const separateFilesDir = { boysFiles, girlsFiles }
 
         for (const p of allPreRegisters) {
           path = filesDir.find(
@@ -495,6 +497,47 @@ export class ChildrenController {
           throw new ServerError('The arrays are different');
         }
 
+        const girlPathList = []
+        const boyPathList = []
+
+        filesDir.forEach((dir) => {
+          const girlPath = separateFilesDir.girlsFiles.find(
+            (d) => dir === d
+          );
+          const boyPath = separateFilesDir.boysFiles.find(
+            (d) => dir === d
+          );
+
+          if (girlPath) {
+            girlPathList.push(girlPath)
+          }
+          if (boyPath) {
+            boyPathList.push(boyPath)
+          }
+
+        })
+
+
+
+        if (boyPathList[0]) {
+          console.log("boy");
+          boyPathList.forEach((p) => {
+            const targetDirectory = `../../Docs/children/boys/organized/${p}`
+            const files = fs.readdirSync(targetDirectory);
+            files.forEach(async (f) => await moveFile(`${targetDirectory}/${f}`, `../../Docs/children/to-be-restored/${f}`))
+            fs.promises.rmdir(targetDirectory, { recursive: false });
+          })
+        }
+        if (girlPathList[0]) {
+          console.log("girl");
+          girlPathList.forEach((p) => {
+            const targetDirectory = `../../Docs/children/girls/organized/${p}`
+            const files = fs.readdirSync(targetDirectory);
+            files.forEach(async (f) => await moveFile(`${targetDirectory}/${f}`, `../../Docs/children/to-be-restored/${f}`))
+            fs.promises.rmdir(targetDirectory, { recursive: false });
+
+          })
+        }
         return { "FoldersToBeManaged": filesDir };
       } catch (e) {
         console.log(e);
