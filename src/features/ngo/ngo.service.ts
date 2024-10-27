@@ -62,7 +62,7 @@ export class NgoService {
 
   async getNgoArrivals(socialWorker: number, swIds: number[]) {
     const today = new Date();
-    const daysAgo = today.setDate(today.getDate() - 10);
+    const daysAgo = today.setDate(today.getDate() - 90);
 
     const needs = await this.needFlaskRepository
       .createQueryBuilder('need')
