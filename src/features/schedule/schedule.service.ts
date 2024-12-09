@@ -94,7 +94,8 @@ export class ScheduleService {
     this.rolesCount();
   }
 
-  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT, {
+
+  @Cron(CronExpression.EVERY_WEEK, {
     name: 'ActiveFamilies',
     timeZone: 'Asia/Tehran',
   })
@@ -129,7 +130,7 @@ export class ScheduleService {
   }
 
   // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here
-  @Cron('00 09 * * Sun', {
+  @Cron('30 09 * * Mon', {
     name: 'MonthlyCampaigns try At 09:00 on Sunday.', // we try every week and only send to those who did not receive (because their child have no needs, etc.)
     timeZone: 'Asia/Tehran',
   })
@@ -146,7 +147,7 @@ export class ScheduleService {
       this.logger.debug(
         'Sending user Campaigns at 01:00 PM, only on Thursdays',
       );
-      // await this.campaignService.sendUserMonthlyCampaigns();
+      await this.campaignService.sendUserMonthlyCampaigns();
     }
   }
 

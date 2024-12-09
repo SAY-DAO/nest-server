@@ -101,7 +101,6 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
           accessToken,
           Number(requestPanelFlaskId),
         );
-        console.log('here2');
 
         if (!socialWorker) {
           throw new ForbiddenException('You Do not have Access!');

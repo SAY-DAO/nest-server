@@ -157,46 +157,46 @@ export default class DataCache {
   };
 
   expirePanelAccessToken = (flaskSwId: number) =>
-  (this.authentication[String(flaskSwId)] = {
-    ...this.authentication[String(flaskSwId)],
-    isExpired: true,
-  });
+    (this.authentication[String(flaskSwId)] = {
+      ...this.authentication[String(flaskSwId)],
+      isExpired: true,
+    });
   expireDappAccessToken = (flaskFamilyId: number) =>
-  (this.authentication[String(flaskFamilyId)] = {
-    ...this.authentication[String(flaskFamilyId)],
-    isExpired: true,
-  });
+    (this.authentication[String(flaskFamilyId)] = {
+      ...this.authentication[String(flaskFamilyId)],
+      isExpired: true,
+    });
 
   // panel analytic scatter chart
   roleScatteredData() {
     return {
       father: getScattered(
-        this.familyData.fathersData,
+        this.familyData && this.familyData.fathersData,
         VirtualFamilyRole.FATHER,
         this.medianList,
       ),
       mother: getScattered(
-        this.familyData.mothersData,
+        this.familyData && this.familyData.mothersData,
         VirtualFamilyRole.MOTHER,
         this.medianList,
       ),
       amoo: getScattered(
-        this.familyData.amoosData,
+        this.familyData && this.familyData.amoosData,
         VirtualFamilyRole.AMOO,
         this.medianList,
       ),
       khaleh: getScattered(
-        this.familyData.khalehsData,
+        this.familyData && this.familyData.khalehsData,
         VirtualFamilyRole.KHALEH,
         this.medianList,
       ),
       daei: getScattered(
-        this.familyData.daeisData,
+        this.familyData && this.familyData.daeisData,
         VirtualFamilyRole.DAEI,
         this.medianList,
       ),
       amme: getScattered(
-        this.familyData.ammesData,
+        this.familyData && this.familyData.ammesData,
         VirtualFamilyRole.AMME,
         this.medianList,
       ),

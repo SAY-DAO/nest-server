@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -157,6 +158,17 @@ export class NeedController {
     return await this.needService.getNestPurchaserNeeds(flaskUserId);
   }
 
+  @Get('title/search') // this will replace need template / preNeed
+  @ApiOperation({ description: 'Get a need from db 2 by title' })
+  async getFlaskNeedByTitle(@Req() req: Request, @Query('q') query: string) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
+      throw new ForbiddenException(401, 'You Are not authorized!');
+    }
+    return await this.needService.getNeedByTitle(query);
+  }
+
   @Get(`flask/:id`)
   @ApiOperation({ description: 'Get a need from db 2' })
   async getFlaskNeed(@Req() req: Request, @Param('id') id: number) {
@@ -176,12 +188,12 @@ export class NeedController {
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    
+
     if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
       throw new ForbiddenException(401, 'You Are not authorized!');
     }
 
-    const theNeed = await this.needService.getNeedByFlaskId(needFlaskId)
+    const theNeed = await this.needService.getNeedByFlaskId(needFlaskId);
 
     return theNeed;
   }

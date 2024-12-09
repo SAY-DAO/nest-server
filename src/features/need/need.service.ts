@@ -197,6 +197,35 @@ export class NeedService {
     return user;
   }
 
+  async getNeedByTitle(title: string): Promise<Need[]> {
+    console.log(title);
+    return await this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .select()
+      .where(
+        new Brackets((qb) => {
+          qb.where('need.type = :typeProduct', {
+            typeProduct: NeedTypeEnum.PRODUCT,
+          })
+            .andWhere('need.title ILIKE :searchTerm', {
+              searchTerm: `%${title}%`,
+            })
+            .orWhere('need.type = :typeService', {
+              typeService: NeedTypeEnum.SERVICE,
+            })
+            .andWhere(
+              "need.name_translations -> 'fa' ILIKE :nameTranslations",
+              {
+                nameTranslations: `%${title}%`,
+              },
+            );
+        }),
+      )
+      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('need.isConfirmed = :needConfirmed', { needConfirmed: true })
+      .getMany();
+  }
+
   async updateNeedRatios(
     need: NeedEntity,
     distanceRatio: Decimal,

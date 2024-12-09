@@ -11,7 +11,7 @@ import {
   NeedTypeEnum,
   SAYPlatformRoles,
 } from 'src/types/interfaces/interface';
-import { convertFlaskToSayRoles } from 'src/utils/helpers';
+import { convertFlaskToSayRoles, daysDifference } from 'src/utils/helpers';
 import { UserService } from '../user/user.service';
 import { AnalyticService } from './analytic.service';
 import config from 'src/config';
@@ -30,7 +30,7 @@ export class AnalyticController {
     private userService: UserService,
 
     private readonly analyticService: AnalyticService,
-  ) { }
+  ) {}
 
   @Get('ecosystem/children')
   @ApiOperation({ description: 'get SAY children ecosystem analytics' })
@@ -60,8 +60,11 @@ export class AnalyticController {
       meanFamilyMembers: number;
       childrenList: any;
     };
-    result = config().dataCache.fetchChildrenEcosystem();
-    if (!result) {
+    const data = config().dataCache.fetchChildrenEcosystem();
+    console.log('datafff');
+    console.log(data);
+
+    if (!data || daysDifference(data.created, new Date()) > 1) {
       result = await this.analyticService.getChildrenEcosystemAnalytic();
       config().dataCache.storeChildrenEcosystem({
         meanNeedsPerChild: result.meanNeedsPerChild,
@@ -79,6 +82,8 @@ export class AnalyticController {
         meanFamilyMembers: result.meanFamilyMembers,
         childrenList: result.childrenList,
       });
+    } else {
+      result = data;
     }
 
     return result;
