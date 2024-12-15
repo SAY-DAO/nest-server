@@ -61,8 +61,6 @@ export class AnalyticController {
       childrenList: any;
     };
     const data = config().dataCache.fetchChildrenEcosystem();
-    console.log('datafff');
-    console.log(data);
 
     if (!data || daysDifference(data.created, new Date()) > 1) {
       result = await this.analyticService.getChildrenEcosystemAnalytic();

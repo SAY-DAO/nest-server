@@ -147,7 +147,7 @@ export class ScheduleService {
       this.logger.debug(
         'Sending user Campaigns at 01:00 PM, only on Thursdays',
       );
-      await this.campaignService.sendUserMonthlyCampaigns();
+      // await this.campaignService.sendUserMonthlyCampaigns();
     }
   }
 
