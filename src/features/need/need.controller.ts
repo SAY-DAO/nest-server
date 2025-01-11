@@ -653,13 +653,15 @@ export class NeedController {
         contentType: false,
       },
     };
+
     // Only for products: for service do a manual review for receipts
     for await (const need of needs[0]) {
       if (
         need.type === NeedTypeEnum.PRODUCT &&
         need.status === ProductStatusEnum.PURCHASED_PRODUCT
       ) {
-        const ticket = await this.ticketService.getTicketByFlaskNeedId(need.id);
+        const ticket = await this.ticketService.getTicketByFlaskNeedId(Number(need.id));
+        console.log(ticket);
 
         try {
           if (

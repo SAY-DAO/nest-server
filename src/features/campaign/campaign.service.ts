@@ -75,9 +75,13 @@ export class CampaignService {
   async handleEmailCampaign(
     campaignEmailCode: string,
     title: string,
-    emailCampaign: CampaignEntity,
     emailReceivers: any[],
   ) {
+    const emailCampaign = await this.getCampaignByCampaignCode(
+      campaignEmailCode,
+      CampaignTypeEnum.EMAIL,
+    );
+
     if (!emailCampaign && emailReceivers && emailReceivers[0]) {
       await this.createCampaign(
         campaignEmailCode,
@@ -102,9 +106,13 @@ export class CampaignService {
   async handleSmsCampaign(
     campaignSmsCode: string,
     title: string,
-    smsCampaign: CampaignEntity,
     smsReceivers: any[],
   ) {
+    const smsCampaign = await this.getCampaignByCampaignCode(
+      campaignSmsCode,
+      CampaignTypeEnum.SMS,
+    );
+
     if (!smsCampaign && smsReceivers && smsReceivers[0]) {
       await this.createCampaign(
         campaignSmsCode,
@@ -498,12 +506,9 @@ export class CampaignService {
                     : flaskUser.userName,
                 },
               });
-              await this.handleEmailCampaign(
-                campaignEmailCode,
-                title,
-                emailCampaign,
-                [nestUser],
-              );
+              await this.handleEmailCampaign(campaignEmailCode, title, [
+                nestUser,
+              ]);
             } catch (e) {
               console.log(e);
               continue;
@@ -538,9 +543,7 @@ export class CampaignService {
             }
           }
           if (smsResult && Number(smsResult.RetStatus) === 1) {
-            await this.handleSmsCampaign(campaignSmsCode, title, smsCampaign, [
-              nestUser,
-            ]);
+            await this.handleSmsCampaign(campaignSmsCode, title, [nestUser]);
             skippedUsersNoChildren++;
           } else {
             this.logger.warn(
@@ -619,12 +622,9 @@ export class CampaignService {
                 googleCampaignBuilder,
               },
             });
-            await this.handleEmailCampaign(
-              campaignEmailCode,
-              title,
-              emailCampaign,
-              [nestUser],
-            );
+            await this.handleEmailCampaign(campaignEmailCode, title, [
+              nestUser,
+            ]);
             this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
             emailReceiversTotal++;
           } catch (e) {
@@ -665,9 +665,7 @@ export class CampaignService {
             console.log(e);
           }
           if (smsResult && Number(smsResult.RetStatus) === 1) {
-            await this.handleSmsCampaign(campaignSmsCode, title, smsCampaign, [
-              nestUser,
-            ]);
+            await this.handleSmsCampaign(campaignSmsCode, title, [nestUser]);
             this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
             smsReceiversTotal++;
           } else {
@@ -864,7 +862,6 @@ export class CampaignService {
               await this.handleEmailCampaign(
                 campaignEmailCode,
                 campaignDetails.title,
-                emailCampaign,
                 [nestUser],
               );
               this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
@@ -910,7 +907,6 @@ export class CampaignService {
               await this.handleSmsCampaign(
                 campaignSmsCode,
                 campaignDetails.title,
-                smsCampaign,
                 [nestUser],
               );
               this.logger.log(`SMS Sent to User: ${nestUser.flaskUserId}`);
@@ -1032,7 +1028,6 @@ export class CampaignService {
                 await this.handleEmailCampaign(
                   campaignEmailCode,
                   campaignDetails.title,
-                  emailCampaign,
                   [nestContributor],
                 );
                 this.logger.log(
@@ -1077,7 +1072,6 @@ export class CampaignService {
                 await this.handleSmsCampaign(
                   campaignSmsCode,
                   campaignDetails.title,
-                  smsCampaign,
                   [nestContributor],
                 );
                 this.logger.log(
