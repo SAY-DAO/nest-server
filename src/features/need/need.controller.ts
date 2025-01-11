@@ -660,7 +660,9 @@ export class NeedController {
         need.type === NeedTypeEnum.PRODUCT &&
         need.status === ProductStatusEnum.PURCHASED_PRODUCT
       ) {
-        const ticket = await this.ticketService.getTicketByFlaskNeedId(Number(need.id));
+        const ticket = await this.ticketService.getTicketByFlaskNeedId(
+          Number(need.id),
+        );
         console.log(ticket);
 
         try {
@@ -698,7 +700,7 @@ export class NeedController {
             }
           }
         } catch (e) {
-          console.log(e);
+          throw new ServerError(e.statusMessage, e.statusCode);
         }
       }
     }
