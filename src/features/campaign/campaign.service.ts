@@ -75,7 +75,7 @@ export class CampaignService {
   async handleEmailCampaign(
     campaignEmailCode: string,
     title: string,
-    emailReceivers: any[],
+    emailReceivers: AllUserEntity[],
   ) {
     const emailCampaign = await this.getCampaignByCampaignCode(
       campaignEmailCode,
@@ -196,7 +196,7 @@ export class CampaignService {
     return need;
   }
 
-  createCampaign(
+  async createCampaign(
     campaignCode: string,
     campaignName: CampaignNameEnum,
     type: CampaignTypeEnum,
@@ -211,7 +211,7 @@ export class CampaignService {
     });
 
     newCampaign.receivers = users;
-    return this.campaignRepository.save(newCampaign);
+    return await this.campaignRepository.save(newCampaign);
   }
 
   async updateCampaignUsers(
@@ -223,7 +223,7 @@ export class CampaignService {
       ? [...currentReceivers, ...users]
       : [...users];
     campaign.receivers = newReceivers;
-    return this.campaignRepository.save(campaign);
+    return await this.campaignRepository.save(campaign);
   }
 
   async sendSwChildConfirmation(
@@ -513,13 +513,12 @@ export class CampaignService {
               console.log(e);
               continue;
             }
-          }
-          let smsResult: {
-            Value: string;
-            RetStatus: number;
-            StrRetStatus: string;
-          };
-          if (flaskUser.is_phonenumber_verified) {
+          } else if (flaskUser.is_phonenumber_verified) {
+            let smsResult: {
+              Value: string;
+              RetStatus: number;
+              StrRetStatus: string;
+            };
             const to = flaskUser.phone_number;
             const from = process.env.SMS_FROM;
             const shortNeedUrl = await this.shortenUrl({
@@ -541,16 +540,16 @@ export class CampaignService {
               );
               console.log(e);
             }
-          }
-          if (smsResult && Number(smsResult.RetStatus) === 1) {
-            await this.handleSmsCampaign(campaignSmsCode, title, [nestUser]);
-            skippedUsersNoChildren++;
-          } else {
-            this.logger.warn(
-              `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
-            );
-          }
 
+            if (smsResult && Number(smsResult.RetStatus) === 1) {
+              await this.handleSmsCampaign(campaignSmsCode, title, [nestUser]);
+              skippedUsersNoChildren++;
+            } else {
+              this.logger.warn(
+                `Could not send SMS to: ${flaskUser.phone_number} for user: ${flaskUser.id} `,
+              );
+            }
+          }
           continue;
         }
 
@@ -558,6 +557,7 @@ export class CampaignService {
         // 5- loop shuffled children
         for await (const child of shuffleArray(userChildren)) {
           if (counter <= 3) {
+            // we use tile of 3 needs in email template
             const childUnpaidNeeds = (
               await this.needService.getFlaskChildUnpaidNeeds(child.id)
             ).filter((n) => !isUnpayable(n));
