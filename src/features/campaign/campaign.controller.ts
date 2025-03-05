@@ -110,4 +110,9 @@ export class CampaignController {
       await this.campaignService.sendNewsLetter(body);
     }
   }
+
+  @Get('test/t')
+  test() {
+      return this.campaignService.test();
+  }
 }

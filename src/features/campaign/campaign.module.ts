@@ -63,7 +63,7 @@ import { TicketContentEntity } from 'src/entities/ticketContent.entity';
         // or
         transport: {
           host: config.get('MAIL_HOST'),
-          secure: true,
+          secure: false,
           auth: {
             user: config.get('MAIL_FROM'),
             pass: config.get('MAIL_PASSWORD'),

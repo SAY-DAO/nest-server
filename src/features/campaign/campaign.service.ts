@@ -241,7 +241,6 @@ export class CampaignService {
       `Emailing: Social worker ${socialWorker.flaskUserId} for new child Confirm!`,
     );
     await this.mailerService.sendMail({
-      from: '"NGOs" <ngo@saydao.org>', // override default from
       to: email,
       bcc: process.env.SAY_ADMIN_EMAIL,
       subject: title,
@@ -1106,6 +1105,29 @@ export class CampaignService {
     } catch (e) {
       console.log(e);
       throw new ServerError(e.message, e.status);
+    }
+  }
+
+  async test() {
+    try {
+      const socialWorker = await this.userService.getFlaskSw(Number(25));
+      this.logger.warn(
+        `Emailing: Social worker ${socialWorker.id} of children with no need!`,
+      );
+
+      await this.mailerService.sendMail({
+        to: socialWorker.email,
+        bcc: process.env.SAY_ADMIN_EMAIL,
+        subject: `${0} کودک بدون نیاز ثبت شده`,
+        template: './swRemindNoNeeds', // `.hbs` extension is appended automatically
+        context: {
+          userName: socialWorker.firstName
+            ? socialWorker.firstName
+            : socialWorker.userName,
+        },
+      });
+    } catch (e) {
+      console.log(e);
     }
   }
 }
