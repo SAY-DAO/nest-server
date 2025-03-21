@@ -143,9 +143,9 @@ export class ScheduleService {
       return;
     }
     // ############## BE CAREFUL #################
-    if (process.env.NODE_ENV === 'production') {
-      await this.campaignService.sendUserMonthlyCampaigns();
-    }
+    // if (process.env.NODE_ENV === 'production') {
+      // await this.campaignService.sendUserMonthlyCampaigns();
+    // }
   }
 
   @Cron('30 8 * * Sat', {
