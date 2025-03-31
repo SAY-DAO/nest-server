@@ -5,15 +5,15 @@ import { ReceiptEntity } from '../../entities/receipt.entity';
 import { NeedService } from '../need/need.service';
 import { ReceiptController } from './receipt.controller';
 import { ReceiptService } from './receipt.service';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { ContributorEntity } from 'src/entities/contributor.entity';
-import { Child } from 'src/entities/flaskEntities/child.entity';
-import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { ContributorEntity } from '../../entities/contributor.entity';
+import { Child } from '../../entities/flaskEntities/child.entity';
+import { Payment } from '../../entities/flaskEntities/payment.entity';
+import { SocialWorker } from '../../entities/flaskEntities/user.entity';
 import { ReceiptMiddleware } from './middlewares/receipt.middleware';
-import { VariableEntity } from 'src/entities/variable.entity';
-import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
-import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
+import { VariableEntity } from '../../entities/variable.entity';
+import { Receipt } from '../../entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
 
 @Module({
   imports: [

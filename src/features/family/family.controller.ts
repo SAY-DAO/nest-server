@@ -14,10 +14,10 @@ import {
   FlaskUserTypesEnum,
   SAY_DAPP_ID,
   VirtualFamilyRole,
-} from 'src/types/interfaces/interface';
-import config from 'src/config';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
-import { findQuartileGrant } from 'src/utils/helpers';
+} from '../../types/interfaces/interface';
+import config from '../../config';
+import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
+import { findQuartileGrant, getContributionRatio, QUANTILE_25th, QUANTILE_50th, QUANTILE_75th, QUANTILE_max, QUANTILE_min } from '../../utils/helpers';
 import {
   CONTRIBUTION_COEFFICIENT,
   Q1_LOWER_COEFFICIENT,
@@ -25,12 +25,12 @@ import {
   Q2_TO_Q3_COEFFICIENT,
   Q3_UPPER_COEFFICIENT,
   daysDifference,
-} from 'src/utils/helpers';
+} from '../../utils/helpers';
 import { mean, quantileSeq, round } from 'mathjs';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { PaymentService } from '../payment/payment.service';
 import { NeedService } from '../need/need.service';
-import { isAuthenticated } from 'src/utils/auth';
+import { isAuthenticated } from '../../utils/auth';
 import { UserService } from '../user/user.service';
 
 @ApiTags('Family')
@@ -48,7 +48,7 @@ export class FamilyController {
     private childrenService: ChildrenService,
     private needService: NeedService,
     private paymentService: PaymentService,
-  ) {}
+  ) { }
 
   @Get('search')
   async searchUsers(
@@ -88,10 +88,11 @@ export class FamilyController {
   }
 
   @Get(`say/payments`)
-  @ApiOperation({ description: 'Get all family role analysis for a user' })
+  @ApiOperation({ description: 'Get SAY payments' })
   async getSayPayments(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
@@ -189,7 +190,11 @@ export class FamilyController {
     }
     const flaskUserId = req.headers['dappFlaskUserId'];
     const need = await this.needService.getNeedById(needId);
-
+    // get verified payment for user
+    if (!need) {
+      throw new ObjectNotFound('Could not fetch need!');
+    }
+    // get verified payment for user
     if (!need.verifiedPayments.find((p) => p.flaskUserId === flaskUserId)) {
       throw new ObjectNotFound('This is not your need!');
     }
@@ -207,53 +212,83 @@ export class FamilyController {
     const onlyConfirmDurationList = [];
     const onlyLogisticDurationList = [];
 
-    // payment duration + amount
+    // 1- Get Confirm, amount, Pay duration and logistics in a range of time.
+    // 2- We use MATH library to sort and get the quantile
+    // 3- Compare the need variables to the quantile values and reward grant.
+
+    // -------------------------------------------------- contributionRatio --------------------------------------------------------------------------
+    // If need ws done by more than one person we reward the vFamily collaboration
+    // # of vFamily involved * coefficient
+    const contributionRatio = getContributionRatio(need.verifiedPayments)
+    // -------------------------------------------------- confirm duration -------------------------------- confirmDate - need.created ------------------
+    let confirmDuration = daysDifference(need.created, need.confirmDate);
+    if (confirmDuration < 0) {
+      // some data from 2019 have wrong confirm dates, such as need 35
+      confirmDuration = 0;
+    }
+    // get all confirms in the range of this confirm date, typically range is two months
+    const confirmsInRange = await this.needService.getConfirmsInRange(
+      need.confirmDate,
+      need.category,
+      need.type,
+      2,//months
+    );
+    confirmsInRange[0].forEach((c) => {
+      onlyConfirmDurationList.push(daysDifference(c.created, c.confirmDate));
+    });
+
+    // confirm duration: lower duration means higher grant
+    const min_confirm_duration = Number(
+      quantileSeq(onlyConfirmDurationList, QUANTILE_min),
+    ); //min
+    const Q1_confirm_duration = Number(
+      quantileSeq(onlyConfirmDurationList, QUANTILE_25th),
+    );
+    const Q2_confirm_duration = Number(
+      quantileSeq(onlyConfirmDurationList, QUANTILE_50th),
+    );
+    const Q3_confirm_duration = Number(
+      quantileSeq(onlyConfirmDurationList, QUANTILE_75th),
+    );
+    const max_confirm_duration = Number(
+      quantileSeq(onlyConfirmDurationList, QUANTILE_max),
+    ); // max
+
+    if (confirmDuration > Q3_confirm_duration) {
+      confirmDurationQGrant = Q1_LOWER_COEFFICIENT;
+    } else if (
+      Q2_confirm_duration < confirmDuration &&
+      confirmDuration <= Q3_confirm_duration
+    ) {
+      confirmDurationQGrant = Q1_TO_Q2_COEFFICIENT;
+    } else if (
+      Q1_confirm_duration < confirmDuration &&
+      confirmDuration <= Q2_confirm_duration
+    ) {
+      confirmDurationQGrant = Q2_TO_Q3_COEFFICIENT;
+    } else if (0 < confirmDuration && confirmDuration <= Q1_confirm_duration) {
+      confirmDurationQGrant = Q3_UPPER_COEFFICIENT;
+    }
+    // -------------------------------------------------- payment duration + amount --------------------- userPay.created - confirmDate -----------------
     const paymentDuration = daysDifference(need.confirmDate, userPay.created);
+    // get all payments in the range of this payment, typically range is two months
     const paymentsInRange = await this.paymentService.getPaymentsInRange(
       userPay.created,
       need.category,
       need.type,
-      2,
+      2, //months
     );
     paymentsInRange[0].forEach((p) => {
       onlyAmountsList.push(p.need_amount);
       onlyPayDurationList.push(daysDifference(p.need.confirmDate, p.created));
     });
 
-    // confirm duration
-    let confirmDuration = daysDifference(need.created, need.confirmDate);
-    if (confirmDuration < 0) {
-      // some data from 2019 have wrong confirm dates, such as need 35
-      confirmDuration = 0;
-    }
-    const confirmsInRange = await this.needService.getConfirmsInRange(
-      need.confirmDate,
-      need.category,
-      need.type,
-      2,
-    );
-    confirmsInRange[0].forEach((c) => {
-      onlyConfirmDurationList.push(daysDifference(c.created, c.confirmDate));
-    });
-
-    // logistic duration
-    const logisticDuration = daysDifference(
-      userPay.created,
-      need.childDeliveryDate,
-    );
-    const logisticsInRange = paymentsInRange;
-    logisticsInRange[0].forEach((p) => {
-      onlyLogisticDurationList.push(
-        daysDifference(p.created, p.need.child_delivery_date),
-      );
-    });
-
     // payment amount: lower amount means lower grant
-    const min_payment_amount = Number(quantileSeq(onlyAmountsList, 0)); //min
-    const Q1_payment_amount = Number(quantileSeq(onlyAmountsList, 0.25));
-    const Q2_payment_amount = Number(quantileSeq(onlyAmountsList, 0.5));
-    const Q3_payment_amount = Number(quantileSeq(onlyAmountsList, 0.75));
-    const max_payment_amount = Number(quantileSeq(onlyAmountsList, 1)); // max
+    const min_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_min)); //min
+    const Q1_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_25th));
+    const Q2_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_50th));
+    const Q3_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_75th));
+    const max_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_max)); // max
     if (0 < userPay.needAmount && userPay.needAmount <= Q1_payment_amount) {
       payAmountQGrant = Q1_LOWER_COEFFICIENT;
     } else if (
@@ -271,11 +306,11 @@ export class FamilyController {
     }
 
     // payment duration: lower duration means higher grant
-    const min_payment_duration = Number(quantileSeq(onlyPayDurationList, 0)); //min
-    const Q1_payment_duration = Number(quantileSeq(onlyPayDurationList, 0.25));
-    const Q2_payment_duration = Number(quantileSeq(onlyPayDurationList, 0.5));
-    const Q3_payment_duration = Number(quantileSeq(onlyPayDurationList, 0.75));
-    const max_payment_duration = Number(quantileSeq(onlyPayDurationList, 1)); // max
+    const min_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_min)); //min
+    const Q1_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_25th));
+    const Q2_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_50th));
+    const Q3_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_75th));
+    const max_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_max)); // max
     if (paymentDuration > Q3_payment_duration) {
       payDurationQGrant = Q1_LOWER_COEFFICIENT;
     } else if (
@@ -292,37 +327,20 @@ export class FamilyController {
       payDurationQGrant = Q3_UPPER_COEFFICIENT;
     }
 
-    // confirm duration: lower duration means higher grant
-    const min_confirm_duration = Number(
-      quantileSeq(onlyConfirmDurationList, 0),
-    ); //min
-    const Q1_confirm_duration = Number(
-      quantileSeq(onlyConfirmDurationList, 0.25),
+
+    // -------------------------------------------------- logistic duration -------------------------- childDeliveryDate - userPay.created -------------
+    const logisticDuration = daysDifference(
+      userPay.created,
+      need.childDeliveryDate,
     );
-    const Q2_confirm_duration = Number(
-      quantileSeq(onlyConfirmDurationList, 0.5),
-    );
-    const Q3_confirm_duration = Number(
-      quantileSeq(onlyConfirmDurationList, 0.75),
-    );
-    const max_confirm_duration = Number(
-      quantileSeq(onlyConfirmDurationList, 1),
-    ); // max
-    if (confirmDuration > Q3_confirm_duration) {
-      confirmDurationQGrant = Q1_LOWER_COEFFICIENT;
-    } else if (
-      Q2_confirm_duration < confirmDuration &&
-      confirmDuration <= Q3_confirm_duration
-    ) {
-      confirmDurationQGrant = Q1_TO_Q2_COEFFICIENT;
-    } else if (
-      Q1_confirm_duration < confirmDuration &&
-      confirmDuration <= Q2_confirm_duration
-    ) {
-      confirmDurationQGrant = Q2_TO_Q3_COEFFICIENT;
-    } else if (0 < confirmDuration && confirmDuration <= Q1_confirm_duration) {
-      confirmDurationQGrant = Q3_UPPER_COEFFICIENT;
-    }
+    // get all logisticDuration in the range of this logisticDuration, typically range is two months
+    const logisticsInRange = paymentsInRange;
+    logisticsInRange[0].forEach((p) => {
+      onlyLogisticDurationList.push(
+        daysDifference(p.created, p.need.child_delivery_date),
+      );
+    });
+
 
     // logistic duration: lower duration means higher grant
     const min_logistic_duration = Number(
@@ -340,6 +358,7 @@ export class FamilyController {
     const max_logistic_duration = Number(
       quantileSeq(onlyLogisticDurationList, 1),
     ); // max
+
     if (logisticDuration > Q3_logistic_duration) {
       logisticDurationQGrant = Q1_LOWER_COEFFICIENT;
     } else if (
@@ -358,13 +377,7 @@ export class FamilyController {
     ) {
       logisticDurationQGrant = Q3_UPPER_COEFFICIENT;
     }
-    const payments = need.verifiedPayments.filter(
-      (p) => p.flaskUserId !== SAY_DAPP_ID && p.needAmount > 0 && p.verified,
-    );
-    const contributionRatio =
-      payments.length > 1
-        ? round((payments.length - 1) * CONTRIBUTION_COEFFICIENT, 2)
-        : 1;
+
 
     if (
       !logisticDurationQGrant ||
@@ -375,15 +388,6 @@ export class FamilyController {
       throw new ServerError('Something is not right!');
     }
     return {
-      needLogisticDuration: {
-        logisticDurationQGrant,
-        logisticDuration: round(logisticDuration, 2),
-        min_logistic_duration: round(min_logistic_duration, 2),
-        Q1_logistic_duration: round(Q1_logistic_duration, 2),
-        Q2_logistic_duration: round(Q2_logistic_duration, 2),
-        Q3_logistic_duration: round(Q3_logistic_duration, 2),
-        max_logistic_duration: round(max_logistic_duration, 2),
-      },
       needConfirmDuration: {
         confirmDurationQGrant,
         confirmDuration: round(confirmDuration, 2),
@@ -411,6 +415,15 @@ export class FamilyController {
         Q3_payment_amount,
         max_payment_amount,
       },
+      needLogisticDuration: {
+        logisticDurationQGrant,
+        logisticDuration: round(logisticDuration, 2),
+        min_logistic_duration: round(min_logistic_duration, 2),
+        Q1_logistic_duration: round(Q1_logistic_duration, 2),
+        Q2_logistic_duration: round(Q2_logistic_duration, 2),
+        Q3_logistic_duration: round(Q3_logistic_duration, 2),
+        max_logistic_duration: round(max_logistic_duration, 2),
+      },
       difficultyRatio: round(
         mean([
           logisticDurationQGrant,
@@ -421,10 +434,6 @@ export class FamilyController {
         2,
       ),
       contributionRatio,
-      // onlyAmountsList,
-      // onlyPayDurationList,
-      // onlyConfirmDurationList,
-      // onlyLogisticDurationList,
     };
   }
 

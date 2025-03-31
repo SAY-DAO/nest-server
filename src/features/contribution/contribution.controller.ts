@@ -12,11 +12,11 @@ import {
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { ValidateContributionPipe } from './pipes/validate-ticket.pipe';
-import { CreateContributionDto } from 'src/types/dtos/contribution/CreateContribution.dto';
-import { isAuthenticated } from 'src/utils/auth';
-import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
+import { CreateContributionDto } from '../../types/dtos/contribution/CreateContribution.dto';
+import { isAuthenticated } from '../../utils/auth';
+import { FlaskUserTypesEnum } from '../../types/interfaces/interface';
 
 @ApiTags('Contribution')
 @ApiSecurity('flask-access-token')

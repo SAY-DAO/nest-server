@@ -8,12 +8,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProviderEntity } from '../../entities/provider.entity';
 import { ProviderService } from './provider.service';
 import { ProviderController } from './provider.controller';
-import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
+import { ProviderJoinNeedEntity } from '../../entities/provider.Join.need..entity';
 import { ProviderMiddleware } from './middlewares/provider.middleware';
 import { NeedService } from '../need/need.service';
-import { NeedEntity } from 'src/entities/need.entity';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { VariableEntity } from 'src/entities/variable.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { VariableEntity } from '../../entities/variable.entity';
 
 @Module({
   imports: [

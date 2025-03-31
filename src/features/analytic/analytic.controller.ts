@@ -10,12 +10,12 @@ import {
   FlaskUserTypesEnum,
   NeedTypeEnum,
   SAYPlatformRoles,
-} from 'src/types/interfaces/interface';
-import { convertFlaskToSayRoles, daysDifference } from 'src/utils/helpers';
+} from '../../types/interfaces/interface';
+import { convertFlaskToSayRoles, daysDifference } from '../../utils/helpers';
 import { UserService } from '../user/user.service';
 import { AnalyticService } from './analytic.service';
-import config from 'src/config';
-import { isAuthenticated } from 'src/utils/auth';
+import config from '../../config';
+import { isAuthenticated } from '../../utils/auth';
 
 @ApiTags('Analytic')
 @ApiSecurity('flask-access-token')

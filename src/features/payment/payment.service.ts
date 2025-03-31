@@ -4,14 +4,14 @@ import { Brackets, Repository, UpdateResult } from 'typeorm';
 import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentParams } from '../../types/parameters/PaymentParameters';
 import { AllUserEntity } from '../../entities/user.entity';
-import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { Need } from 'src/entities/flaskEntities/need.entity';
+import { Payment } from '../../entities/flaskEntities/payment.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
 import {
   NeedTypeEnum,
   ProductStatusEnum,
   SAY_DAPP_ID,
   ServiceStatusEnum,
-} from 'src/types/interfaces/interface';
+} from '../../types/interfaces/interface';
 
 @Injectable()
 export class PaymentService {
@@ -92,7 +92,7 @@ export class PaymentService {
     month: number,
   ): Promise<[Payment[], number]> {
     const d = new Date(paymentDate);
-    d.setMonth(d.getMonth() - month); // 1 months ago
+    d.setMonth(d.getMonth() - month); // 1 months before
 
     const d2 = new Date(paymentDate);
     d2.setMonth(d2.getMonth() + month); // 1 months after

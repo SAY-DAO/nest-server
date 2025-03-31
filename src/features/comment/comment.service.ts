@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Observable, from } from 'rxjs';
-import { CommentEntity } from 'src/entities/comment.entity';
-import { NeedEntity } from 'src/entities/need.entity';
-import { AllUserEntity } from 'src/entities/user.entity';
-import { VirtualFamilyRole } from 'src/types/interfaces/interface';
+import { CommentEntity } from '../../entities/comment.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { AllUserEntity } from '../../entities/user.entity';
+import { VirtualFamilyRole } from '../../types/interfaces/interface';
 import { IsNull, Not, Repository } from 'typeorm';
 
 @Injectable()

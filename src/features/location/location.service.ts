@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Cities } from 'src/entities/flaskEntities/cities.entity';
-import { Countries } from 'src/entities/flaskEntities/countries.entity';
-import { LocationEntity } from 'src/entities/location.entity';
-import { CityParams } from 'src/types/parameters/CityParameters';
+import { Cities } from '../../entities/flaskEntities/cities.entity';
+import { Countries } from '../../entities/flaskEntities/countries.entity';
+import { LocationEntity } from '../../entities/location.entity';
+import { CityParams } from '../../types/parameters/CityParameters';
 import { Repository } from 'typeorm';
 
 @Injectable()

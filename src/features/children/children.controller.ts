@@ -27,33 +27,33 @@ import {
   PreRegisterStatusEnum,
   SchoolTypeEnum,
   SAYPlatformRoles,
-} from 'src/types/interfaces/interface';
-import { isAuthenticated } from 'src/utils/auth';
-import config from 'src/config';
+} from '../../types/interfaces/interface';
+import { isAuthenticated } from '../../utils/auth';
+import config from '../../config';
 import { UserService } from '../user/user.service';
 import {
   CreateFlaskChildDto,
   PreparePreRegisterChildDto,
   UpdateApprovedPreRegisterDto,
   UpdatePreRegisterChildDto,
-} from 'src/types/dtos/CreateChild.dto';
+} from '../../types/dtos/CreateChild.dto';
 import { ValidateChildPipe } from './pipes/validate-child.ts/validate-child.ts.pipe';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { avatarStorage } from 'src/storage/avatarStorage';
-import { ServerError } from 'src/filters/server-exception.filter';
-import { voiceStorage } from 'src/storage/voiceStorage';
+import { avatarStorage } from '../../storage/avatarStorage';
+import { ServerError } from '../../filters/server-exception.filter';
+import { voiceStorage } from '../../storage/voiceStorage';
 import { ChildrenInterceptor } from './interceptors/children.interceptors';
 import { LocationService } from '../location/location.service';
 import { DownloadService } from '../download/download.service';
 import { NgoService } from '../ngo/ngo.service';
 import { randomUUID } from 'crypto';
-import { NgoEntity } from 'src/entities/ngo.entity';
+import { NgoEntity } from '../../entities/ngo.entity';
 import { SyncService } from '../sync/sync.service';
-import { LocationEntity } from 'src/entities/location.entity';
-import { NgoParams } from 'src/types/parameters/NgoParammeters';
+import { LocationEntity } from '../../entities/location.entity';
+import { NgoParams } from '../../types/parameters/NgoParammeters';
 import {
   capitalizeFirstLetter,
   convertFlaskToSayAppRoles,
@@ -61,15 +61,15 @@ import {
   convertFlaskToSayRoles,
   formatDate,
   truncateString,
-} from 'src/utils/helpers';
+} from '../../utils/helpers';
 import axios from 'axios';
-import { AllUserEntity } from 'src/entities/user.entity';
-import { checkIfDirectoryExists, getCurrentFilenames, moveFile, renameFile } from 'src/utils/file';
+import { AllUserEntity } from '../../entities/user.entity';
+import { checkIfDirectoryExists, getCurrentFilenames, moveFile, renameFile } from '../../utils/file';
 import fs from 'fs';
 import { CampaignService } from '../campaign/campaign.service';
 import { File } from '@web-std/file';
-import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.entity';
+import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 import { forEach } from 'mathjs';
 
 @ApiTags('Children')

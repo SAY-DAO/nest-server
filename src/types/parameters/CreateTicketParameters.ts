@@ -1,4 +1,4 @@
-import { NeedEntity } from 'src/entities/need.entity';
+import { NeedEntity } from '../../entities/need.entity';
 import { AnnouncementEnum, Colors } from '../interfaces/interface';
 
 export class CreateTicketParams {

@@ -1,25 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { mean, round } from 'mathjs';
-import config from 'src/config';
-import { Child } from 'src/entities/flaskEntities/child.entity';
-import { Family } from 'src/entities/flaskEntities/family.entity';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { NGO } from 'src/entities/flaskEntities/ngo.entity';
-import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
-import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import config from '../../config';
+import { Child } from '../../entities/flaskEntities/child.entity';
+import { Family } from '../../entities/flaskEntities/family.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { NGO } from '../../entities/flaskEntities/ngo.entity';
+import { Payment } from '../../entities/flaskEntities/payment.entity';
+import { SocialWorker, User } from '../../entities/flaskEntities/user.entity';
+import { UserFamily } from '../../entities/flaskEntities/userFamily.entity';
 import {
   NeedTypeEnum,
   SAYPlatformRoles,
   ChildExistence,
-} from 'src/types/interfaces/interface';
+} from '../../types/interfaces/interface';
 import {
   daysDifference,
   getNeedsTimeLine,
   removeSpecialDuplicates,
   timeDifferenceWithComment,
-} from 'src/utils/helpers';
+} from '../../utils/helpers';
 import { Repository } from 'typeorm';
 
 @Injectable()

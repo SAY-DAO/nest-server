@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression, Timeout } from '@nestjs/schedule';
-import { VirtualFamilyRole } from 'src/types/interfaces/interface';
-import config from 'src/config';
+import { VirtualFamilyRole } from '../../types/interfaces/interface';
+import config from '../../config';
 import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
 import { CampaignService } from '../campaign/campaign.service';
-import { persianDay } from 'src/utils/helpers';
+import { persianDay } from '../../utils/helpers';
 import { execute } from '@getvim/execute';
 
 @Injectable()

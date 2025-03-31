@@ -3,14 +3,14 @@ import { NFTStorage, File } from 'nft.storage';
 import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IpfsEntity } from 'src/entities/ipfs.entity';
-import { NeedEntity } from 'src/entities/need.entity';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import { IpfsEntity } from '../../entities/ipfs.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 import { Token } from 'nft.storage/dist/src/lib/interface';
-import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
+import { WalletExceptionFilter } from '../../filters/wallet-exception.filter';
 import { ChildrenService } from '../children/children.service';
 import { PaymentService } from '../payment/payment.service';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { DownloadService } from '../download/download.service';
 
 @Injectable()

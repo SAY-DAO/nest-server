@@ -1,5 +1,5 @@
 import { ArgumentMetadata, HttpException, HttpStatus, Injectable, PipeTransform } from '@nestjs/common';
-import { Children } from 'src/types/interfaces/Children';
+import { Children } from '../../../../types/interfaces/Children';
 
 @Injectable()
 export class ValidateChildPipe implements PipeTransform {

@@ -7,7 +7,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
 import {
@@ -20,7 +20,7 @@ import {
   sleep,
   convertFlaskToSayPanelRoles,
   daysDifference,
-} from 'src/utils/helpers';
+} from '../../utils/helpers';
 import {
   AnnouncementEnum,
   CampaignNameEnum,
@@ -30,26 +30,26 @@ import {
   PanelContributors,
   ProductStatusEnum,
   ServiceStatusEnum,
-} from 'src/types/interfaces/interface';
+} from '../../types/interfaces/interface';
 import { FamilyService } from '../family/family.service';
-import { CampaignEntity } from 'src/entities/campaign.entity';
+import { CampaignEntity } from '../../entities/campaign.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AllUserEntity } from 'src/entities/user.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
-import config from 'src/config';
-import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import config from '../../config';
+import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.entity';
 import { isURL } from 'class-validator';
-import { UrlEntity } from 'src/entities/url.entity';
+import { UrlEntity } from '../../entities/url.entity';
 import { nanoid } from 'nanoid';
-import { ShortenURLDto } from 'src/types/dtos/url.dto';
+import { ShortenURLDto } from '../../types/dtos/url.dto';
 import MelipayamakApi from 'melipayamak';
 import {
   PaginateQuery,
   Paginated,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
-import { CreateSendNewsLetterDto } from 'src/types/dtos/CreateSendNewsLetter.dto';
+import { CreateSendNewsLetterDto } from '../../types/dtos/CreateSendNewsLetter.dto';
 import { SyncService } from '../sync/sync.service';
 import { TicketService } from '../ticket/ticket.service';
 

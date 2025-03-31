@@ -1,8 +1,8 @@
 import { Controller, ForbiddenException, Get, Req } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { IpfsService } from './ipfs.service';
-import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
-import { isAuthenticated } from 'src/utils/auth';
+import { FlaskUserTypesEnum } from '../../types/interfaces/interface';
+import { isAuthenticated } from '../../utils/auth';
 
 @ApiTags('IPFS')
 @ApiSecurity('flask-access-token')

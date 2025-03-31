@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 // import { id } from 'ethers';
-import { NeedAPIApi, NeedReceipt } from 'src/generated-sources/openapi';
-import { HeaderOptions } from 'src/types/interfaces/interface';
+import { NeedAPIApi, NeedReceipt } from '../../generated-sources/openapi';
+import { HeaderOptions } from '../../types/interfaces/interface';
 import { Repository, UpdateResult } from 'typeorm';
 import { ReceiptEntity } from '../../entities/receipt.entity';
 import { ReceiptParams } from '../../types/parameters/ReceiptParameter';

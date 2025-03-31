@@ -6,15 +6,15 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { MineService } from './mine.service';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { FamilyService } from '../family/family.service';
 import {
   FlaskUserTypesEnum,
   SAY_DAPP_ID,
-} from 'src/types/interfaces/interface';
-import { isAuthenticated } from 'src/utils/auth';
-import { NeedEntity } from 'src/entities/need.entity';
+} from '../../types/interfaces/interface';
+import { isAuthenticated } from '../../utils/auth';
+import { NeedEntity } from '../../entities/need.entity';
 import { NeedService } from '../need/need.service';
 
 @ApiTags('Mines')

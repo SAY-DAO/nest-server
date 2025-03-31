@@ -9,12 +9,12 @@ import {
   Param,
 } from '@nestjs/common';
 import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
-import { isAuthenticated } from 'src/utils/auth';
+import { FlaskUserTypesEnum } from '../../types/interfaces/interface';
+import { isAuthenticated } from '../../utils/auth';
 import { CampaignService } from './campaign.service';
-import { ShortenURLDto } from 'src/types/dtos/url.dto';
-import { ServerError } from 'src/filters/server-exception.filter';
-import { CreateSendNewsLetterDto } from 'src/types/dtos/CreateSendNewsLetter.dto';
+import { ShortenURLDto } from '../../types/dtos/url.dto';
+import { ServerError } from '../../filters/server-exception.filter';
+import { CreateSendNewsLetterDto } from '../../types/dtos/CreateSendNewsLetter.dto';
 import { ValidateNewsLetterPipe } from './pipes/validate-campaign.pipe';
 
 @ApiTags('Campaign')

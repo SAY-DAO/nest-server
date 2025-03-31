@@ -13,17 +13,15 @@ import {
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { PaymentService } from './payment.service';
-import { isAuthenticated } from 'src/utils/auth';
-import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
-import config from 'src/config';
+import { isAuthenticated } from '../../utils/auth';
+import { FlaskUserTypesEnum } from '../../types/interfaces/interface';
+import config from '../../config';
 import axios from 'axios';
 import { ValidatePaymentPipe } from './pipes/validate-campaign.pipe';
 import {
   CreateFlaskCartPaymentDto,
   CreateFlaskPaymentDto,
-  VerifyFlaskPaymentDto,
-} from 'src/types/dtos/CreatePayment.dto';
-import { ServerError } from 'src/filters/server-exception.filter';
+} from '../../types/dtos/CreatePayment.dto';
 
 @ApiTags('Payments')
 @ApiSecurity('flask-access-token')

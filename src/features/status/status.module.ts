@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { StatusService } from './status.service';
 import { StatusController } from './status.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StatusEntity } from 'src/entities/status.entity';
+import { StatusEntity } from '../../entities/status.entity';
 import { StatusMiddleware } from './middlewares/status.middleware';
 
 @Module({

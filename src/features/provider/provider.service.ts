@@ -4,8 +4,8 @@ import { ProviderEntity } from '../../entities/provider.entity';
 import { Repository } from 'typeorm';
 import { ProviderParams } from '../../types/parameters/ProviderParams';
 import { from, Observable } from 'rxjs';
-import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
-import { capitalizeFirstLetter } from 'src/utils/helpers';
+import { ProviderJoinNeedEntity } from '../../entities/provider.Join.need..entity';
+import { capitalizeFirstLetter } from '../../utils/helpers';
 
 @Injectable()
 export class ProviderService {

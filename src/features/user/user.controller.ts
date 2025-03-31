@@ -15,25 +15,25 @@ import {
   FlaskUserTypesEnum,
   SAYPlatformRoles,
   SUPER_ADMIN_ID_PANEL,
-} from 'src/types/interfaces/interface';
+} from '../../types/interfaces/interface';
 import {
   convertFlaskToSayRoles,
   getOrganizedNeeds,
   timeDifferenceWithComment,
-} from 'src/utils/helpers';
+} from '../../utils/helpers';
 import { MyPageInterceptor } from './interceptors/mypage.interceptors';
 import { TicketService } from '../ticket/ticket.service';
 import { WalletService } from '../wallet/wallet.service';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { NeedService } from '../need/need.service';
 import { ChildrenService } from '../children/children.service';
-import { Need } from 'src/entities/flaskEntities/need.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
 import { Paginated } from 'nestjs-paginate';
 import { NgoService } from '../ngo/ngo.service';
-import { TicketEntity } from 'src/entities/ticket.entity';
-import { SignatureEntity } from 'src/entities/signature.entity';
-import { IpfsEntity } from 'src/entities/ipfs.entity';
-import { isAuthenticated } from 'src/utils/auth';
+import { TicketEntity } from '../../entities/ticket.entity';
+import { SignatureEntity } from '../../entities/signature.entity';
+import { IpfsEntity } from '../../entities/ipfs.entity';
+import { isAuthenticated } from '../../utils/auth';
 
 @ApiTags('Users')
 @ApiSecurity('flask-access-token')

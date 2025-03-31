@@ -14,8 +14,8 @@ import { Response } from 'express';
 import { ApiFileResponse } from './api-file-response.decorator';
 import { DownloadInterceptor } from './interceptors/download.interceptors';
 import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { isAuthenticated } from 'src/utils/auth';
-import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
+import { isAuthenticated } from '../../utils/auth';
+import { FlaskUserTypesEnum } from '../../types/interfaces/interface';
 
 @UseInterceptors(DownloadInterceptor)
 @ApiTags('Download')

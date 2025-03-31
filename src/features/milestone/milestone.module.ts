@@ -15,19 +15,19 @@ import { PaymentEntity } from '../../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { AllUserEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
-import { ContributorEntity } from 'src/entities/contributor.entity';
-import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
-import { Child } from 'src/entities/flaskEntities/child.entity';
-import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
-import { Family } from 'src/entities/flaskEntities/family.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { SocialWorker, User } from '../../entities/flaskEntities/user.entity';
+import { ContributorEntity } from '../../entities/contributor.entity';
+import { EthereumAccountEntity } from '../../entities/ethereum.account.entity';
+import { Child } from '../../entities/flaskEntities/child.entity';
+import { Payment } from '../../entities/flaskEntities/payment.entity';
+import { UserFamily } from '../../entities/flaskEntities/userFamily.entity';
+import { Family } from '../../entities/flaskEntities/family.entity';
 import { MileStoneMiddleware } from './middlewares/milestone.middleware';
-import { VariableEntity } from 'src/entities/variable.entity';
-import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
-import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
-import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
+import { VariableEntity } from '../../entities/variable.entity';
+import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.entity';
+import { Receipt } from '../../entities/flaskEntities/receipt.entity';
+import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
 
 @Module({
   imports: [

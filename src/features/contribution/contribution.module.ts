@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { ContributionController } from './contribution.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ContributionEntity } from 'src/entities/contribution.entity';
+import { ContributionEntity } from '../../entities/contribution.entity';
 import { contributionMiddleware } from './middlewares/comment.middleware';
 
 @Module({

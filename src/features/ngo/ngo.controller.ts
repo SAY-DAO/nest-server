@@ -10,13 +10,13 @@ import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
   FlaskUserTypesEnum,
   SAYPlatformRoles,
-} from 'src/types/interfaces/interface';
-import { convertFlaskToSayRoles } from 'src/utils/helpers';
+} from '../../types/interfaces/interface';
+import { convertFlaskToSayRoles } from '../../utils/helpers';
 import { SyncService } from '../sync/sync.service';
 import { UserService } from '../user/user.service';
 
 import { NgoService } from './ngo.service';
-import { isAuthenticated } from 'src/utils/auth';
+import { isAuthenticated } from '../../utils/auth';
 
 @ApiTags('Ngo')
 @ApiSecurity('flask-access-token')

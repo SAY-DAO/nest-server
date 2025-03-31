@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { AllUserEntity } from '../../entities/user.entity';
-import { UserParams } from 'src/types/parameters/UserParameters';
-import { NgoEntity } from 'src/entities/ngo.entity';
-import { SocialWorker, User } from 'src/entities/flaskEntities/user.entity';
-import { getSAYRoleString } from 'src/utils/helpers';
-import { PanelContributors } from 'src/types/interfaces/interface';
-import { ContributorEntity } from 'src/entities/contributor.entity';
+import { UserParams } from '../../types/parameters/UserParameters';
+import { NgoEntity } from '../../entities/ngo.entity';
+import { SocialWorker, User } from '../../entities/flaskEntities/user.entity';
+import { getSAYRoleString } from '../../utils/helpers';
+import { PanelContributors } from '../../types/interfaces/interface';
+import { ContributorEntity } from '../../entities/contributor.entity';
 import { from } from 'rxjs';
-import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { EthereumAccountEntity } from '../../entities/ethereum.account.entity';
 
 @Injectable()
 export class UserService {

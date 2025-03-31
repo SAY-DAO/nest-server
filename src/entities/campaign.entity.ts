@@ -4,7 +4,7 @@ import { AllUserEntity } from './user.entity';
 import {
   CampaignNameEnum,
   CampaignTypeEnum,
-} from 'src/types/interfaces/interface';
+} from '../types/interfaces/interface';
 
 @Entity()
 export class CampaignEntity extends BaseEntity {

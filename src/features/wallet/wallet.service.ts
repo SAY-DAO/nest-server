@@ -6,8 +6,6 @@ import {
   Domain,
   SwSignatureResult,
   NeedTypeEnum,
-  CategoryDefinitionPersianEnum,
-  CategoryEnum,
   SwProductVoucher,
   SwServiceVoucher,
   SAYPlatformRoles,
@@ -17,21 +15,20 @@ import {
 import { NeedService } from '../need/need.service';
 import VerifyVoucherContract from '../../contracts/needModule/VerifyVoucher.sol/VerifyVoucher.json';
 import { mainnet } from '../../contracts/network-settings.json';
-import { ChildrenEntity } from '../../entities/children.entity';
 import {
   EthersContract,
   InjectSignerProvider,
   EthersSigner,
 } from 'nestjs-ethers';
-import { NeedEntity } from 'src/entities/need.entity';
-import { daysDifference, getSAYRolePersian } from 'src/utils/helpers';
+import { NeedEntity } from '../../entities/need.entity';
+import { daysDifference, getSAYRolePersian } from '../../utils/helpers';
 import { UserService } from '../user/user.service';
 import { from, Observable } from 'rxjs';
-import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
+import { WalletExceptionFilter } from '../../filters/wallet-exception.filter';
 import {
   fetchProductMessageContent,
   fetchServiceMessageContent,
-} from 'src/utils/signatures';
+} from '../../utils/signatures';
 
 @Injectable()
 export class WalletService {

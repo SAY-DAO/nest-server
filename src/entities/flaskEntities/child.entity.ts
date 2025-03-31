@@ -1,4 +1,4 @@
-import { ChildExistence } from 'src/types/interfaces/interface';
+import { ChildExistence } from '../../types/interfaces/interface';
 import { Entity, Column } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 

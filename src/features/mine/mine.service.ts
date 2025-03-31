@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMineDto } from '../../types/dtos/mine/create-mine.dto';
-import { UpdateMineDto } from '../../types/dtos/mine/update-mine.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NeedEntity } from 'src/entities/need.entity';
+import { NeedEntity } from '../../entities/need.entity';
 import {
   PaymentStatusEnum,
   SAYPlatformRoles,
-} from 'src/types/interfaces/interface';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { SignatureEntity } from 'src/entities/signature.entity';
-import { PaymentEntity } from 'src/entities/payment.entity';
+} from '../../types/interfaces/interface';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { Payment } from '../../entities/flaskEntities/payment.entity';
+import { SignatureEntity } from '../../entities/signature.entity';
+import { PaymentEntity } from '../../entities/payment.entity';
 
 @Injectable()
 export class MineService {

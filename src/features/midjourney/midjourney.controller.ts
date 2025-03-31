@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { MidjourneyService } from './midjourney.service';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { DownloadService } from '../download/download.service';
 import { NeedService } from '../need/need.service';
 import { ApiFileResponse } from '../download/api-file-response.decorator';
@@ -18,13 +18,13 @@ import { Response as expressResponse } from 'express';
 import { MessageBody } from '@nestjs/websockets';
 import { FamilyService } from '../family/family.service';
 import { rimraf } from 'rimraf';
-import { isAuthenticated } from 'src/utils/auth';
+import { isAuthenticated } from '../../utils/auth';
 import {
   FlaskUserTypesEnum,
   SUPER_ADMIN_ID_PANEL,
-} from 'src/types/interfaces/interface';
-import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
-import { checkIfDirectoryExists } from 'src/utils/file';
+} from '../../types/interfaces/interface';
+import { WalletExceptionFilter } from '../../filters/wallet-exception.filter';
+import { checkIfDirectoryExists } from '../../utils/file';
 import fs from 'fs';
 import path from 'path';
 
@@ -289,7 +289,7 @@ export class MidjourneyController {
     ) {
       throw new WalletExceptionFilter(403, 'You Are not the Super admin');
     }
-    const filePath = 'src/features/midjourney/bad-images-to-remove.json';
+    const filePath = '../../features/midjourney/bad-images-to-remove.json';
 
     fs.readFile(filePath, 'utf8', (err, data) => {
       if (err) {

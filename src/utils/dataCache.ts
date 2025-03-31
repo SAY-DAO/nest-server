@@ -3,7 +3,7 @@ import {
   FlaskUserTypesEnum,
   SAYPlatformRoles,
   VirtualFamilyRole,
-} from 'src/types/interfaces/interface';
+} from '../types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
 import { getScattered } from './helpers';
 

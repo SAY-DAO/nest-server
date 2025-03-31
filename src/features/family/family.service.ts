@@ -3,18 +3,18 @@ import {
   PaymentStatusEnum,
   SAYPlatformRoles,
   VirtualFamilyRole,
-} from 'src/types/interfaces/interface';
+} from '../../types/interfaces/interface';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Need } from 'src/entities/flaskEntities/need.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
 import { And, IsNull, Not, Repository, UpdateResult } from 'typeorm';
-import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { Child } from 'src/entities/flaskEntities/child.entity';
-import { User } from 'src/entities/flaskEntities/user.entity';
-import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
-import { Family } from 'src/entities/flaskEntities/family.entity';
-import { NeedEntity } from 'src/entities/need.entity';
-import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
-import { AllUserEntity } from 'src/entities/user.entity';
+import { Payment } from '../../entities/flaskEntities/payment.entity';
+import { Child } from '../../entities/flaskEntities/child.entity';
+import { User } from '../../entities/flaskEntities/user.entity';
+import { UserFamily } from '../../entities/flaskEntities/userFamily.entity';
+import { Family } from '../../entities/flaskEntities/family.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { NeedFamily } from '../../entities/flaskEntities/needFamily';
+import { AllUserEntity } from '../../entities/user.entity';
 
 @Injectable()
 export class FamilyService {

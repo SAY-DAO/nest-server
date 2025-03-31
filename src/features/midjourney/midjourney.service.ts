@@ -2,21 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { MidjourneyEntity } from '../../entities/midjourney.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { NeedEntity } from 'src/entities/need.entity';
+import { NeedEntity } from '../../entities/need.entity';
 import fs from 'fs';
-import config from 'src/config';
-import { checkIfDirectoryExists, deleteFile } from 'src/utils/file';
+import config from '../../config';
+import { checkIfDirectoryExists, deleteFile } from '../../utils/file';
 import { NeedService } from '../need/need.service';
 import { FamilyService } from '../family/family.service';
-import { SAYPlatformRoles } from 'src/types/interfaces/interface';
+import { SAYPlatformRoles } from '../../types/interfaces/interface';
 import {
   Paginated,
   PaginateQuery,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
-import { PaymentEntity } from 'src/entities/payment.entity';
-import { SignatureEntity } from 'src/entities/signature.entity';
-import { NgoEntity } from 'src/entities/ngo.entity';
+import { PaymentEntity } from '../../entities/payment.entity';
+import { SignatureEntity } from '../../entities/signature.entity';
+import { NgoEntity } from '../../entities/ngo.entity';
 
 @Injectable()
 export class MidjourneyService {

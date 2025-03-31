@@ -2,37 +2,37 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
-import { ChildAPIApi } from 'src/generated-sources/openapi';
-import { NeedSummary } from 'src/types/interfaces/Need';
+import { ChildAPIApi } from '../../generated-sources/openapi';
+import { NeedSummary } from '../../types/interfaces/Need';
 import {
   ChildParams,
   PreRegisterChildPrepareParams,
   PreRegisterChildUpdateApprovedParams,
   PreRegisterChildUpdateParams,
   createFlaskChildParams,
-} from 'src/types/parameters/ChildParameters';
-import { NgoEntity } from 'src/entities/ngo.entity';
-import { ContributorEntity } from 'src/entities/contributor.entity';
-import { Child } from 'src/entities/flaskEntities/child.entity';
+} from '../../types/parameters/ChildParameters';
+import { NgoEntity } from '../../entities/ngo.entity';
+import { ContributorEntity } from '../../entities/contributor.entity';
+import { Child } from '../../entities/flaskEntities/child.entity';
 import {
   ChildConfirmation,
   ChildExistence,
   PreRegisterStatusEnum,
   SexEnum,
-} from 'src/types/interfaces/interface';
-import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
-import { Family } from 'src/entities/flaskEntities/family.entity';
-import { User } from 'src/entities/flaskEntities/user.entity';
-import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+} from '../../types/interfaces/interface';
+import { UserFamily } from '../../entities/flaskEntities/userFamily.entity';
+import { Family } from '../../entities/flaskEntities/family.entity';
+import { User } from '../../entities/flaskEntities/user.entity';
+import { NGO } from '../../entities/flaskEntities/ngo.entity';
 import {
   Paginated,
   PaginateQuery,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
-import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.entity';
 import { Observable, from } from 'rxjs';
-import { LocationEntity } from 'src/entities/location.entity';
-import { AllUserEntity } from 'src/entities/user.entity';
+import { LocationEntity } from '../../entities/location.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 
 @Injectable()
 export class ChildrenService {
