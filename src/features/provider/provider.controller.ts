@@ -35,8 +35,8 @@ import {
   NeedTypeEnum,
 } from '../../types/interfaces/interface';
 import { ValidateProviderPipe } from './pipes/validate-provider.pipe';
-import { ProviderJoinNeedEntity } from 'src/entities/provider.Join.need..entity';
-import { isAuthenticated } from 'src/utils/auth';
+import { ProviderJoinNeedEntity } from '../../entities/provider.Join.need..entity';
+import { isAuthenticated } from '../../utils/auth';
 import { NeedService } from '../need/need.service';
 
 @ApiTags('Provider')

@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { NeedEntity } from 'src/entities/need.entity';
-import { TicketEntity } from 'src/entities/ticket.entity';
-import { TicketContentEntity } from 'src/entities/ticketContent.entity';
-import { TicketViewEntity } from 'src/entities/ticketView.entity';
-import { AllUserEntity } from 'src/entities/user.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { TicketEntity } from '../../entities/ticket.entity';
+import { TicketContentEntity } from '../../entities/ticketContent.entity';
+import { TicketViewEntity } from '../../entities/ticketView.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import {
   AnnouncementEnum,
   Colors,
   ProductStatusEnum,
-} from 'src/types/interfaces/interface';
-import { CreateTicketContentParams } from 'src/types/parameters/CreateTicketContentParameters';
-import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
+} from '../../types/interfaces/interface';
+import { CreateTicketContentParams } from '../../types/parameters/CreateTicketContentParameters';
+import { CreateTicketParams } from '../../types/parameters/CreateTicketParameters';
 import { Repository, UpdateResult } from 'typeorm';
 
 @Injectable()

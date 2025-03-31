@@ -13,20 +13,20 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { TicketEntity } from 'src/entities/ticket.entity';
-import { ServerError } from 'src/filters/server-exception.filter';
-import { BadRequestTransformationFilter } from 'src/filters/socket-exception.filter';
-import { CreateJoinRoomDto } from 'src/types/dtos/ticket/CreateJoinRoom.dto';
-import { CreateTicketColorDto } from 'src/types/dtos/ticket/CreateTicketColor.dto';
-import { CreateTicketContentDto } from 'src/types/dtos/ticket/CreateTicketContent.dto';
-import { CreateTicketNotificationDto } from 'src/types/dtos/ticket/CreateTicketNotif.dto';
-import { CreateTicketViewDto } from 'src/types/dtos/ticket/CreateTicketView.dto';
+import { TicketEntity } from '../../entities/ticket.entity';
+import { ServerError } from '../../filters/server-exception.filter';
+import { BadRequestTransformationFilter } from '../../filters/socket-exception.filter';
+import { CreateJoinRoomDto } from '../../types/dtos/ticket/CreateJoinRoom.dto';
+import { CreateTicketColorDto } from '../../types/dtos/ticket/CreateTicketColor.dto';
+import { CreateTicketContentDto } from '../../types/dtos/ticket/CreateTicketContent.dto';
+import { CreateTicketNotificationDto } from '../../types/dtos/ticket/CreateTicketNotif.dto';
+import { CreateTicketViewDto } from '../../types/dtos/ticket/CreateTicketView.dto';
 import {
   AnnouncementEnum,
   PanelContributors,
   SAYPlatformRoles,
-} from 'src/types/interfaces/interface';
-import { convertFlaskToSayRoles, ticketNotifications } from 'src/utils/helpers';
+} from '../../types/interfaces/interface';
+import { convertFlaskToSayRoles, ticketNotifications } from '../../utils/helpers';
 import { TicketService } from '../ticket/ticket.service';
 import { UserService } from '../user/user.service';
 import { ValidateGatewayPipe } from './pipes/validate-gateway.pipe';

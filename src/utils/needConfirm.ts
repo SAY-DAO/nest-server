@@ -1,5 +1,5 @@
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { Need } from '../entities/flaskEntities/need.entity';
+import { ServerError } from '../filters/server-exception.filter';
 import {
   AnnouncementEnum,
   CategoryEnum,
@@ -9,7 +9,7 @@ import {
   PaymentStatusEnum,
   SAYPlatformRoles,
   SUPER_ADMIN_ID_PANEL,
-} from 'src/types/interfaces/interface';
+} from '../types/interfaces/interface';
 import {
   convertFlaskToSayRoles,
   daysDifference,
@@ -19,9 +19,9 @@ import {
 } from './helpers';
 import { round } from 'mathjs';
 import axios from 'axios';
-import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
-import { NeedEntity } from 'src/entities/need.entity';
-import { AllUserEntity } from 'src/entities/user.entity';
+import { CreateTicketParams } from '../types/parameters/CreateTicketParameters';
+import { NeedEntity } from '../entities/need.entity';
+import { AllUserEntity } from '../entities/user.entity';
 
 const BASE_AGE_OF_DUPLICATE_0 = 30;
 const BASE_AGE_OF_DUPLICATE_1 = 30;

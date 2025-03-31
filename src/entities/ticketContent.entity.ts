@@ -1,4 +1,4 @@
-import { AnnouncementEnum } from "src/types/interfaces/interface";
+import { AnnouncementEnum } from "../types/interfaces/interface";
 import { Column, Entity, ManyToOne } from "typeorm";
 import { BaseEntity } from "./BaseEntity";
 import { TicketEntity } from "./ticket.entity";

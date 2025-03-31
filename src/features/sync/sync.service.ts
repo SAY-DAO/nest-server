@@ -1,22 +1,22 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { LocationEntity } from 'src/entities/location.entity';
-import { NgoEntity } from 'src/entities/ngo.entity';
-import { PaymentEntity } from 'src/entities/payment.entity';
-import { ReceiptEntity } from 'src/entities/receipt.entity';
-import { StatusEntity } from 'src/entities/status.entity';
-import { AllUserEntity } from 'src/entities/user.entity';
+import { LocationEntity } from '../../entities/location.entity';
+import { NgoEntity } from '../../entities/ngo.entity';
+import { PaymentEntity } from '../../entities/payment.entity';
+import { ReceiptEntity } from '../../entities/receipt.entity';
+import { StatusEntity } from '../../entities/status.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import {
   NeedTypeDefinitionEnum,
   NeedTypeEnum,
   PanelContributors,
   PaymentStatusEnum,
   SchoolTypeEnum,
-} from 'src/types/interfaces/interface';
-import { NgoParams } from 'src/types/parameters/NgoParammeters';
-import { PaymentParams } from 'src/types/parameters/PaymentParameters';
-import { ReceiptParams } from 'src/types/parameters/ReceiptParameter';
-import { StatusParams } from 'src/types/parameters/StausParameters';
-import { convertFlaskToSayPanelRoles } from 'src/utils/helpers';
+} from '../../types/interfaces/interface';
+import { NgoParams } from '../../types/parameters/NgoParammeters';
+import { PaymentParams } from '../../types/parameters/PaymentParameters';
+import { ReceiptParams } from '../../types/parameters/ReceiptParameter';
+import { StatusParams } from '../../types/parameters/StausParameters';
+import { convertFlaskToSayPanelRoles } from '../../utils/helpers';
 import { ChildrenService } from '../children/children.service';
 import { NeedService } from '../need/need.service';
 import { NgoService } from '../ngo/ngo.service';
@@ -24,20 +24,19 @@ import { PaymentService } from '../payment/payment.service';
 import { ReceiptService } from '../receipt/receipt.service';
 import { StatusService } from '../status/status.service';
 import { UserService } from '../user/user.service';
-import { AllExceptionsFilter } from 'src/filters/all-exception.filter';
-import { ServerError } from 'src/filters/server-exception.filter';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
+import { AllExceptionsFilter } from '../../filters/all-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
+import { SocialWorker } from '../../entities/flaskEntities/user.entity';
 import { LocationService } from '../location/location.service';
-import { UserParams } from 'src/types/parameters/UserParameters';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import { UserParams } from '../../types/parameters/UserParameters';
+import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 import { ProviderService } from '../provider/provider.service';
-import { ProviderEntity } from 'src/entities/provider.entity';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { CreateReceiptDto } from 'src/types/dtos/CreateReceipt.dto';
-import { CreatePaymentDto } from 'src/types/dtos/CreatePayment.dto';
-import { CreateStatusDto } from 'src/types/dtos/CreateStatus.dto';
-import { Child } from 'src/entities/flaskEntities/child.entity';
-import { ChildrenEntity } from 'src/entities/children.entity';
+import { ProviderEntity } from '../../entities/provider.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { CreateReceiptDto } from '../../types/dtos/CreateReceipt.dto';
+import { CreatePaymentDto } from '../../types/dtos/CreatePayment.dto';
+import { CreateStatusDto } from '../../types/dtos/CreateStatus.dto';
+import { Child } from '../../entities/flaskEntities/child.entity';
 
 @Injectable()
 export class SyncService {

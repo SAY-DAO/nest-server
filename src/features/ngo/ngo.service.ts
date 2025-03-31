@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LocationEntity } from 'src/entities/location.entity';
-import { Child } from 'src/entities/flaskEntities/child.entity';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { NGO } from 'src/entities/flaskEntities/ngo.entity';
-import { SocialWorker } from 'src/entities/flaskEntities/user.entity';
-import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
+import { LocationEntity } from '../../entities/location.entity';
+import { Child } from '../../entities/flaskEntities/child.entity';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { NGO } from '../../entities/flaskEntities/ngo.entity';
+import { SocialWorker } from '../../entities/flaskEntities/user.entity';
+import { NgoArrivalEntity, NgoEntity } from '../../entities/ngo.entity';
 import {
   FlaskUserTypesEnum,
   NeedTypeEnum,
   ProductStatusEnum,
-} from 'src/types/interfaces/interface';
-import { NgoParams } from 'src/types/parameters/NgoParammeters';
+} from '../../types/interfaces/interface';
+import { NgoParams } from '../../types/parameters/NgoParammeters';
 import { Brackets, Repository, UpdateResult } from 'typeorm';
 
 @Injectable()

@@ -1,12 +1,5 @@
-import { IpfsEntity } from 'src/entities/ipfs.entity';
-import { SignatureEntity } from 'src/entities/signature.entity';
-import { TicketEntity } from 'src/entities/ticket.entity';
-import {
-  SwmypageReceipts_,
-  SwmypageStatusUpdates,
-  SwmypageVerifiedPayments,
-} from 'src/generated-sources/openapi';
-import { SAYPlatformRoles } from './interface';
+import { IpfsEntity } from '../../entities/ipfs.entity';
+import { TicketEntity } from '../../entities/ticket.entity';
 
 export interface NeedsData {
   all_needs_count: number;

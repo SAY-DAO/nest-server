@@ -13,19 +13,19 @@ import {
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { NeedService } from '../need/need.service';
-import { NeedEntity } from 'src/entities/need.entity';
-import { AllUserEntity } from 'src/entities/user.entity';
+import { NeedEntity } from '../../entities/need.entity';
+import { AllUserEntity } from '../../entities/user.entity';
 import { UserService } from '../user/user.service';
 import { ValidateCommentPipe } from './pipes/validate-ticket.pipe';
-import { CreateCommentDto } from 'src/types/dtos/CreateComment.dto';
-import { CommentEntity } from 'src/entities/comment.entity';
+import { CreateCommentDto } from '../../types/dtos/CreateComment.dto';
+import { CommentEntity } from '../../entities/comment.entity';
 import {
   FlaskUserTypesEnum,
   VirtualFamilyRole,
-} from 'src/types/interfaces/interface';
-import { isAuthenticated } from 'src/utils/auth';
+} from '../../types/interfaces/interface';
+import { isAuthenticated } from '../../utils/auth';
 
 @ApiTags('Comment')
 @ApiSecurity('flask-access-token')

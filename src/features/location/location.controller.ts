@@ -1,8 +1,8 @@
 import { Controller, ForbiddenException, Get, Req } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { LocationService } from './location.service';
-import { isAuthenticated } from 'src/utils/auth';
-import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
+import { isAuthenticated } from '../../utils/auth';
+import { FlaskUserTypesEnum } from '../../types/interfaces/interface';
 
 @ApiTags('Location')
 @ApiSecurity('flask-access-token')

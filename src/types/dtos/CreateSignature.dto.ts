@@ -1,5 +1,4 @@
 import { IsNotEmpty } from 'class-validator';
-import { SwmypageNeeds } from 'src/generated-sources/openapi';
 import { SAYPlatformRoles } from '../interfaces/interface';
 import { CreatePaymentDto } from './CreatePayment.dto';
 import { CreateReceiptDto } from './CreateReceipt.dto';

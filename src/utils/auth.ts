@@ -1,11 +1,11 @@
 import { ForbiddenException, Logger } from '@nestjs/common';
-import config from 'src/config';
-import { ServerError } from 'src/filters/server-exception.filter';
-import { SocialWorkerAPIApi, UserAPIApi } from 'src/generated-sources/openapi';
+import config from '../config';
+import { ServerError } from '../filters/server-exception.filter';
+import { SocialWorkerAPIApi, UserAPIApi } from '../generated-sources/openapi';
 import { convertFlaskToSayRoles, timeDifference } from './helpers';
 import {
   FlaskUserTypesEnum,
-} from 'src/types/interfaces/interface';
+} from '../types/interfaces/interface';
 
 export async function updateFlaskCacheAuthentication(req, logger: Logger) {
   logger.warn('Passing through MiddleWare...');
@@ -13,6 +13,7 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
   const accessToken = req.headers['authorization'];
   const requestDappFlaskId = Number(req.headers['flaskdappid']);
   const requestPanelFlaskId = Number(req.headers['flaskid']);
+
 
   if (!accessToken || (!requestPanelFlaskId && !requestDappFlaskId)) {
     throw new ForbiddenException('Access Token and the ID is required!');
@@ -93,14 +94,19 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
       }
 
       if (!fetched || fetched.isExpired) {
+
         logger.warn(
           'No token at cache, Authenticating from Social worker Flask Api...',
         );
         const flaskApi = new SocialWorkerAPIApi();
-        const socialWorker = await flaskApi.apiV2SocialworkersIdGet(
-          accessToken,
-          Number(requestPanelFlaskId),
-        );
+        let socialWorker
+        try {
+          socialWorker = await flaskApi.apiV2SocialworkersIdGet(
+            accessToken,
+            Number(requestPanelFlaskId),
+          );
+        } catch (e) {
+        }
 
         if (!socialWorker) {
           throw new ForbiddenException('You Do not have Access!');

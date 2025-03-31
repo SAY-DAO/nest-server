@@ -1,6 +1,6 @@
 import { NeedEntity } from '../../entities/need.entity';
 import { PanelContributors } from '../interfaces/interface';
-import { EthereumAccountEntity } from 'src/entities/ethereum.account.entity';
+import { EthereumAccountEntity } from '../../entities/ethereum.account.entity';
 
 export type UserParams = {
   typeId?: number;

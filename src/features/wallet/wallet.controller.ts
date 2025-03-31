@@ -38,7 +38,7 @@ import { ValidateSignaturePipe } from './pipes/validate-wallet.pipe';
 import { WalletService } from './wallet.service';
 import { SyncService } from '../sync/sync.service';
 import { generateNonce, SiweErrorType, SiweMessage } from 'siwe';
-import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
+import { WalletExceptionFilter } from '../../filters/wallet-exception.filter';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { WalletInterceptor } from './interceptors/wallet.interceptors';
 import { UserService } from '../user/user.service';
@@ -46,14 +46,14 @@ import {
   convertFlaskToSayAppRoles,
   convertFlaskToSayPanelRoles,
   convertFlaskToSayRoles,
-} from 'src/utils/helpers';
+} from '../../utils/helpers';
 import { NeedService } from '../need/need.service';
-import { SocialWorkerAPIApi, UserAPIApi } from 'src/generated-sources/openapi';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { SocialWorkerAPIApi, UserAPIApi } from '../../generated-sources/openapi';
+import { ServerError } from '../../filters/server-exception.filter';
 import { TicketService } from '../ticket/ticket.service';
-import config from 'src/config';
-import { isAuthenticated } from 'src/utils/auth';
-import { ObjectNotFound } from 'src/filters/notFound-expectation.filter';
+import config from '../../config';
+import { isAuthenticated } from '../../utils/auth';
+import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 
 @UseInterceptors(WalletInterceptor)
 @ApiSecurity('flask-access-token')
@@ -75,6 +75,8 @@ export class WalletController {
     private needService: NeedService,
     private ticketService: TicketService,
   ) {}
+
+  // ------------------------------------------ Eth SignIn ------------------------------------------------
 
   @Get('nonce/:typeId')
   @ApiOperation({ description: 'Get SIWE nonce' })
@@ -161,17 +163,17 @@ export class WalletController {
 
       const message = new SiweMessage(body.message);
 
-      const fields = await message.validate(body.signature);
-      if (fields.nonce !== session.nonce) {
-        throw new WalletExceptionFilter(422, `Invalid nonce.`);
-      }
+      try {
+        await message.verify({ signature: body.signature });
+    } catch {
+        throw new WalletExceptionFilter(422, `could not sign in.`);
+    }
 
-      session.siwe = fields;
       session.siwe.flaskUserId = userId;
       session.siwe.flaskTypeId = typeId;
-      // session.cookie._expires = new Date(fields.expirationTime);
-      // session.clear();
       session.save();
+
+      // 
       const panelRole = convertFlaskToSayPanelRoles(typeId);
       if (
         panelRole === PanelContributors.SOCIAL_WORKER ||
@@ -265,6 +267,8 @@ export class WalletController {
     }
     return session.siwe;
   }
+
+  // ------------------------------------------ PREPARE ------------------------------------------------
 
   @Post(`signature/panel/prepare`)
   @UsePipes(new ValidationPipe()) // validation for dto files

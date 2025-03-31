@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Observable, from } from 'rxjs';
-import { ContributionEntity } from 'src/entities/contribution.entity';
+import { ContributionEntity } from '../../entities/contribution.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

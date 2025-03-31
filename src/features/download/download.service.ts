@@ -5,11 +5,11 @@ import { join } from 'path';
 import { createWriteStream } from 'fs';
 import axios from 'axios';
 import { Readable } from 'stream';
-import { prepareUrl } from 'src/utils/helpers';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { prepareUrl } from '../../utils/helpers';
+import { ServerError } from '../../filters/server-exception.filter';
 import mime from 'mime';
 import fs from 'fs';
-import { WalletExceptionFilter } from 'src/filters/wallet-exception.filter';
+import { WalletExceptionFilter } from '../../filters/wallet-exception.filter';
 import { File } from '@web-std/file';
 import readXlsxFile from 'read-excel-file/node';
 

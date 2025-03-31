@@ -23,31 +23,31 @@ import {
   PaymentStatusEnum,
   ProductStatusEnum,
   ServiceStatusEnum,
-} from 'src/types/interfaces/interface';
-import { ChildrenEntity } from 'src/entities/children.entity';
-import { NeedParams } from 'src/types/parameters/NeedParameters';
-import { NgoEntity } from 'src/entities/ngo.entity';
-import { StatusEntity } from 'src/entities/status.entity';
-import { PaymentEntity } from 'src/entities/payment.entity';
-import { ReceiptEntity } from 'src/entities/receipt.entity';
-import { IpfsEntity } from 'src/entities/ipfs.entity';
-import { ProviderEntity } from 'src/entities/provider.entity';
-import { Child } from 'src/entities/flaskEntities/child.entity';
-import { AllUserEntity } from 'src/entities/user.entity';
-import { NeedStatusUpdate } from 'src/entities/flaskEntities/NeedStatusUpdate.entity';
-import { Payment } from 'src/entities/flaskEntities/payment.entity';
-import { NeedReceipt } from 'src/entities/flaskEntities/needReceipt.entity';
-import { Receipt } from 'src/entities/flaskEntities/receipt.entity';
-import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+} from '../../types/interfaces/interface';
+import { ChildrenEntity } from '../../entities/children.entity';
+import { NeedParams } from '../../types/parameters/NeedParameters';
+import { NgoEntity } from '../../entities/ngo.entity';
+import { StatusEntity } from '../../entities/status.entity';
+import { PaymentEntity } from '../../entities/payment.entity';
+import { ReceiptEntity } from '../../entities/receipt.entity';
+import { IpfsEntity } from '../../entities/ipfs.entity';
+import { ProviderEntity } from '../../entities/provider.entity';
+import { Child } from '../../entities/flaskEntities/child.entity';
+import { AllUserEntity } from '../../entities/user.entity';
+import { NeedStatusUpdate } from '../../entities/flaskEntities/NeedStatusUpdate.entity';
+import { Payment } from '../../entities/flaskEntities/payment.entity';
+import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
+import { Receipt } from '../../entities/flaskEntities/receipt.entity';
+import { NGO } from '../../entities/flaskEntities/ngo.entity';
 import {
   Paginated,
   PaginateQuery,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
 import { from } from 'rxjs';
-import { VariableEntity } from 'src/entities/variable.entity';
+import { VariableEntity } from '../../entities/variable.entity';
 import Decimal from 'decimal.js';
-import { getMonthsAgo } from 'src/utils/helpers';
+import { getMonthsAgo } from '../../utils/helpers';
 
 @Injectable()
 export class NeedService {
@@ -166,6 +166,19 @@ export class NeedService {
         verifiedPayments: true,
       },
     });
+  }
+
+  async countNeeds(): Promise<number> {
+    return this.needRepository.count();
+  }
+
+  async randomNestNeed(numberOfNeeds: number): Promise<NeedEntity> {
+    const randomIndex = Math.floor(Math.random() * numberOfNeeds);
+    return await this.needRepository
+    .createQueryBuilder('need')
+    .skip(randomIndex) // Skip random number of rows
+    .take(1) // Only take 1 record
+    .getOne();
   }
 
   getNeedsWithSignatures(): Promise<NeedEntity[]> {
@@ -995,10 +1008,10 @@ export class NeedService {
     month: number,
   ): Promise<[Need[], number]> {
     const d = new Date(confirmDate);
-    d.setMonth(d.getMonth() - month); // 1 months ago
+    d.setMonth(d.getMonth() - month); // 2 months before
 
     const d2 = new Date(confirmDate);
-    d2.setMonth(d2.getMonth() + month); // 1 months after
+    d2.setMonth(d2.getMonth() + month); // 2 months after
 
     return await this.flaskNeedRepository
       .createQueryBuilder('need')

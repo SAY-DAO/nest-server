@@ -1,5 +1,5 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { SwMyPage } from 'src/generated-sources/openapi';
+import { SwMyPage } from '../../../generated-sources/openapi';
 
 @Injectable()
 export class ValidateNeedPipe implements PipeTransform {

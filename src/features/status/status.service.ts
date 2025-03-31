@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { StatusEntity } from 'src/entities/status.entity';
+import { StatusEntity } from '../../entities/status.entity';
 import {
   NeedStatusUpdateModel,
   NeedStatusUpdatesAPIApi,
-} from 'src/generated-sources/openapi';
-import { HeaderOptions } from 'src/types/interfaces/interface';
-import { StatusParams } from 'src/types/parameters/StausParameters';
+} from '../../generated-sources/openapi';
+import { HeaderOptions } from '../../types/interfaces/interface';
+import { StatusParams } from '../../types/parameters/StausParameters';
 import { Repository, UpdateResult } from 'typeorm';
 
 @Injectable()

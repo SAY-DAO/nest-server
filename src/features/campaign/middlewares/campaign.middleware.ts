@@ -8,8 +8,8 @@ import {
   Response,
 } from '@nestjs/common';
 import { NextFunction } from 'express';
-import { ServerError } from 'src/filters/server-exception.filter';
-import { updateFlaskCacheAuthentication } from 'src/utils/auth';
+import { ServerError } from '../../../filters/server-exception.filter';
+import { updateFlaskCacheAuthentication } from '../../../utils/auth';
 
 @Injectable()
 export class CampaignMiddleware implements NestMiddleware {

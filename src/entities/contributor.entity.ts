@@ -3,7 +3,7 @@ import { ChildrenEntity } from './children.entity';
 import { NgoEntity } from './ngo.entity';
 import { BaseEntity } from './BaseEntity';
 import { AllUserEntity } from './user.entity';
-import { PanelContributors } from 'src/types/interfaces/interface';
+import { PanelContributors } from '../types/interfaces/interface';
 import { ChildrenPreRegisterEntity } from './childrenPreRegister.entity';
 
 @Entity() // panel admin, sw, auditor, ...

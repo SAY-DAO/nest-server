@@ -11,7 +11,7 @@ import {
 import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { UserService } from '../user/user.service';
 import { NeedService } from './need.service';
-import { isAuthenticated } from 'src/utils/auth';
+import { isAuthenticated } from '../../utils/auth';
 import {
   AnnouncementEnum,
   CategoryEnum,
@@ -20,9 +20,9 @@ import {
   NeedTypeEnum,
   ProductStatusEnum,
   SUPER_ADMIN_ID_PANEL,
-} from 'src/types/interfaces/interface';
-import config from 'src/config';
-import { daysDifference, timeDifference } from 'src/utils/helpers';
+} from '../../types/interfaces/interface';
+import config from '../../config';
+import { daysDifference, timeDifference } from '../../utils/helpers';
 import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
@@ -33,12 +33,12 @@ import {
   SIMILAR_NAME_LIMIT_PRODUCT,
   SIMILAR_NAME_LIMIT_SERVICE,
   validateNeed,
-} from 'src/utils/needConfirm';
-import { ValidatedDupType } from 'src/types/interfaces/Need';
+} from '../../utils/needConfirm';
+import { ValidatedDupType } from '../../types/interfaces/Need';
 import { SyncService } from '../sync/sync.service';
-import { TicketEntity } from 'src/entities/ticket.entity';
+import { TicketEntity } from '../../entities/ticket.entity';
 import { ProviderService } from '../provider/provider.service';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 
 const BASE_LIMIT_DUPLICATES_0 = 4; // when confirming a need 4 duplicates are allowed for the category 0
 const BASE_LIMIT_DUPLICATES_1 = 3;

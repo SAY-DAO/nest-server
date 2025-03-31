@@ -1,4 +1,3 @@
-import { AllUserEntity } from 'src/entities/user.entity';
 
 export type PaymentParams = {
     flaskId: number;

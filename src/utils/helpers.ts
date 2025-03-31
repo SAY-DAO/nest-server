@@ -1,7 +1,8 @@
-import { PRODUCT_UNPAYABLE_PERIOD } from 'src/config';
-import { Need } from 'src/entities/flaskEntities/need.entity';
-import { TicketEntity } from 'src/entities/ticket.entity';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { round } from 'mathjs';
+import { PRODUCT_UNPAYABLE_PERIOD } from '../config';
+import { Need } from '../entities/flaskEntities/need.entity';
+import { TicketEntity } from '../entities/ticket.entity';
+import { ServerError } from '../filters/server-exception.filter';
 import {
   NeedTypeEnum,
   PaymentStatusEnum,
@@ -16,9 +17,15 @@ import {
   CampaignNameEnum,
   CampaignTypeEnum,
   AnnouncementEnum,
-} from 'src/types/interfaces/interface';
-import fs from 'fs';
-import { checkIfDirectoryExists } from './file';
+  SAY_DAPP_ID,
+} from '../types/interfaces/interface';
+
+// MATH.quantileSeq
+export const QUANTILE_min = 0;
+export const QUANTILE_25th = 0.25;
+export const QUANTILE_50th = 0.5;
+export const QUANTILE_75th = 0.75;
+export const QUANTILE_max = 1;
 
 export const Q1_LOWER_COEFFICIENT = 0.75;
 export const Q1_TO_Q2_COEFFICIENT = 1;
@@ -199,28 +206,28 @@ export function persianMonthStringFarsi(value: Date) {
   return pm === 'Farvardin'
     ? 'فروردین'
     : pm === 'Ordibehesht'
-      ? 'اردیبهست'
-      : pm === 'Khordad'
-        ? 'خرداد'
-        : pm === 'Tir'
-          ? 'تیر'
-          : pm === 'Mordad'
-            ? 'مرداد'
-            : pm === 'Shahrivar'
-              ? 'شهریور'
-              : pm === 'Mehr'
-                ? 'مهر'
-                : pm === 'Aban'
-                  ? 'آبان'
-                  : pm === 'Azar'
-                    ? 'آذر'
-                    : pm === 'Dey'
-                      ? 'دی'
-                      : pm === 'Bahman'
-                        ? 'بهمن'
-                        : pm === 'Esfand'
-                          ? 'اسفند'
-                          : null;
+    ? 'اردیبهست'
+    : pm === 'Khordad'
+    ? 'خرداد'
+    : pm === 'Tir'
+    ? 'تیر'
+    : pm === 'Mordad'
+    ? 'مرداد'
+    : pm === 'Shahrivar'
+    ? 'شهریور'
+    : pm === 'Mehr'
+    ? 'مهر'
+    : pm === 'Aban'
+    ? 'آبان'
+    : pm === 'Azar'
+    ? 'آذر'
+    : pm === 'Dey'
+    ? 'دی'
+    : pm === 'Bahman'
+    ? 'بهمن'
+    : pm === 'Esfand'
+    ? 'اسفند'
+    : null;
 }
 
 export function persianDay(value: Date) {
@@ -547,7 +554,7 @@ export function ticketNotifications(
         !myView ||
         (latestView.flaskUserId !== myView.flaskUserId &&
           Date.parse(myView.viewed.toUTCString()) <
-          Date.parse(latestView.viewed.toUTCString()))
+            Date.parse(latestView.viewed.toUTCString()))
       );
     });
 
@@ -558,7 +565,7 @@ export function isUnpayable(need: Need) {
   return (
     need.unavailable_from &&
     timeDifference(new Date(), need.unavailable_from).hh <
-    PRODUCT_UNPAYABLE_PERIOD
+      PRODUCT_UNPAYABLE_PERIOD
   );
 }
 
@@ -651,6 +658,7 @@ export function findQuartileGrant(
     };
   }
   // paid <= Q1, Q1 < paid <= Q2 , Q2 < paid <= Q3,  paid > Q3
+  // Father
   if (
     0 < userValues.fatherCompletePay &&
     userValues.fatherCompletePay <= Qs.Q1.father
@@ -990,4 +998,15 @@ export function getSimilarityPercentage(sentence1: string, sentence2: string) {
   const similarityPercentage = Math.round(similarity * 100);
 
   return similarityPercentage;
+}
+ 
+export function getContributionRatio(verifiedPayments){
+  const payments = verifiedPayments.filter(
+    (p) => p.flaskUserId !== SAY_DAPP_ID && p.needAmount > 0 && p.verified,
+  );
+  const contributionRatio =
+    payments.length > 1
+      ? round((payments.length - 1) * CONTRIBUTION_COEFFICIENT, 2)
+      : 1;
+  return contributionRatio
 }

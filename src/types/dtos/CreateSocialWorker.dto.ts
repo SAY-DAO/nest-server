@@ -1,4 +1,4 @@
-import { NgoEntity } from 'src/entities/ngo.entity';
+import { NgoEntity } from '../../entities/ngo.entity';
 import { SAYPlatformRoles } from '../interfaces/interface';
 
 export class CreateSocialWorkerDto {

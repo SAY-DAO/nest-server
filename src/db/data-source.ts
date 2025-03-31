@@ -23,11 +23,11 @@ import { VariableEntity } from '../entities/variable.entity';
 import { EthereumTransaction } from '../entities/ethereum.transaction.entity';
 import { EthereumAccountEntity } from '../entities/ethereum.account.entity';
 import config from '../config';
-import { AllUserEntity } from 'src/entities/user.entity';
-import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
-import { ContributionEntity } from 'src/entities/contribution.entity';
-import { CampaignEntity } from 'src/entities/campaign.entity';
-import { UrlEntity } from 'src/entities/url.entity';
+import { AllUserEntity } from '../entities/user.entity';
+import { ChildrenPreRegisterEntity } from '../entities/childrenPreRegister.entity';
+import { ContributionEntity } from '../entities/contribution.entity';
+import { CampaignEntity } from '../entities/campaign.entity';
+import { UrlEntity } from '../entities/url.entity';
 
 export const postgresDataSourceOptions: DataSourceOptions = {
   ...config().db1,

@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
-import { SwmypageNeeds } from 'src/generated-sources/openapi';
-import { AnnouncementEnum } from 'src/types/interfaces/interface';
+import { SwmypageNeeds } from '../../../generated-sources/openapi';
+import { AnnouncementEnum } from '../../../types/interfaces/interface';
 import { CreatePaymentDto } from '../CreatePayment.dto';
 import { CreateReceiptDto } from '../CreateReceipt.dto';
 import { CreateStatusDto } from '../CreateStatus.dto';

@@ -1,4 +1,4 @@
-import { VirtualFamilyRole } from 'src/types/interfaces/interface';
+import { VirtualFamilyRole } from '../types/interfaces/interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { NeedEntity } from './need.entity';

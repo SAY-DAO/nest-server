@@ -1,8 +1,8 @@
-import { NeedEntity } from 'src/entities/need.entity';
+import { NeedEntity } from '../entities/need.entity';
 import {
   CategoryDefinitionPersianEnum,
   CategoryEnum,
-} from 'src/types/interfaces/interface';
+} from '../types/interfaces/interface';
 
 export function fetchProductMessageContent(
   need: NeedEntity,

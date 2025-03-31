@@ -18,7 +18,7 @@ import {
   AnnouncementEnum,
   FlaskUserTypesEnum,
   SAYPlatformRoles,
-} from 'src/types/interfaces/interface';
+} from '../../types/interfaces/interface';
 import { TicketEntity } from '../../entities/ticket.entity';
 import { SyncService } from '../sync/sync.service';
 import { AddTicketInterceptor } from './interceptors/addTicket.interceptors';
@@ -27,13 +27,13 @@ import {
   convertFlaskToSayRoles,
   dateConvertToPersian,
   getSAYRoleInteger,
-} from 'src/utils/helpers';
+} from '../../utils/helpers';
 import { ValidateTicketPipe } from './pipes/validate-ticket.pipe';
-import { CreateTicketParams } from 'src/types/parameters/CreateTicketParameters';
+import { CreateTicketParams } from '../../types/parameters/CreateTicketParameters';
 import { NeedService } from '../need/need.service';
-import { ServerError } from 'src/filters/server-exception.filter';
+import { ServerError } from '../../filters/server-exception.filter';
 import { UserService } from '../user/user.service';
-import { isAuthenticated } from 'src/utils/auth';
+import { isAuthenticated } from '../../utils/auth';
 
 @ApiTags('Tickets')
 @ApiSecurity('flask-access-token')
