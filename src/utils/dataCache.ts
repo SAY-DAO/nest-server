@@ -6,6 +6,7 @@ import {
 } from '../types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
 import { getScattered } from './helpers';
+import { Need } from '../entities/flaskEntities/need.entity';
 
 export default class DataCache {
   childrenEcosystem = null;
@@ -13,7 +14,16 @@ export default class DataCache {
     [flaskId: number]: AuthenticationType;
   } = {};
 
-  familyData = null;
+  // complete pays of fathers, mothers, ... for all time
+  familyData: {
+    fathersData: Need[],
+    mothersData: Need[],
+    amoosData: Need[],
+    khalehsData: Need[],
+    daeisData: Need[],
+    ammesData: Need[],
+    created: Date
+  } = null;
   familyRolesCount = null;
   childActiveFamilies = null;
   medianList = [];
@@ -98,7 +108,14 @@ export default class DataCache {
     khalehsData,
     daeisData,
     ammesData,
-  }) => {
+  }:{
+    fathersData: Need[];
+    mothersData: Need[];
+    amoosData: Need[];
+    khalehsData: Need[];
+    daeisData: Need[];
+    ammesData: Need[];
+}) => {
     this.familyData = {
       fathersData,
       mothersData,
@@ -157,15 +174,15 @@ export default class DataCache {
   };
 
   expirePanelAccessToken = (flaskSwId: number) =>
-    (this.authentication[String(flaskSwId)] = {
-      ...this.authentication[String(flaskSwId)],
-      isExpired: true,
-    });
+  (this.authentication[String(flaskSwId)] = {
+    ...this.authentication[String(flaskSwId)],
+    isExpired: true,
+  });
   expireDappAccessToken = (flaskFamilyId: number) =>
-    (this.authentication[String(flaskFamilyId)] = {
-      ...this.authentication[String(flaskFamilyId)],
-      isExpired: true,
-    });
+  (this.authentication[String(flaskFamilyId)] = {
+    ...this.authentication[String(flaskFamilyId)],
+    isExpired: true,
+  });
 
   // panel analytic scatter chart
   roleScatteredData() {

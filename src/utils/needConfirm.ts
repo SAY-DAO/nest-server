@@ -1,19 +1,17 @@
 import { Need } from '../entities/flaskEntities/need.entity';
-import { ServerError } from '../filters/server-exception.filter';
 import {
   AnnouncementEnum,
   CategoryEnum,
   Colors,
   FlaskUserTypesEnum,
   NeedTypeEnum,
-  PaymentStatusEnum,
-  SAYPlatformRoles,
   SUPER_ADMIN_ID_PANEL,
 } from '../types/interfaces/interface';
 import {
   convertFlaskToSayRoles,
   daysDifference,
   getSimilarityPercentage,
+  isOver18,
   prepareUrl,
   urlSimilarityPercentage,
 } from './helpers';
@@ -33,6 +31,7 @@ const SIMILAR_TXT_PERCENTAGE = 10; // percentage
 export const SIMILAR_NAME_LIMIT_PRODUCT = 20;
 export const SIMILAR_NAME_LIMIT_SERVICE = 10;
 export const GRACE_PERIOD = 15; // days left after ticket to fix the problem mentioned in ticket
+
 export async function validateNeed(
   nestNeed: NeedEntity,
   SuperAdmin: AllUserEntity,
@@ -56,13 +55,20 @@ export async function validateNeed(
   const isDeleted = nestNeed.isDeleted;
   const information = nestNeed.information;
   const details = nestNeed.details;
+  const child = nestNeed.child;
 
-  let result = {
+  let result: {
+    needId: string;
+    isValidNeed: boolean;
+    participants: AllUserEntity[];
+    ticketDetails: CreateTicketParams;
+    message: string;
+  } = {
     needId: nestNeed.id,
     isValidNeed: true,
     participants: [],
     ticketDetails: null,
-    message: null,
+    message: '',
   };
   // validate Confirm and delete
   if (isDeleted || confirmDate) {
@@ -84,6 +90,26 @@ export async function validateNeed(
     };
     return result;
   }
+  // validate child age
+  if (isOver18(child.birthDate)) {
+    const createTicketDetails: CreateTicketParams = {
+      title: `Child over 18`,
+      flaskNeedId: nestNeed.flaskId,
+      need: nestNeed,
+      flaskUserId: SUPER_ADMIN_ID_PANEL,
+      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
+      lastAnnouncement: AnnouncementEnum.ERROR,
+      color: Colors.RED,
+    };
+    result = {
+      needId: nestNeed.id,
+      isValidNeed: false,
+      participants: [SuperAdmin],
+      ticketDetails: createTicketDetails,
+      message: 'Automated Message: Child is over 18!',
+    };
+    return result;
+  }
   // validate need information/details
   const list = [
     'شلوار',
@@ -91,6 +117,7 @@ export async function validateNeed(
     'لباس',
     'مانتو',
     'کفش',
+    'پالتو',
     'دمپایی',
     'شورت',
     'سوتین',
@@ -118,8 +145,8 @@ export async function validateNeed(
       title: `More info`,
       flaskNeedId: nestNeed.flaskId,
       need: nestNeed,
-      flaskUserId: nestNeed.socialWorker.flaskUserId,
-      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
+      flaskUserId: SUPER_ADMIN_ID_PANEL,
+      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
       lastAnnouncement: AnnouncementEnum.ERROR,
       color: Colors.RED,
     };
@@ -184,12 +211,11 @@ export async function validateNeed(
         title: 'We need retailer Link',
         flaskNeedId: nestNeed.flaskId,
         need: nestNeed,
-        flaskUserId: nestNeed.socialWorker.flaskUserId,
-        role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
+        flaskUserId: SUPER_ADMIN_ID_PANEL,
+        role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
         lastAnnouncement: AnnouncementEnum.ERROR,
         color: Colors.RED,
       };
-      console.log('\x1b[36m%s\x1b[0m', 'Creating Social workerTicket ...\n');
       result = {
         needId: nestNeed.id,
         isValidNeed: false,
@@ -252,8 +278,8 @@ export async function validateNeed(
       title: 'We need Icon Link',
       flaskNeedId: nestNeed.flaskId,
       need: nestNeed,
-      flaskUserId: nestNeed.socialWorker.flaskUserId,
-      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
+      flaskUserId: SUPER_ADMIN_ID_PANEL,
+      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
       lastAnnouncement: AnnouncementEnum.ERROR,
       color: Colors.RED,
     };
@@ -271,26 +297,25 @@ export async function validateNeed(
   // validate details
   if (
     !name_en ||
-    !description_en ||
-    (type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)) ||
     name_en.length < 3 ||
+    !description_en ||
     description_en.length < 5 ||
+    (type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)) ||
     price < 500
   ) {
     const createTicketDetails: CreateTicketParams = {
-      title: `Check ${
-        price < 500
-          ? 'Price'
-          : type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)
+      title: `Check ${price < 500
+        ? 'Price'
+        : type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)
           ? 'Title'
           : !name_en || name_en.length < 3
-          ? 'Name'
-          : !description_en || (description_en.length < 5 && 'Description')
-      }`,
+            ? 'Name'
+            : !description_en || (description_en.length < 5 && 'Description')
+        }`,
       flaskNeedId: nestNeed.flaskId,
       need: nestNeed,
-      flaskUserId: nestNeed.socialWorker.flaskUserId,
-      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SOCIAL_WORKER),
+      flaskUserId: SUPER_ADMIN_ID_PANEL,
+      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
       lastAnnouncement: AnnouncementEnum.ERROR,
       color: Colors.RED,
     };
@@ -299,22 +324,21 @@ export async function validateNeed(
       isValidNeed: false,
       participants: [nestNeed.socialWorker, SuperAdmin],
       ticketDetails: createTicketDetails,
-      message: `Automated Message: Please check ${
-        price < 500
-          ? 'Price'
-          : type === NeedTypeEnum.PRODUCT && (!title || title.length < MIN_TITLE_LENGTH)
+      message: `Automated Message: Please check ${price < 500
+        ? 'Price'
+        : type === NeedTypeEnum.PRODUCT && (!title || title.length < MIN_TITLE_LENGTH)
           ? 'Title'
           : !name_en || name_en.length < 3
-          ? 'Name'
-          : !description_en || (description_en.length < 5 && 'Description')
-      }`,
+            ? 'Name'
+            : !description_en || (description_en.length < 5 && 'Description')
+        }`,
     };
     return result;
   }
   return result;
 }
 
-export function checkNeed(need: Need, duplicate: Need) {
+export function rateDuplicate(need: Need, duplicate: Need) {
   let C: boolean | null; // category
   let T: boolean | null; // type
   let R: boolean | null; // retailerLink

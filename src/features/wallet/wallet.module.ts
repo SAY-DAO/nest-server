@@ -48,6 +48,7 @@ import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.en
 import { Countries } from '../../entities/flaskEntities/countries.entity';
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
+import { FamilyService } from '../family/family.service';
 
 @Module({
   imports: [
@@ -119,6 +120,7 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
     ProviderService,
     DownloadService,
     TicketService,
+    FamilyService
   ],
 })
 export class WalletModule {

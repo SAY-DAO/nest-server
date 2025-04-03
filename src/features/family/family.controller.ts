@@ -19,7 +19,6 @@ import config from '../../config';
 import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
 import { findQuartileGrant, getContributionRatio, QUANTILE_25th, QUANTILE_50th, QUANTILE_75th, QUANTILE_max, QUANTILE_min } from '../../utils/helpers';
 import {
-  CONTRIBUTION_COEFFICIENT,
   Q1_LOWER_COEFFICIENT,
   Q1_TO_Q2_COEFFICIENT,
   Q2_TO_Q3_COEFFICIENT,
@@ -483,7 +482,12 @@ export class FamilyController {
       status: number;
       userRole: number;
     };
-    const childrenList = [];
+    const childrenList: {
+      childId: any;
+      caredFor: boolean;
+      status: number;
+      userRole: number;
+    }[] = [];
     for await (const child of myChildren) {
       const caredFor = await this.familyService.isChildCaredOnce(
         dappFlaskUserId,
@@ -500,9 +504,20 @@ export class FamilyController {
       };
       childrenList.push(childrenStatus);
     }
+
+    // this is updated by the schedule module
     const ecoCompletePayQuartile = config().dataCache.theQuartile();
 
-    const distanceRatio = findQuartileGrant(
+    const distanceRatio: {
+      allChildrenCaredFor: boolean,
+      fatherQGrant: number,
+      motherQGrant: number,
+      amooQGrant: number,
+      khalehQGrant: number,
+      daeiQGrant: number,
+      ammeQGrant: number,
+      avg: number,
+    } = findQuartileGrant(
       {
         fatherCompletePay: userAsFather[1],
         motherCompletePay: userAsMother[1],

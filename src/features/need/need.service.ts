@@ -879,6 +879,7 @@ export class NeedService {
         'need.created',
         'need.updated',
         'need.confirmDate',
+        'need.doneAt',
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');
@@ -887,7 +888,7 @@ export class NeedService {
 
   async getDeleteCandidates(): Promise<[Need[], number]> {
     const date = new Date();
-    date.setMonth(date.getMonth() - 3); // three months ago
+    date.setMonth(date.getMonth() - 3); // Three months ago
     return this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(
@@ -908,6 +909,7 @@ export class NeedService {
       })
       .select([
         'need.id',
+        'need.title',
         'need.status',
         'need.isConfirmed',
         'need.deleted_at',

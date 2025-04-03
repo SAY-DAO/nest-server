@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Need } from '../../entities/flaskEntities/need.entity';
-import { NeedEntity } from '../../entities/need.entity';
 import { TicketEntity } from '../../entities/ticket.entity';
 import { TicketContentEntity } from '../../entities/ticketContent.entity';
 import { TicketViewEntity } from '../../entities/ticketView.entity';
@@ -24,10 +22,6 @@ export class TicketService {
     private ticketContentRepository: Repository<TicketContentEntity>,
     @InjectRepository(TicketViewEntity)
     private ticketViewRepository: Repository<TicketViewEntity>,
-    @InjectRepository(Need, 'flaskPostgres')
-    private flaskNeedRepository: Repository<Need>,
-    @InjectRepository(NeedEntity)
-    private needRepository: Repository<NeedEntity>,
   ) {}
 
   async createTicket(

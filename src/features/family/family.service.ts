@@ -31,7 +31,7 @@ export class FamilyService {
     private flaskFamilyRepository: Repository<Family>,
     @InjectRepository(UserFamily, 'flaskPostgres')
     private flaskUserFamilyRepository: Repository<UserFamily>,
-  ) {}
+  ) { }
 
   async searchUsers(query: string): Promise<User[]> {
     return this.flaskUserRepository
@@ -120,7 +120,7 @@ export class FamilyService {
   async getFamilyRoleCompletePay(
     vfamilyRole: VirtualFamilyRole,
     userId: number,
-  ): Promise<any> {
+  ): Promise<[Need[], number]> {
     return (
       this.flaskNeedRepository
         .createQueryBuilder('need')

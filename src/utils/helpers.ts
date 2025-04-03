@@ -19,6 +19,8 @@ import {
   AnnouncementEnum,
   SAY_DAPP_ID,
 } from '../types/interfaces/interface';
+import { NeedFamily } from '../entities/flaskEntities/needFamily';
+import { Payment } from '../entities/flaskEntities/payment.entity';
 
 // MATH.quantileSeq
 export const QUANTILE_min = 0;
@@ -206,28 +208,28 @@ export function persianMonthStringFarsi(value: Date) {
   return pm === 'Farvardin'
     ? 'فروردین'
     : pm === 'Ordibehesht'
-    ? 'اردیبهست'
-    : pm === 'Khordad'
-    ? 'خرداد'
-    : pm === 'Tir'
-    ? 'تیر'
-    : pm === 'Mordad'
-    ? 'مرداد'
-    : pm === 'Shahrivar'
-    ? 'شهریور'
-    : pm === 'Mehr'
-    ? 'مهر'
-    : pm === 'Aban'
-    ? 'آبان'
-    : pm === 'Azar'
-    ? 'آذر'
-    : pm === 'Dey'
-    ? 'دی'
-    : pm === 'Bahman'
-    ? 'بهمن'
-    : pm === 'Esfand'
-    ? 'اسفند'
-    : null;
+      ? 'اردیبهست'
+      : pm === 'Khordad'
+        ? 'خرداد'
+        : pm === 'Tir'
+          ? 'تیر'
+          : pm === 'Mordad'
+            ? 'مرداد'
+            : pm === 'Shahrivar'
+              ? 'شهریور'
+              : pm === 'Mehr'
+                ? 'مهر'
+                : pm === 'Aban'
+                  ? 'آبان'
+                  : pm === 'Azar'
+                    ? 'آذر'
+                    : pm === 'Dey'
+                      ? 'دی'
+                      : pm === 'Bahman'
+                        ? 'بهمن'
+                        : pm === 'Esfand'
+                          ? 'اسفند'
+                          : null;
 }
 
 export function persianDay(value: Date) {
@@ -554,7 +556,7 @@ export function ticketNotifications(
         !myView ||
         (latestView.flaskUserId !== myView.flaskUserId &&
           Date.parse(myView.viewed.toUTCString()) <
-            Date.parse(latestView.viewed.toUTCString()))
+          Date.parse(latestView.viewed.toUTCString()))
       );
     });
 
@@ -565,7 +567,7 @@ export function isUnpayable(need: Need) {
   return (
     need.unavailable_from &&
     timeDifference(new Date(), need.unavailable_from).hh <
-      PRODUCT_UNPAYABLE_PERIOD
+    PRODUCT_UNPAYABLE_PERIOD
   );
 }
 
@@ -818,15 +820,18 @@ export function getScattered(
   vRole: VirtualFamilyRole,
   medianList: any[],
 ) {
-  const series = [];
-  const usersPays = [];
+  const series: { userId: number, total: number }[] = [];
+  const usersPays: {
+    userId: number,
+    created: Date,
+  }[] = [];
   if (data) {
-    // 1- go over all needs and seperate users who has paid
+    // 1- go over all needs and seperate users who have paid
     data.forEach((n) => {
-      n.participants.forEach((partic) => {
+      n.participants.forEach((partic: NeedFamily) => {
         // get the payment of the participant
         const payment = n.payments.find(
-          (p) => p.id_user === partic.id_user && p.need_amount > 0,
+          (p: Payment) => p.id_user === partic.id_user && p.need_amount > 0,
         );
         if (payment && payment.id_user) {
           usersPays.push({
@@ -839,7 +844,6 @@ export function getScattered(
   }
   // 2- count total pays per users
   const listOfIds = [];
-  const finalList = [];
   usersPays.forEach((u) => {
     const onlyThisUserPays = usersPays.filter((p) => p.userId === u.userId);
     if (!listOfIds.find((item) => item.userId === u.userId)) {
@@ -848,11 +852,12 @@ export function getScattered(
     }
   });
 
-  // {userId: 126, total: 101}
+  // series = [{userId: 126, total: 101},{userId: 666, total: 3}, {userId: 567, total: 3}, ...]
   const sorted = series.sort((a, b) => a.total - b.total);
-  const myList = [];
-  // [[1,162],[4, 5], ...]
+  const finalList = [];
+  const myList:number[] = [];
   sorted.forEach((s) => {
+    // since we set how many of this total is found we look for duplicates - finalList=[[126,1], [3,2]] / one user with total of 126 payment and 2 users with each having 3 payments.
     if (!myList.find((e) => e === s.total)) {
       myList.push(s.total);
       finalList.push([
@@ -862,6 +867,8 @@ export function getScattered(
     }
   });
 
+  // TO-DO: medianList does not use the multiplyer/(#users).
+   //{father: [[126,1], [3,2], ...] , mother:{...} ,...}- in context of the chosen role [total, #users] 
   // for quartile
   medianList.push({ [vRole]: finalList.map((el) => el[0]) });
   return finalList;
@@ -999,8 +1006,8 @@ export function getSimilarityPercentage(sentence1: string, sentence2: string) {
 
   return similarityPercentage;
 }
- 
-export function getContributionRatio(verifiedPayments){
+
+export function getContributionRatio(verifiedPayments) {
   const payments = verifiedPayments.filter(
     (p) => p.flaskUserId !== SAY_DAPP_ID && p.needAmount > 0 && p.verified,
   );
@@ -1009,4 +1016,20 @@ export function getContributionRatio(verifiedPayments){
       ? round((payments.length - 1) * CONTRIBUTION_COEFFICIENT, 2)
       : 1;
   return contributionRatio
+}
+
+export function isOver18(birthday: Date): boolean {
+  const today = new Date();
+  let age = today.getFullYear() - birthday.getFullYear();
+  
+  // Adjust age if the birthday hasn't occurred yet this year.
+  const monthDifference = today.getMonth() - birthday.getMonth();
+  if (
+    monthDifference < 0 || 
+    (monthDifference === 0 && today.getDate() < birthday.getDate())
+  ) {
+    age--;
+  }
+  
+  return age >= 18;
 }

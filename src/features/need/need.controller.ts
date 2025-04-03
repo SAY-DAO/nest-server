@@ -18,6 +18,7 @@ import {
   Colors,
   FlaskUserTypesEnum,
   NeedTypeEnum,
+  PaymentStatusEnum,
   ProductStatusEnum,
   SUPER_ADMIN_ID_PANEL,
 } from '../../types/interfaces/interface';
@@ -28,7 +29,7 @@ import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
 import { TicketService } from '../ticket/ticket.service';
 import {
-  checkNeed,
+  rateDuplicate,
   GRACE_PERIOD,
   SIMILAR_NAME_LIMIT_PRODUCT,
   SIMILAR_NAME_LIMIT_SERVICE,
@@ -39,6 +40,9 @@ import { SyncService } from '../sync/sync.service';
 import { TicketEntity } from '../../entities/ticket.entity';
 import { ProviderService } from '../provider/provider.service';
 import { ServerError } from '../../filters/server-exception.filter';
+import { Need } from '../../entities/flaskEntities/need.entity';
+import { PaymentService } from '../payment/payment.service';
+import { Payment } from '../../entities/flaskEntities/payment.entity';
 
 const BASE_LIMIT_DUPLICATES_0 = 4; // when confirming a need 4 duplicates are allowed for the category 0
 const BASE_LIMIT_DUPLICATES_1 = 3;
@@ -61,7 +65,9 @@ export class NeedController {
     private ticketService: TicketService,
     private syncService: SyncService,
     private providerService: ProviderService,
-  ) {}
+    private paymentService: PaymentService,
+
+  ) { }
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs from db 1' })
@@ -319,12 +325,11 @@ export class NeedController {
       !toBeConfirmed ||
       !toBeConfirmed.list[0] ||
       !toBeConfirmed.createdAt ||
-      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 5;
+      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 60;
     console.log(`Mass prepare expired: ${expired}`);
     console.log(
-      `Last prepare: ${
-        toBeConfirmed.createdAt &&
-        timeDifference(toBeConfirmed.createdAt, new Date()).mm
+      `Last prepare: ${toBeConfirmed.createdAt &&
+      timeDifference(toBeConfirmed.createdAt, new Date()).mm
       } minutes ago`,
     );
 
@@ -354,6 +359,7 @@ export class NeedController {
             fetchedNeed.provider.id != fetchedProviderRel.nestProviderId) ||
           fetchedNeed.status !== need.status ||
           fetchedNeed.category !== need.category ||
+          fetchedNeed.cost !== need._cost ||
           fetchedNeed.type !== need.type ||
           fetchedNeed.details !== need.details ||
           fetchedNeed.title !== need.title ||
@@ -370,11 +376,10 @@ export class NeedController {
           );
           fetchedNeed = nestNeed;
         }
-
         const superAdmin = await this.userService.getUserByFlaskId(
           SUPER_ADMIN_ID_PANEL,
         );
-
+        // check the basic requirements of a newly created need.
         const validatedNeed = await validateNeed(fetchedNeed, superAdmin);
         let ticket: TicketEntity;
         let needTickets = await this.ticketService.getTicketsByNeed(
@@ -385,6 +390,7 @@ export class NeedController {
             t.lastAnnouncement === AnnouncementEnum.ERROR ||
             t.color === Colors.RED,
         );
+
         // 0-  ticket if not a valid need and not ticketed yet
         if (!validatedNeed.isValidNeed) {
           // create ticket if already has not
@@ -408,6 +414,7 @@ export class NeedController {
               superAdmin.flaskUserId,
               ticket.id,
             );
+            console.log('\x1b[36m%s\x1b[0m', 'Ticketing and Skipping need...\n');
           } else if (
             ticketError &&
             daysDifference(ticketError.createdAt, new Date()) > GRACE_PERIOD
@@ -433,7 +440,6 @@ export class NeedController {
             possibleMissMatch: [],
             ticket,
           });
-          console.log('\x1b[36m%s\x1b[0m', 'Skipping need...\n');
           continue;
         }
         /// -------------------------------- If Valid Need --------------------------------------------///
@@ -460,23 +466,27 @@ export class NeedController {
           validatedDups = duplicates.map((d) => {
             return {
               ...d,
-              validation: checkNeed(need, d),
+              validation: rateDuplicate(need, d),
             };
           });
         }
 
         let errorMsg: string;
-        // 2- compare to confirmed similar needs / names_translations
+        // 2- Get needs with similar names in the ecosystem.
         // then if not many similar needs it should be checked manually
         const similarNameNeeds = await this.needService.getSimilarNeeds(
           need.name_translations.en,
         );
-        const sameCatSimilarity = similarNameNeeds.filter(
-          (n) => n.category === need.category,
-        );
-        const diffCatSimilarity = similarNameNeeds.filter(
-          (n) => n.category !== need.category,
-        );
+
+        const sameCatSimilarity: Need[] = [];
+        const diffCatSimilarity: Need[] = []; // used for possible miss match - to help find error in this need or older needs with wrong category, ...
+        for (const item of similarNameNeeds) {
+          if (item.category === need.category) {
+            sameCatSimilarity.push(item);
+          } else if (item.category !== need.category) {
+            diffCatSimilarity.push(item);
+          }
+        }
 
         if (
           need.type === NeedTypeEnum.PRODUCT &&
@@ -506,6 +516,8 @@ export class NeedController {
         if (need.category === CategoryEnum.SURROUNDING) {
           limit = BASE_LIMIT_DUPLICATES_3;
         }
+
+        // Limit error
         const validCount =
           validatedDups &&
           validatedDups.filter((v) => v.validation.isValidDuplicate).length;
@@ -513,16 +525,15 @@ export class NeedController {
         if (validCount && limit < validCount) {
           errorMsg = `Limit error, ${limit}`;
         }
-        if (
-          validatedDups &&
-          validatedDups.filter((v) => v.category !== fetchedNeed.category)
-            .length > 0
-        ) {
-          errorMsg = `Category error, ${
-            validatedDups.filter((v) => v.category !== fetchedNeed.category)
-              .length
-          }`;
+
+        // Category error
+        const list = validatedDups && validatedDups.filter(
+          (v) => v.category !== fetchedNeed.category,
+        );
+        if (list && list.length > 0) {
+          errorMsg = `Category error, ${list.length}`;
         }
+
         myList.push({
           limit,
           validCount,
@@ -617,13 +628,29 @@ export class NeedController {
       throw new ForbiddenException('You Are not the Super admin');
     }
     const deleteCandidates = await this.needService.getDeleteCandidates();
+
     for await (const need of deleteCandidates[0]) {
-      const daysDiff = daysDifference(need.confirmDate, new Date());
-      if (daysDiff > 90) {
+      console.log('Looking at need: ', need.id);
+      const payments = await this.paymentService.getFlaskNeedPayments(need.id)
+      let payment: Payment
+      // if partial payment give two months from the payment time.
+      if (need.status === PaymentStatusEnum.PARTIAL_PAY) {
+        payment = payments.find(p => daysDifference(p.verified && p.created, new Date()) < 60)
+        if (payment) {
+          console.log("found recent partial pay, Skipping...", need.title);
+          continue
+        }
+      }
+      try {
+        console.log('Deleting ...');
         const accessToken =
           config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
         await this.needService.deleteFlaskOneNeed(need.id, accessToken);
+        console.log('Deleted.');
+      } catch (e) {
+        console.log(e);
       }
+
     }
     return { deleted: deleteCandidates[1] };
   }

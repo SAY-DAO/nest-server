@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Logger,
   NotFoundException,
@@ -48,12 +49,16 @@ import {
   convertFlaskToSayRoles,
 } from '../../utils/helpers';
 import { NeedService } from '../need/need.service';
-import { SocialWorkerAPIApi, UserAPIApi } from '../../generated-sources/openapi';
+import {
+  SocialWorkerAPIApi,
+  UserAPIApi,
+} from '../../generated-sources/openapi';
 import { ServerError } from '../../filters/server-exception.filter';
 import { TicketService } from '../ticket/ticket.service';
 import config from '../../config';
 import { isAuthenticated } from '../../utils/auth';
 import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
+import { FamilyService } from '../family/family.service';
 
 @UseInterceptors(WalletInterceptor)
 @ApiSecurity('flask-access-token')
@@ -73,8 +78,9 @@ export class WalletController {
     private ipfsService: IpfsService,
     private userService: UserService,
     private needService: NeedService,
+    private familyService: FamilyService,
     private ticketService: TicketService,
-  ) {}
+  ) { }
 
   // ------------------------------------------ Eth SignIn ------------------------------------------------
 
@@ -144,7 +150,7 @@ export class WalletController {
     }
   }
 
-  @Post(`verify/:userId/:typeId`)
+  @Post('verify/:userId/:typeId')
   @ApiOperation({ description: 'Verify SIWE' })
   async verifySiwe(
     @Param('userId', ParseIntPipe) userId: number,
@@ -165,15 +171,15 @@ export class WalletController {
 
       try {
         await message.verify({ signature: body.signature });
-    } catch {
+      } catch {
         throw new WalletExceptionFilter(422, `could not sign in.`);
-    }
+      }
 
       session.siwe.flaskUserId = userId;
       session.siwe.flaskTypeId = typeId;
       session.save();
 
-      // 
+      //
       const panelRole = convertFlaskToSayPanelRoles(typeId);
       if (
         panelRole === PanelContributors.SOCIAL_WORKER ||
@@ -832,6 +838,85 @@ export class WalletController {
     return {
       signatures: userSignatures[0],
       total: userSignatures[1],
+    };
+  }
+
+  @Get(`signature/ready/:needId`)
+  @ApiOperation({
+    description: 'Get a signed need by sw for vFamily member',
+  })
+  async getReadyOneNeed(@Req() req: Request, @Param('needId') needId: string) {
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+      throw new ForbiddenException('You Are not authorized');
+    }
+
+    if (!needId) {
+      throw new ObjectNotFound('We need the needId!');
+    }
+    const theNeed = await this.familyService.getFamilyReadyToSignOneNeed(
+      needId,
+    );
+
+    if (
+      !theNeed ||
+      !theNeed.verifiedPayments.find(
+        (p) => p.flaskUserId === Number(dappFlaskUserId) && p.verified,
+      )
+    ) {
+      throw new ObjectNotFound('Could not match this need to you!');
+    }
+    if (
+      !theNeed.signatures.find(
+        (s) => s.flaskUserId === theNeed.socialWorker.flaskUserId,
+      )
+    ) {
+      throw new ObjectNotFound(
+        'This need does not have the social worker signature!',
+      );
+    }
+    const members = await this.familyService.getChildFamilyMembers(
+      theNeed.child.flaskId,
+      theNeed.verifiedPayments.map((p) => p.flaskUserId), // list of payees
+    );
+
+    if (members.length < 1) {
+      throw new ObjectNotFound('No payee was found!');
+    }
+    return {
+      ...theNeed,
+      members,
+    };
+  }
+
+  @Get(`signature/ready/all/needs`)
+  @ApiOperation({
+    description: 'Get all signed needs for family member',
+  })
+  async getReadyAllNeed(@Req() req: Request) {
+    const dappFlaskUserId = req.headers['dappFlaskUserId'];
+    if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+      throw new ForbiddenException('You Are not authorized');
+    }
+
+    const readyNeeds = await this.familyService.getFamilyReadyToSignNeeds(
+      dappFlaskUserId,
+    );
+
+    const signedNeedsCount = await this.familyService.countFamilySignedNeeds(
+      dappFlaskUserId,
+    );
+
+    return {
+      signed: signedNeedsCount,
+      readyNeedsList: readyNeeds.filter(
+        (need) =>
+          need.midjourneyImage !== null || // we need to use panel to assign midjourney images first
+          (need.signatures &&
+            need.signatures.find(
+              (s) => s.flaskUserId === Number(dappFlaskUserId),
+            )),
+      ),
     };
   }
 

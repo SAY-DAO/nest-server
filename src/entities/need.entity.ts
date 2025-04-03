@@ -22,7 +22,6 @@ import { SignatureEntity } from './signature.entity';
 import { CommentEntity } from './comment.entity';
 import { VariableEntity } from './variable.entity';
 import { EthereumTransaction } from './ethereum.transaction.entity';
-import { CampaignEntity } from './campaign.entity';
 
 @Entity()
 export class NeedEntity extends BaseEntity {
