@@ -23,7 +23,7 @@ import {
   SUPER_ADMIN_ID_PANEL,
 } from '../../types/interfaces/interface';
 import config from '../../config';
-import { daysDifference, timeDifference } from '../../utils/helpers';
+import { daysDifference, isOver18, timeDifference } from '../../utils/helpers';
 import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
@@ -43,6 +43,7 @@ import { ServerError } from '../../filters/server-exception.filter';
 import { Need } from '../../entities/flaskEntities/need.entity';
 import { PaymentService } from '../payment/payment.service';
 import { Payment } from '../../entities/flaskEntities/payment.entity';
+import { ChildrenService } from '../children/children.service';
 
 const BASE_LIMIT_DUPLICATES_0 = 4; // when confirming a need 4 duplicates are allowed for the category 0
 const BASE_LIMIT_DUPLICATES_1 = 3;
@@ -66,6 +67,7 @@ export class NeedController {
     private syncService: SyncService,
     private providerService: ProviderService,
     private paymentService: PaymentService,
+    private childrenService: ChildrenService,
 
   ) { }
 
@@ -273,6 +275,7 @@ export class NeedController {
     const token =
       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
     try {
+
       if (body) {
         for await (const needId of body.needIds) {
           if (Number(needId) > 0) {

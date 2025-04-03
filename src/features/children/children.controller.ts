@@ -34,7 +34,6 @@ import { UserService } from '../user/user.service';
 import {
   CreateFlaskChildDto,
   PreparePreRegisterChildDto,
-  UpdateApprovedPreRegisterDto,
   UpdatePreRegisterChildDto,
 } from '../../types/dtos/CreateChild.dto';
 import { ValidateChildPipe } from './pipes/validate-child.ts/validate-child.ts.pipe';
@@ -49,28 +48,21 @@ import { ChildrenInterceptor } from './interceptors/children.interceptors';
 import { LocationService } from '../location/location.service';
 import { DownloadService } from '../download/download.service';
 import { NgoService } from '../ngo/ngo.service';
-import { randomUUID } from 'crypto';
 import { NgoEntity } from '../../entities/ngo.entity';
 import { SyncService } from '../sync/sync.service';
-import { LocationEntity } from '../../entities/location.entity';
-import { NgoParams } from '../../types/parameters/NgoParammeters';
 import {
   capitalizeFirstLetter,
-  convertFlaskToSayAppRoles,
-  convertFlaskToSayPanelRoles,
   convertFlaskToSayRoles,
   formatDate,
   truncateString,
 } from '../../utils/helpers';
 import axios from 'axios';
 import { AllUserEntity } from '../../entities/user.entity';
-import { checkIfDirectoryExists, getCurrentFilenames, moveFile, renameFile } from '../../utils/file';
+import { checkIfDirectoryExists, moveFile, } from '../../utils/file';
 import fs from 'fs';
 import { CampaignService } from '../campaign/campaign.service';
 import { File } from '@web-std/file';
 import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.entity';
-import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
-import { forEach } from 'mathjs';
 
 @ApiTags('Children')
 @ApiSecurity('flask-access-token')
@@ -360,7 +352,7 @@ export class ChildrenController {
           checkIfDirectoryExists(originalAwakeGirl) ||
           checkIfDirectoryExists(originalAwakeBoy)
         ) {
-  
+
 
           const newChildFolder = `../../Docs/children${Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
             }organized/${capitalizeFirstLetter(body.sayNameEn)}_${preRegister.id}`;

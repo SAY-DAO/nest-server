@@ -58,7 +58,7 @@ export class NeedService {
     private needRepository: Repository<NeedEntity>,
     @InjectRepository(VariableEntity)
     private variableRepository: Repository<VariableEntity>,
-  ) {}
+  ) { }
 
   async getFlaskNeed(flaskNeedId: number): Promise<Need> {
     return this.flaskNeedRepository.findOne({
@@ -175,10 +175,10 @@ export class NeedService {
   async randomNestNeed(numberOfNeeds: number): Promise<NeedEntity> {
     const randomIndex = Math.floor(Math.random() * numberOfNeeds);
     return await this.needRepository
-    .createQueryBuilder('need')
-    .skip(randomIndex) // Skip random number of rows
-    .take(1) // Only take 1 record
-    .getOne();
+      .createQueryBuilder('need')
+      .skip(randomIndex) // Skip random number of rows
+      .take(1) // Only take 1 record
+      .getOne();
   }
 
   getNeedsWithSignatures(): Promise<NeedEntity[]> {
