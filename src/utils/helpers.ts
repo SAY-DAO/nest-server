@@ -855,7 +855,7 @@ export function getScattered(
   // series = [{userId: 126, total: 101},{userId: 666, total: 3}, {userId: 567, total: 3}, ...]
   const sorted = series.sort((a, b) => a.total - b.total);
   const finalList = [];
-  const myList:number[] = [];
+  const myList: number[] = [];
   sorted.forEach((s) => {
     // since we set how many of this total is found we look for duplicates - finalList=[[126,1], [3,2]] / one user with total of 126 payment and 2 users with each having 3 payments.
     if (!myList.find((e) => e === s.total)) {
@@ -866,11 +866,18 @@ export function getScattered(
       ]);
     }
   });
-
   // TO-DO: medianList does not use the multiplyer/(#users).
-   //{father: [[126,1], [3,2], ...] , mother:{...} ,...}- in context of the chosen role [total, #users] 
-  // for quartile
-  medianList.push({ [vRole]: finalList.map((el) => el[0]) });
+  // {[[126,1], [3,2], [178,1]...] , [...] ,...}- in context of the chosen role [total, #users] 
+  // for quartile / Scattered graph
+  // medianList.push({ [vRole]: finalList.map((el) => el[0]) });
+  const paidList: number[] = [];
+  for (const [totalPaid, userCount] of finalList) {
+    for (let i = 0; i < userCount; i++) {
+      paidList.push(totalPaid);
+    }
+  }
+  medianList.push({ [vRole]: paidList });
+
   return finalList;
 }
 
@@ -1021,15 +1028,15 @@ export function getContributionRatio(verifiedPayments) {
 export function isOver18(birthday: Date): boolean {
   const today = new Date();
   let age = today.getFullYear() - birthday.getFullYear();
-  
+
   // Adjust age if the birthday hasn't occurred yet this year.
   const monthDifference = today.getMonth() - birthday.getMonth();
   if (
-    monthDifference < 0 || 
+    monthDifference < 0 ||
     (monthDifference === 0 && today.getDate() < birthday.getDate())
   ) {
     age--;
   }
-  
+
   return age >= 18;
 }
