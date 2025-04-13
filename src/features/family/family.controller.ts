@@ -25,7 +25,7 @@ import {
   Q3_UPPER_COEFFICIENT,
   daysDifference,
 } from '../../utils/helpers';
-import { mean, quantileSeq, round } from 'mathjs';
+import { compareNatural, mean, quantileSeq, round, sort } from 'mathjs';
 import { ServerError } from '../../filters/server-exception.filter';
 import { PaymentService } from '../payment/payment.service';
 import { NeedService } from '../need/need.service';
@@ -206,10 +206,10 @@ export class FamilyController {
     let confirmDurationQGrant: number;
     let logisticDurationQGrant: number;
 
-    const onlyAmountsList = [];
-    const onlyPayDurationList = [];
-    const onlyConfirmDurationList = [];
-    const onlyLogisticDurationList = [];
+    let onlyAmountsList = [];
+    let onlyPayDurationList = [];
+    let onlyConfirmDurationList = [];
+    let onlyLogisticDurationList = [];
 
     // 1- Get Confirm, amount, Pay duration and logistics in a range of time.
     // 2- We use MATH library to sort and get the quantile
@@ -219,6 +219,7 @@ export class FamilyController {
     // If need ws done by more than one person we reward the vFamily collaboration
     // # of vFamily involved * coefficient
     const contributionRatio = getContributionRatio(need.verifiedPayments)
+
     // -------------------------------------------------- confirm duration -------------------------------- confirmDate - need.created ------------------
     let confirmDuration = daysDifference(need.created, need.confirmDate);
     if (confirmDuration < 0) {
@@ -235,6 +236,8 @@ export class FamilyController {
     confirmsInRange[0].forEach((c) => {
       onlyConfirmDurationList.push(daysDifference(c.created, c.confirmDate));
     });
+
+    onlyConfirmDurationList = sort(onlyConfirmDurationList, compareNatural);
 
     // confirm duration: lower duration means higher grant
     const min_confirm_duration = Number(
@@ -282,6 +285,7 @@ export class FamilyController {
       onlyPayDurationList.push(daysDifference(p.need.confirmDate, p.created));
     });
 
+    onlyAmountsList = sort(onlyAmountsList, compareNatural);
     // payment amount: lower amount means lower grant
     const min_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_min)); //min
     const Q1_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_25th));
@@ -304,6 +308,7 @@ export class FamilyController {
       payAmountQGrant = Q3_UPPER_COEFFICIENT;
     }
 
+    onlyPayDurationList = sort(onlyPayDurationList, compareNatural);
     // payment duration: lower duration means higher grant
     const min_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_min)); //min
     const Q1_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_25th));
@@ -341,21 +346,22 @@ export class FamilyController {
     });
 
 
+    onlyLogisticDurationList = sort(onlyLogisticDurationList, compareNatural);
     // logistic duration: lower duration means higher grant
     const min_logistic_duration = Number(
-      quantileSeq(onlyLogisticDurationList, 0),
+      quantileSeq(onlyLogisticDurationList, QUANTILE_min),
     ); //min
     const Q1_logistic_duration = Number(
-      quantileSeq(onlyLogisticDurationList, 0.25),
+      quantileSeq(onlyLogisticDurationList, QUANTILE_25th),
     );
     const Q2_logistic_duration = Number(
-      quantileSeq(onlyLogisticDurationList, 0.5),
+      quantileSeq(onlyLogisticDurationList, QUANTILE_50th),
     );
     const Q3_logistic_duration = Number(
-      quantileSeq(onlyLogisticDurationList, 0.75),
+      quantileSeq(onlyLogisticDurationList, QUANTILE_75th),
     );
     const max_logistic_duration = Number(
-      quantileSeq(onlyLogisticDurationList, 1),
+      quantileSeq(onlyLogisticDurationList, QUANTILE_max),
     ); // max
 
     if (logisticDuration > Q3_logistic_duration) {

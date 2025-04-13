@@ -166,7 +166,6 @@ export class WalletController {
           'Expected prepareMessage object as body.',
         );
       }
-
       const message = new SiweMessage(body.message);
 
       try {
@@ -174,7 +173,7 @@ export class WalletController {
       } catch {
         throw new WalletExceptionFilter(422, `could not sign in.`);
       }
-
+      console.log(session);
       session.siwe.flaskUserId = userId;
       session.siwe.flaskTypeId = typeId;
       session.save();

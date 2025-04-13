@@ -95,7 +95,6 @@ export class CampaignController {
   ) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    console.log(panelFlaskUserId);
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       !(

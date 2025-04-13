@@ -67,7 +67,7 @@ export class CampaignService {
     private childrenService: ChildrenService,
     private syncService: SyncService,
     private ticketService: TicketService,
-  ) {}
+  ) { }
   private readonly logger = new Logger(CampaignService.name);
   smsApi = new MelipayamakApi(process.env.SMS_USER, process.env.SMS_PASSWORD);
   smsRest = this.smsApi.sms();
@@ -268,7 +268,7 @@ export class CampaignService {
       const list: [{ swId: number; eligible: number; total: number }] = [
         { swId: null, eligible: null, total: null },
       ];
-      const needs = await this.needService.getArrivalUpdateCandidates();
+      const needs = await this.needService.getArrivedCandidates();
       console.log(`Number of needs: ${needs[1]}`);
       for await (const need of needs[0]) {
         if (
@@ -525,9 +525,8 @@ export class CampaignService {
             });
             this.logger.warn(`Sending expand family SMS to: ${to}`);
 
-            const text = `سلام ${
-              flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
-            }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
+            const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+              }، شما در حال حاضر سرپرستی هیچ کودکی را ندارید، برای گسترش خانواده مجازی‌تان: ${shortNeedUrl} \n لغو۱۱`;
             try {
               await sleep(1000);
               console.log('Woke Up...');
@@ -641,11 +640,9 @@ export class CampaignService {
           });
           this.logger.warn(`Sending campaign SMS to: ${to}`);
 
-          const text = `سلام ${
-            flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
-          }،\n از آخرین نیازهای کودک شما، ${
-            eligibleChildren[0].sayName
-          }: ${shortNeedUrl} لغو۱۱`;
+          const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+            }،\n از آخرین نیازهای کودک شما، ${eligibleChildren[0].sayName
+            }: ${shortNeedUrl} لغو۱۱`;
 
           let smsResult: {
             Value: string;
@@ -879,11 +876,9 @@ export class CampaignService {
 
           this.logger.warn(`Sending campaign SMS to: ${to}`);
 
-          const text = `سلام ${
-            flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
-          }،\n ${campaignDetails.smsContent}\n  ${
-            campaignDetails.smsLink
-          } لغو۱۱`;
+          const text = `سلام ${flaskUser.firstName ? flaskUser.firstName : flaskUser.userName
+            }،\n ${campaignDetails.smsContent}\n  ${campaignDetails.smsLink
+            } لغو۱۱`;
 
           let smsResult: {
             Value: string;
@@ -1044,11 +1039,9 @@ export class CampaignService {
 
             this.logger.warn(`Sending campaign SMS to: ${to}`);
 
-            const text = `سلام ${
-              sw.firstName ? sw.firstName : sw.userName
-            }،\n ${campaignDetails.smsContent}\n  ${
-              campaignDetails.smsLink
-            } لغو۱۱`;
+            const text = `سلام ${sw.firstName ? sw.firstName : sw.userName
+              }،\n ${campaignDetails.smsContent}\n  ${campaignDetails.smsLink
+              } لغو۱۱`;
 
             let smsResult: {
               Value: string;

@@ -119,11 +119,7 @@ export class ProviderController {
           body.flaskNeedId,
           body.nestProviderId,
         );
-      console.log("relation1");
-      console.log(relation.id);
     } else {
-      console.log("relation2");
-      console.log(relation.id);
         await this.providerService.updateProviderRelation(
           relation.id,
           body.flaskNeedId,
@@ -138,10 +134,6 @@ export class ProviderController {
         );
 
         const need = await this.needService.getNeedByFlaskId(body.flaskNeedId);
-        console.log("relation2");
-        console.log(body.flaskNeedId);
-        console.log(need.id);
-        console.log("end");
         await this.needService.updateNeedProvider(need.id, provider);
       }
     } catch (e) {

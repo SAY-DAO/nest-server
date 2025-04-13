@@ -5,7 +5,7 @@ import config from '../../config';
 import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
 import { CampaignService } from '../campaign/campaign.service';
-import { persianDay } from '../../utils/helpers';
+import { persianDay, timeDifference } from '../../utils/helpers';
 import { execute } from '@getvim/execute';
 
 @Injectable()
@@ -14,9 +14,10 @@ export class ScheduleService {
     private campaignService: CampaignService,
     private familyService: FamilyService,
     private analyticService: AnalyticService,
-  ) {}
+  ) { }
   private readonly logger = new Logger(ScheduleService.name);
 
+  // first store the list of needs paid by roles - then call these methods in cache this.roleScatteredData() this.theQuartile();
   async completePays() {
     const father = await this.familyService.getFamilyRoleCompletePay(
       VirtualFamilyRole.FATHER,
@@ -121,8 +122,13 @@ export class ScheduleService {
   })
   async handleWeeklyCron() {
     this.logger.debug(' Complete payments of families Called every Week');
-    const data = config().dataCache.fetchFamilyAll();
-    if (!data) {
+    const familyData = config().dataCache.fetchFamilyAll();
+
+    const expired =
+      !familyData ||
+      !familyData.created ||
+      timeDifference(familyData.created, new Date()).mm >= 10080; // 60 minutes/hour × 24 hours/day × 7 days/week = 10,080 minutes/week
+    if (expired) {
       this.completePays();
     } else {
       this.logger.debug('Reading from cache');
@@ -144,7 +150,7 @@ export class ScheduleService {
     }
     // ############## BE CAREFUL #################
     // if (process.env.NODE_ENV === 'production') {
-      // await this.campaignService.sendUserMonthlyCampaigns();
+    // await this.campaignService.sendUserMonthlyCampaigns();
     // }
   }
 

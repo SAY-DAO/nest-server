@@ -598,9 +598,9 @@ export class NeedController {
     return { list: deleteCandidates[0], total: deleteCandidates[1] };
   }
 
-  @Get('update/candidates')
+  @Get('arrived/candidates')
   @ApiOperation({ description: 'Get arrived needs to update them' })
-  async updateArrivalsCandidates(@Req() req: Request) {
+  async getArrivalsCandidates(@Req() req: Request) {
     // delete old confirmed needs
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
@@ -612,7 +612,7 @@ export class NeedController {
       throw new ForbiddenException('You Are not the Super admin');
     }
     const updateCandidates =
-      await this.needService.getArrivalUpdateCandidates();
+      await this.needService.getArrivedCandidates();
 
     return { list: updateCandidates[0], total: updateCandidates[1] };
   }
@@ -658,8 +658,8 @@ export class NeedController {
     return { deleted: deleteCandidates[1] };
   }
 
-  @Get('update/arrivals')
-  async updateNeedsStatus(@Req() req: Request) {
+  @Get('update/arrived')
+  async updateNeedStatus(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
@@ -670,7 +670,7 @@ export class NeedController {
       throw new ForbiddenException('You Are not the Super admin');
     }
 
-    const needs = await this.needService.getArrivalUpdateCandidates();
+    const needs = await this.needService.getArrivedCandidates();
 
     const token =
       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
@@ -683,7 +683,6 @@ export class NeedController {
         contentType: false,
       },
     };
-
     // Only for products: for service do a manual review for receipts
     for await (const need of needs[0]) {
       if (
@@ -693,7 +692,6 @@ export class NeedController {
         const ticket = await this.ticketService.getTicketByFlaskNeedId(
           Number(need.id),
         );
-        console.log(ticket);
 
         try {
           if (

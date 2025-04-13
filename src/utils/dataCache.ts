@@ -5,7 +5,7 @@ import {
   VirtualFamilyRole,
 } from '../types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
-import { getScattered } from './helpers';
+import { getScattered, QUANTILE_25th, QUANTILE_50th, QUANTILE_75th, QUANTILE_max, QUANTILE_min } from './helpers';
 import { Need } from '../entities/flaskEntities/need.entity';
 
 export default class DataCache {
@@ -108,14 +108,14 @@ export default class DataCache {
     khalehsData,
     daeisData,
     ammesData,
-  }:{
+  }: {
     fathersData: Need[];
     mothersData: Need[];
     amoosData: Need[];
     khalehsData: Need[];
     daeisData: Need[];
     ammesData: Need[];
-}) => {
+  }) => {
     this.familyData = {
       fathersData,
       mothersData,
@@ -125,7 +125,8 @@ export default class DataCache {
       ammesData,
       created: new Date(),
     };
-    this.roleScatteredData();
+    // after storing needs paid by roles, e.g. list of needs paid by fathers
+    this.roleScatteredData();  // update medianList for quartile
     this.theQuartile();
   };
 
@@ -184,7 +185,7 @@ export default class DataCache {
     isExpired: true,
   });
 
-  // panel analytic scatter chart
+  // panel analytic scatter chart + update medianList for quartile
   roleScatteredData() {
     return {
       father: getScattered(
@@ -295,60 +296,59 @@ export default class DataCache {
 
       if (father && father[0]) {
         medianObject.father = median(father);
-        IQRObject.min.father = Number(quantileSeq(father, 0)); //min
-        IQRObject.Q1.father = Number(quantileSeq(father, 0.25));
-        IQRObject.Q2.father = Number(quantileSeq(father, 0.5));
-        IQRObject.Q3.father = Number(quantileSeq(father, 0.75));
-        IQRObject.max.father = Number(quantileSeq(father, 1));
+        IQRObject.min.father = Number(quantileSeq(father, QUANTILE_min)); //min
+        IQRObject.Q1.father = Number(quantileSeq(father, QUANTILE_25th));
+        IQRObject.Q2.father = Number(quantileSeq(father, QUANTILE_50th));
+        IQRObject.Q3.father = Number(quantileSeq(father, QUANTILE_75th));
+        IQRObject.max.father = Number(quantileSeq(father, QUANTILE_max));
         IQRObject.IQR.father = IQRObject.Q3.father - IQRObject.Q1.father;
       }
       if (mother && mother[0]) {
         medianObject.mother = median(mother);
-        IQRObject.min.mother = Number(quantileSeq(mother, 0)); // min
-        IQRObject.Q1.mother = Number(quantileSeq(mother, 0.25));
-        IQRObject.Q2.mother = Number(quantileSeq(mother, 0.5));
-        IQRObject.Q3.mother = Number(quantileSeq(mother, 0.75));
-        IQRObject.max.mother = Number(quantileSeq(mother, 1)); // max
+        IQRObject.min.mother = Number(quantileSeq(mother, QUANTILE_min)); // min
+        IQRObject.Q1.mother = Number(quantileSeq(mother, QUANTILE_25th));
+        IQRObject.Q2.mother = Number(quantileSeq(mother, QUANTILE_50th));
+        IQRObject.Q3.mother = Number(quantileSeq(mother, QUANTILE_75th));
+        IQRObject.max.mother = Number(quantileSeq(mother, QUANTILE_max)); // max
         IQRObject.IQR.mother = IQRObject.Q3.mother - IQRObject.Q1.mother;
       }
       if (amoo && amoo[0]) {
         medianObject.amoo = median(amoo);
-        IQRObject.min.amoo = Number(quantileSeq(amoo, 0)); // min
-        IQRObject.Q1.amoo = Number(quantileSeq(amoo, 0.25));
-        IQRObject.Q2.amoo = Number(quantileSeq(amoo, 0.5));
-        IQRObject.Q3.amoo = Number(quantileSeq(amoo, 0.75));
-        IQRObject.max.amoo = Number(quantileSeq(amoo, 1)); // max
+        IQRObject.min.amoo = Number(quantileSeq(amoo, QUANTILE_min)); // min
+        IQRObject.Q1.amoo = Number(quantileSeq(amoo, QUANTILE_25th));
+        IQRObject.Q2.amoo = Number(quantileSeq(amoo, QUANTILE_50th));
+        IQRObject.Q3.amoo = Number(quantileSeq(amoo, QUANTILE_75th));
+        IQRObject.max.amoo = Number(quantileSeq(amoo, QUANTILE_max)); // max
         IQRObject.IQR.amoo = IQRObject.Q3.amoo - IQRObject.Q1.amoo;
       }
       if (khaleh && khaleh[0]) {
         medianObject.khaleh = median(khaleh);
-        IQRObject.min.khaleh = Number(quantileSeq(khaleh, 0)); // min
-        IQRObject.Q1.khaleh = Number(quantileSeq(khaleh, 0.25));
-        IQRObject.Q2.khaleh = Number(quantileSeq(khaleh, 0.5));
-        IQRObject.Q3.khaleh = Number(quantileSeq(khaleh, 0.75));
-        IQRObject.max.khaleh = Number(quantileSeq(khaleh, 1)); // max
+        IQRObject.min.khaleh = Number(quantileSeq(khaleh, QUANTILE_min)); // min
+        IQRObject.Q1.khaleh = Number(quantileSeq(khaleh, QUANTILE_25th));
+        IQRObject.Q2.khaleh = Number(quantileSeq(khaleh, QUANTILE_50th));
+        IQRObject.Q3.khaleh = Number(quantileSeq(khaleh, QUANTILE_75th));
+        IQRObject.max.khaleh = Number(quantileSeq(khaleh, QUANTILE_max)); // max
         IQRObject.IQR.khaleh = IQRObject.Q3.khaleh - IQRObject.Q1.khaleh;
       }
       if (daei && daei[0]) {
         medianObject.daei = median(daei);
-        IQRObject.min.daei = Number(quantileSeq(daei, 0)); // min
-        IQRObject.Q1.daei = Number(quantileSeq(daei, 0.25));
-        IQRObject.Q2.daei = Number(quantileSeq(daei, 0.5));
-        IQRObject.Q3.daei = Number(quantileSeq(daei, 0.75));
-        IQRObject.max.daei = Number(quantileSeq(daei, 1)); // max
+        IQRObject.min.daei = Number(quantileSeq(daei, QUANTILE_min)); // min
+        IQRObject.Q1.daei = Number(quantileSeq(daei, QUANTILE_25th));
+        IQRObject.Q2.daei = Number(quantileSeq(daei, QUANTILE_50th));
+        IQRObject.Q3.daei = Number(quantileSeq(daei, QUANTILE_75th));
+        IQRObject.max.daei = Number(quantileSeq(daei, QUANTILE_max)); // max
         IQRObject.IQR.daei = IQRObject.Q3.daei - IQRObject.Q1.daei;
       }
       if (amme && amme[0]) {
         medianObject.amme = median(amme);
-        IQRObject.min.amme = Number(quantileSeq(amme, 0)); // min
-        IQRObject.Q1.amme = Number(quantileSeq(amme, 0.25));
-        IQRObject.Q2.amme = Number(quantileSeq(amme, 0.5));
-        IQRObject.Q3.amme = Number(quantileSeq(amme, 0.75));
-        IQRObject.max.amme = Number(quantileSeq(amme, 1)); // max
+        IQRObject.min.amme = Number(quantileSeq(amme, QUANTILE_min)); // min
+        IQRObject.Q1.amme = Number(quantileSeq(amme, QUANTILE_25th));
+        IQRObject.Q2.amme = Number(quantileSeq(amme, QUANTILE_50th));
+        IQRObject.Q3.amme = Number(quantileSeq(amme, QUANTILE_75th));
+        IQRObject.max.amme = Number(quantileSeq(amme, QUANTILE_max)); // max
         IQRObject.IQR.amme = IQRObject.Q3.amme - IQRObject.Q1.amme;
       }
     });
-
     return { medianObject, IQRObject };
   }
 }

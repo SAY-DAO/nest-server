@@ -49,7 +49,7 @@ export class TicketController {
     private needService: NeedService,
     private readonly syncService: SyncService,
     private userService: UserService,
-  ) {}
+  ) { }
 
   @Get('all')
   async findAll(@Req() req: Request) {
@@ -195,7 +195,10 @@ export class TicketController {
     if (need.ipfs) {
       throw new ServerError('After IPFS upload you can not change anything.');
     }
+    if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO && !body.arrivalDate) {
+      throw new ServerError('No arrival date was found.');
 
+    }
     let ticket: TicketEntity;
     ticket = await this.ticketService.getTicketByFlaskNeedId(body.flaskNeedId);
     if (ticket) {
@@ -213,19 +216,13 @@ export class TicketController {
       );
     }
 
-    await this.ticketService.createTicketView(
-      createTicketDetails.flaskUserId,
-      ticket.id,
-    );
-
     if (body.announcement === AnnouncementEnum.ARRIVED_AT_NGO) {
       const persianDate = dateConvertToPersian(String(body.arrivalDate));
       const contentDetails = {
         message: ` .به سمن رسید --- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
-        ).getFullYear()}-${
-          new Date(body.arrivalDate).getMonth() + 1
-        }-${new Date(body.arrivalDate).getDate()}`} `,
+        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
+          }-${new Date(body.arrivalDate).getDate()}`} `,
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.ARRIVED_AT_NGO,
@@ -243,9 +240,8 @@ export class TicketController {
       const contentDetails = {
         message: ` .مبلغ دریافت شد--- ${persianDate} --- ${`${new Date(
           body.arrivalDate,
-        ).getFullYear()}-${
-          new Date(body.arrivalDate).getMonth() + 1
-        }-${new Date(body.arrivalDate).getDate()}`} `,
+        ).getFullYear()}-${new Date(body.arrivalDate).getMonth() + 1
+          }-${new Date(body.arrivalDate).getDate()}`} `,
 
         from: body.flaskUserId,
         announcement: AnnouncementEnum.NGO_RECEIVED_MONEY,
@@ -257,6 +253,12 @@ export class TicketController {
       }
       await this.ticketService.createTicketContent(contentDetails, ticket);
     }
+
+    await this.ticketService.createTicketView(
+      createTicketDetails.flaskUserId,
+      ticket.id,
+    );
+
     await this.ticketService.updateTicketAnnouncement(
       ticket.id,
       body.announcement,

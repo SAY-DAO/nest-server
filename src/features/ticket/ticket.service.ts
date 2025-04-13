@@ -38,8 +38,6 @@ export class TicketService {
   }
 
   getTicketByFlaskNeedId(flaskNeedId: number): Promise<TicketEntity> {
-    console.log(flaskNeedId);
-    
     const ticket = this.ticketRepository.findOne({
       where: {
         need: {

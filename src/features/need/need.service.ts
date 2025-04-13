@@ -211,7 +211,6 @@ export class NeedService {
   }
 
   async getNeedByTitle(title: string): Promise<Need[]> {
-    console.log(title);
     return await this.flaskNeedRepository
       .createQueryBuilder('need')
       .select()
@@ -923,7 +922,7 @@ export class NeedService {
       .getManyAndCount();
   }
 
-  async getArrivalUpdateCandidates(): Promise<[Need[], number]> {
+  async getArrivedCandidates(): Promise<[Need[], number]> {
     return this.flaskNeedRepository
       .createQueryBuilder('need')
       .leftJoinAndMapOne(

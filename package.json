@@ -57,7 +57,7 @@
     "discord.js": "14.11.0",
     "dotenv": "^16.0.1",
     "es6-promise": "^4.2.8",
-    "ethers": "^5.7.0",
+    "ethers": "^6.13.5",
     "express-session": "^1.17.3",
     "handlebars": "^4.7.8",
     "mathjs": "^11.9.1",
@@ -76,7 +76,7 @@
     "reflect-metadata": "0.1.13",
     "rimraf": "^5.0.5",
     "rxjs": "^7.8.1",
-    "siwe": "^2.1.4",
+    "siwe": "^3.0.0",
     "typeorm": "^0.3.12",
     "uuidv4": "^6.2.13"
   },

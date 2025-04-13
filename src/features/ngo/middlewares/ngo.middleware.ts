@@ -20,7 +20,6 @@ export class NgoMiddleware implements NestMiddleware {
       await updateFlaskCacheAuthentication(req, this.logger);
     } catch (e) {
       console.log(req.headers);
-
       throw new ServerError(e.message, e.status);
     }
 

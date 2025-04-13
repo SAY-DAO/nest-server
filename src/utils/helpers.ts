@@ -866,16 +866,14 @@ export function getScattered(
       ]);
     }
   });
-  // TO-DO: medianList does not use the multiplyer/(#users).
   // {[[126,1], [3,2], [178,1]...] , [...] ,...}- in context of the chosen role [total, #users] 
-  // for quartile / Scattered graph
-  // medianList.push({ [vRole]: finalList.map((el) => el[0]) });
   const paidList: number[] = [];
   for (const [totalPaid, userCount] of finalList) {
     for (let i = 0; i < userCount; i++) {
       paidList.push(totalPaid);
     }
   }
+  // for quartile / Scattered graph
   medianList.push({ [vRole]: paidList });
 
   return finalList;
