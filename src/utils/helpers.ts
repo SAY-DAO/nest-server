@@ -1038,3 +1038,41 @@ export function isOver18(birthday: Date): boolean {
 
   return age >= 18;
 }
+
+
+// Function to calculate Levenshtein distance
+function levenshtein(a: string, b: string) {
+  const tmp = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    tmp[i] = [i];
+  }
+
+  for (let i = 0; i <= a.length; i++) {
+    tmp[0][i] = i;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      tmp[i][j] = Math.min(
+        tmp[i - 1][j] + 1, // Deletion
+        tmp[i][j - 1] + 1, // Insertion
+        tmp[i - 1][j - 1] + (a[j - 1] === b[i - 1] ? 0 : 1), // Substitution
+      );
+    }
+  }
+
+  return tmp[b.length][a.length];
+}
+
+// Function to check similarity based on Levenshtein distance
+export function areNamesSimilar(name1: string, name2: string) {
+  console.log(`Looking at ${name1} and ${name2}`);
+  const distance = levenshtein(name1.toLowerCase(), name2.toLowerCase());
+  const maxLength = Math.max(name1.length, name2.length);
+  const similarity = 1 - distance / maxLength;
+
+  console.log(`Similarity: ${similarity * 100}%`);
+
+  return similarity > 0.50; // Returns true if similarity is greater than 50%
+}

@@ -51,6 +51,7 @@ import { NgoService } from '../ngo/ngo.service';
 import { NgoEntity } from '../../entities/ngo.entity';
 import { SyncService } from '../sync/sync.service';
 import {
+  areNamesSimilar,
   capitalizeFirstLetter,
   convertFlaskToSayRoles,
   formatDate,
@@ -58,7 +59,7 @@ import {
 } from '../../utils/helpers';
 import axios from 'axios';
 import { AllUserEntity } from '../../entities/user.entity';
-import { checkIfDirectoryExists, moveFile, } from '../../utils/file';
+import { checkIfDirectoryExists, moveFile } from '../../utils/file';
 import fs from 'fs';
 import { CampaignService } from '../campaign/campaign.service';
 import { File } from '@web-std/file';
@@ -328,7 +329,8 @@ export class ChildrenController {
 
     // for local purposes - organized folders and files
     if (process.env.NODE_ENV === 'development') {
-      const preRegistersByName = await this.childrenService.getPreChildrenByName(body.sayNameFa)
+      const preRegistersByName =
+        await this.childrenService.getPreChildrenByName(body.sayNameFa);
 
       if (preRegistersByName && preRegistersByName.length > 0) {
         throw new BadRequestException('Can not have similar names!');
@@ -343,7 +345,6 @@ export class ChildrenController {
       const originalSleptBoy = `../../Docs/children/boys/${files.sleptFile[0].filename.split('-s-')[0]
         }.png`;
 
-
       const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
       const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
 
@@ -352,10 +353,9 @@ export class ChildrenController {
           checkIfDirectoryExists(originalAwakeGirl) ||
           checkIfDirectoryExists(originalAwakeBoy)
         ) {
-
-
           const newChildFolder = `../../Docs/children${Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
-            }organized/${capitalizeFirstLetter(body.sayNameEn)}_${preRegister.id}`;
+            }organized/${capitalizeFirstLetter(body.sayNameEn)}_${preRegister.id
+            }`;
 
           if (!checkIfDirectoryExists(newChildFolder)) {
             console.log('Creating the child organized folder ...');
@@ -376,8 +376,6 @@ export class ChildrenController {
           throw new ServerError('could not find the file');
         }
         return preRegister;
-
-
       } catch (e) {
         throw new ServerError(e.msg);
       }
@@ -415,7 +413,8 @@ export class ChildrenController {
 
   @Get(`complete-delete`)
   @ApiOperation({
-    description: 'After delete we need to move back the avatars to their folders',
+    description:
+      'After delete we need to move back the avatars to their folders',
   })
   @UsePipes(new ValidationPipe())
   async preRegisterCompleteDelete(@Req() req: Request) {
@@ -457,7 +456,9 @@ export class ChildrenController {
           `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.NOT_REGISTERED}`,
           configs,
         );
-        const allPreRegisters = result1.data.data.concat(result2.data.data).concat(result3.data.data);
+        const allPreRegisters = result1.data.data
+          .concat(result2.data.data)
+          .concat(result3.data.data);
 
         // remove the path which has a preregister id. return the paths left in array -> those which were deleted, ...
         function removeItemOnce(arr: any[], value: string) {
@@ -469,68 +470,75 @@ export class ChildrenController {
         }
         let path: string;
         const boysFiles = fs.readdirSync(`../../Docs/children/boys/organized`);
-        const girlsFiles = fs.readdirSync(`../../Docs/children/girls/organized`);
+        const girlsFiles = fs.readdirSync(
+          `../../Docs/children/girls/organized`,
+        );
         const filesDir = boysFiles.concat(girlsFiles);
-        const separateFilesDir = { boysFiles, girlsFiles }
+        const separateFilesDir = { boysFiles, girlsFiles };
 
         for (const p of allPreRegisters) {
-          path = filesDir.find(
-            (d) => d.split(`_`)[1] === p.id
-          );
+          path = filesDir.find((d) => d.split(`_`)[1] === p.id);
           if (!path) {
             // This one is deleted and we need to restore the child folder
-            continue
+            continue;
           } else {
-            removeItemOnce(filesDir, path)
+            removeItemOnce(filesDir, path);
           }
         }
 
-        if (girlsFiles.length + boysFiles.length !== (boysFiles.concat(girlsFiles)).length) {
+        if (
+          girlsFiles.length + boysFiles.length !==
+          boysFiles.concat(girlsFiles).length
+        ) {
           throw new ServerError('The arrays are different');
         }
 
-        const girlPathList = []
-        const boyPathList = []
+        const girlPathList = [];
+        const boyPathList = [];
 
         filesDir.forEach((dir) => {
-          const girlPath = separateFilesDir.girlsFiles.find(
-            (d) => dir === d
-          );
-          const boyPath = separateFilesDir.boysFiles.find(
-            (d) => dir === d
-          );
+          const girlPath = separateFilesDir.girlsFiles.find((d) => dir === d);
+          const boyPath = separateFilesDir.boysFiles.find((d) => dir === d);
 
           if (girlPath) {
-            girlPathList.push(girlPath)
+            girlPathList.push(girlPath);
           }
           if (boyPath) {
-            boyPathList.push(boyPath)
+            boyPathList.push(boyPath);
           }
-
-        })
-
-
+        });
 
         if (boyPathList[0]) {
-          console.log("boy");
+          console.log('boy');
           boyPathList.forEach((p) => {
-            const targetDirectory = `../../Docs/children/boys/organized/${p}`
+            const targetDirectory = `../../Docs/children/boys/organized/${p}`;
             const files = fs.readdirSync(targetDirectory);
-            files.forEach(async (f) => await moveFile(`${targetDirectory}/${f}`, `../../Docs/children/to-be-restored/${f}`))
+            files.forEach(
+              async (f) =>
+                await moveFile(
+                  `${targetDirectory}/${f}`,
+                  `../../Docs/children/to-be-restored/${f}`,
+                ),
+            );
             fs.promises.rmdir(targetDirectory, { recursive: false });
-          })
+          });
         }
         if (girlPathList[0]) {
-          console.log("girl");
+          console.log('girl');
           girlPathList.forEach((p) => {
-            const targetDirectory = `../../Docs/children/girls/organized/${p}`
+            const targetDirectory = `../../Docs/children/girls/organized/${p}`;
             const files = fs.readdirSync(targetDirectory);
-            files.forEach(async (f) => await moveFile(`${targetDirectory}/${f}`, `../../Docs/children/to-be-restored/${f}`))
+            files.forEach(
+              async (f) =>
+                await moveFile(
+                  `${targetDirectory}/${f}`,
+                  `../../Docs/children/to-be-restored/${f}`,
+                ),
+            );
             fs.promises.rmdir(targetDirectory, { recursive: false });
-
-          })
+          });
         }
-        return { "FoldersToBeManaged": filesDir };
+        return { FoldersToBeManaged: filesDir };
       } catch (e) {
         console.log(e);
         throw new ServerError(e.message);
@@ -565,14 +573,33 @@ export class ChildrenController {
     if (!voiceFile) {
       throw new ServerError('No file was uploaded!');
     }
+    if (body.firstName) {
+      throw new ServerError('No first name was given!');
+    }
     try {
       const allPreRegisters =
         await this.childrenService.getChildrenPreRegisterSimple(
           PreRegisterStatusEnum.NOT_REGISTERED,
         );
 
-      const candidate = allPreRegisters.find(
-        (p) => !p.voiceUrl && p.sex === Number(body.sex),
+      // filter those preregisters which their first names are not similar to the child real name
+      // to minimize human mistakes, we use  Levenshtein distance for similarity
+      const filtered = allPreRegisters.filter(
+        (pre) =>
+          pre.sayName.fa !== body.firstName ||
+          (pre.sayName.fa &&
+            !areNamesSimilar(pre.sayName.fa, body.firstName)),
+      );
+
+      if (allPreRegisters && allPreRegisters[0] && (!filtered || filtered.length === 0)) {
+        throw new ServerError('Say name and child name are similar!');
+      }
+
+      const candidate = filtered.find(
+        (p) =>
+          !p.voiceUrl &&
+          p.sex === Number(body.sex) &&
+          p.sayName.fa !== body.firstName,
       );
       if (!candidate) {
         throw new ServerError('We need more avatars');
@@ -869,7 +896,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN) &&
       Number(status) === PreRegisterStatusEnum.NOT_REGISTERED
     ) {
-      return await this.childrenService.getChildrenPreRegisterNotRegistered(
+      return await this.childrenService.getChildrenPreRegisterAdmin(
         {
           page: page,
           limit: limit,
@@ -993,14 +1020,15 @@ export class ChildrenController {
 
     const names = confirmedNames.concat(preNames);
 
-    // to minimize human mistakes, we also compare the last 3 chars - همادخت vs هُمادخت
+    // to minimize human mistakes, we use  Levenshtein distance for similarity
     const found = names.filter((n) =>
       lang === 'en'
         ? n.en.toUpperCase() === newName.toUpperCase() ||
-        (n.en &&
-          n.en.slice(-3).toUpperCase() === newName.slice(-3).toUpperCase())
-        : n.fa === newName || (n.fa && n.fa.slice(-3) === newName.slice(-3)),
+        (n.en && areNamesSimilar(n.en, newName))
+        : n.fa && (n.fa === newName || areNamesSimilar(n.fa, newName)),
     );
+
+
 
     return {
       found,

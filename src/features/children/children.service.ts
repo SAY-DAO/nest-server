@@ -128,95 +128,6 @@ export class ChildrenService {
     return needs;
   }
 
-  createPreRegisterChild(
-    awakeUrl: string,
-    sleptUrl: string,
-    sayName: { fa: string; en: string },
-    sex: SexEnum,
-  ): Promise<ChildrenPreRegisterEntity> {
-    const newChild = this.preRegisterChildrenRepository.create({
-      awakeUrl,
-      sleptUrl,
-      sayName: { fa: sayName.fa, en: sayName.en },
-      sex,
-    });
-    return this.preRegisterChildrenRepository.save(newChild);
-  }
-
-  approvePreregister(
-    preRegister: ChildrenPreRegisterEntity,
-    firstNameEn: string,
-    lastNameEn: string,
-    bioEn: string,
-    flaskChildId: number,
-    voiceUrl: string,
-  ): Promise<UpdateResult> {
-    return this.preRegisterChildrenRepository.update(
-      { id: preRegister.id },
-      {
-        status: PreRegisterStatusEnum.CONFIRMED,
-        flaskChildId,
-        firstName: { fa: preRegister.firstName.fa, en: firstNameEn },
-        lastName: { fa: preRegister.lastName.fa, en: lastNameEn },
-        bio: { fa: preRegister.bio.fa, en: bioEn },
-        voiceUrl,
-      },
-    );
-  }
-
-  preRegisterAssignChild(
-    theId: string,
-    childDetails: PreRegisterChildPrepareParams,
-    location: LocationEntity,
-    ngo: NgoEntity,
-    sw: ContributorEntity,
-  ): Promise<UpdateResult> {
-    return this.preRegisterChildrenRepository.update(
-      { id: theId },
-      {
-        ...childDetails,
-        firstName: {
-          fa: childDetails.firstName.fa,
-          en: childDetails.firstName.en,
-        },
-        lastName: { fa: childDetails.lastName.fa, en: '' },
-        bio: { fa: childDetails.bio.fa, en: '' },
-        location,
-        ngo,
-        socialWorker: sw,
-      },
-    );
-  }
-
-  preRegisterUpdate(
-    theId: string,
-    childDetails: PreRegisterChildUpdateParams,
-  ): Promise<UpdateResult> {
-    return this.preRegisterChildrenRepository.update(
-      { id: theId },
-      {
-        ...childDetails,
-        firstName: {
-          fa: childDetails.firstName.fa,
-          en: childDetails.firstName.en,
-        },
-        lastName: { fa: childDetails.lastName.fa, en: '' },
-        bio: { fa: childDetails.bio.fa, en: '' },
-      },
-    );
-  }
-
-  preRegisterUpdateApproved(
-    flaskChildId: number,
-    theId: string,
-    childDetails: PreRegisterChildUpdateApprovedParams,
-  ): Promise<UpdateResult> {
-    return this.preRegisterChildrenRepository.update(
-      { id: theId },
-      { flaskChildId, ...childDetails },
-    );
-  }
-
   createChild(
     childDetails: ChildParams,
     ngo: NgoEntity,
@@ -246,104 +157,6 @@ export class ChildrenService {
   getChildren(): Promise<ChildrenEntity[]> {
     return this.childrenRepository.find();
   }
-
-  getChildrenPreRegisterByFlaskId(
-    flaskChildId: number,
-  ): Promise<ChildrenPreRegisterEntity> {
-    return this.preRegisterChildrenRepository.findOne({
-      where: {
-        flaskChildId,
-      },
-    });
-  }
-
-  async getChildrenPreRegisters(
-    options: PaginateQuery,
-    status: PreRegisterStatusEnum,
-    ngoIds: number[],
-    swIds: number[],
-  ): Promise<Paginated<ChildrenPreRegisterEntity>> {
-    const queryBuilder = this.preRegisterChildrenRepository
-      .createQueryBuilder('preRegister')
-      .leftJoinAndMapOne(
-        'preRegister.location',
-        LocationEntity,
-        'location',
-        'location.flaskCityId = preRegister.city',
-      )
-      .leftJoinAndMapOne(
-        'preRegister.socialWorker',
-        AllUserEntity,
-        'socialWorker',
-        'socialWorker.flaskUserId = preRegister.flaskSwId',
-      )
-      .leftJoinAndMapOne(
-        'preRegister.ngo',
-        NgoEntity,
-        'ngo',
-        'ngo.flaskNgoId = preRegister.flaskNgoId',
-      )
-      .where('preRegister.status = :status', {
-        status,
-      })
-      .andWhere('ngo.flaskNgoId IN (:...ngoIds)', {
-        ngoIds: [...ngoIds],
-      })
-      .andWhere('preRegister.flaskSwId IN (:...swIds)', {
-        swIds: swIds,
-      })
-      .andWhere('socialWorker.isContributor = :isContributor', {
-        isContributor: true,
-      });
-
-    return await nestPaginate<ChildrenPreRegisterEntity>(
-      options,
-      queryBuilder,
-      {
-        defaultSortBy: [['createdAt', 'DESC']],
-        sortableColumns: ['id'],
-        nullSort: 'last',
-      },
-    );
-  }
-
-  async getChildrenPreRegisterNotRegistered(
-    options: PaginateQuery,
-    status: PreRegisterStatusEnum,
-  ): Promise<Paginated<ChildrenPreRegisterEntity>> {
-    const queryBuilder = this.preRegisterChildrenRepository
-      .createQueryBuilder('preRegister')
-      .leftJoinAndMapOne(
-        'preRegister.location',
-        LocationEntity,
-        'location',
-        'location.flaskCityId = preRegister.city',
-      )
-      .where('preRegister.status = :status', {
-        status,
-      });
-    return await nestPaginate<ChildrenPreRegisterEntity>(
-      options,
-      queryBuilder,
-      {
-        defaultSortBy: [['createdAt', 'DESC']],
-        sortableColumns: ['id'],
-        nullSort: 'last',
-      },
-    );
-  }
-
-  //no pagination
-  getChildrenPreRegisterSimple(
-    status: PreRegisterStatusEnum,
-  ): Promise<ChildrenPreRegisterEntity[]> {
-    return this.preRegisterChildrenRepository.find({
-      where: {
-        status: status,
-      },
-    });
-  }
-
 
 
   async getFlaskChildren(
@@ -419,38 +232,6 @@ export class ChildrenService {
       .createQueryBuilder('child')
       .select(['child.sayname_translations'])
       .getMany();
-  }
-
-  async getPreChildrenNames(): Promise<ChildrenPreRegisterEntity[]> {
-    return await this.preRegisterChildrenRepository
-      .createQueryBuilder('child')
-      .where('child.status != :status', {
-        status: PreRegisterStatusEnum.CONFIRMED,
-      })
-      .select(['child.sayName'])
-      .getMany();
-  }
-
-  async getPreChildrenByName(sayNameEn: string): Promise<ChildrenPreRegisterEntity[]> {
-    return await this.preRegisterChildrenRepository
-      .createQueryBuilder('child')
-      // .where('child.status != :status', {
-      //   status: PreRegisterStatusEnum.CONFIRMED,
-      // })
-      .where("child.sayName -> 'en' = :sayName", {
-        sayName: sayNameEn,
-      })
-      .select(['child.sayName'])
-      .getMany();
-  }
-
-  getChildPreRegisterById(id: string): Promise<ChildrenPreRegisterEntity> {
-    const child = this.preRegisterChildrenRepository.findOne({
-      where: {
-        id: id,
-      },
-    });
-    return child;
   }
 
   getChildById(flaskId: number): Promise<ChildrenEntity> {
@@ -531,7 +312,233 @@ export class ChildrenService {
       .cache(10000)
       .getMany();
   }
+  // ----------------------------------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------------------- PRE - REGISTER -------------------------------------------------------
+  // ----------------------------------------------------------------------------------------------------------------------------------
+
+  createPreRegisterChild(
+    awakeUrl: string,
+    sleptUrl: string,
+    sayName: { fa: string; en: string },
+    sex: SexEnum,
+  ): Promise<ChildrenPreRegisterEntity> {
+    const newChild = this.preRegisterChildrenRepository.create({
+      awakeUrl,
+      sleptUrl,
+      sayName: { fa: sayName.fa, en: sayName.en },
+      sex,
+    });
+    return this.preRegisterChildrenRepository.save(newChild);
+  }
+
+  approvePreregister(
+    preRegister: ChildrenPreRegisterEntity,
+    firstNameEn: string,
+    lastNameEn: string,
+    bioEn: string,
+    flaskChildId: number,
+    voiceUrl: string,
+  ): Promise<UpdateResult> {
+    return this.preRegisterChildrenRepository.update(
+      { id: preRegister.id },
+      {
+        status: PreRegisterStatusEnum.CONFIRMED,
+        flaskChildId,
+        firstName: { fa: preRegister.firstName.fa, en: firstNameEn },
+        lastName: { fa: preRegister.lastName.fa, en: lastNameEn },
+        bio: { fa: preRegister.bio.fa, en: bioEn },
+        voiceUrl,
+      },
+    );
+  }
+
+  preRegisterAssignChild(
+    theId: string,
+    childDetails: PreRegisterChildPrepareParams,
+    location: LocationEntity,
+    ngo: NgoEntity,
+    sw: ContributorEntity,
+  ): Promise<UpdateResult> {
+    return this.preRegisterChildrenRepository.update(
+      { id: theId },
+      {
+        ...childDetails,
+        firstName: {
+          fa: childDetails.firstName.fa,
+          en: childDetails.firstName.en,
+        },
+        lastName: { fa: childDetails.lastName.fa, en: '' },
+        bio: { fa: childDetails.bio.fa, en: '' },
+        location,
+        ngo,
+        socialWorker: sw,
+      },
+    );
+  }
+
+  preRegisterUpdate(
+    theId: string,
+    childDetails: PreRegisterChildUpdateParams,
+  ): Promise<UpdateResult> {
+    return this.preRegisterChildrenRepository.update(
+      { id: theId },
+      {
+        ...childDetails,
+        firstName: {
+          fa: childDetails.firstName.fa,
+          en: childDetails.firstName.en,
+        },
+        lastName: { fa: childDetails.lastName.fa, en: '' },
+        bio: { fa: childDetails.bio.fa, en: '' },
+      },
+    );
+  }
+  
+
+  // When panel edit/update a confirmed child
+  preRegisterUpdateApproved(
+    flaskChildId: number,
+    theId: string,
+    childDetails: PreRegisterChildUpdateApprovedParams,
+  ): Promise<UpdateResult> {
+    return this.preRegisterChildrenRepository.update(
+      { id: theId },
+      { flaskChildId, ...childDetails },
+    );
+  }
+
+  getChildrenPreRegisterByFlaskId(
+    flaskChildId: number,
+  ): Promise<ChildrenPreRegisterEntity> {
+    return this.preRegisterChildrenRepository.findOne({
+      where: {
+        flaskChildId,
+      },
+    });
+  }
+
+  async getChildrenPreRegisters(
+    options: PaginateQuery,
+    status: PreRegisterStatusEnum,
+    ngoIds: number[],
+    swIds: number[],
+  ): Promise<Paginated<ChildrenPreRegisterEntity>> {
+    const queryBuilder = this.preRegisterChildrenRepository
+      .createQueryBuilder('preRegister')
+      .leftJoinAndMapOne(
+        'preRegister.location',
+        LocationEntity,
+        'location',
+        'location.flaskCityId = preRegister.city',
+      )
+      .leftJoinAndMapOne(
+        'preRegister.socialWorker',
+        AllUserEntity,
+        'socialWorker',
+        'socialWorker.flaskUserId = preRegister.flaskSwId',
+      )
+      .leftJoinAndMapOne(
+        'preRegister.ngo',
+        NgoEntity,
+        'ngo',
+        'ngo.flaskNgoId = preRegister.flaskNgoId',
+      )
+      .where('preRegister.status = :status', {
+        status,
+      })
+      .andWhere('ngo.flaskNgoId IN (:...ngoIds)', {
+        ngoIds: [...ngoIds],
+      })
+      .andWhere('preRegister.flaskSwId IN (:...swIds)', {
+        swIds: swIds,
+      })
+      .andWhere('socialWorker.isContributor = :isContributor', {
+        isContributor: true,
+      });
+
+    return await nestPaginate<ChildrenPreRegisterEntity>(
+      options,
+      queryBuilder,
+      {
+        defaultSortBy: [['createdAt', 'DESC']],
+        sortableColumns: ['id'],
+        nullSort: 'last',
+      },
+    );
+  }
+
+  async getChildrenPreRegisterAdmin(
+    options: PaginateQuery,
+    status: PreRegisterStatusEnum,
+  ): Promise<Paginated<ChildrenPreRegisterEntity>> {
+    const queryBuilder = this.preRegisterChildrenRepository
+      .createQueryBuilder('preRegister')
+      .leftJoinAndMapOne(
+        'preRegister.location',
+        LocationEntity,
+        'location',
+        'location.flaskCityId = preRegister.city',
+      )
+      .where('preRegister.status = :status', {
+        status,
+      });
+    return await nestPaginate<ChildrenPreRegisterEntity>(
+      options,
+      queryBuilder,
+      {
+        defaultSortBy: [['createdAt', 'DESC']],
+        sortableColumns: ['id'],
+        nullSort: 'last',
+      },
+    );
+  }
+
+  // no pagination
+  getChildrenPreRegisterSimple(
+    status: PreRegisterStatusEnum,
+  ): Promise<ChildrenPreRegisterEntity[]> {
+    return this.preRegisterChildrenRepository.find({
+      where: {
+        status: status,
+      },
+    });
+  }
+
+  async getPreChildrenNames(): Promise<ChildrenPreRegisterEntity[]> {
+    return await this.preRegisterChildrenRepository
+      .createQueryBuilder('child')
+      .where('child.status != :status', {
+        status: PreRegisterStatusEnum.CONFIRMED,
+      })
+      .select(['child.sayName'])
+      .getMany();
+  }
+
+  async getPreChildrenByName(sayNameEn: string): Promise<ChildrenPreRegisterEntity[]> {
+    return await this.preRegisterChildrenRepository
+      .createQueryBuilder('child')
+      // .where('child.status != :status', {
+      //   status: PreRegisterStatusEnum.CONFIRMED,
+      // })
+      .where("child.sayName -> 'en' = :sayName", {
+        sayName: sayNameEn,
+      })
+      .select(['child.sayName'])
+      .getMany();
+  }
+
+  getChildPreRegisterById(id: string): Promise<ChildrenPreRegisterEntity> {
+    const child = this.preRegisterChildrenRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+    return child;
+  }
+
   async deletePreRegister(id: string): Promise<Observable<any>> {
     return from(this.preRegisterChildrenRepository.delete(id));
   }
+
+
 }
