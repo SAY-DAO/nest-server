@@ -573,7 +573,8 @@ export class ChildrenController {
     if (!voiceFile) {
       throw new ServerError('No file was uploaded!');
     }
-    if (body.firstName) {
+
+    if (!body.firstName) {
       throw new ServerError('No first name was given!');
     }
     try {
@@ -872,7 +873,7 @@ export class ChildrenController {
       // for auditor - admin
       swIds = await this.userService
         .getFlaskSwIds()
-        .then((r) => r.map((s) => s.id)); // all NGOs id
+        .then((r) => r.map((s) => s.id));
 
       ngoIds = await this.ngoService
         .getFlaskNgos()
@@ -896,6 +897,7 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN) &&
       Number(status) === PreRegisterStatusEnum.NOT_REGISTERED
     ) {
+
       return await this.childrenService.getChildrenPreRegisterAdmin(
         {
           page: page,
