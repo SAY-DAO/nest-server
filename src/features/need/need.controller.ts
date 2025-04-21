@@ -23,7 +23,7 @@ import {
   SUPER_ADMIN_ID_PANEL,
 } from '../../types/interfaces/interface';
 import config from '../../config';
-import { daysDifference, isOver18, timeDifference } from '../../utils/helpers';
+import { daysDifference, timeDifference } from '../../utils/helpers';
 import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
@@ -475,20 +475,32 @@ export class NeedController {
         }
 
         let errorMsg: string;
-        // 2- Get needs with similar names in the ecosystem.
+        // 2- ONLY PRODUCT since no title for service - Get needs with similar names in the ecosystem.
         // then if not many similar needs it should be checked manually
-        const similarNameNeeds = await this.needService.getSimilarNeeds(
-          need.name_translations.en,
-        );
+        let similarTitleNeeds: Need[]
+        if (need.type === NeedTypeEnum.PRODUCT) {
+          similarTitleNeeds = await this.needService.getSimilarNeedsProduct(
+            need.title.slice(0, 25)
+          );
+        } else {
+          similarTitleNeeds = await this.needService.getSimilarNeedsService(
+            need.name_translations.fa,
+          );
+
+        }
 
         const sameCatSimilarity: Need[] = [];
         const diffCatSimilarity: Need[] = []; // used for possible miss match - to help find error in this need or older needs with wrong category, ...
-        for (const item of similarNameNeeds) {
+        for (const item of similarTitleNeeds) {
           if (item.category === need.category) {
             sameCatSimilarity.push(item);
           } else if (item.category !== need.category) {
             diffCatSimilarity.push(item);
           }
+          // if (getSimilarityPercentage(need.name_translations.fa, need.name_translations.fa) < 80) {
+          //   errorMsg = `Wrong Icon.`;
+          // }
+
         }
 
         if (
@@ -496,7 +508,9 @@ export class NeedController {
           sameCatSimilarity.length < SIMILAR_NAME_LIMIT_PRODUCT
         ) {
           errorMsg = `Similar count error, only ${sameCatSimilarity.length}.`;
+
         }
+
         if (
           need.type === NeedTypeEnum.SERVICE &&
           sameCatSimilarity.length < SIMILAR_NAME_LIMIT_SERVICE
@@ -542,6 +556,7 @@ export class NeedController {
           validCount,
           need: fetchedNeed,
           duplicates: validatedDups,
+          similarTitleNeeds,
           errorMsg,
           possibleMissMatch: diffCatSimilarity.map((n) => {
             return {

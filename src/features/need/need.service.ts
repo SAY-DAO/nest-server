@@ -1075,12 +1075,19 @@ export class NeedService {
       .getMany();
   }
 
-  async getSimilarNeeds(name: string): Promise<Need[]> {
+  // -- Install pg_trgm into the default schema (usually `public`):
+  // CREATE EXTENSION IF NOT EXISTS pg_trgm;
+  async getSimilarNeedsProduct(title: string): Promise<Need[]> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
-      .where("need.name_translations -> 'en' = :nameTranslations", {
-        nameTranslations: name,
-      })
+      .addSelect('similarity(need.title, :title)', 'similarity_score')
+      .where('similarity(need.title, :title) > 0.20', { title })
+      .andWhere('need.type = :type', { type: NeedTypeEnum.PRODUCT })
+      // .addSelect(`levenshtein(lower(need.title), lower(:term))`, 'distance')
+      // .where(`levenshtein(lower(need.title), lower(:term)) <= :maxDistance`, {
+      //   term: title,
+      //   maxDistance,
+      // })
       .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
       .select([
@@ -1095,6 +1102,37 @@ export class NeedService {
         'need.isConfirmed',
         'need.created',
         'need.confirmDate',
+        'need.imageUrl',
+        'need._cost',
+      ])
+      .cache(60000)
+      .orderBy('need.created', 'ASC');
+    return await queryBuilder.getMany();
+  }
+
+  async getSimilarNeedsService(name: string): Promise<Need[]> {
+    const queryBuilder = this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .where("need.name_translations -> 'fa' = :nameTranslations", {
+        nameTranslations: name,
+      })
+      .andWhere('need.type = :type', { type: NeedTypeEnum.SERVICE })
+      .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
+      .select([
+        'need.id',
+        'need.title',
+        'need.status',
+        'need.type',
+        'need.child_id',
+        'need.name_translations',
+        'need.description_translations',
+        'need.category',
+        'need.isConfirmed',
+        'need.created',
+        'need.confirmDate',
+        'need.imageUrl',
+        'need._cost',
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');

@@ -430,120 +430,134 @@ export class ChildrenController {
       throw new ForbiddenException('You Are not the Authorized!');
     }
     // for local purposes - organized folders and files
-    if (process.env.NODE_ENV === 'development') {
-      try {
-        const token =
-          config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
-        const configs = {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: token,
-            contentType: false,
-            flaskId: panelFlaskUserId,
-            'X-TAKE': 0,
-            'X-LIMIT': 100,
-          },
-        };
-        const result1 = await axios.get(
-          `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.PRE_REGISTERED}`,
-          configs,
-        );
-        const result2 = await axios.get(
-          `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.CONFIRMED}`,
-          configs,
-        );
-        const result3 = await axios.get(
-          `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.NOT_REGISTERED}`,
-          configs,
-        );
-        const allPreRegisters = result1.data.data
-          .concat(result2.data.data)
-          .concat(result3.data.data);
+    //          "FoldersToBeManaged":
+    //         "Ashour_352c5795-7b1b-4359-aca0-c6f3bf6278a8",
+    //         "Daraab_06d47abb-f436-4d10-b2e6-f5bd2640a906",
+    //         "Hormouz_3cd386e9-a0d9-47f9-a07e-5a738d0f1063",
+    //         "Panaah_41f615f7-ad85-4563-b11c-ef6194b72ef3",
+    //         "Pendaar_7186e8d1-de01-4fa5-ba39-7bd5c858ed1e",
+    //         "Delbar_015919df-1f02-4194-a6c9-aad50d64868a",
+    //         "Goldis_8a667f3d-ce49-4313-b7d3-c23707e5cb6b",
+    //         "Hamdam_3d348ff8-d6a4-4c30-bec0-212afe9112b7",
+    //         "Mah-Afarin_9a1a47ca-b42a-4c2a-8423-d43bce3adf2f",
+    //         "Navaa_053578c9-a5aa-4f85-a903-d7d6071c4298",
+    //         "Nilgoon_748fb98a-eb8f-4288-8572-9c83f2d9ef05",
+    //         "Pari_93d43b4d-6d37-492a-86e3-ae5e315b79ed",
+    //         "Parna_6e459aeb-da42-421d-952f-bf4bfe04de13",
+    //         "Shooka_8f7183e2-86e7-4cec-a59e-289930e699b8"
+    // TO-DO: very very buggy
+    // if (process.env.NODE_ENV === 'development') {
+    //   try {
+    //     const token =
+    //       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
+    //     const configs = {
+    //       headers: {
+    //         'Content-Type': 'multipart/form-data',
+    //         Authorization: token,
+    //         contentType: false,
+    //         flaskId: panelFlaskUserId,
+    //         'X-TAKE': 0,
+    //         'X-LIMIT': 100,
+    //       },
+    //     };
+    //     const result1 = await axios.get(
+    //       `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.PRE_REGISTERED}`,
+    //       configs,
+    //     );
+    //     const result2 = await axios.get(
+    //       `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.CONFIRMED}`,
+    //       configs,
+    //     );
+    //     const result3 = await axios.get(
+    //       `https://nest.saydao.org/api/dao/children/preregister/all/${PreRegisterStatusEnum.NOT_REGISTERED}`,
+    //       configs,
+    //     );
+    //     const allPreRegisters = result1.data.data
+    //       .concat(result2.data.data)
+    //       .concat(result3.data.data);
 
-        // remove the path which has a preregister id. return the paths left in array -> those which were deleted, ...
-        function removeItemOnce(arr: any[], value: string) {
-          const index = arr.indexOf(value);
-          if (index > -1) {
-            arr.splice(index, 1);
-          }
-          return arr;
-        }
-        let path: string;
-        const boysFiles = fs.readdirSync(`../../Docs/children/boys/organized`);
-        const girlsFiles = fs.readdirSync(
-          `../../Docs/children/girls/organized`,
-        );
-        const filesDir = boysFiles.concat(girlsFiles);
-        const separateFilesDir = { boysFiles, girlsFiles };
+    //     // remove the path which has a preregister id. return the paths left in array -> those which were deleted, ...
+    //     function removeItemOnce(arr: any[], value: string) {
+    //       const index = arr.indexOf(value);
+    //       if (index > -1) {
+    //         arr.splice(index, 1);
+    //       }
+    //       return arr;
+    //     }
+    //     let path: string;
+    //     const boysFiles = fs.readdirSync(`../../Docs/children/boys/organized`);
+    //     const girlsFiles = fs.readdirSync(
+    //       `../../Docs/children/girls/organized`,
+    //     );
+    //     const filesDir = boysFiles.concat(girlsFiles);
+    //     const separateFilesDir = { boysFiles, girlsFiles };
 
-        for (const p of allPreRegisters) {
-          path = filesDir.find((d) => d.split(`_`)[1] === p.id);
-          if (!path) {
-            // This one is deleted and we need to restore the child folder
-            continue;
-          } else {
-            removeItemOnce(filesDir, path);
-          }
-        }
+    //     for (const p of allPreRegisters) {
+    //       path = filesDir.find((d) => d.split(`_`)[1] === p.id);
+    //       if (!path) {
+    //         // This one is deleted and we need to restore the child folder
+    //         continue;
+    //       } else {
+    //         removeItemOnce(filesDir, path);
+    //       }
+    //     }
 
-        if (
-          girlsFiles.length + boysFiles.length !==
-          boysFiles.concat(girlsFiles).length
-        ) {
-          throw new ServerError('The arrays are different');
-        }
+    //     if (
+    //       girlsFiles.length + boysFiles.length !==
+    //       boysFiles.concat(girlsFiles).length
+    //     ) {
+    //       throw new ServerError('The arrays are different');
+    //     }
 
-        const girlPathList = [];
-        const boyPathList = [];
+    //     const girlPathList = [];
+    //     const boyPathList = [];
 
-        filesDir.forEach((dir) => {
-          const girlPath = separateFilesDir.girlsFiles.find((d) => dir === d);
-          const boyPath = separateFilesDir.boysFiles.find((d) => dir === d);
+    //     filesDir.forEach((dir) => {
+    //       const girlPath = separateFilesDir.girlsFiles.find((d) => dir === d);
+    //       const boyPath = separateFilesDir.boysFiles.find((d) => dir === d);
 
-          if (girlPath) {
-            girlPathList.push(girlPath);
-          }
-          if (boyPath) {
-            boyPathList.push(boyPath);
-          }
-        });
+    //       if (girlPath) {
+    //         girlPathList.push(girlPath);
+    //       }
+    //       if (boyPath) {
+    //         boyPathList.push(boyPath);
+    //       }
+    //     });
 
-        if (boyPathList[0]) {
-          console.log('boy');
-          boyPathList.forEach((p) => {
-            const targetDirectory = `../../Docs/children/boys/organized/${p}`;
-            const files = fs.readdirSync(targetDirectory);
-            files.forEach(
-              async (f) =>
-                await moveFile(
-                  `${targetDirectory}/${f}`,
-                  `../../Docs/children/to-be-restored/${f}`,
-                ),
-            );
-            fs.promises.rmdir(targetDirectory, { recursive: false });
-          });
-        }
-        if (girlPathList[0]) {
-          console.log('girl');
-          girlPathList.forEach((p) => {
-            const targetDirectory = `../../Docs/children/girls/organized/${p}`;
-            const files = fs.readdirSync(targetDirectory);
-            files.forEach(
-              async (f) =>
-                await moveFile(
-                  `${targetDirectory}/${f}`,
-                  `../../Docs/children/to-be-restored/${f}`,
-                ),
-            );
-            fs.promises.rmdir(targetDirectory, { recursive: false });
-          });
-        }
-        return { FoldersToBeManaged: filesDir };
-      } catch (e) {
-        console.log(e);
-        throw new ServerError(e.message);
-      }
-    }
+    //     if (boyPathList[0]) {
+    //       boyPathList.forEach((p) => {
+    //         const targetDirectory = `../../Docs/children/boys/organized/${p}`;
+    //         const files = fs.readdirSync(targetDirectory);
+    //         files.forEach(
+    //           async (f) =>
+    //             await moveFile(
+    //               `${targetDirectory}/${f}`,
+    //               `../../Docs/children/to-be-restored/${f}`,
+    //             ),
+    //         );
+    //         fs.promises.rmdir(targetDirectory, { recursive: false });
+    //       });
+    //     }
+    //     if (girlPathList[0]) {
+    //       girlPathList.forEach((p) => {
+    //         const targetDirectory = `../../Docs/children/girls/organized/${p}`;
+    //         const files = fs.readdirSync(targetDirectory);
+    //         files.forEach(
+    //           async (f) =>
+    //             await moveFile(
+    //               `${targetDirectory}/${f}`,
+    //               `../../Docs/children/to-be-restored/${f}`,
+    //             ),
+    //         );
+    //         fs.promises.rmdir(targetDirectory, { recursive: false });
+    //       });
+    //     }
+    //     return { FoldersToBeManaged: filesDir };
+    //   } catch (e) {
+    //     console.log(e);
+    //     throw new ServerError(e.message);
+    //   }
+    // }
   }
 
   @ApiOperation({
@@ -589,7 +603,7 @@ export class ChildrenController {
         (pre) =>
           pre.sayName.fa !== body.firstName ||
           (pre.sayName.fa &&
-            !areNamesSimilar(pre.sayName.fa, body.firstName)),
+            !areNamesSimilar(pre.sayName.fa, body.firstName, 50)),
       );
 
       if (allPreRegisters && allPreRegisters[0] && (!filtered || filtered.length === 0)) {
@@ -1026,8 +1040,8 @@ export class ChildrenController {
     const found = names.filter((n) =>
       lang === 'en'
         ? n.en.toUpperCase() === newName.toUpperCase() ||
-        (n.en && areNamesSimilar(n.en, newName))
-        : n.fa && (n.fa === newName || areNamesSimilar(n.fa, newName)),
+        (n.en && areNamesSimilar(n.en, newName, 50))
+        : n.fa && (n.fa === newName || areNamesSimilar(n.fa, newName, 50)),
     );
 
 
