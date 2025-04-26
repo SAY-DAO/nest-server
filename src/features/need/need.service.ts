@@ -1106,12 +1106,11 @@ export class NeedService {
         'need._cost',
       ])
       .cache(60000)
-      .limit(5)
       .orderBy('need.created', 'ASC');
     return await queryBuilder.getManyAndCount();
   }
 
-  async getSimilarNeedsService(name: string): Promise<Need[]> {
+  async getSimilarNeedsService(name: string): Promise<[Need[], number]> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .where("need.name_translations -> 'fa' = :nameTranslations", {
@@ -1137,6 +1136,6 @@ export class NeedService {
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');
-    return await queryBuilder.getMany();
+    return await queryBuilder.getManyAndCount();
   }
 }

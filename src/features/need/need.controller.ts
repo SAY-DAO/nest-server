@@ -481,11 +481,11 @@ export class NeedController {
         if (need.type === NeedTypeEnum.PRODUCT) {
           similarTitleNeeds = await this.needService.getSimilarNeedsProduct(
             need.title.slice(0, 25)
-          )[0];
+          );
         } else {
           similarTitleNeeds = await this.needService.getSimilarNeedsService(
             need.name_translations.fa,
-          )[0];
+          );
         }
 
         const sameCatSimilarity: Need[] = [];
@@ -553,7 +553,7 @@ export class NeedController {
           validCount,
           need: fetchedNeed,
           duplicates: validatedDups,
-          similarTitleNeeds: similarTitleNeeds && similarTitleNeeds[0],
+          similarTitleNeeds: similarTitleNeeds && similarTitleNeeds[0].filter(() => Math.random() < 10 / similarTitleNeeds[0].length), // take only 10
           similarTitleCount: similarTitleNeeds && similarTitleNeeds[1],
           errorMsg,
           possibleMissMatch: diffCatSimilarity.map((n) => {
