@@ -208,7 +208,7 @@ export function persianMonthStringFarsi(value: Date) {
   return pm === 'Farvardin'
     ? 'فروردین'
     : pm === 'Ordibehesht'
-      ? 'اردیبهست'
+      ? 'اردیبهشت'
       : pm === 'Khordad'
         ? 'خرداد'
         : pm === 'Tir'

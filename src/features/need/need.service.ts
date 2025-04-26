@@ -1077,7 +1077,7 @@ export class NeedService {
 
   // -- Install pg_trgm into the default schema (usually `public`):
   // CREATE EXTENSION IF NOT EXISTS pg_trgm;
-  async getSimilarNeedsProduct(title: string): Promise<Need[]> {
+  async getSimilarNeedsProduct(title: string): Promise<[Need[], number]> {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .addSelect('similarity(need.title, :title)', 'similarity_score')
@@ -1106,8 +1106,9 @@ export class NeedService {
         'need._cost',
       ])
       .cache(60000)
+      .limit(5)
       .orderBy('need.created', 'ASC');
-    return await queryBuilder.getMany();
+    return await queryBuilder.getManyAndCount();
   }
 
   async getSimilarNeedsService(name: string): Promise<Need[]> {

@@ -28,7 +28,7 @@ const BASE_AGE_OF_DUPLICATE_3 = 30;
 const MIN_TITLE_LENGTH = 5;
 const SIMILAR_URL_PERCENTAGE = 57; // percentage
 const SIMILAR_TXT_PERCENTAGE = 20; // percentage
-export const SIMILAR_NAME_LIMIT_PRODUCT = 20;
+export const SIMILAR_NAME_LIMIT_PRODUCT = 15;
 export const SIMILAR_NAME_LIMIT_SERVICE = 10;
 export const GRACE_PERIOD = 15; // days left after ticket to fix the problem mentioned in ticket
 

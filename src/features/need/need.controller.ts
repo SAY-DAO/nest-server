@@ -477,30 +477,27 @@ export class NeedController {
         let errorMsg: string;
         // 2- ONLY PRODUCT since no title for service - Get needs with similar names in the ecosystem.
         // then if not many similar needs it should be checked manually
-        let similarTitleNeeds: Need[]
+        let similarTitleNeeds: [Need[], number]
         if (need.type === NeedTypeEnum.PRODUCT) {
           similarTitleNeeds = await this.needService.getSimilarNeedsProduct(
             need.title.slice(0, 25)
-          );
+          )[0];
         } else {
           similarTitleNeeds = await this.needService.getSimilarNeedsService(
             need.name_translations.fa,
-          );
-
+          )[0];
         }
 
         const sameCatSimilarity: Need[] = [];
         const diffCatSimilarity: Need[] = []; // used for possible miss match - to help find error in this need or older needs with wrong category, ...
-        for (const item of similarTitleNeeds) {
-          if (item.category === need.category) {
-            sameCatSimilarity.push(item);
-          } else if (item.category !== need.category) {
-            diffCatSimilarity.push(item);
+        if (similarTitleNeeds && similarTitleNeeds[1] > 1) {
+          for (const item of similarTitleNeeds[0]) {
+            if (item.category === need.category) {
+              sameCatSimilarity.push(item);
+            } else if (item.category !== need.category) {
+              diffCatSimilarity.push(item);
+            }
           }
-          // if (getSimilarityPercentage(need.name_translations.fa, need.name_translations.fa) < 80) {
-          //   errorMsg = `Wrong Icon.`;
-          // }
-
         }
 
         if (
@@ -556,7 +553,8 @@ export class NeedController {
           validCount,
           need: fetchedNeed,
           duplicates: validatedDups,
-          similarTitleNeeds,
+          similarTitleNeeds: similarTitleNeeds && similarTitleNeeds[0],
+          similarTitleCount: similarTitleNeeds && similarTitleNeeds[1],
           errorMsg,
           possibleMissMatch: diffCatSimilarity.map((n) => {
             return {
