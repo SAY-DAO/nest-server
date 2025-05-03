@@ -380,6 +380,7 @@ export class ChildrenService {
     theId: string,
     childDetails: PreRegisterChildUpdateParams,
   ): Promise<UpdateResult> {
+    console.log(childDetails);
     return this.preRegisterChildrenRepository.update(
       { id: theId },
       {

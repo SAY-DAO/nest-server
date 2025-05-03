@@ -41,9 +41,8 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { avatarStorage } from '../../storage/avatarStorage';
+import {  avatarVoiceStorage } from '../../storage/avatarVoiceStorage';
 import { ServerError } from '../../filters/server-exception.filter';
-import { voiceStorage } from '../../storage/voiceStorage';
 import { ChildrenInterceptor } from './interceptors/children.interceptors';
 import { LocationService } from '../location/location.service';
 import { DownloadService } from '../download/download.service';
@@ -83,6 +82,7 @@ export class ChildrenController {
     private downloadService: DownloadService,
     private campaignService: CampaignService,
   ) { }
+
   @Get(`preregister/:childFlaskId`)
   @ApiOperation({ description: 'Get child preregister' })
   async getChildPreregister(
@@ -111,7 +111,7 @@ export class ChildrenController {
   @UsePipes(new ValidationPipe()) // validation for dto files
   @Patch(`preregister/approve/:id`)
   @ApiOperation({ description: 'Approve a pre register' })
-  @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
+  @UseInterceptors(FileInterceptor('voiceFile', avatarVoiceStorage))
   async approvePreregister(
     @Req() req: Request,
     @UploadedFile() voiceFile: Express.Multer.File,
@@ -288,7 +288,7 @@ export class ChildrenController {
         { name: 'awakeFile', maxCount: 1 },
         { name: 'sleptFile', maxCount: 1 },
       ],
-      avatarStorage,
+      avatarVoiceStorage,
     ),
   )
   @UsePipes(new ValidationPipe())
@@ -379,6 +379,62 @@ export class ChildrenController {
       } catch (e) {
         throw new ServerError(e.msg);
       }
+    }
+  }
+
+
+  @ApiOperation({ description: 'update pre register' })
+  @Patch(`preregister/update`)
+  @UsePipes(new ValidationPipe())
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'awakeFile', maxCount: 1 },
+        { name: 'sleptFile', maxCount: 1 },
+        { name: 'voiceFile', maxCount: 1 },
+      ],
+      avatarVoiceStorage
+    ),
+  )
+  async preRegisterUpdate(
+    @Req() req: Request,
+    @UploadedFiles()
+    files: {
+      awakeFile?: Express.Multer.File[];
+      sleptFile?: Express.Multer.File[];
+      voiceFile?: Express.Multer.File[];
+    },
+    @Body(ValidateChildPipe) body: UpdatePreRegisterChildDto,
+  ) {
+
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      !(
+        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
+        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
+        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
+        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
+      )
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    try {
+      console.log(files.awakeFile[0]);
+      return await this.childrenService.preRegisterUpdate(body.id, {
+        bio: { fa: body.bio, en: '' },
+        voiceUrl: files.voiceFile && files.voiceFile[0] && files.voiceFile[0].filename,
+        awakeUrl: files.awakeFile && files.awakeFile[0] && files.awakeFile[0].filename,
+        sleptUrl: files.sleptFile && files.sleptFile[0] && files.sleptFile[0].filename,
+        housingStatus: Number(body.housingStatus),
+        educationLevel: Number(body.educationLevel),
+        schoolType: Number(body.schoolType),
+        lastName: { fa: body.lastName, en: '' },
+        firstName: { fa: body.firstName, en: '' },
+      });
+    } catch (e) {
+      throw new ServerError(e.message, e.status);
     }
   }
 
@@ -565,7 +621,7 @@ export class ChildrenController {
   })
   @Patch(`preregister/assign`)
   @UsePipes(new ValidationPipe())
-  @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
+  @UseInterceptors(FileInterceptor('voiceFile', avatarVoiceStorage))
   async preRegisterAssignChild(
     @Req() req: Request,
     @UploadedFile() voiceFile,
@@ -730,42 +786,6 @@ export class ChildrenController {
     }
   }
 
-  @ApiOperation({ description: 'update pre register' })
-  @Patch(`preregister/update`)
-  @UsePipes(new ValidationPipe())
-  @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
-  async preRegisterUpdate(
-    @Req() req: Request,
-    @UploadedFile() voiceFile,
-    @Body(ValidateChildPipe) body: UpdatePreRegisterChildDto,
-  ) {
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      !(
-        panelFlaskTypeId === FlaskUserTypesEnum.SOCIAL_WORKER ||
-        panelFlaskTypeId === FlaskUserTypesEnum.NGO_SUPERVISOR ||
-        panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN ||
-        panelFlaskTypeId === FlaskUserTypesEnum.ADMIN
-      )
-    ) {
-      throw new ForbiddenException('You Are not the Super admin');
-    }
-    try {
-      return await this.childrenService.preRegisterUpdate(body.id, {
-        bio: { fa: body.bio, en: '' },
-        voiceUrl: voiceFile && voiceFile.filename,
-        housingStatus: Number(body.housingStatus),
-        educationLevel: Number(body.educationLevel),
-        schoolType: Number(body.schoolType),
-        lastName: { fa: body.lastName, en: '' },
-        firstName: { fa: body.firstName, en: '' },
-      });
-    } catch (e) {
-      throw new ServerError(e.message, e.status);
-    }
-  }
 
   @ApiOperation({ description: 'update approved pre register' })
   @Patch(`preregister/update-approved/:flaskChildId`)
@@ -974,7 +994,7 @@ export class ChildrenController {
     description: 'update child',
   })
   @Patch(`flaskChildId=:flaskChildId`)
-  @UseInterceptors(FileInterceptor('voiceFile', voiceStorage))
+  @UseInterceptors(FileInterceptor('voiceFile', avatarVoiceStorage))
   @UsePipes(new ValidationPipe())
   async updateChild(
     @Req() req: Request,
