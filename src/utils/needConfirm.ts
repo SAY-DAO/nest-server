@@ -110,7 +110,7 @@ export async function validateNeed(
   const listResult = [];
   for (let i = 0; i < list.length; i++) {
     const titleResult = Number(
-      title && Number(getSimilarityPercentage(title, list[i])),
+      title && Number(getSimilarityPercentage(title.slice(0, 20), list[i].slice(0, 20))),
     );
     listResult.push(titleResult);
   }

@@ -379,9 +379,6 @@ export class NeedController {
           );
           fetchedNeed = nestNeed;
         }
-        // if (fetchedNeed.flaskId !== 14425 && fetchedNeed.flaskId !== 14327 && fetchedNeed.flaskId !== 14178 && fetchedNeed.flaskId !== 14008) {
-        //   continue
-        // }
         const superAdmin = await this.userService.getUserByFlaskId(
           SUPER_ADMIN_ID_PANEL,
         );
