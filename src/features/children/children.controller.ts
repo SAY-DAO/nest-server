@@ -41,7 +41,7 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import {  avatarVoiceStorage } from '../../storage/avatarVoiceStorage';
+import { avatarVoiceStorage } from '../../storage/avatarVoiceStorage';
 import { ServerError } from '../../filters/server-exception.filter';
 import { ChildrenInterceptor } from './interceptors/children.interceptors';
 import { LocationService } from '../location/location.service';
@@ -161,8 +161,9 @@ export class ChildrenController {
       const fileBuffer = await fs.promises.readFile(
         `uploads/children/voices/${voiceFile.filename}`,
       );
+      const blob = new Blob([new Uint8Array(fileBuffer)]);
 
-      const file = new File([fileBuffer], `${voiceFile.filename}`, {
+      const file = new File([blob], `${voiceFile.filename}`, {
         type: voiceFile.mimetype,
       });
 
@@ -1017,8 +1018,9 @@ export class ChildrenController {
       const fileBuffer = await fs.promises.readFile(
         `uploads/children/voices/${voiceFile.filename}`,
       );
+      const blob = new Blob([new Uint8Array(fileBuffer)]);
 
-      theVoiceFile = new File([fileBuffer], `${voiceFile.filename}`, {
+      theVoiceFile = new File([blob], `${voiceFile.filename}`, {
         type: voiceFile.mimetype,
       });
     }

@@ -1104,9 +1104,10 @@ export class NeedService {
         'need.confirmDate',
         'need.imageUrl',
         'need._cost',
+        'need.doneAt',
       ])
       .cache(60000)
-      .orderBy('need.created', 'ASC');
+      .orderBy('similarity(need.title, :title)', 'DESC');
     return await queryBuilder.getManyAndCount();
   }
 
@@ -1133,6 +1134,7 @@ export class NeedService {
         'need.confirmDate',
         'need.imageUrl',
         'need._cost',
+        'need.doneAt',
       ])
       .cache(60000)
       .orderBy('need.created', 'ASC');

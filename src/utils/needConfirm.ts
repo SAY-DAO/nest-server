@@ -90,26 +90,7 @@ export async function validateNeed(
     };
     return result;
   }
-  // validate child age
-  if (isOver18(child.birthDate)) {
-    const createTicketDetails: CreateTicketParams = {
-      title: `Child over 18`,
-      flaskNeedId: nestNeed.flaskId,
-      need: nestNeed,
-      flaskUserId: SUPER_ADMIN_ID_PANEL,
-      role: convertFlaskToSayRoles(FlaskUserTypesEnum.SUPER_ADMIN),
-      lastAnnouncement: AnnouncementEnum.ERROR,
-      color: Colors.RED,
-    };
-    result = {
-      needId: nestNeed.id,
-      isValidNeed: false,
-      participants: [SuperAdmin],
-      ticketDetails: createTicketDetails,
-      message: 'Automated Message: Child is over 18!',
-    };
-    return result;
-  }
+
   // validate need information/details
   const list = [
     'شلوار',
@@ -335,6 +316,7 @@ export async function validateNeed(
     };
     return result;
   }
+
   return result;
 }
 

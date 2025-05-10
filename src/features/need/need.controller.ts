@@ -23,7 +23,7 @@ import {
   SUPER_ADMIN_ID_PANEL,
 } from '../../types/interfaces/interface';
 import config from '../../config';
-import { daysDifference, timeDifference } from '../../utils/helpers';
+import { areNamesSimilar, daysDifference, isOver18, timeDifference } from '../../utils/helpers';
 import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
@@ -379,6 +379,9 @@ export class NeedController {
           );
           fetchedNeed = nestNeed;
         }
+        // if (fetchedNeed.flaskId !== 14425 && fetchedNeed.flaskId !== 14327 && fetchedNeed.flaskId !== 14178 && fetchedNeed.flaskId !== 14008) {
+        //   continue
+        // }
         const superAdmin = await this.userService.getUserByFlaskId(
           SUPER_ADMIN_ID_PANEL,
         );
@@ -480,7 +483,7 @@ export class NeedController {
         let similarTitleNeeds: [Need[], number]
         if (need.type === NeedTypeEnum.PRODUCT) {
           similarTitleNeeds = await this.needService.getSimilarNeedsProduct(
-            need.title.slice(0, 25)
+            need.title.slice(0, 20)
           );
         } else {
           similarTitleNeeds = await this.needService.getSimilarNeedsService(
@@ -545,25 +548,33 @@ export class NeedController {
           (v) => v.category !== fetchedNeed.category,
         );
         if (list && list.length > 0) {
-          errorMsg = `Category error, ${list.length}`;
+          errorMsg = `Category error, ${list.length} different need(s)`;
         }
 
+        // Child age error
+        if (isOver18(fetchedNeed.child.birthDate)) {
+          errorMsg = 'Automated Message: Child is over 18!';
+        }
         myList.push({
           limit,
           validCount,
           need: fetchedNeed,
           duplicates: validatedDups,
-          similarTitleNeeds: similarTitleNeeds && similarTitleNeeds[0].filter(() => Math.random() < 10 / similarTitleNeeds[0].length), // take only 10
+          similarTitleNeeds: similarTitleNeeds && similarTitleNeeds[0].slice(0, 10), // take only 10
           similarTitleCount: similarTitleNeeds && similarTitleNeeds[1],
           errorMsg,
           possibleMissMatch: diffCatSimilarity.map((n) => {
             return {
               needId: n.id,
+              title: n.title,
+              name_translations: n.name_translations,
               childId: n.child_id,
               status: n.status,
               category: n.category,
               type: n.type,
               isConfirmed: n.confirmDate && true,
+              doneAt: n.doneAt,
+              confirmDate: n.confirmDate
             };
           }),
           ticket,
