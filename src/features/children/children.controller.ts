@@ -161,8 +161,9 @@ export class ChildrenController {
       const fileBuffer = await fs.promises.readFile(
         `uploads/children/voices/${voiceFile.filename}`,
       );
+      const blob = new Blob([new Uint8Array(fileBuffer)]);
 
-      const file = new File([fileBuffer], `${voiceFile.filename}`, {
+      const file = new File([blob], `${voiceFile.filename}`, {
         type: voiceFile.mimetype,
       });
 
@@ -421,7 +422,6 @@ export class ChildrenController {
       throw new ForbiddenException('You Are not the Super admin');
     }
     try {
-      console.log(files.awakeFile[0]);
       return await this.childrenService.preRegisterUpdate(body.id, {
         bio: { fa: body.bio, en: '' },
         voiceUrl: files.voiceFile && files.voiceFile[0] && files.voiceFile[0].filename,
@@ -1017,8 +1017,9 @@ export class ChildrenController {
       const fileBuffer = await fs.promises.readFile(
         `uploads/children/voices/${voiceFile.filename}`,
       );
+      const blob = new Blob([new Uint8Array(fileBuffer)]);
 
-      theVoiceFile = new File([fileBuffer], `${voiceFile.filename}`, {
+      theVoiceFile = new File([blob], `${voiceFile.filename}`, {
         type: voiceFile.mimetype,
       });
     }
