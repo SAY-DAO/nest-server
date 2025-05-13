@@ -161,9 +161,8 @@ export class ChildrenController {
       const fileBuffer = await fs.promises.readFile(
         `uploads/children/voices/${voiceFile.filename}`,
       );
-      const blob = new Blob([new Uint8Array(fileBuffer)]);
 
-      const file = new File([blob], `${voiceFile.filename}`, {
+      const file = new File([fileBuffer], `${voiceFile.filename}`, {
         type: voiceFile.mimetype,
       });
 
@@ -1018,9 +1017,8 @@ export class ChildrenController {
       const fileBuffer = await fs.promises.readFile(
         `uploads/children/voices/${voiceFile.filename}`,
       );
-      const blob = new Blob([new Uint8Array(fileBuffer)]);
 
-      theVoiceFile = new File([blob], `${voiceFile.filename}`, {
+      theVoiceFile = new File([fileBuffer], `${voiceFile.filename}`, {
         type: voiceFile.mimetype,
       });
     }
