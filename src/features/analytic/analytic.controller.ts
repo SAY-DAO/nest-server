@@ -16,6 +16,7 @@ import { UserService } from '../user/user.service';
 import { AnalyticService } from './analytic.service';
 import config from '../../config';
 import { isAuthenticated } from '../../utils/auth';
+import { NgoService } from '../ngo/ngo.service';
 
 @ApiTags('Analytic')
 @ApiSecurity('flask-access-token')
@@ -28,9 +29,10 @@ import { isAuthenticated } from '../../utils/auth';
 export class AnalyticController {
   constructor(
     private userService: UserService,
+    private ngoService: NgoService,
 
     private readonly analyticService: AnalyticService,
-  ) {}
+  ) { }
 
   @Get('ecosystem/children')
   @ApiOperation({ description: 'get SAY children ecosystem analytics' })
@@ -200,11 +202,18 @@ export class AnalyticController {
     }
     const role = convertFlaskToSayRoles(Number(panelFlaskTypeId));
     let swIds: number[];
+    let ngoIds: number[];
+
     if (role === SAYPlatformRoles.AUDITOR) {
       swIds = await this.userService
         .getFlaskSwIds()
         .then((r) => r.map((s) => s.id));
+      ngoIds = await this.ngoService
+        .getFlaskNgos()
+        .then((r) => r.filter((n) => n.isActive).map((n) => n.id));
+
     }
+
     if (role === SAYPlatformRoles.NGO_SUPERVISOR) {
       const supervisor = await this.userService.getFlaskSocialWorker(
         panelFlaskUserId,
@@ -212,16 +221,24 @@ export class AnalyticController {
       swIds = await this.userService
         .getFlaskSocialWorkersByNgo(supervisor.ngo_id)
         .then((r) => r.map((s) => s.id));
+      ngoIds = [supervisor.ngo_id]
     }
+
     if (role === SAYPlatformRoles.PURCHASER) {
+      const sw = await this.userService.getFlaskSocialWorker(
+        panelFlaskUserId,
+      );
       swIds = await this.userService
         .getFlaskSwIds()
         .then((r) => r.map((s) => s.id));
+      ngoIds = [sw.ngo_id]
     }
+
     return await this.analyticService.getUserContribution(
       swIds,
       role,
       panelFlaskUserId,
+      ngoIds
     );
   }
 }

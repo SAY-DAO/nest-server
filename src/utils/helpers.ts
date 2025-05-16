@@ -384,6 +384,7 @@ export function getNeedsTimeLine(needs: Need[]) {
     else if (thePersianMonthConfirm === 2) {
       ordibehesht.confirmed += 1;
     }
+
     // khordad
     else if (thePersianMonthConfirm === 3) {
       khordad.confirmed += 1;
@@ -434,13 +435,13 @@ export function getNeedsTimeLine(needs: Need[]) {
   monthAgo.setDate(monthAgo.getDate() - 30);
 
   const inTwoDays = needs.filter(
-    (n) => new Date(n.confirmDate).getTime() >= twoDaysAgo.getTime(),
+    (n) => new Date(n.created).getTime() >= twoDaysAgo.getTime(),
   );
   const inWeek = needs.filter(
-    (n) => new Date(n.confirmDate).getTime() >= weekAgo.getTime(),
+    (n) => new Date(n.created).getTime() >= weekAgo.getTime(),
   );
   const inThirtyDays = needs.filter(
-    (n) => new Date(n.confirmDate).getTime() >= monthAgo.getTime(),
+    (n) => new Date(n.created).getTime() >= monthAgo.getTime(),
   );
   const summary = {
     inTwoDays: inTwoDays.length,
@@ -451,18 +452,18 @@ export function getNeedsTimeLine(needs: Need[]) {
   return {
     summary,
     inMonth: {
-      Farvardin: farvardin,
-      Ordibehesht: ordibehesht,
-      Khordad: khordad,
-      Tir: tir,
-      Mordad: mordad,
-      Shahrivar: shahrivar,
-      Mehr: mehr,
-      Aban: aban,
-      Azar: azar,
-      Dey: dey,
-      Bahman: bahman,
-      Esfand: esfand,
+      1: farvardin,
+      2: ordibehesht,
+      3: khordad,
+      4: tir,
+      5: mordad,
+      6: shahrivar,
+      7: mehr,
+      8: aban,
+      9: azar,
+      10: dey,
+      11: bahman,
+      12: esfand,
     },
   };
 }

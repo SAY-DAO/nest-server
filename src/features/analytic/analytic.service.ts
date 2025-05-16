@@ -41,7 +41,7 @@ export class AnalyticService {
     private flaskChildRepository: Repository<Child>,
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
-  ) {}
+  ) { }
 
   async getDeliveredNeedsAnalytic(type: NeedTypeEnum) {
     return await this.flaskNeedRepository
@@ -581,9 +581,10 @@ export class AnalyticService {
     swIds: number[],
     role: SAYPlatformRoles,
     flaskUserId: number,
+    ngoIds: number[]
   ) {
     const today = new Date();
-    const monthsAgo = today.setMonth(today.getMonth() - 4);
+    const monthsAgo = today.setMonth(today.getMonth() - 6);
 
     const needs = await this.flaskNeedRepository
       .createQueryBuilder('need')
@@ -594,7 +595,7 @@ export class AnalyticService {
         'child.id = need.child_id',
       )
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.id_ngo = :ngoIds', { ngoIds: 22 })
+      .where('child.id_ngo IN (:...ngoIds)', { ngoIds })
       .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .where('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
       .where('need.created > :startDate', { startDate: new Date(monthsAgo) })

@@ -24,6 +24,8 @@ import { VariableEntity } from '../../entities/variable.entity';
 import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.entity';
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
+import { NgoService } from '../ngo/ngo.service';
+import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
       ChildrenEntity,
       PaymentEntity,
       ChildrenPreRegisterEntity,
+      NgoEntity,
+      NgoArrivalEntity
     ]),
   ],
 
@@ -61,6 +65,7 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
     NeedService,
     ChildrenService,
     FamilyService,
+    NgoService
   ],
 })
 export class AnalyticModule implements NestModule {
