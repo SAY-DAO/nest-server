@@ -599,7 +599,7 @@ export class AnalyticService {
       .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
       .where('child.id_ngo NOT IN (:...ngoIds)', { ngoIds: [3, 14] })
       .where('need.created > :startDate', { startDate: new Date(monthsAgo) })
-      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+      // .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .andWhere('need.created_by_id IN (:...swIds)', {
         swIds:
           role === SAYPlatformRoles.SOCIAL_WORKER ? [flaskUserId] : [...swIds],
@@ -622,7 +622,7 @@ export class AnalyticService {
         // 'need.purchase_date',
         // 'need.expected_delivery_date',
         // 'need.unavailable_from',
-        // 'need.deleted_at'
+        'need.deleted_at'
       ])
       .orderBy('need.created', 'DESC')
       .getManyAndCount();

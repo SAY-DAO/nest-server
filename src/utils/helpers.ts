@@ -309,121 +309,105 @@ export function timeDifferenceWithComment(
 }
 
 export function getNeedsTimeLine(needs: Need[]) {
-  const farvardin = { created: 0, confirmed: 0 };
-  const ordibehesht = { created: 0, confirmed: 0 };
-  const khordad = { created: 0, confirmed: 0 };
-  const tir = { created: 0, confirmed: 0 };
-  const mordad = { created: 0, confirmed: 0 };
-  const shahrivar = { created: 0, confirmed: 0 };
-  const mehr = { created: 0, confirmed: 0 };
-  const aban = { created: 0, confirmed: 0 };
-  const azar = { created: 0, confirmed: 0 };
-  const dey = { created: 0, confirmed: 0 };
-  const bahman = { created: 0, confirmed: 0 };
-  const esfand = { created: 0, confirmed: 0 };
+  const farvardin = { created: 0, confirmed: 0, deleted: 0 };
+  const ordibehesht = { created: 0, confirmed: 0, deleted: 0 };
+  const khordad = { created: 0, confirmed: 0, deleted: 0 };
+  const tir = { created: 0, confirmed: 0, deleted: 0 };
+  const mordad = { created: 0, confirmed: 0, deleted: 0 };
+  const shahrivar = { created: 0, confirmed: 0, deleted: 0 };
+  const mehr = { created: 0, confirmed: 0, deleted: 0 };
+  const aban = { created: 0, confirmed: 0, deleted: 0 };
+  const azar = { created: 0, confirmed: 0, deleted: 0 };
+  const dey = { created: 0, confirmed: 0, deleted: 0 };
+  const bahman = { created: 0, confirmed: 0, deleted: 0 };
+  const esfand = { created: 0, confirmed: 0, deleted: 0 };
 
   for (let i = 0; i < needs.length; i++) {
     const thePersianMonthCreated = persianMonth(needs[i].created);
-    const thePersianMonthConfirm = persianMonth(needs[i].confirmDate);
 
     // farvardin
     if (thePersianMonthCreated === 1) {
-      farvardin.created += 1;
+      if (!needs[i].deleted_at) farvardin.created += 1; else { farvardin.deleted += 1; }
+      if (needs[i].confirmDate) {
+        farvardin.confirmed += 1;
+      }
     }
     // ordibehesht
     else if (thePersianMonthCreated === 2) {
-      ordibehesht.created += 1;
+      if (!needs[i].deleted_at) ordibehesht.created += 1; else { ordibehesht.deleted += 1; }
+      if (needs[i].confirmDate) {
+        ordibehesht.confirmed += 1;
+      }
     }
     // khordad
     else if (thePersianMonthCreated === 3) {
-      khordad.created += 1;
+      if (!needs[i].deleted_at) khordad.created += 1; else { khordad.deleted += 1; }
+      if (needs[i].confirmDate) {
+        khordad.confirmed += 1;
+      }
     }
     // tir
     else if (thePersianMonthCreated === 4) {
-      tir.created += 1;
+      if (!needs[i].deleted_at) tir.created += 1; else { tir.deleted += 1; }
+      if (needs[i].confirmDate) {
+        tir.confirmed += 1;
+      }
     }
     // mordad
     else if (thePersianMonthCreated === 5) {
-      mordad.created += 1;
+      if (!needs[i].deleted_at) mordad.created += 1; else { mordad.deleted += 1; }
+      if (needs[i].confirmDate) {
+        mordad.confirmed += 1;
+      }
     }
     // shahrivar
     else if (thePersianMonthCreated === 6) {
-      shahrivar.created += 1;
+      if (!needs[i].deleted_at) shahrivar.created += 1; else { shahrivar.deleted += 1; }
+      if (needs[i].confirmDate) {
+        shahrivar.confirmed += 1;
+      }
     }
     // mehr
     else if (thePersianMonthCreated === 7) {
-      mehr.created += 1;
+      if (!needs[i].deleted_at) mehr.created += 1; else { mehr.deleted += 1; }
+      if (needs[i].confirmDate) {
+        mehr.confirmed += 1;
+      }
     }
     // aban
     else if (thePersianMonthCreated === 8) {
-      aban.created += 1;
+      if (!needs[i].deleted_at) aban.created += 1; else { aban.deleted += 1; }
+      if (needs[i].confirmDate) {
+        aban.confirmed += 1;
+      }
     }
     // azar
     else if (thePersianMonthCreated === 9) {
-      azar.created += 1;
+      if (!needs[i].deleted_at) azar.created += 1; else { azar.deleted += 1 }
+      if (needs[i].confirmDate) {
+        azar.confirmed += 1;
+      }
     }
     // dey
     else if (thePersianMonthCreated === 10) {
-      dey.created += 1;
+      if (!needs[i].deleted_at) dey.created += 1; else { dey.deleted += 1; }
+      if (needs[i].confirmDate) {
+        dey.confirmed += 1;
+      }
     }
     // bahman
     else if (thePersianMonthCreated === 11) {
-      bahman.created += 1;
+      if (!needs[i].deleted_at) bahman.created += 1; else { bahman.deleted += 1; }
+      if (needs[i].confirmDate) {
+        bahman.confirmed += 1;
+      }
     }
-
     // esfand
     else if (thePersianMonthCreated === 12) {
-      esfand.created += 1;
-    }
-
-    // farvardin
-    if (thePersianMonthConfirm === 1) {
-      farvardin.confirmed += 1;
-    }
-    // ordibehesht
-    else if (thePersianMonthConfirm === 2) {
-      ordibehesht.confirmed += 1;
-    }
-
-    // khordad
-    else if (thePersianMonthConfirm === 3) {
-      khordad.confirmed += 1;
-    }
-    // tir
-    else if (thePersianMonthConfirm === 4) {
-      tir.confirmed += 1;
-    }
-    // mordad
-    else if (thePersianMonthConfirm === 5) {
-      mordad.confirmed += 1;
-    }
-    // shahrivar
-    else if (thePersianMonthConfirm === 6) {
-      shahrivar.confirmed += 1;
-    }
-    // mehr
-    else if (thePersianMonthConfirm === 7) {
-      mehr.confirmed += 1;
-    }
-    // aban
-    else if (thePersianMonthConfirm === 8) {
-      aban.confirmed += 1;
-    }
-    // azar
-    else if (thePersianMonthConfirm === 9) {
-      azar.confirmed += 1;
-    }
-    // dey
-    else if (thePersianMonthConfirm === 10) {
-      dey.confirmed += 1;
-    }
-    // bahman
-    else if (thePersianMonthConfirm === 11) {
-      bahman.confirmed += 1;
-    }
-    // esfand
-    else if (thePersianMonthConfirm === 12) {
-      esfand.confirmed += 1;
+      if (!needs[i].deleted_at) esfand.created += 1; else { esfand.deleted += 1; }
+      if (needs[i].confirmDate) {
+        esfand.confirmed += 1;
+      }
     }
   }
 
@@ -821,10 +805,10 @@ export function getScattered(
   vRole: VirtualFamilyRole,
   medianList: any[],
 ) {
-  const series: { userId: number, total: number }[] = [];
+  const series: { userId: number; total: number }[] = [];
   const usersPays: {
-    userId: number,
-    created: Date,
+    userId: number;
+    created: Date;
   }[] = [];
   if (data) {
     // 1- go over all needs and seperate users who have paid
@@ -867,7 +851,7 @@ export function getScattered(
       ]);
     }
   });
-  // {[[126,1], [3,2], [178,1]...] , [...] ,...}- in context of the chosen role [total, #users] 
+  // {[[126,1], [3,2], [178,1]...] , [...] ,...}- in context of the chosen role [total, #users]
   const paidList: number[] = [];
   for (const [totalPaid, userCount] of finalList) {
     for (let i = 0; i < userCount; i++) {
@@ -945,15 +929,16 @@ export function getMonthsAgo(date: Date, priorMonths: number) {
   return date;
 }
 
-
 export function getSimilarityPercentage(sentence1: string, sentence2: string) {
-  const distance = levenshtein(sentence1.toLowerCase(), sentence2.toLowerCase());
+  const distance = levenshtein(
+    sentence1.toLowerCase(),
+    sentence2.toLowerCase(),
+  );
   const maxLength = Math.max(sentence1.length, sentence2.length);
   const similarity = 1 - distance / maxLength;
 
-  return round(similarity * 100)
+  return round(similarity * 100);
 }
-
 
 export function urlSimilarityPercentage(url1: string, url2: string) {
   // Convert URLs to lowercase to make the comparison case-insensitive
@@ -976,7 +961,7 @@ export function getContributionRatio(verifiedPayments) {
     payments.length > 1
       ? round((payments.length - 1) * CONTRIBUTION_COEFFICIENT, 2)
       : 1;
-  return contributionRatio
+  return contributionRatio;
 }
 
 export function isOver18(birthday: Date): boolean {
@@ -994,7 +979,6 @@ export function isOver18(birthday: Date): boolean {
 
   return age >= 18;
 }
-
 
 // Function to calculate Levenshtein distance
 function levenshtein(a: string, b: string) {
@@ -1022,7 +1006,11 @@ function levenshtein(a: string, b: string) {
 }
 
 // Function to check similarity based on Levenshtein distance
-export function areNamesSimilar(name1: string, name2: string, thresholdPercentage: number) {
+export function areNamesSimilar(
+  name1: string,
+  name2: string,
+  thresholdPercentage: number,
+) {
   console.log(`Looking at ${name1} and ${name2}`);
   const distance = levenshtein(name1.toLowerCase(), name2.toLowerCase());
   const maxLength = Math.max(name1.length, name2.length);
