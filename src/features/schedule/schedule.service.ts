@@ -116,7 +116,7 @@ export class ScheduleService {
     }
   }
 
-  @Cron(CronExpression.EVERY_WEEK, {
+  @Cron(CronExpression.EVERY_DAY_AT_3AM, {
     name: 'CompletePayments',
     timeZone: 'Asia/Tehran',
   })
