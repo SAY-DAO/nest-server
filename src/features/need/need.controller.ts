@@ -23,7 +23,12 @@ import {
   SUPER_ADMIN_ID_PANEL,
 } from '../../types/interfaces/interface';
 import config from '../../config';
-import { areNamesSimilar, daysDifference, isOver18, timeDifference } from '../../utils/helpers';
+import {
+  areNamesSimilar,
+  daysDifference,
+  isOver18,
+  timeDifference,
+} from '../../utils/helpers';
 import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
@@ -44,6 +49,7 @@ import { Need } from '../../entities/flaskEntities/need.entity';
 import { PaymentService } from '../payment/payment.service';
 import { Payment } from '../../entities/flaskEntities/payment.entity';
 import { ChildrenService } from '../children/children.service';
+import { sentenceSimilarityPercent } from 'src/utils/similaritity';
 
 const BASE_LIMIT_DUPLICATES_0 = 4; // when confirming a need 4 duplicates are allowed for the category 0
 const BASE_LIMIT_DUPLICATES_1 = 3;
@@ -68,7 +74,6 @@ export class NeedController {
     private providerService: ProviderService,
     private paymentService: PaymentService,
     private childrenService: ChildrenService,
-
   ) { }
 
   @Get(`all`)
@@ -275,7 +280,6 @@ export class NeedController {
     const token =
       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
     try {
-
       if (body) {
         for await (const needId of body.needIds) {
           if (Number(needId) > 0) {
@@ -352,6 +356,10 @@ export class NeedController {
         // 1- sync & validate need
         let fetchedNeed = await this.needService.getNeedByFlaskId(need.id);
 
+        // if (fetchedNeed.flaskId !== 14448) {
+        //   continue;
+        // }
+
         // Just in case
         const fetchedProviderRel =
           await this.providerService.getProviderNeedRelationById(need.id);
@@ -382,6 +390,7 @@ export class NeedController {
         const superAdmin = await this.userService.getUserByFlaskId(
           SUPER_ADMIN_ID_PANEL,
         );
+
         // check the basic requirements of a newly created need.
         const validatedNeed = await validateNeed(fetchedNeed, superAdmin);
         let ticket: TicketEntity;
@@ -417,7 +426,10 @@ export class NeedController {
               superAdmin.flaskUserId,
               ticket.id,
             );
-            console.log('\x1b[36m%s\x1b[0m', 'Ticketing and Skipping need...\n');
+            console.log(
+              '\x1b[36m%s\x1b[0m',
+              'Ticketing and Skipping need...\n',
+            );
           } else if (
             ticketError &&
             daysDifference(ticketError.createdAt, new Date()) > GRACE_PERIOD
@@ -477,15 +489,25 @@ export class NeedController {
         let errorMsg: string;
         // 2- ONLY PRODUCT since no title for service - Get needs with similar names in the ecosystem.
         // then if not many similar needs it should be checked manually
-        let similarTitleNeeds: [Need[], number]
+        let similarTitleNeeds: [Need[], number];
         if (need.type === NeedTypeEnum.PRODUCT) {
           similarTitleNeeds = await this.needService.getSimilarNeedsProduct(
-            need.title.slice(0, 20)
+            need.title,
           );
+          // double check
+          similarTitleNeeds[0] = similarTitleNeeds[0].filter((n) =>
+            sentenceSimilarityPercent(n.title.slice(0, 15), need.title.slice(0, 15)) > 20,
+          );
+          similarTitleNeeds[1] = similarTitleNeeds[0].length
         } else {
           similarTitleNeeds = await this.needService.getSimilarNeedsService(
             need.name_translations.fa,
           );
+          // double check
+          similarTitleNeeds[0] = similarTitleNeeds[0].filter((n) =>
+            sentenceSimilarityPercent(n.name_translations.fa, need.name_translations.fa) > 20,
+          );
+          similarTitleNeeds[1] = similarTitleNeeds[0].length
         }
 
         const sameCatSimilarity: Need[] = [];
@@ -505,7 +527,6 @@ export class NeedController {
           sameCatSimilarity.length < SIMILAR_NAME_LIMIT_PRODUCT
         ) {
           errorMsg = `Similar count error, only ${sameCatSimilarity.length}.`;
-
         }
 
         if (
@@ -541,9 +562,9 @@ export class NeedController {
         }
 
         // Category error
-        const list = validatedDups && validatedDups.filter(
-          (v) => v.category !== fetchedNeed.category,
-        );
+        const list =
+          validatedDups &&
+          validatedDups.filter((v) => v.category !== fetchedNeed.category);
         if (list && list.length > 0) {
           errorMsg = `Category error, ${list.length} different need(s)`;
         }
@@ -557,7 +578,8 @@ export class NeedController {
           validCount,
           need: fetchedNeed,
           duplicates: validatedDups,
-          similarTitleNeeds: similarTitleNeeds && similarTitleNeeds[0].slice(0, 10), // take only 10
+          similarTitleNeeds:
+            similarTitleNeeds && similarTitleNeeds[0].slice(0, 10), // take only 10
           similarTitleCount: similarTitleNeeds && similarTitleNeeds[1],
           errorMsg,
           possibleMissMatch: diffCatSimilarity.map((n) => {
@@ -571,7 +593,7 @@ export class NeedController {
               type: n.type,
               isConfirmed: n.confirmDate && true,
               doneAt: n.doneAt,
-              confirmDate: n.confirmDate
+              confirmDate: n.confirmDate,
             };
           }),
           ticket,
@@ -632,8 +654,7 @@ export class NeedController {
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
-    const updateCandidates =
-      await this.needService.getArrivedCandidates();
+    const updateCandidates = await this.needService.getArrivedCandidates();
 
     return { list: updateCandidates[0], total: updateCandidates[1] };
   }
@@ -655,14 +676,16 @@ export class NeedController {
 
     for await (const need of deleteCandidates[0]) {
       console.log('Looking at need: ', need.id);
-      const payments = await this.paymentService.getFlaskNeedPayments(need.id)
-      let payment: Payment
+      const payments = await this.paymentService.getFlaskNeedPayments(need.id);
+      let payment: Payment;
       // if partial payment give two months from the payment time.
       if (need.status === PaymentStatusEnum.PARTIAL_PAY) {
-        payment = payments.find(p => daysDifference(p.verified && p.created, new Date()) < 60)
+        payment = payments.find(
+          (p) => daysDifference(p.verified && p.created, new Date()) < 90,
+        );
         if (payment) {
-          console.log("found recent partial pay, Skipping...", need.title);
-          continue
+          console.log('found recent partial pay, Skipping...', need.title);
+          continue;
         }
       }
       try {
@@ -674,7 +697,6 @@ export class NeedController {
       } catch (e) {
         console.log(e);
       }
-
     }
     return { deleted: deleteCandidates[1] };
   }

@@ -21,6 +21,7 @@ import {
 } from '../types/interfaces/interface';
 import { NeedFamily } from '../entities/flaskEntities/needFamily';
 import { Payment } from '../entities/flaskEntities/payment.entity';
+import { levenshteinDistance, nameSimilarityPercent, sentenceSimilarityPercent } from './similaritity';
 
 // MATH.quantileSeq
 export const QUANTILE_min = 0;
@@ -930,27 +931,14 @@ export function getMonthsAgo(date: Date, priorMonths: number) {
 }
 
 export function getSimilarityPercentage(sentence1: string, sentence2: string) {
-  const distance = levenshtein(
-    sentence1.toLowerCase(),
-    sentence2.toLowerCase(),
-  );
-  const maxLength = Math.max(sentence1.length, sentence2.length);
-  const similarity = 1 - distance / maxLength;
-
-  return round(similarity * 100);
+  const similarity = sentenceSimilarityPercent(sentence1, sentence2)
+  return round(similarity);
 }
 
 export function urlSimilarityPercentage(url1: string, url2: string) {
-  // Convert URLs to lowercase to make the comparison case-insensitive
-  url1 = url1.toLowerCase();
-  url2 = url2.toLowerCase();
+  const similarity = nameSimilarityPercent(url1, url2)
 
-  // Calculate similarity percentage
-  const distance = levenshtein(url1, url2);
-  const maxLength = Math.max(url1.length, url2.length);
-  const similarityPercentage = ((maxLength - distance) / maxLength) * 100;
-
-  return similarityPercentage.toFixed(2);
+  return similarity.toFixed(2);
 }
 
 export function getContributionRatio(verifiedPayments) {
@@ -980,43 +968,15 @@ export function isOver18(birthday: Date): boolean {
   return age >= 18;
 }
 
-// Function to calculate Levenshtein distance
-function levenshtein(a: string, b: string) {
-  const tmp = [];
-
-  for (let i = 0; i <= b.length; i++) {
-    tmp[i] = [i];
-  }
-
-  for (let i = 0; i <= a.length; i++) {
-    tmp[0][i] = i;
-  }
-
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      tmp[i][j] = Math.min(
-        tmp[i - 1][j] + 1, // Deletion
-        tmp[i][j - 1] + 1, // Insertion
-        tmp[i - 1][j - 1] + (a[j - 1] === b[i - 1] ? 0 : 1), // Substitution
-      );
-    }
-  }
-
-  return tmp[b.length][a.length];
-}
-
-// Function to check similarity based on Levenshtein distance
 export function areNamesSimilar(
   name1: string,
   name2: string,
   thresholdPercentage: number,
 ) {
-  console.log(`Looking at ${name1} and ${name2}`);
-  const distance = levenshtein(name1.toLowerCase(), name2.toLowerCase());
-  const maxLength = Math.max(name1.length, name2.length);
-  const similarity = 1 - distance / maxLength;
-
-  console.log(`Similarity: ${similarity * 100}%`);
-
-  return similarity > thresholdPercentage / 100; // Returns true if similarity is greater than 50%
+  const dist = levenshteinDistance(name1, name2);
+  const maxLen = Math.max(name1.length, name2.length);
+  if (maxLen === 0) return true;
+  const ratio = 1 - dist / maxLen;
+  console.log(`Similarity: ${Math.round(ratio * 10000) / 100}%`);
+  return Math.round(ratio * 10000) / 100 > thresholdPercentage; // Returns true if similarity is greater than 50%
 }

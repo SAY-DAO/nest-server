@@ -21,7 +21,7 @@ import { CreateTicketParams } from '../types/parameters/CreateTicketParameters';
 import { NeedEntity } from '../entities/need.entity';
 import { AllUserEntity } from '../entities/user.entity';
 
-const BASE_AGE_OF_DUPLICATE_0 = 30;
+const BASE_AGE_OF_DUPLICATE_0 = 50;
 const BASE_AGE_OF_DUPLICATE_1 = 30;
 const BASE_AGE_OF_DUPLICATE_2 = 30;
 const BASE_AGE_OF_DUPLICATE_3 = 30;
