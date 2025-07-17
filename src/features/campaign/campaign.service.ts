@@ -508,6 +508,8 @@ export class CampaignService {
               await this.handleEmailCampaign(campaignEmailCode, title, [
                 nestUser,
               ]);
+              await sleep(1000);
+
             } catch (e) {
               console.log(e);
               continue;
@@ -623,6 +625,8 @@ export class CampaignService {
             await this.handleEmailCampaign(campaignEmailCode, title, [
               nestUser,
             ]);
+            await sleep(1000);
+
             this.logger.log(`Email Sent to User: ${nestUser.flaskUserId}`);
             emailReceiversTotal++;
           } catch (e) {
@@ -854,6 +858,8 @@ export class CampaignService {
                   : flaskUser.userName,
               },
             });
+            await sleep(1000);
+
             if (!campaignDetails.isTest) {
               await this.handleEmailCampaign(
                 campaignEmailCode,
