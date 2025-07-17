@@ -279,6 +279,9 @@ export class NeedController {
 
     const token =
       config().dataCache.fetchPanelAuthentication(panelFlaskUserId).token;
+
+    config().dataCache.resetToBeConfirmed();
+
     try {
       if (body) {
         for await (const needId of body.needIds) {

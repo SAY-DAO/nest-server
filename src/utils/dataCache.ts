@@ -100,6 +100,13 @@ export default class DataCache {
     this.ToBeConfirmed.createdAt = createdAt;
   };
 
+  resetToBeConfirmed = () => {
+    this.ToBeConfirmed = {
+      list: [],
+      createdAt: null,
+    };
+  }
+
   // dApp user ratio in different roles / distance ratio
   storeFamilyData = ({
     fathersData,
@@ -152,6 +159,7 @@ export default class DataCache {
 
   fetchMidjourney = () => this.midjourneyList;
   fetchToBeConfirmed = () => this.ToBeConfirmed;
+
   fetchChildrenNoNeeds() {
     return this.countChildrenNoNeeds;
   }
