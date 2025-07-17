@@ -1054,6 +1054,7 @@ export class CampaignService {
               RetStatus: number;
               StrRetStatus: string;
             };
+            
 
             try {
               await sleep(1000);
