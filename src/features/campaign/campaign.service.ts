@@ -749,11 +749,11 @@ export class CampaignService {
     try {
       // campaign codes
       const campaignEmailCode = fetchCampaignCode(
-        CampaignNameEnum.NEWS_LETTER,
+        CampaignNameEnum.NEWS_LETTER_FOLLOW_UP,
         CampaignTypeEnum.EMAIL,
       );
       const campaignSmsCode = fetchCampaignCode(
-        CampaignNameEnum.NEWS_LETTER,
+        CampaignNameEnum.NEWS_LETTER_FOLLOW_UP,
         CampaignTypeEnum.SMS,
       );
 
