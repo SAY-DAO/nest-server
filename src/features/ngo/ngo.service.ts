@@ -9,14 +9,22 @@ import { NgoArrivalEntity, NgoEntity } from '../../entities/ngo.entity';
 import {
   FlaskUserTypesEnum,
   NeedTypeEnum,
-  ProductStatusEnum,
+  PreRegisterStatusEnum,
 } from '../../types/interfaces/interface';
-import { NgoParams } from '../../types/parameters/NgoParammeters';
+import { NgoParams, PreRegisterNgoParams } from '../../types/parameters/NgoParammeters';
 import { Brackets, Repository, UpdateResult } from 'typeorm';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
+import {
+  Paginated,
+  PaginateQuery,
+  paginate as nestPaginate,
+} from 'nestjs-paginate';
 
 @Injectable()
 export class NgoService {
   constructor(
+    @InjectRepository(NgoPreRegisterEntity)
+    private preRegisterNgoRepository: Repository<NgoPreRegisterEntity>,
     @InjectRepository(NgoEntity)
     private ngoRepository: Repository<NgoEntity>,
     @InjectRepository(NgoArrivalEntity)
@@ -197,7 +205,7 @@ export class NgoService {
     return this.ngoRepository.save({ id: newNgo.id, ...newNgo });
   }
 
-  getFlaskNGOSws(
+  async getFlaskNGOSws(
     ngoId: number,
     flaskSwId: number,
     typeId: FlaskUserTypesEnum,
@@ -208,27 +216,38 @@ export class NgoService {
         typeId === FlaskUserTypesEnum.ADMIN ||
         typeId === FlaskUserTypesEnum.SUPER_ADMIN
       ) {
-        return this.flaskSocialWorkerRepository.find({
-          where: {
-            ngo_id: ngoId,
-          },
-        });
+        return await this.flaskSocialWorkerRepository
+          .createQueryBuilder('sw')
+          .andWhere('sw.ngo_id = :ngoId', { ngoId })
+          .andWhere('sw.deleted_at IS NULL')
+          .cache(60000)
+          .orderBy('sw.is_active', 'DESC')
+          .getMany();
       } else if (ngoId && typeId === FlaskUserTypesEnum.SOCIAL_WORKER) {
-        return this.flaskSocialWorkerRepository.find({
-          where: {
-            id: flaskSwId,
-            ngo_id: ngoId,
-          },
-        });
+        return await this.flaskSocialWorkerRepository
+          .createQueryBuilder('sw')
+          .where('sw.id = :flaskSwId', { flaskSwId })
+          .andWhere('sw.ngo_id = :ngoId', { ngoId })
+          .andWhere('sw.deleted_at IS NULL')
+          .cache(60000)
+          .orderBy('sw.is_active', 'DESC')
+          .getMany();
       }
+
     } else if (
       !ngoId &&
       (typeId === FlaskUserTypesEnum.SUPER_ADMIN ||
         typeId === FlaskUserTypesEnum.ADMIN)
     ) {
-      return this.flaskSocialWorkerRepository.find();
+      return await this.flaskSocialWorkerRepository
+        .createQueryBuilder('sw')
+        .where('sw.deleted_at IS NULL')
+        .cache(60000)
+        .orderBy('sw.is_active', 'DESC')
+        .getMany();
     }
   }
+
 
   async updateNgo(
     ngoId: string,
@@ -240,4 +259,58 @@ export class NgoService {
       location: city,
     });
   }
+
+  // ----------------------------------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------------------- PRE - REGISTER -------------------------------------------------------
+  // ----------------------------------------------------------------------------------------------------------------------------------
+
+  getNgoPreRegisterById(
+    id: string,
+  ): Promise<NgoPreRegisterEntity> {
+    return this.preRegisterNgoRepository.findOne({
+      where: {
+        id,
+      },
+    });
+  }
+
+  createPreRegisterNgo(
+    details: PreRegisterNgoParams
+  ): Promise<NgoPreRegisterEntity> {
+    const newNgo = this.preRegisterNgoRepository.create({
+      name: details.name,
+      swPhoneNumber: details.swPhoneNumber,
+      phoneNumber: details.phoneNumber,
+      emailAddress: details.emailAddress,
+      postalAddress: details.postalAddress,
+      website: details.website,
+      country: details.country,
+      state: details.state,
+      city: details.city,
+      idCardUrl: details.idCardUrl,
+      docUrl: details.docUrl,
+      logoUrl: details.logoUrl,
+      firstName: details.firstName,
+      lastName: details.lastName,
+    });
+    return this.preRegisterNgoRepository.save(newNgo);
+  }
+
+  async getNgosPreRegister(
+    options: PaginateQuery,
+  ): Promise<Paginated<NgoPreRegisterEntity>> {
+    const queryBuilder = this.preRegisterNgoRepository
+      .createQueryBuilder('preRegister')
+
+    return await nestPaginate<NgoPreRegisterEntity>(
+      options,
+      queryBuilder,
+      {
+        defaultSortBy: [['createdAt', 'DESC']],
+        sortableColumns: ['id'],
+        nullSort: 'last',
+      },
+    );
+  }
+
 }

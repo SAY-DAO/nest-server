@@ -28,6 +28,7 @@ import { ChildrenPreRegisterEntity } from '../entities/childrenPreRegister.entit
 import { ContributionEntity } from '../entities/contribution.entity';
 import { CampaignEntity } from '../entities/campaign.entity';
 import { UrlEntity } from '../entities/url.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 export const postgresDataSourceOptions: DataSourceOptions = {
   ...config().db1,
@@ -61,6 +62,7 @@ export const postgresDataSourceOptions: DataSourceOptions = {
     ChildrenPreRegisterEntity,
     ContributionEntity,
     UrlEntity,
+    NgoPreRegisterEntity
   ],
 };
 

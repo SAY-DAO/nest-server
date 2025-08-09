@@ -52,6 +52,7 @@ import { TicketService } from '../ticket/ticket.service';
 import { TicketViewEntity } from '../../entities/ticketView.entity';
 import { TicketEntity } from '../../entities/ticket.entity';
 import { TicketContentEntity } from '../../entities/ticketContent.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Global() // 👈 global module
 @Module({
@@ -123,6 +124,7 @@ import { TicketContentEntity } from '../../entities/ticketContent.entity';
       TicketViewEntity,
       TicketEntity,
       TicketContentEntity,
+      NgoPreRegisterEntity
     ]),
   ],
   providers: [

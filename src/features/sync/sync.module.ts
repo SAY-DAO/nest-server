@@ -37,6 +37,7 @@ import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.en
 import { Countries } from '../../entities/flaskEntities/countries.entity';
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
       ProviderJoinNeedEntity,
       ProviderEntity,
       ChildrenPreRegisterEntity,
+      NgoPreRegisterEntity
     ]), // add entity and services to be available in the module
     ScheduleModule.forRoot(),
     HttpModule,
@@ -91,4 +93,4 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
     ProviderService,
   ], // add entity and services to be available in the module
 })
-export class SyncModule {}
+export class SyncModule { }

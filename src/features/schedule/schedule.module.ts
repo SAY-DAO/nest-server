@@ -22,6 +22,7 @@ import { UserService } from '../user/user.service';
 import { NgoArrivalEntity, NgoEntity } from '../../entities/ngo.entity';
 import { ContributorEntity } from '../../entities/contributor.entity';
 import { EthereumAccountEntity } from '../../entities/ethereum.account.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Module({
   imports: [
@@ -48,7 +49,8 @@ import { EthereumAccountEntity } from '../../entities/ethereum.account.entity';
       NgoArrivalEntity,
       ContributorEntity,
       AllUserEntity,
-      EthereumAccountEntity
+      EthereumAccountEntity,
+      NgoPreRegisterEntity
     ]),
   ],
   controllers: [],

@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChildrenEntity } from '../../entities/children.entity';
 import { LocationEntity } from '../../entities/location.entity';
@@ -37,6 +37,7 @@ import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.en
 import { Countries } from '../../entities/flaskEntities/countries.entity';
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
       AllUserEntity,
       EthereumAccountEntity,
       ChildrenPreRegisterEntity,
+      NgoPreRegisterEntity
     ]),
   ],
   controllers: [NgoController],
@@ -92,6 +94,8 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
 })
 export class NgoModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(NgoMiddleware).forRoutes('ngo');
+    consumer.apply(NgoMiddleware).exclude(
+      { path: 'ngo/preregister', method: RequestMethod.POST },
+    ).forRoutes(NgoController);
   }
 }

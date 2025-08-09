@@ -41,6 +41,7 @@ import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.en
 import { Countries } from '../../entities/flaskEntities/countries.entity';
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
       ProviderJoinNeedEntity,
       ProviderEntity,
       ChildrenPreRegisterEntity,
+      NgoPreRegisterEntity
     ]),
   ],
   controllers: [TicketController],

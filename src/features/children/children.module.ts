@@ -45,6 +45,7 @@ import { ProviderJoinNeedEntity } from '../../entities/provider.Join.need..entit
 import { ProviderEntity } from '../../entities/provider.entity';
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
       StatusEntity,
       ProviderJoinNeedEntity,
       ProviderEntity,
+      NgoPreRegisterEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,

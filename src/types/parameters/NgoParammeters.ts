@@ -22,3 +22,20 @@ export type NgoParams = {
     registerDate?: Date;
     updated: Date,
 }
+
+export type PreRegisterNgoParams = {
+    name: string;
+    swPhoneNumber: number;
+    phoneNumber: number;
+    emailAddress: string;
+    postalAddress: string;
+    website: string;
+    country: number;
+    state: number;
+    city: number;
+    idCardUrl: string;
+    docUrl: string;
+    logoUrl: string;
+    firstName: string
+    lastName: string
+};

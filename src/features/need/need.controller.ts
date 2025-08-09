@@ -48,7 +48,6 @@ import { ServerError } from '../../filters/server-exception.filter';
 import { Need } from '../../entities/flaskEntities/need.entity';
 import { PaymentService } from '../payment/payment.service';
 import { Payment } from '../../entities/flaskEntities/payment.entity';
-import { ChildrenService } from '../children/children.service';
 import { sentenceSimilarityPercent } from 'src/utils/similaritity';
 
 const BASE_LIMIT_DUPLICATES_0 = 4; // when confirming a need 4 duplicates are allowed for the category 0
@@ -73,7 +72,6 @@ export class NeedController {
     private syncService: SyncService,
     private providerService: ProviderService,
     private paymentService: PaymentService,
-    private childrenService: ChildrenService,
   ) { }
 
   @Get(`all`)

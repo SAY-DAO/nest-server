@@ -49,6 +49,7 @@ import { Countries } from '../../entities/flaskEntities/countries.entity';
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
 import { FamilyService } from '../family/family.service';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Module({
   imports: [
@@ -102,6 +103,7 @@ import { FamilyService } from '../family/family.service';
       TicketContentEntity,
       TicketViewEntity,
       ChildrenPreRegisterEntity,
+      NgoPreRegisterEntity
     ]),
   ],
   controllers: [WalletController],

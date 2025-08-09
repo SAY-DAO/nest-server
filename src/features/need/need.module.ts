@@ -46,6 +46,7 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
 import { TicketService } from '../ticket/ticket.service';
 import { TicketContentEntity } from '../../entities/ticketContent.entity';
 import { TicketViewEntity } from '../../entities/ticketView.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { TicketViewEntity } from '../../entities/ticketView.entity';
       ProviderEntity,
       ProviderJoinNeedEntity,
       ChildrenPreRegisterEntity,
+      NgoPreRegisterEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,

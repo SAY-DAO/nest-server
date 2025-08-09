@@ -126,6 +126,10 @@ export class SocialWorker extends BaseEntity {
 
   @Column({ nullable: true })
   is_active?: boolean;
+
+  @Column({ nullable: true })
+  deleted_at?: Date;
+
 }
 
 @Entity()

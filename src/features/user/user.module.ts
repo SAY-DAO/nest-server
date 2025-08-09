@@ -36,6 +36,7 @@ import { VariableEntity } from '../../entities/variable.entity';
 import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.entity';
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
+import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
       NgoEntity,
       NgoArrivalEntity,
       ChildrenPreRegisterEntity,
+      NgoPreRegisterEntity
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
