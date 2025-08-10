@@ -513,7 +513,7 @@ export class NeedController {
 
         const sameCatSimilarity: Need[] = [];
         const diffCatSimilarity: Need[] = []; // used for possible miss match - to help find error in this need or older needs with wrong category, ...
-        if (similarTitleNeeds && similarTitleNeeds[1] > 1) {
+        if (similarTitleNeeds && similarTitleNeeds[1] > 0) {
           for (const item of similarTitleNeeds[0]) {
             if (item.category === need.category) {
               sameCatSimilarity.push(item);
