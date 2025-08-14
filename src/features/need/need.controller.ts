@@ -376,6 +376,7 @@ export class NeedController {
           fetchedNeed.details !== need.details ||
           fetchedNeed.title !== need.title ||
           fetchedNeed.information !== need.informations ||
+          fetchedNeed.descriptionTranslations.en !== need.description_translations.en ||
           fetchedNeed.nameTranslations.en !== need.name_translations.en
         ) {
           const { need: nestNeed } = await this.syncService.syncNeed(
