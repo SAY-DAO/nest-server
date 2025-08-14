@@ -16,9 +16,6 @@ export class CrawlerController {
       throw new NotFoundException('Query parameter "url" is required.');
     }
     const res = await this.service.getData(url);
-    console.log(url);
-    console.log(res);
-
     if (!res) {
       throw new NotFoundException('Could not fetch product (DKP missing or APIs failed).');
     }
