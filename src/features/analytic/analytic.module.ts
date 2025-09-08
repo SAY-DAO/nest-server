@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AnalyticService } from './analytic.service';
 import { AnalyticController } from './analytic.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -27,6 +32,9 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
 import { NgoService } from '../ngo/ngo.service';
 import { NgoArrivalEntity, NgoEntity } from 'src/entities/ngo.entity';
 import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
+import { AnalyticPublicController } from './public.analytic.controller';
+import { AnalyticPublicService } from './public.analytic.service';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -56,22 +64,29 @@ import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
       ChildrenPreRegisterEntity,
       NgoEntity,
       NgoArrivalEntity,
-      NgoPreRegisterEntity
+      NgoPreRegisterEntity,
     ]),
+    CacheModule.register({
+      ttl: Number(process.env.REPORTS_CACHE_TTL ?? 10), // seconds
+      max: 100,
+    }),
   ],
 
-  controllers: [AnalyticController],
+  controllers: [AnalyticController, AnalyticPublicController],
   providers: [
     AnalyticService,
+    AnalyticPublicService,
     UserService,
     NeedService,
     ChildrenService,
     FamilyService,
-    NgoService
+    NgoService,
   ],
 })
 export class AnalyticModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AnalyticMiddleware).forRoutes('analytic');
+    consumer
+      .apply(AnalyticMiddleware)
+      .exclude({ path: 'analytic/public', method: RequestMethod.GET });
   }
 }

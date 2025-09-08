@@ -11,7 +11,10 @@ import {
   NeedTypeEnum,
   PreRegisterStatusEnum,
 } from '../../types/interfaces/interface';
-import { NgoParams, PreRegisterNgoParams } from '../../types/parameters/NgoParammeters';
+import {
+  NgoParams,
+  PreRegisterNgoParams,
+} from '../../types/parameters/NgoParammeters';
 import { Brackets, Repository, UpdateResult } from 'typeorm';
 import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 import {
@@ -35,7 +38,7 @@ export class NgoService {
     private needFlaskRepository: Repository<Need>,
     @InjectRepository(SocialWorker, 'flaskPostgres')
     private flaskSocialWorkerRepository: Repository<SocialWorker>,
-  ) { }
+  ) {}
 
   getNgos(): Promise<NgoEntity[]> {
     return this.ngoRepository.find();
@@ -85,7 +88,7 @@ export class NgoService {
         new Brackets((qb) => {
           qb.where('need.type = :typeProduct', {
             typeProduct: NeedTypeEnum.PRODUCT,
-          })
+          });
           // .andWhere('need.status = :productStatus', {
           //   productStatus: ProductStatusEnum.PURCHASED_PRODUCT,
           // });
@@ -169,14 +172,14 @@ export class NgoService {
       .andWhere('ngo.id NOT IN (:...testNgoIds)', {
         testNgoIds: [3, 14],
       })
-      .cache(10000)
+      .cache(true)
       .getMany();
   }
 
   getAllFlaskNgos(): Promise<NGO[]> {
     return this.ngoFlaskRepository
       .createQueryBuilder('ngo')
-      .cache(10000)
+      .cache(true)
       .getMany();
   }
 
@@ -220,7 +223,7 @@ export class NgoService {
           .createQueryBuilder('sw')
           .andWhere('sw.ngo_id = :ngoId', { ngoId })
           .andWhere('sw.deleted_at IS NULL')
-          .cache(60000)
+          .cache(true)
           .orderBy('sw.is_active', 'DESC')
           .getMany();
       } else if (ngoId && typeId === FlaskUserTypesEnum.SOCIAL_WORKER) {
@@ -229,11 +232,10 @@ export class NgoService {
           .where('sw.id = :flaskSwId', { flaskSwId })
           .andWhere('sw.ngo_id = :ngoId', { ngoId })
           .andWhere('sw.deleted_at IS NULL')
-          .cache(60000)
+          .cache(true)
           .orderBy('sw.is_active', 'DESC')
           .getMany();
       }
-
     } else if (
       !ngoId &&
       (typeId === FlaskUserTypesEnum.SUPER_ADMIN ||
@@ -242,12 +244,11 @@ export class NgoService {
       return await this.flaskSocialWorkerRepository
         .createQueryBuilder('sw')
         .where('sw.deleted_at IS NULL')
-        .cache(60000)
+        .cache(true)
         .orderBy('sw.is_active', 'DESC')
         .getMany();
     }
   }
-
 
   async updateNgo(
     ngoId: string,
@@ -264,9 +265,7 @@ export class NgoService {
   // ----------------------------------------------------------- PRE - REGISTER -------------------------------------------------------
   // ----------------------------------------------------------------------------------------------------------------------------------
 
-  getNgoPreRegisterById(
-    id: string,
-  ): Promise<NgoPreRegisterEntity> {
+  getNgoPreRegisterById(id: string): Promise<NgoPreRegisterEntity> {
     return this.preRegisterNgoRepository.findOne({
       where: {
         id,
@@ -275,7 +274,7 @@ export class NgoService {
   }
 
   createPreRegisterNgo(
-    details: PreRegisterNgoParams
+    details: PreRegisterNgoParams,
   ): Promise<NgoPreRegisterEntity> {
     const newNgo = this.preRegisterNgoRepository.create({
       name: details.name,
@@ -299,18 +298,13 @@ export class NgoService {
   async getNgosPreRegister(
     options: PaginateQuery,
   ): Promise<Paginated<NgoPreRegisterEntity>> {
-    const queryBuilder = this.preRegisterNgoRepository
-      .createQueryBuilder('preRegister')
+    const queryBuilder =
+      this.preRegisterNgoRepository.createQueryBuilder('preRegister');
 
-    return await nestPaginate<NgoPreRegisterEntity>(
-      options,
-      queryBuilder,
-      {
-        defaultSortBy: [['createdAt', 'DESC']],
-        sortableColumns: ['id'],
-        nullSort: 'last',
-      },
-    );
+    return await nestPaginate<NgoPreRegisterEntity>(options, queryBuilder, {
+      defaultSortBy: [['createdAt', 'DESC']],
+      sortableColumns: ['id'],
+      nullSort: 'last',
+    });
   }
-
 }

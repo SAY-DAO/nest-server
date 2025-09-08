@@ -37,6 +37,9 @@ function loadConfig() {
       dropSchema: false, //  Don't use this in production - Drops the schema each time data source is being initialized.
       migrationsRun: true, // if migrations should be auto run on every application launch. As an alternative, you can use CLI and run migration:run command.
       migrations: [`dist/db/migrations/*.js`], // list of migrations that need to be loaded by TypeORM
+      cache: {
+        duration: 15000, // cache duration in milliseconds (e.g., 15 seconds)
+      },
     },
     db2: {
       name: 'flaskPostgres',

@@ -13,6 +13,9 @@ import {
   NeedTypeEnum,
   SAYPlatformRoles,
   ChildExistence,
+  ProductStatusEnum,
+  PaymentStatusEnum,
+  ServiceStatusEnum,
 } from '../../types/interfaces/interface';
 import {
   daysDifference,
@@ -260,7 +263,7 @@ export class AnalyticService {
       ])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('need.status = 0')
+      .andWhere('need.status = :status', { status: PaymentStatusEnum.NOT_PAID })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -268,7 +271,7 @@ export class AnalyticService {
       .createQueryBuilder('need')
       .select(['need.id', 'need.child_id', 'need.status', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.status = 1')
+      .andWhere('need.status = :status', { status: PaymentStatusEnum.COMPLETE_PAY })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -276,7 +279,7 @@ export class AnalyticService {
       .createQueryBuilder('need')
       .select(['need.id', 'need.child_id', 'need.status', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.status = 2')
+      .andWhere('need.status = :status', { status: PaymentStatusEnum.PARTIAL_PAY })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -290,8 +293,8 @@ export class AnalyticService {
         'isDeleted',
       ])
       .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.type = :type', { type: 1 })
-      .andWhere('need.status = 3')
+      .andWhere('need.type = :type', {  type: NeedTypeEnum.PRODUCT  })
+      .andWhere('need.status = :status', { status: ProductStatusEnum.PURCHASED_PRODUCT })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -305,8 +308,8 @@ export class AnalyticService {
         'isDeleted',
       ])
       .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.type = :type', { type: 0 })
-      .andWhere('need.status = 3')
+      .andWhere('need.type = :type', { type: NeedTypeEnum.SERVICE })
+      .andWhere('need.status = :status', { status: ServiceStatusEnum.MONEY_TO_NGO })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -320,8 +323,8 @@ export class AnalyticService {
         'isDeleted',
       ])
       .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.type = :type', { type: 1 })
-      .andWhere('need.status = 4')
+      .andWhere('need.type = :type', { type: NeedTypeEnum.PRODUCT })
+      .andWhere('need.status = :status', { status: ProductStatusEnum.DELIVERED_TO_NGO })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 

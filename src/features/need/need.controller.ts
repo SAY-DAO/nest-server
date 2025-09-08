@@ -328,6 +328,7 @@ export class NeedController {
       .then((r) => r.filter((n) => n.isActive).map((n) => n.id));
 
     let toBeConfirmed = config().dataCache.fetchToBeConfirmed();
+    console.log(toBeConfirmed);
 
     const expired =
       !toBeConfirmed ||
@@ -349,6 +350,7 @@ export class NeedController {
       );
       const myList = [];
       let counter = 0;
+
       for await (const need of notConfirmed[0]) {
         counter += 1;
         console.log(
@@ -356,10 +358,6 @@ export class NeedController {
         );
         // 1- sync & validate need
         let fetchedNeed = await this.needService.getNeedByFlaskId(need.id);
-
-        // if (fetchedNeed.flaskId !== 14448) {
-        //   continue;
-        // }
 
         // Just in case
         const fetchedProviderRel =

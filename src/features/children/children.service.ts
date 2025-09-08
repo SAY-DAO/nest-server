@@ -43,7 +43,7 @@ export class ChildrenService {
     private childrenRepository: Repository<ChildrenEntity>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-  ) { }
+  ) {}
 
   async countChildren(ngoIds: number[]) {
     return this.flaskChildRepository
@@ -79,7 +79,7 @@ export class ChildrenService {
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
         testNgoIds: [3, 14],
       })
-      .cache(60000)
+      .cache(true)
       .getMany();
   }
 
@@ -158,7 +158,6 @@ export class ChildrenService {
     return this.childrenRepository.find();
   }
 
-
   async getFlaskChildren(
     options: PaginateQuery,
     body: {
@@ -180,8 +179,8 @@ export class ChildrenService {
           body.isConfirmed === ChildConfirmation.CONFIRMED
             ? [true]
             : ChildConfirmation.NOT_CONFIRMED
-              ? [false]
-              : ChildConfirmation.BOTH && [true, false],
+            ? [false]
+            : ChildConfirmation.BOTH && [true, false],
       })
       .andWhere('child.id_social_worker IN (:...socialWorkerIds)', {
         socialWorkerIds: [...socialWorkerIds],
@@ -191,17 +190,17 @@ export class ChildrenService {
           body.statuses[0] >= 0
             ? [...body.statuses]
             : [
-              ChildExistence.DEAD,
-              ChildExistence.AlivePresent,
-              ChildExistence.AliveGone,
-              ChildExistence.TempGone,
-            ],
+                ChildExistence.DEAD,
+                ChildExistence.AlivePresent,
+                ChildExistence.AliveGone,
+                ChildExistence.TempGone,
+              ],
       })
 
       .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
         testNgoIds: [3, 14],
       })
-      .cache(60000);
+      .cache(true);
 
     return await nestPaginate<Child>(options, queryBuilder, {
       sortableColumns: ['id'],
@@ -309,7 +308,7 @@ export class ChildrenService {
         'user.id',
         'user.avatarUrl',
       ])
-      .cache(10000)
+      .cache(true)
       .getMany();
   }
   // ----------------------------------------------------------------------------------------------------------------------------------
@@ -394,7 +393,6 @@ export class ChildrenService {
       },
     );
   }
-  
 
   // When panel edit/update a confirmed child
   preRegisterUpdateApproved(
@@ -515,7 +513,9 @@ export class ChildrenService {
       .getMany();
   }
 
-  async getPreChildrenByName(sayNameEn: string): Promise<ChildrenPreRegisterEntity[]> {
+  async getPreChildrenByName(
+    sayNameEn: string,
+  ): Promise<ChildrenPreRegisterEntity[]> {
     return await this.preRegisterChildrenRepository
       .createQueryBuilder('child')
       // .where('child.status != :status', {
@@ -540,6 +540,4 @@ export class ChildrenService {
   async deletePreRegister(id: string): Promise<Observable<any>> {
     return from(this.preRegisterChildrenRepository.delete(id));
   }
-
-
 }

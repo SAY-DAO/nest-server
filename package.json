@@ -87,6 +87,7 @@
   },
   "devDependencies": {
     "@golevelup/ts-jest": "^0.6.2",
+    "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/cli": "^10.2.1",
     "@nestjs/schematics": "10.0.1",
     "@nestjs/testing": "^11.0.12",
@@ -102,6 +103,7 @@
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "5.61.0",
     "@typescript-eslint/parser": "5.61.0",
+    "cache-manager": "^7.2.0",
     "eslint": "8.44.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-prettier": "4.2.1",

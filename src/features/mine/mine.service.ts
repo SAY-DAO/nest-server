@@ -41,7 +41,7 @@ export class MineService {
       .andWhere('payment.id IS NOT NULL')
       .andWhere('payment.verified IS NOT NULL')
       .andWhere('payment.order_id IS NOT NULL')
-      .cache(60000)
+      .cache(true)
       .getCount();
   }
 
@@ -95,7 +95,7 @@ export class MineService {
       .andWhere('signature.role = :role', {
         role: SAYPlatformRoles.AUDITOR,
       })
-      .cache(60000)
+      .cache(true)
       .getMany();
   }
 
@@ -123,7 +123,7 @@ export class MineService {
       .andWhere('signature.role = :role', {
         role: SAYPlatformRoles.FAMILY,
       })
-      .cache(60000)
+      .cache(true)
       .getMany();
   }
 
@@ -155,7 +155,7 @@ export class MineService {
       .andWhere('signature.role = :role', {
         role: SAYPlatformRoles.FAMILY,
       })
-      .cache(60000)
+      .cache(true)
       .getCount();
   }
 }

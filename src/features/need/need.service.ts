@@ -58,7 +58,7 @@ export class NeedService {
     private needRepository: Repository<NeedEntity>,
     @InjectRepository(VariableEntity)
     private variableRepository: Repository<VariableEntity>,
-  ) { }
+  ) {}
 
   async getFlaskNeed(flaskNeedId: number): Promise<Need> {
     return this.flaskNeedRepository.findOne({
@@ -439,7 +439,7 @@ export class NeedService {
       //   'need.created',
       //   'need.confirmDate',
       // ])
-      .cache(60000)
+      .cache(true)
       .orderBy('need.created', 'ASC');
     return await queryBuilder.getManyAndCount();
   }
@@ -510,7 +510,7 @@ export class NeedService {
         'need.informations',
         'need.unavailable_from',
       ])
-      .cache(60000);
+      .cache(true);
 
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
@@ -594,7 +594,7 @@ export class NeedService {
         'need.unavailable_from',
         'payment',
       ])
-      .cache(60000);
+      .cache(true);
 
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
@@ -709,7 +709,7 @@ export class NeedService {
         'receipt',
         'need_receipt',
       ])
-      .cache(60000);
+      .cache(true);
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
       defaultSortBy: [['updated', 'DESC']],
@@ -831,7 +831,7 @@ export class NeedService {
         'need_receipt',
         'payment',
       ])
-      .cache(60000);
+      .cache(true);
     return await nestPaginate<Need>(options, queryBuilder, {
       sortableColumns: ['id'],
       defaultSortBy: [['child_delivery_date', 'DESC']],
@@ -880,7 +880,7 @@ export class NeedService {
         'need.confirmDate',
         'need.doneAt',
       ])
-      .cache(60000)
+      .cache(true)
       .orderBy('need.created', 'ASC');
     return await queryBuilder.getMany();
   }
@@ -916,7 +916,7 @@ export class NeedService {
         'need.updated',
         'need.confirmDate',
       ])
-      .cache(60000)
+      .cache(true)
       .limit(500)
       .orderBy('need.created', 'ASC')
       .getManyAndCount();
@@ -997,7 +997,7 @@ export class NeedService {
         'need.confirmDate',
         'need.doneAt',
       ])
-      .cache(60000)
+      .cache(true)
       .orderBy('need.created', 'DESC')
       .getMany();
   }
@@ -1106,7 +1106,7 @@ export class NeedService {
         'need._cost',
         'need.doneAt',
       ])
-      .cache(60000)
+      .cache(true)
       .orderBy('similarity(need.title, :title)', 'DESC');
     return await queryBuilder.getManyAndCount();
   }
@@ -1136,7 +1136,7 @@ export class NeedService {
         'need._cost',
         'need.doneAt',
       ])
-      .cache(60000)
+      .cache(true)
       .orderBy('need.created', 'ASC');
     return await queryBuilder.getManyAndCount();
   }

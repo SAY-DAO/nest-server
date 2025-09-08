@@ -31,7 +31,7 @@ export class FamilyService {
     private flaskFamilyRepository: Repository<Family>,
     @InjectRepository(UserFamily, 'flaskPostgres')
     private flaskUserFamilyRepository: Repository<UserFamily>,
-  ) { }
+  ) {}
 
   async searchUsers(query: string): Promise<User[]> {
     return this.flaskUserRepository
@@ -81,7 +81,7 @@ export class FamilyService {
       .andWhere('userFamily.flaskFamilyRole = :flaskFamilyRole', {
         flaskFamilyRole: vfamilyRole, // we have -1 and -2 in data as well (e.g user id:208 is SAY)
       })
-      .cache(10000)
+      .cache(true)
       .getCount();
   }
 
@@ -180,7 +180,7 @@ export class FamilyService {
           'needFamily',
           'payment',
         ])
-        .cache(10000)
+        .cache(true)
         .getManyAndCount()
     );
   }
@@ -302,7 +302,7 @@ export class FamilyService {
       .andWhere('userFamily.id_user IN (:...paidMembers)', {
         paidMembers: paidMembers,
       })
-      .cache(10000)
+      .cache(true)
       .getMany();
   }
 
