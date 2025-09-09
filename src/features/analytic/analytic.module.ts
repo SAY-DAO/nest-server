@@ -87,6 +87,20 @@ export class AnalyticModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AnalyticMiddleware)
-      .exclude({ path: 'analytic/public', method: RequestMethod.GET });
+      .exclude(
+        { path: 'analytic/public/summary', method: RequestMethod.GET },
+        { path: 'analytic/public/transactions', method: RequestMethod.GET },
+        {
+          path: 'analytic/public/season-comparison',
+          method: RequestMethod.GET,
+        },
+        { path: 'analytic/public/multi-payers', method: RequestMethod.GET },
+        { path: 'analytic/public/logs', method: RequestMethod.GET },
+        {
+          path: 'analytic/public/needs-frequency-clustered',
+          method: RequestMethod.GET,
+        },
+      )
+      .forRoutes('analytic');
   }
 }

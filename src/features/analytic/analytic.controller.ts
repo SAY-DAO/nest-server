@@ -32,13 +32,15 @@ export class AnalyticController {
     private ngoService: NgoService,
 
     private readonly analyticService: AnalyticService,
-  ) { }
+  ) {}
 
   @Get('ecosystem/children')
   @ApiOperation({ description: 'get SAY children ecosystem analytics' })
   async getChildrenEcosystemAnalytic(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    console.log(req.headers);
+
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
@@ -211,7 +213,6 @@ export class AnalyticController {
       ngoIds = await this.ngoService
         .getFlaskNgos()
         .then((r) => r.filter((n) => n.isActive).map((n) => n.id));
-
     }
 
     if (role === SAYPlatformRoles.NGO_SUPERVISOR) {
@@ -221,24 +222,22 @@ export class AnalyticController {
       swIds = await this.userService
         .getFlaskSocialWorkersByNgo(supervisor.ngo_id)
         .then((r) => r.map((s) => s.id));
-      ngoIds = [supervisor.ngo_id]
+      ngoIds = [supervisor.ngo_id];
     }
 
     if (role === SAYPlatformRoles.PURCHASER) {
-      const sw = await this.userService.getFlaskSocialWorker(
-        panelFlaskUserId,
-      );
+      const sw = await this.userService.getFlaskSocialWorker(panelFlaskUserId);
       swIds = await this.userService
         .getFlaskSwIds()
         .then((r) => r.map((s) => s.id));
-      ngoIds = [sw.ngo_id]
+      ngoIds = [sw.ngo_id];
     }
 
     return await this.analyticService.getUserContribution(
       swIds,
       role,
       panelFlaskUserId,
-      ngoIds
+      ngoIds,
     );
   }
 }
