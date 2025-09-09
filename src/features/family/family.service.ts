@@ -319,4 +319,17 @@ export class FamilyService {
       newsLetterCampaign: newStatus,
     });
   }
+
+  async updateBuilderStatus(user: AllUserEntity): Promise<UpdateResult> {
+    const newValue = !user.isBuilder;
+    return this.allUserRepository.update(user.id, {
+      isBuilder: newValue,
+    });
+  }
+  async getBuilderStatus(flaskUserId: number): Promise<boolean> {
+    const user = await this.allUserRepository.findOne({
+      where: { flaskUserId },
+    });
+    return user.isBuilder;
+  }
 }

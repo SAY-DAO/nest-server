@@ -7,6 +7,7 @@ import { ContributorEntity } from './contributor.entity';
 import { SignatureEntity } from './signature.entity';
 import { CommentEntity } from './comment.entity';
 import { CampaignEntity } from './campaign.entity';
+import { CheckPointEntity } from 'src/entities/checkpoint.entity';
 
 @Entity()
 export class AllUserEntity extends BaseEntity {
@@ -15,9 +16,6 @@ export class AllUserEntity extends BaseEntity {
 
   @Column({ nullable: true })
   typeId: number; // for contributors
-
-  @OneToMany(() => ContributorEntity, (c) => c.user, { eager: true })
-  contributions: ContributorEntity[];
 
   @OneToMany(() => EthereumAccountEntity, (account) => account.user, {
     eager: true,
@@ -32,8 +30,15 @@ export class AllUserEntity extends BaseEntity {
   @ManyToMany(() => CampaignEntity, (c) => c.receivers)
   campaigns: CampaignEntity[];
 
+  // for users who also contribute in building the ecosystem
+  @Column({ default: false })
+  isBuilder: boolean; // content creators, developers, ...
+
   @Column({ nullable: false })
-  isContributor: boolean;
+  isContributor: boolean; // since we have two sifferent models in flask this helps to distinguish b/w flask users and social workers and avoid id conflict
+
+  @OneToMany(() => ContributorEntity, (c) => c.user, { eager: true })
+  contributions: ContributorEntity[]; // panel contributor like admin, auditor, sw, ...
 
   @Column({ nullable: true })
   userName: string;
@@ -70,4 +75,7 @@ export class AllUserEntity extends BaseEntity {
 
   @Column({ default: true })
   newsLetterCampaign: boolean;
+
+  @OneToMany(() => CheckPointEntity, (cp) => cp.user)
+  checkpoints: CheckPointEntity[];
 }

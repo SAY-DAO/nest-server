@@ -29,6 +29,7 @@ import { ContributionEntity } from '../entities/contribution.entity';
 import { CampaignEntity } from '../entities/campaign.entity';
 import { UrlEntity } from '../entities/url.entity';
 import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
+import { CheckPointEntity } from 'src/entities/checkpoint.entity';
 
 export const postgresDataSourceOptions: DataSourceOptions = {
   ...config().db1,
@@ -62,7 +63,8 @@ export const postgresDataSourceOptions: DataSourceOptions = {
     ChildrenPreRegisterEntity,
     ContributionEntity,
     UrlEntity,
-    NgoPreRegisterEntity
+    NgoPreRegisterEntity,
+    CheckPointEntity,
   ],
 };
 

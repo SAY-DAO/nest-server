@@ -37,6 +37,8 @@ import { ChildrenPreRegisterEntity } from '../../entities/childrenPreRegister.en
 import { Receipt } from '../../entities/flaskEntities/receipt.entity';
 import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
 import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
+import { CheckPointService } from '../checkpoint/checkpoint.service';
+import { CheckPointEntity } from 'src/entities/checkpoint.entity';
 
 @Module({
   imports: [
@@ -71,7 +73,8 @@ import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
       NgoEntity,
       NgoArrivalEntity,
       ChildrenPreRegisterEntity,
-      NgoPreRegisterEntity
+      NgoPreRegisterEntity,
+      CheckPointEntity,
     ]),
     ScheduleModule.forRoot(),
     HttpModule,
@@ -87,6 +90,7 @@ import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
     IpfsService,
     NgoService,
     DownloadService,
+    CheckPointService,
   ],
 })
 export class UserModule implements NestModule {

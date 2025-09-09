@@ -46,6 +46,7 @@ import { postgresDataSourceOptions } from './db/data-source';
 import { CampaignModule } from './features/campaign/campaign.module';
 import { Countries } from './entities/flaskEntities/countries.entity';
 import { CrawlerModule } from './features/crawler/crawler.module';
+import { CheckPointModule } from './features/checkpoint/checkpoint.module';
 
 const imports = [
   ThrottlerModule.forRoot({
@@ -107,7 +108,8 @@ const imports = [
   MineModule,
   ContributionModule,
   CampaignModule,
-  CrawlerModule
+  CrawlerModule,
+  CheckPointModule,
 ];
 
 @Module({
@@ -115,4 +117,4 @@ const imports = [
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

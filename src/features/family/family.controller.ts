@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Query,
   Req,
@@ -17,7 +18,15 @@ import {
 } from '../../types/interfaces/interface';
 import config from '../../config';
 import { ObjectNotFound } from '../../filters/notFound-expectation.filter';
-import { findQuartileGrant, getContributionRatio, QUANTILE_25th, QUANTILE_50th, QUANTILE_75th, QUANTILE_max, QUANTILE_min } from '../../utils/helpers';
+import {
+  findQuartileGrant,
+  getContributionRatio,
+  QUANTILE_25th,
+  QUANTILE_50th,
+  QUANTILE_75th,
+  QUANTILE_max,
+  QUANTILE_min,
+} from '../../utils/helpers';
 import {
   Q1_LOWER_COEFFICIENT,
   Q1_TO_Q2_COEFFICIENT,
@@ -47,7 +56,52 @@ export class FamilyController {
     private childrenService: ChildrenService,
     private needService: NeedService,
     private paymentService: PaymentService,
-  ) { }
+  ) {}
+
+  @Get(`/members/:flaskUserId`)
+  @ApiOperation({ description: 'Get a family member' })
+  async getFlaskSw(
+    @Req() req: Request,
+    @Param('flaskUserId', ParseIntPipe) flaskUserId: number,
+  ) {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    const flaskUser = await this.userService.getFlaskUser(flaskUserId);
+    const nestUser = await this.userService.getFamilyByFlaskId(flaskUserId);
+    
+    return { ...flaskUser, isBuilder: nestUser.isBuilder };
+  }
+
+  @Patch('builder/:flaskUserId')
+  @ApiOperation({
+    description: 'Admin change the builder status of family members',
+  })
+  async updateBuilderStatus(
+    @Req() req: Request,
+    @Query('flaskUserId') flaskUserId: number,
+  ): Promise<any> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+    const nestFamilyMember = await this.userService.getFamilyByFlaskId(
+      flaskUserId,
+    );
+    if (!nestFamilyMember) {
+      throw new ForbiddenException("Can't find the user");
+    }
+    return await this.familyService.updateBuilderStatus(nestFamilyMember);
+  }
 
   @Get('search')
   async searchUsers(
@@ -218,7 +272,7 @@ export class FamilyController {
     // -------------------------------------------------- contributionRatio --------------------------------------------------------------------------
     // If need ws done by more than one person we reward the vFamily collaboration
     // # of vFamily involved * coefficient
-    const contributionRatio = getContributionRatio(need.verifiedPayments)
+    const contributionRatio = getContributionRatio(need.verifiedPayments);
 
     // -------------------------------------------------- confirm duration -------------------------------- confirmDate - need.created ------------------
     let confirmDuration = daysDifference(need.created, need.confirmDate);
@@ -231,7 +285,7 @@ export class FamilyController {
       need.confirmDate,
       need.category,
       need.type,
-      2,//months
+      2, //months
     );
     confirmsInRange[0].forEach((c) => {
       onlyConfirmDurationList.push(daysDifference(c.created, c.confirmDate));
@@ -287,11 +341,21 @@ export class FamilyController {
 
     onlyAmountsList = sort(onlyAmountsList, compareNatural);
     // payment amount: lower amount means lower grant
-    const min_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_min)); //min
-    const Q1_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_25th));
-    const Q2_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_50th));
-    const Q3_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_75th));
-    const max_payment_amount = Number(quantileSeq(onlyAmountsList, QUANTILE_max)); // max
+    const min_payment_amount = Number(
+      quantileSeq(onlyAmountsList, QUANTILE_min),
+    ); //min
+    const Q1_payment_amount = Number(
+      quantileSeq(onlyAmountsList, QUANTILE_25th),
+    );
+    const Q2_payment_amount = Number(
+      quantileSeq(onlyAmountsList, QUANTILE_50th),
+    );
+    const Q3_payment_amount = Number(
+      quantileSeq(onlyAmountsList, QUANTILE_75th),
+    );
+    const max_payment_amount = Number(
+      quantileSeq(onlyAmountsList, QUANTILE_max),
+    ); // max
     if (0 < userPay.needAmount && userPay.needAmount <= Q1_payment_amount) {
       payAmountQGrant = Q1_LOWER_COEFFICIENT;
     } else if (
@@ -310,11 +374,21 @@ export class FamilyController {
 
     onlyPayDurationList = sort(onlyPayDurationList, compareNatural);
     // payment duration: lower duration means higher grant
-    const min_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_min)); //min
-    const Q1_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_25th));
-    const Q2_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_50th));
-    const Q3_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_75th));
-    const max_payment_duration = Number(quantileSeq(onlyPayDurationList, QUANTILE_max)); // max
+    const min_payment_duration = Number(
+      quantileSeq(onlyPayDurationList, QUANTILE_min),
+    ); //min
+    const Q1_payment_duration = Number(
+      quantileSeq(onlyPayDurationList, QUANTILE_25th),
+    );
+    const Q2_payment_duration = Number(
+      quantileSeq(onlyPayDurationList, QUANTILE_50th),
+    );
+    const Q3_payment_duration = Number(
+      quantileSeq(onlyPayDurationList, QUANTILE_75th),
+    );
+    const max_payment_duration = Number(
+      quantileSeq(onlyPayDurationList, QUANTILE_max),
+    ); // max
     if (paymentDuration > Q3_payment_duration) {
       payDurationQGrant = Q1_LOWER_COEFFICIENT;
     } else if (
@@ -331,7 +405,6 @@ export class FamilyController {
       payDurationQGrant = Q3_UPPER_COEFFICIENT;
     }
 
-
     // -------------------------------------------------- logistic duration -------------------------- childDeliveryDate - userPay.created -------------
     const logisticDuration = daysDifference(
       userPay.created,
@@ -344,7 +417,6 @@ export class FamilyController {
         daysDifference(p.created, p.need.child_delivery_date),
       );
     });
-
 
     onlyLogisticDurationList = sort(onlyLogisticDurationList, compareNatural);
     // logistic duration: lower duration means higher grant
@@ -382,7 +454,6 @@ export class FamilyController {
     ) {
       logisticDurationQGrant = Q3_UPPER_COEFFICIENT;
     }
-
 
     if (
       !logisticDurationQGrant ||
@@ -515,14 +586,14 @@ export class FamilyController {
     const ecoCompletePayQuartile = config().dataCache.theQuartile();
 
     const distanceRatio: {
-      allChildrenCaredFor: boolean,
-      fatherQGrant: number,
-      motherQGrant: number,
-      amooQGrant: number,
-      khalehQGrant: number,
-      daeiQGrant: number,
-      ammeQGrant: number,
-      avg: number,
+      allChildrenCaredFor: boolean;
+      fatherQGrant: number;
+      motherQGrant: number;
+      amooQGrant: number;
+      khalehQGrant: number;
+      daeiQGrant: number;
+      ammeQGrant: number;
+      avg: number;
     } = findQuartileGrant(
       {
         fatherCompletePay: userAsFather[1],
