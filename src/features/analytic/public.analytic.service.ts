@@ -26,6 +26,7 @@ import { SeasonComparisonResponseDto } from './dto/season-comparison-response.dt
 import { productCategories, serviceCategories } from 'src/utils/catagories';
 import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 import { CheckPointEntity } from 'src/entities/checkpoint.entity';
+import { AllUserEntity } from 'src/entities/user.entity';
 
 // Helper: month labels
 const MONTH_LABELS = [
@@ -72,6 +73,9 @@ export class AnalyticPublicService {
     @InjectRepository(CheckPointEntity)
     private checkPointRepository: Repository<CheckPointEntity>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
+    @InjectRepository(AllUserEntity)
+    private allUserRepository: Repository<AllUserEntity>,
   ) {}
 
   async getSummary(useCache = true): Promise<SummaryDto> {

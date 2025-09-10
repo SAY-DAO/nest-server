@@ -737,4 +737,12 @@ export class FamilyController {
     return (await this.userService.getFamilyByFlaskId(dappFlaskUserId))
       .newsLetterCampaign;
   }
+
+  @Get('builders')
+  @ApiOperation({
+    description: 'Admin change the builder status of family members',
+  })
+  async fetchBuilders(): Promise<any> {
+    return await this.familyService.fetchBuilders();
+  }
 }

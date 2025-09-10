@@ -332,4 +332,11 @@ export class FamilyService {
     });
     return user.isBuilder;
   }
+
+  fetchBuilders(): Promise<AllUserEntity[]> {
+    const users = this.allUserRepository.find({
+      where: { isBuilder: true },
+    });
+    return users;
+  }
 }

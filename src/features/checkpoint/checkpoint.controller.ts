@@ -62,44 +62,10 @@ export class CheckPointController {
     return await this.cpService.createForUser(user, dto);
   }
 
-  // // list: supports filtering by type and confirmation status
-  // @Get('user/:userId')
-  // @ApiOperation({
-  //   description: 'List checkpoints for a user (filter by type, confirmation)',
-  // })
-  // async listForUser(
-  //   @Req() req: Request,
-  //   @Query('type') type: CheckPointType,
-  //   @Query('onlyConfirmed') onlyConfirmed?: string, // 'true' | 'false' | undefined
-  //   @Query('limit') limit = '50',
-  //   @Query('offset') offset = '0',
-  // ): Promise<CheckPointEntity[]> {
-  //   const dappFlaskUserId = req.headers['dappFlaskUserId'];
-  //   if (dappFlaskUserId) {
-  //     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-  //       throw new ForbiddenException('You Are not authorized');
-  //     }
-  //   }
-  //   const user = await this.userService.getFamilyByFlaskId(dappFlaskUserId);
-  //   const onlyConfirmedBool =
-  //     onlyConfirmed === 'true'
-  //       ? true
-  //       : onlyConfirmed === 'false'
-  //       ? false
-  //       : undefined;
-  //   return this.cpService.findByUser(
-  //     user.id,
-  //     type,
-  //     onlyConfirmedBool,
-  //     Number(limit),
-  //     Number(offset),
-  //   );
-  // }
 
   @Get('')
   @ApiOperation({ description: 'Get paginated checkpoints' })
   async getAll(@Req() req: Request, @Query() query: PaginateQuery) {
-    const dappFlaskUserId = req.headers['dappFlaskUserId'];
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
 
@@ -114,7 +80,6 @@ export class CheckPointController {
     } else {
       throw new ForbiddenException('We need the user ID!');
     }
-    // 🔹 Directly use the paginate query
     return this.cpService.findAll(query);
   }
 
