@@ -5,24 +5,31 @@ import {
   VirtualFamilyRole,
 } from '../types/interfaces/interface';
 import { quantileSeq, median } from 'mathjs';
-import { getScattered, QUANTILE_25th, QUANTILE_50th, QUANTILE_75th, QUANTILE_max, QUANTILE_min } from './helpers';
+import {
+  getScattered,
+  QUANTILE_25th,
+  QUANTILE_50th,
+  QUANTILE_75th,
+  QUANTILE_max,
+  QUANTILE_min,
+} from './helpers';
 import { Need } from '../entities/flaskEntities/need.entity';
 
 export default class DataCache {
   childrenEcosystem = null;
   authentication: {
-    [flaskId: number]: AuthenticationType;
+    [flaskId: string]: AuthenticationType;
   } = {};
 
   // complete pays of fathers, mothers, ... for all time
   familyData: {
-    fathersData: Need[],
-    mothersData: Need[],
-    amoosData: Need[],
-    khalehsData: Need[],
-    daeisData: Need[],
-    ammesData: Need[],
-    created: Date
+    fathersData: Need[];
+    mothersData: Need[];
+    amoosData: Need[];
+    khalehsData: Need[];
+    daeisData: Need[];
+    ammesData: Need[];
+    created: Date;
   } = null;
   familyRolesCount = null;
   childActiveFamilies = null;
@@ -105,7 +112,7 @@ export default class DataCache {
       list: [],
       createdAt: null,
     };
-  }
+  };
 
   // dApp user ratio in different roles / distance ratio
   storeFamilyData = ({
@@ -133,7 +140,7 @@ export default class DataCache {
       created: new Date(),
     };
     // after storing needs paid by roles, e.g. list of needs paid by fathers
-    this.roleScatteredData();  // update medianList for quartile
+    this.roleScatteredData(); // update medianList for quartile
     this.theQuartile();
   };
 
@@ -183,15 +190,15 @@ export default class DataCache {
   };
 
   expirePanelAccessToken = (flaskSwId: number) =>
-  (this.authentication[String(flaskSwId)] = {
-    ...this.authentication[String(flaskSwId)],
-    isExpired: true,
-  });
+    (this.authentication[String(flaskSwId)] = {
+      ...this.authentication[String(flaskSwId)],
+      isExpired: true,
+    });
   expireDappAccessToken = (flaskFamilyId: number) =>
-  (this.authentication[String(flaskFamilyId)] = {
-    ...this.authentication[String(flaskFamilyId)],
-    isExpired: true,
-  });
+    (this.authentication[String(flaskFamilyId)] = {
+      ...this.authentication[String(flaskFamilyId)],
+      isExpired: true,
+    });
 
   // panel analytic scatter chart + update medianList for quartile
   roleScatteredData() {

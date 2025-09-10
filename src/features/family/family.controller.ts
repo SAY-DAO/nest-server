@@ -40,6 +40,7 @@ import { PaymentService } from '../payment/payment.service';
 import { NeedService } from '../need/need.service';
 import { isAuthenticated } from '../../utils/auth';
 import { UserService } from '../user/user.service';
+import { UserAPIApi } from 'src/generated-sources/openapi';
 
 @ApiTags('Family')
 @ApiSecurity('flask-access-token')
@@ -58,9 +59,29 @@ export class FamilyController {
     private paymentService: PaymentService,
   ) {}
 
+  @Get(`/members/me`)
+  @ApiOperation({ description: 'Get a family member' })
+  async getMe(@Req() req: Request) {
+    const accessToken = req.headers['authorization'];
+
+    const userFlaskApi = new UserAPIApi();
+    const familyMember = await userFlaskApi.apiV2UserUserIduserIdGet(
+      accessToken,
+      'me',
+    );
+    if (!familyMember) {
+      throw new ForbiddenException('You Are not the authenticated1');
+    }
+    let nestUser = await this.userService.getFamilyByFlaskId(familyMember.id);
+    if (!nestUser) {
+      nestUser = await this.userService.createFamily(familyMember.id);
+    }
+    return { ...familyMember, isBuilder: nestUser.isBuilder };
+  }
+
   @Get(`/members/:flaskUserId`)
   @ApiOperation({ description: 'Get a family member' })
-  async getFlaskSw(
+  async getFlaskVirtualFamily(
     @Req() req: Request,
     @Param('flaskUserId', ParseIntPipe) flaskUserId: number,
   ) {
@@ -74,7 +95,7 @@ export class FamilyController {
     }
     const flaskUser = await this.userService.getFlaskUser(flaskUserId);
     const nestUser = await this.userService.getFamilyByFlaskId(flaskUserId);
-    
+
     return { ...flaskUser, isBuilder: nestUser.isBuilder };
   }
 
@@ -168,14 +189,15 @@ export class FamilyController {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
         throw new ForbiddenException('You Are not authorized');
       }
-    }
-    if (panelFlaskUserId) {
+    } else if (panelFlaskUserId) {
       if (
         !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
         panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
       ) {
         throw new ForbiddenException('You Are not the Super admin');
       }
+    } else {
+      throw new ForbiddenException('We need the user ID!');
     }
     const ecoCompletePayQuartile = config().dataCache.theQuartile();
     const ecoCompletePayAsRole = config().dataCache.fetchFamilyAll();
@@ -232,27 +254,27 @@ export class FamilyController {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
         throw new ForbiddenException('You Are not authorized');
       }
-    }
-    if (panelFlaskUserId) {
+    } else if (panelFlaskUserId) {
       if (
         !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
         panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
       ) {
         throw new ForbiddenException('You Are not the Super admin');
       }
+    } else {
+      throw new ForbiddenException('We need the user ID!');
     }
-    const flaskUserId = req.headers['dappFlaskUserId'];
     const need = await this.needService.getNeedById(needId);
     // get verified payment for user
     if (!need) {
       throw new ObjectNotFound('Could not fetch need!');
     }
     // get verified payment for user
-    if (!need.verifiedPayments.find((p) => p.flaskUserId === flaskUserId)) {
+    if (!need.verifiedPayments.find((p) => p.flaskUserId === dappFlaskUserId)) {
       throw new ObjectNotFound('This is not your need!');
     }
     const userPay = need.verifiedPayments.find(
-      (p) => p.flaskUserId === flaskUserId && p.needAmount > 0,
+      (p) => p.flaskUserId === dappFlaskUserId && p.needAmount > 0,
     );
 
     let payAmountQGrant: number;
@@ -651,6 +673,8 @@ export class FamilyController {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
         throw new ForbiddenException('You Are not authorized');
       }
+    } else {
+      throw new ForbiddenException('We need the user ID!');
     }
     let nestFamilyMember = await this.userService.getFamilyByFlaskId(
       dappFlaskUserId,
@@ -672,6 +696,8 @@ export class FamilyController {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
         throw new ForbiddenException('You Are not authorized');
       }
+    } else {
+      throw new ForbiddenException('We need the user ID!');
     }
     let nestFamilyMember = await this.userService.getFamilyByFlaskId(
       dappFlaskUserId,
@@ -692,6 +718,8 @@ export class FamilyController {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
         throw new ForbiddenException('You Are not authorized');
       }
+    } else {
+      throw new ForbiddenException('We need the user ID!');
     }
     let nestFamilyMember = await this.userService.getFamilyByFlaskId(
       dappFlaskUserId,

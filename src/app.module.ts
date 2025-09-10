@@ -40,7 +40,6 @@ import { FamilyModule } from './features/family/family.module';
 import { MidjourneyModule } from './features/midjourney/midjourney.module';
 import { CommentModule } from './features/comment/comment.module';
 import { MineModule } from './features/mine/mine.module';
-import { ContributionModule } from './features/contribution/contribution.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { postgresDataSourceOptions } from './db/data-source';
 import { CampaignModule } from './features/campaign/campaign.module';
@@ -106,7 +105,6 @@ const imports = [
   MidjourneyModule,
   CommentModule,
   MineModule,
-  ContributionModule,
   CampaignModule,
   CrawlerModule,
   CheckPointModule,

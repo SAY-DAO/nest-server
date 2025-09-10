@@ -1,53 +1,53 @@
-// src/checkpoint/checkpoint-type.enum.ts
-export enum CheckPointType {
-  // Engineering / Releases
-  FEATURE = 'feature',
-  BUG_FIX = 'bug-fix',
-  HOTFIX = 'hotfix',
-  DEPLOY = 'deploy',
-  ROLLBACK = 'rollback',
-  DB_MIGRATION = 'db-migration',
-  CODE_REVIEW = 'code-review',
-  PERFORMANCE = 'performance',
+export const CheckPointType = {
+  FEATURE: 'feature',
+  BUG_FIX: 'bug-fix',
+  HOTFIX: 'hotfix',
+  DEPLOY: 'deploy',
+  ROLLBACK: 'rollback',
+  DB_MIGRATION: 'db-migration',
+  CODE_REVIEW: 'code-review',
+  PERFORMANCE: 'performance',
 
-  // Product / Research
-  ROADMAP = 'roadmap',
-  PRODUCT_SPEC = 'product-spec',
-  USER_RESEARCH = 'user-research',
-  QA_APPROVAL = 'qa-approval',
+  ROADMAP: 'roadmap',
+  PRODUCT_SPEC: 'spec',
+  USER_RESEARCH: 'research',
+  TESTING: 'testing',
 
-  // Design / Creative
-  DESIGN = 'design',
-  UX = 'ux',
-  BRANDING = 'branding',
-  ASSET_PRODUCTION = 'asset-production', // images/video/illustrations
+  DESIGN: 'design',
+  UX: 'ux',
+  BRANDING: 'brand',
+  ASSET_PRODUCTION: 'assets',
 
-  // Content / Marketing
-  CONTENT = 'content-creation',
-  COPYWRITING = 'copywriting',
-  SEO = 'seo',
-  SOCIAL = 'social',
-  EMAIL = 'email-campaign',
-  PAID_ADS = 'paid-ads',
-  MARKETING_CAMPAIGN = 'marketing-campaign',
-  GROWTH_EXPERIMENT = 'growth-experiment',
+  CONTENT: 'content',
+  COPYWRITING: 'copy',
+  SEO: 'seo',
+  SOCIAL: 'social',
+  EMAIL: 'email',
+  PAID_ADS: 'ads',
+  MARKETING_CAMPAIGN: 'campaign',
+  GROWTH_EXPERIMENT: 'experiment',
 
-  // Customer / Sales / Support
-  CUSTOMER_SUPPORT = 'customer-support',
-  ONBOARDING = 'onboarding',
-  SALES = 'sales',
-  BIZDEV = 'bizdev',
-  INCIDENT = 'incident', // outages / incident work
+  CUSTOMER_SUPPORT: 'support',
+  ONBOARDING: 'onboarding',
+  SALES_OUTREACH: 'sales',
+  PARTNERSHIPS: 'partners',
+  INCIDENT_RESPONSE: 'incident',
 
-  // Ops / Infra / Security / Legal / Finance / HR
-  MONITORING = 'monitoring',
-  BACKUP = 'backup',
-  SECURITY = 'security',
-  CONFIG_CHANGE = 'config-change',
-  AUTOMATION = 'automation',
-  LEGAL = 'legal',
-  FINANCE = 'finance',
-  HR = 'hr',
-  MEETING = 'meeting',
-  TRAINING = 'training',
-}
+  MONITORING: 'monitor',
+  BACKUP: 'backup',
+  SECURITY: 'security',
+  CONFIG_CHANGE: 'config',
+  AUTOMATION: 'automation',
+
+  LEGAL: 'legal',
+  FINANCE: 'finance',
+  HR: 'hr',
+  MEETING: 'meeting',
+  TRAINING: 'training',
+
+  CHILD_JOINED: 'joined',
+  SEASONAL_REPORT: 'report',
+} as const;
+
+export type CheckPointType =
+  (typeof CheckPointType)[keyof typeof CheckPointType];

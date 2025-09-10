@@ -1,7 +1,8 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
+  ForbiddenException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,6 +10,11 @@ import { CreateCheckPointDto } from './dto/create-checkpoint.dto';
 import { CheckPointEntity } from '../../entities/checkpoint.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { GetCheckpointsDto } from './dto/get-checkpoints.dto';
+import {
+  Paginated,
+  PaginateQuery,
+  paginate as nestPaginate,
+} from 'nestjs-paginate';
 
 @Injectable()
 export class CheckPointService {
@@ -37,7 +43,7 @@ export class CheckPointService {
         .andWhere('cp.isConfirmed = false')
         .getCount();
       if (unconfirmedCount >= this.MAX_UNCONFIRMED) {
-        throw new BadRequestException(
+        throw new ForbiddenException(
           `You can have up to ${this.MAX_UNCONFIRMED} unconfirmed checkpoints. Wait for approval before posting new ones.`,
         );
       }
@@ -82,62 +88,55 @@ export class CheckPointService {
     return cp;
   }
 
-  async findAll(query: GetCheckpointsDto) {
-    const page = query.page ?? 1;
-    const pageSize = query.pageSize ?? 10;
-    const skip = (page - 1) * pageSize;
-    const take = pageSize;
+  async findAll(query: PaginateQuery): Promise<Paginated<CheckPointEntity>> {
+    try {
+      const qb = this.checkPointRepository
+        .createQueryBuilder('cp')
+        .leftJoinAndSelect('cp.user', 'user');
 
-    const sort = query.sort ?? 'createdAt:desc';
-    const [sortField, sortDir] = sort.split(':');
-    const orderDirection =
-      sortDir && sortDir.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+      // 🔹 Searching
+      if (query.search) {
+        const searchTerm = `%${query.search}%`;
+        qb.andWhere(
+          '(cp.title ILIKE :search OR cp.description ILIKE :search)',
+          { search: searchTerm },
+        );
+      }
 
-    const qb = this.checkPointRepository
-      .createQueryBuilder('cp')
-      .leftJoinAndSelect('cp.user', 'user');
+      // 🔹 Filtering
+      if (query.filter?.type) {
+        qb.andWhere('cp.type = :type', { type: query.filter.type });
+      }
 
-    if (query.q) {
-      const q = `%${query.q}%`;
-      // Postgres ILIKE for case-insensitive search; if you're not using Postgres adjust accordingly.
-      qb.andWhere('(cp.title ILIKE :q OR cp.description ILIKE :q)', { q });
-    }
+      if (typeof query.filter?.isConfirmed === 'boolean') {
+        qb.andWhere('cp.isConfirmed = :isConfirmed', {
+          isConfirmed: query.filter.isConfirmed,
+        });
+      }
 
-    if (query.type) {
-      qb.andWhere('cp.type = :type', { type: query.type });
-    }
-
-    if (typeof query.isConfirmed === 'boolean') {
-      qb.andWhere('cp.isConfirmed = :isConfirmed', {
-        isConfirmed: query.isConfirmed,
+      // 🔹 Return paginated results
+      return await nestPaginate<CheckPointEntity>(query, qb, {
+        sortableColumns: ['createdAt', 'confirmedAt', 'title'],
+        defaultSortBy: [['createdAt', 'DESC']],
+        nullSort: 'last',
+        searchableColumns: ['title', 'description'],
+        select: [
+          'cp.id',
+          'cp.title',
+          'cp.description',
+          'cp.type',
+          'cp.createdAt',
+          'cp.confirmedAt',
+          'cp.isConfirmed',
+          'user.id',
+          'user.name',
+          'user.username',
+          'user.email',
+        ],
       });
+    } catch (err) {
+      throw new InternalServerErrorException('Failed to fetch checkpoints');
     }
-
-    // protect against SQL injection by allowing only a small set of sortable fields
-    const allowedSortFields = new Set(['createdAt', 'confirmedAt', 'title']);
-    const orderField = allowedSortFields.has(sortField)
-      ? `cp.${sortField}`
-      : 'cp.createdAt';
-
-    qb.orderBy(orderField, orderDirection as 'ASC' | 'DESC');
-    qb.skip(skip).take(take);
-
-    const [items, total] = await qb.getManyAndCount();
-
-    // map to include simple userName convenience field
-    const mapped = items.map((it) => {
-      const user = it.user as any;
-      const userName = user
-        ? user.name || user.username || user.email || user.id
-        : undefined;
-      return {
-        ...it,
-        userName,
-        userId: it.userId ?? (user ? user.id : undefined),
-      };
-    });
-
-    return { items: mapped, total };
   }
 
   /**

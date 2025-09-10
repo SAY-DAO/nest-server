@@ -23,11 +23,12 @@ import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 import { UserService } from '../user/user.service';
 import { ServerError } from 'src/filters/server-exception.filter';
 import { GetCheckpointsDto } from './dto/get-checkpoints.dto';
+import { PaginateQuery } from 'nestjs-paginate';
 
 @ApiTags('Checkpoint')
 @ApiSecurity('flask-access-token')
 @ApiHeader({
-  name: 'flaskdappid',
+  name: 'flaskId',
   description: 'to use cache and flask authentication',
   required: true,
 })
@@ -53,85 +54,123 @@ export class CheckPointController {
       if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
         throw new ForbiddenException('You Are not authorized');
       }
+    } else {
+      throw new ForbiddenException('We need the user ID!');
     }
     const user = await this.userService.getFamilyByFlaskId(dappFlaskUserId);
     if (!user) throw new NotFoundException(`User not found`);
-    try {
-      return await this.cpService.createForUser(user, dto);
-    } catch (e) {
-      throw new ServerError({ ...e });
-    }
+    return await this.cpService.createForUser(user, dto);
   }
 
-  // list: supports filtering by type and confirmation status
-  @Get('user/:userId')
-  @ApiOperation({
-    description: 'List checkpoints for a user (filter by type, confirmation)',
-  })
-  async listForUser(
-    @Req() req: Request,
-    @Query('type') type: CheckPointType,
-    @Query('onlyConfirmed') onlyConfirmed?: string, // 'true' | 'false' | undefined
-    @Query('limit') limit = '50',
-    @Query('offset') offset = '0',
-  ): Promise<CheckPointEntity[]> {
+  // // list: supports filtering by type and confirmation status
+  // @Get('user/:userId')
+  // @ApiOperation({
+  //   description: 'List checkpoints for a user (filter by type, confirmation)',
+  // })
+  // async listForUser(
+  //   @Req() req: Request,
+  //   @Query('type') type: CheckPointType,
+  //   @Query('onlyConfirmed') onlyConfirmed?: string, // 'true' | 'false' | undefined
+  //   @Query('limit') limit = '50',
+  //   @Query('offset') offset = '0',
+  // ): Promise<CheckPointEntity[]> {
+  //   const dappFlaskUserId = req.headers['dappFlaskUserId'];
+  //   if (dappFlaskUserId) {
+  //     if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
+  //       throw new ForbiddenException('You Are not authorized');
+  //     }
+  //   }
+  //   const user = await this.userService.getFamilyByFlaskId(dappFlaskUserId);
+  //   const onlyConfirmedBool =
+  //     onlyConfirmed === 'true'
+  //       ? true
+  //       : onlyConfirmed === 'false'
+  //       ? false
+  //       : undefined;
+  //   return this.cpService.findByUser(
+  //     user.id,
+  //     type,
+  //     onlyConfirmedBool,
+  //     Number(limit),
+  //     Number(offset),
+  //   );
+  // }
+
+  @Get('')
+  @ApiOperation({ description: 'Get paginated checkpoints' })
+  async getAll(@Req() req: Request, @Query() query: PaginateQuery) {
     const dappFlaskUserId = req.headers['dappFlaskUserId'];
-    if (dappFlaskUserId) {
-      if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-        throw new ForbiddenException('You Are not authorized');
-      }
-    }
-    const user = await this.userService.getFamilyByFlaskId(dappFlaskUserId);
-    const onlyConfirmedBool =
-      onlyConfirmed === 'true'
-        ? true
-        : onlyConfirmed === 'false'
-        ? false
-        : undefined;
-    return this.cpService.findByUser(
-      user.id,
-      type,
-      onlyConfirmedBool,
-      Number(limit),
-      Number(offset),
-    );
-  }
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
 
-  // admin: confirm checkpoint
-  // protect with an AuthGuard + role check in real app (example left open)
-  @Patch(':id/confirm')
-  @ApiOperation({
-    description: 'Confirm (approve) a checkpoint (admin action)',
-  })
-  async confirm(
-    @Param('id', ParseIntPipe) id: string,
-  ): Promise<CheckPointEntity> {
-    return this.cpService.confirmCheckpoint(id);
+    // 🔹 Authentication checks
+    if (panelFlaskUserId) {
+      if (
+        !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+        panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+      ) {
+        throw new ForbiddenException('You are not the Super admin');
+      }
+    } else {
+      throw new ForbiddenException('We need the user ID!');
+    }
+    // 🔹 Directly use the paginate query
+    return this.cpService.findAll(query);
   }
 
   @Get(':id')
   async getOne(
+    @Req() req: Request,
     @Param('id', ParseIntPipe) id: string,
   ): Promise<CheckPointEntity> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
+
     return this.cpService.findOne(id);
   }
 
-  @Get('')
-  async getAll(@Req() req: Request, @Query() query: GetCheckpointsDto) {
-    const dappFlaskUserId = req.headers['dappFlaskUserId'];
-    if (dappFlaskUserId) {
-      if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-        throw new ForbiddenException('You Are not authorized');
-      }
+  // admin: confirm checkpoint
+  // protect with an AuthGuard + role check in real app (example left open)
+  @Patch(':id')
+  @ApiOperation({
+    description: 'Confirm (approve) a checkpoint (admin action)',
+  })
+  async confirm(
+    @Req() req: Request,
+    @Param('id') id: string,
+  ): Promise<CheckPointEntity> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
     }
-    const user = await this.userService.getFamilyByFlaskId(dappFlaskUserId);
-    return this.cpService.findAll(query);
+
+    return this.cpService.confirmCheckpoint(id);
   }
 
   @Delete(':id')
   async remove(
-    @Param('id', ParseIntPipe) id: string,
+    @Req() req: Request,
+    @Param('id') id: string,
   ): Promise<{ ok: boolean }> {
+    const panelFlaskUserId = req.headers['panelFlaskUserId'];
+    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
+    if (
+      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
+      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('You Are not the Super admin');
+    }
     await this.cpService.remove(id);
     return { ok: true };
   }

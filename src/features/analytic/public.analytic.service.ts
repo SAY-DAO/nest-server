@@ -25,6 +25,7 @@ import {
 import { SeasonComparisonResponseDto } from './dto/season-comparison-response.dto';
 import { productCategories, serviceCategories } from 'src/utils/catagories';
 import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
+import { CheckPointEntity } from 'src/entities/checkpoint.entity';
 
 // Helper: month labels
 const MONTH_LABELS = [
@@ -68,6 +69,8 @@ export class AnalyticPublicService {
     private flaskPaymentRepository: Repository<Payment>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
+    @InjectRepository(CheckPointEntity)
+    private checkPointRepository: Repository<CheckPointEntity>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -739,9 +742,39 @@ export class AnalyticPublicService {
 
     return qb.getMany();
   }
+  /**
+   * Return the most recent 20 checkpoints ordered by checkpoint time (descending).
+   * No filters, no pagination metadata — just an array of CheckPointEntity.
+   */
+  async findLatest20(): Promise<CheckPointEntity[]> {
+    try {
+      const qb = this.checkPointRepository
+        .createQueryBuilder('cp')
+        .leftJoinAndSelect('cp.user', 'user')
+        // .select([
+        //   'cp.id',
+        //   'cp.title',
+        //   'cp.description',
+        //   'cp.type',
+        //   'cp.checkPointDate', // adjust column name if different
+        //   'cp.createdAt',
+        //   'cp.confirmedAt',
+        //   'cp.isConfirmed',
+        //   'user.id',
+        //   'user.name',
+        //   'user.username',
+        //   'user.email',
+        // ])
+        // order by checkpoint time primary, fallback to createdAt for tie-breaker
+        .orderBy('cp.checkPointDate', 'DESC')
+        .addOrderBy('cp.createdAt', 'DESC')
+        .take(20); // LIMIT 20
 
-  async getLogs(limit = 50): Promise<any[]> {
-    // Optional: implement reading from a logs table if you have it.
-    return [];
+      const items = await qb.getMany();
+      return items;
+    } catch (err) {
+      // optional: log(err)
+      throw new InternalServerErrorException('Failed to fetch checkpoints');
+    }
   }
 }

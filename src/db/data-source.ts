@@ -25,7 +25,6 @@ import { EthereumAccountEntity } from '../entities/ethereum.account.entity';
 import config from '../config';
 import { AllUserEntity } from '../entities/user.entity';
 import { ChildrenPreRegisterEntity } from '../entities/childrenPreRegister.entity';
-import { ContributionEntity } from '../entities/contribution.entity';
 import { CampaignEntity } from '../entities/campaign.entity';
 import { UrlEntity } from '../entities/url.entity';
 import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
@@ -61,7 +60,6 @@ export const postgresDataSourceOptions: DataSourceOptions = {
     MidjourneyEntity,
     CommentEntity,
     ChildrenPreRegisterEntity,
-    ContributionEntity,
     UrlEntity,
     NgoPreRegisterEntity,
     CheckPointEntity,

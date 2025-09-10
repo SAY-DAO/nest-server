@@ -14,12 +14,13 @@ export const CheckPointCategory: Record<string, CheckPointType[]> = {
     CheckPointType.AUTOMATION,
     CheckPointType.BACKUP,
     CheckPointType.SECURITY,
+    CheckPointType.CONFIG_CHANGE,
   ],
   Product: [
     CheckPointType.ROADMAP,
     CheckPointType.PRODUCT_SPEC,
     CheckPointType.USER_RESEARCH,
-    CheckPointType.QA_APPROVAL,
+    CheckPointType.TESTING,
   ],
   Design: [
     CheckPointType.DESIGN,
@@ -40,9 +41,9 @@ export const CheckPointCategory: Record<string, CheckPointType[]> = {
   Customer: [
     CheckPointType.CUSTOMER_SUPPORT,
     CheckPointType.ONBOARDING,
-    CheckPointType.SALES,
-    CheckPointType.BIZDEV,
-    CheckPointType.INCIDENT,
+    CheckPointType.SALES_OUTREACH,
+    CheckPointType.PARTNERSHIPS,
+    CheckPointType.INCIDENT_RESPONSE,
   ],
   Business: [
     CheckPointType.LEGAL,
@@ -51,4 +52,5 @@ export const CheckPointCategory: Record<string, CheckPointType[]> = {
     CheckPointType.MEETING,
     CheckPointType.TRAINING,
   ],
+  Internal: [CheckPointType.CHILD_JOINED, CheckPointType.SEASONAL_REPORT],
 };

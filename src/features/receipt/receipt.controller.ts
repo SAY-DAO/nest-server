@@ -19,7 +19,7 @@ import { FlaskUserTypesEnum } from '../../types/interfaces/interface';
 })
 @Controller('receipt')
 export class ReceiptController {
-  constructor(private receiptService: ReceiptService) { }
+  constructor(private receiptService: ReceiptService) {}
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs from flask' })
@@ -37,11 +37,12 @@ export class ReceiptController {
       if (!isAuthenticated(panelFlaskUserId, panelFlaskTypeId)) {
         throw new ForbiddenException('You Are not authorized');
       }
-    }
-    if (dappFlaskUserId) {
+    } else if (dappFlaskUserId) {
       if (isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
         throw new ForbiddenException('You Are not authorized');
       }
+    } else {
+      throw new ForbiddenException('We need the user ID!');
     }
 
     const accessToken = req.headers['authorization'];

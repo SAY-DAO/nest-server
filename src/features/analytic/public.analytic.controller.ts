@@ -81,4 +81,16 @@ export class AnalyticPublicController {
       2,
     );
   }
+
+  @Get('checkpoints')
+  @ApiOperation({
+    description: 'Get latest 20 checkpoints (by checkpoint date)',
+  })
+  async getAll() {
+    try {
+      return this.analyticPublicService.findLatest20();
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }

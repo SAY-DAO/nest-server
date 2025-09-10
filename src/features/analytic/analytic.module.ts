@@ -35,6 +35,7 @@ import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
 import { AnalyticPublicController } from './public.analytic.controller';
 import { AnalyticPublicService } from './public.analytic.service';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CheckPointEntity } from 'src/entities/checkpoint.entity';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { CacheModule } from '@nestjs/cache-manager';
       NgoEntity,
       NgoArrivalEntity,
       NgoPreRegisterEntity,
+      CheckPointEntity,
     ]),
     CacheModule.register({
       ttl: Number(process.env.REPORTS_CACHE_TTL ?? 10), // seconds
@@ -98,6 +100,10 @@ export class AnalyticModule implements NestModule {
         { path: 'analytic/public/logs', method: RequestMethod.GET },
         {
           path: 'analytic/public/needs-frequency-clustered',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'analytic/public/checkpoints',
           method: RequestMethod.GET,
         },
       )

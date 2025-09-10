@@ -3,9 +3,7 @@ import config from '../config';
 import { ServerError } from '../filters/server-exception.filter';
 import { SocialWorkerAPIApi, UserAPIApi } from '../generated-sources/openapi';
 import { convertFlaskToSayRoles, timeDifference } from './helpers';
-import {
-  FlaskUserTypesEnum,
-} from '../types/interfaces/interface';
+import { FlaskUserTypesEnum } from '../types/interfaces/interface';
 
 export async function updateFlaskCacheAuthentication(req, logger: Logger) {
   logger.warn('Passing through MiddleWare...');
@@ -14,18 +12,17 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
   const requestDappFlaskId = Number(req.headers['flaskdappid']);
   const requestPanelFlaskId = Number(req.headers['flaskid']);
 
-
   if (!accessToken || (!requestPanelFlaskId && !requestDappFlaskId)) {
     throw new ForbiddenException('Access Token and the ID is required!');
   }
-
 
   try {
     // for Dapp
     if (requestDappFlaskId) {
       // If in Cache
       logger.log('fetching dapp cache token...');
-      let fetched = config().dataCache.fetchDappAuthentication(requestDappFlaskId);
+      let fetched =
+        config().dataCache.fetchDappAuthentication(requestDappFlaskId);
       if (fetched) {
         logger.log('fetched dapp cache token...');
         if (
@@ -36,7 +33,8 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
           config().dataCache.expireDappAccessToken(requestDappFlaskId);
           req.headers['dappFlaskUserId'] = '';
           req.headers['flaskId'] = '';
-          fetched = config().dataCache.fetchDappAuthentication(requestDappFlaskId);
+          fetched =
+            config().dataCache.fetchDappAuthentication(requestDappFlaskId);
         } else {
           logger.log('Got the cache token!...');
           req.headers['dappFlaskUserId'] = requestDappFlaskId;
@@ -54,6 +52,7 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
           accessToken,
           'me',
         );
+
         if (!familyMember) {
           throw new ForbiddenException('You Do not have Access!');
         } else {
@@ -73,7 +72,8 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
     // for panel
     else if (requestPanelFlaskId) {
       logger.log('fetching panel cache token...');
-      let fetched = config().dataCache.fetchPanelAuthentication(requestPanelFlaskId);
+      let fetched =
+        config().dataCache.fetchPanelAuthentication(requestPanelFlaskId);
       if (fetched) {
         if (
           timeDifference(fetched.createdAt, new Date()).mm > 1 ||
@@ -84,7 +84,8 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
           req.headers['panelFlaskTypeId'] = '';
           req.headers['panelFlaskUserId'] = '';
           req.headers['flaskId'] = '';
-          fetched = config().dataCache.fetchPanelAuthentication(requestPanelFlaskId);
+          fetched =
+            config().dataCache.fetchPanelAuthentication(requestPanelFlaskId);
         } else {
           logger.log('Got the cache token!...');
           req.headers['panelFlaskUserId'] = requestPanelFlaskId;
@@ -94,19 +95,17 @@ export async function updateFlaskCacheAuthentication(req, logger: Logger) {
       }
 
       if (!fetched || fetched.isExpired) {
-
         logger.warn(
           'No token at cache, Authenticating from Social worker Flask Api...',
         );
         const flaskApi = new SocialWorkerAPIApi();
-        let socialWorker
+        let socialWorker;
         try {
           socialWorker = await flaskApi.apiV2SocialworkersIdGet(
             accessToken,
             Number(requestPanelFlaskId),
           );
-        } catch (e) {
-        }
+        } catch (e) {}
 
         if (!socialWorker) {
           throw new ForbiddenException('You Do not have Access!');
@@ -142,9 +141,6 @@ export function isAuthenticated(
   userType: FlaskUserTypesEnum,
 ): boolean {
   console.log('checking authentication...');
-  console.log(flaskUserId);
-  console.log(userType);
-
   if (userType === FlaskUserTypesEnum.FAMILY) {
     const dappAuthentication =
       config().dataCache.fetchDappAuthentication(flaskUserId);

@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { FamilyService } from './family.service';
 import { FamilyController } from './family.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -66,6 +71,9 @@ import { NeedReceipt } from '../../entities/flaskEntities/needReceipt.entity';
 })
 export class FamilyModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(FamilyMiddleware).forRoutes('family');
+    consumer
+      .apply(FamilyMiddleware)
+      .exclude({ path: 'family/members/me', method: RequestMethod.GET })
+      .forRoutes('family');
   }
 }

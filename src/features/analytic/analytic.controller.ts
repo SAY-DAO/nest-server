@@ -39,7 +39,6 @@ export class AnalyticController {
   async getChildrenEcosystemAnalytic(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    console.log(req.headers);
 
     if (
       !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||

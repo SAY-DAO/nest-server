@@ -4,6 +4,8 @@ import {
   IsString,
   MaxLength,
   IsEnum,
+  IsUrl,
+  IsDateString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
@@ -14,6 +16,12 @@ export class CreateCheckPointDto {
   @IsNotEmpty()
   @MaxLength(200)
   title: string;
+
+  @ApiProperty({ example: 'https://saydao.org/...', maxLength: 500 })
+  @IsUrl()
+  @IsOptional()
+  @MaxLength(500)
+  url?: string;
 
   @ApiProperty({
     example: 'The feature is finished',
@@ -31,4 +39,8 @@ export class CreateCheckPointDto {
   @IsOptional()
   @IsEnum(CheckPointType)
   type: CheckPointType;
+
+  @IsDateString()
+  @IsNotEmpty()
+  checkPointDate: string;
 }

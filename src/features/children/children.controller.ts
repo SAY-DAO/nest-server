@@ -81,8 +81,8 @@ export class ChildrenController {
     private locationService: LocationService,
     private downloadService: DownloadService,
     private campaignService: CampaignService,
-  ) { }
- 
+  ) {}
+
   @Get(`preregister/:childFlaskId`)
   @ApiOperation({ description: 'Get child preregister' })
   async getChildPreregister(
@@ -337,14 +337,18 @@ export class ChildrenController {
         throw new BadRequestException('Can not have similar names!');
       }
 
-      const originalAwakeGirl = `../../Docs/children/girls/${files.awakeFile[0].filename.split('-s-')[0]
-        }.png`;
-      const originalAwakeBoy = `../../Docs/children/boys/${files.awakeFile[0].filename.split('-s-')[0]
-        }.png`;
-      const originalSleptGirl = `../../Docs/children/girls/${files.sleptFile[0].filename.split('-s-')[0]
-        }.png`;
-      const originalSleptBoy = `../../Docs/children/boys/${files.sleptFile[0].filename.split('-s-')[0]
-        }.png`;
+      const originalAwakeGirl = `../../Docs/children/girls/${
+        files.awakeFile[0].filename.split('-s-')[0]
+      }.png`;
+      const originalAwakeBoy = `../../Docs/children/boys/${
+        files.awakeFile[0].filename.split('-s-')[0]
+      }.png`;
+      const originalSleptGirl = `../../Docs/children/girls/${
+        files.sleptFile[0].filename.split('-s-')[0]
+      }.png`;
+      const originalSleptBoy = `../../Docs/children/boys/${
+        files.sleptFile[0].filename.split('-s-')[0]
+      }.png`;
 
       const newAwakeName = `awake-${body.sayNameEn.toLowerCase()}.png`;
       const newSleepName = `sleep-${body.sayNameEn.toLowerCase()}.png`;
@@ -354,9 +358,11 @@ export class ChildrenController {
           checkIfDirectoryExists(originalAwakeGirl) ||
           checkIfDirectoryExists(originalAwakeBoy)
         ) {
-          const newChildFolder = `../../Docs/children${Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
-            }organized/${capitalizeFirstLetter(body.sayNameEn)}_${preRegister.id
-            }`;
+          const newChildFolder = `../../Docs/children${
+            Number(body.sex) === SexEnum.MALE ? '/boys/' : '/girls/'
+          }organized/${capitalizeFirstLetter(body.sayNameEn)}_${
+            preRegister.id
+          }`;
 
           if (!checkIfDirectoryExists(newChildFolder)) {
             console.log('Creating the child organized folder ...');
@@ -383,7 +389,6 @@ export class ChildrenController {
     }
   }
 
-
   @ApiOperation({ description: 'update pre register' })
   @Patch(`preregister/update`)
   @UsePipes(new ValidationPipe())
@@ -394,7 +399,7 @@ export class ChildrenController {
         { name: 'sleptFile', maxCount: 1 },
         { name: 'voiceFile', maxCount: 1 },
       ],
-      avatarVoiceStorage
+      avatarVoiceStorage,
     ),
   )
   async preRegisterUpdate(
@@ -407,7 +412,6 @@ export class ChildrenController {
     },
     @Body(ValidateChildPipe) body: UpdatePreRegisterChildDto,
   ) {
-
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
     if (
@@ -424,9 +428,12 @@ export class ChildrenController {
     try {
       return await this.childrenService.preRegisterUpdate(body.id, {
         bio: { fa: body.bio, en: '' },
-        voiceUrl: files.voiceFile && files.voiceFile[0] && files.voiceFile[0].filename,
-        awakeUrl: files.awakeFile && files.awakeFile[0] && files.awakeFile[0].filename,
-        sleptUrl: files.sleptFile && files.sleptFile[0] && files.sleptFile[0].filename,
+        voiceUrl:
+          files.voiceFile && files.voiceFile[0] && files.voiceFile[0].filename,
+        awakeUrl:
+          files.awakeFile && files.awakeFile[0] && files.awakeFile[0].filename,
+        sleptUrl:
+          files.sleptFile && files.sleptFile[0] && files.sleptFile[0].filename,
         housingStatus: Number(body.housingStatus),
         educationLevel: Number(body.educationLevel),
         schoolType: Number(body.schoolType),
@@ -662,7 +669,11 @@ export class ChildrenController {
             !areNamesSimilar(pre.sayName.fa, body.firstName, 50)),
       );
 
-      if (allPreRegisters && allPreRegisters[0] && (!filtered || filtered.length === 0)) {
+      if (
+        allPreRegisters &&
+        allPreRegisters[0] &&
+        (!filtered || filtered.length === 0)
+      ) {
         throw new ServerError('Say name and child name are similar!');
       }
 
@@ -785,7 +796,6 @@ export class ChildrenController {
       throw new ServerError(e.message, e.status);
     }
   }
-
 
   @ApiOperation({ description: 'update approved pre register' })
   @Patch(`preregister/update-approved/:flaskChildId`)
@@ -931,7 +941,6 @@ export class ChildrenController {
         panelFlaskTypeId === FlaskUserTypesEnum.SUPER_ADMIN) &&
       Number(status) === PreRegisterStatusEnum.NOT_REGISTERED
     ) {
-
       return await this.childrenService.getChildrenPreRegisterAdmin(
         {
           page: page,
@@ -1061,11 +1070,9 @@ export class ChildrenController {
     const found = names.filter((n) =>
       lang === 'en'
         ? n.en.toUpperCase() === newName.toUpperCase() ||
-        (n.en && areNamesSimilar(n.en, newName, 50))
+          (n.en && areNamesSimilar(n.en, newName, 50))
         : n.fa && (n.fa === newName || areNamesSimilar(n.fa, newName, 50)),
     );
-
-
 
     return {
       found,
