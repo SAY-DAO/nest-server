@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   ForbiddenException,
   Get,
@@ -105,7 +106,7 @@ export class FamilyController {
   })
   async updateBuilderStatus(
     @Req() req: Request,
-    @Query('flaskUserId') flaskUserId: number,
+    @Param('flaskUserId') flaskUserId: number,
   ): Promise<any> {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
@@ -114,6 +115,11 @@ export class FamilyController {
       panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
     ) {
       throw new ForbiddenException('You Are not the Super admin');
+    }
+    if (flaskUserId == null || Number.isNaN(Number(flaskUserId))) {
+      throw new BadRequestException(
+        'flaskUserId is required and must be a number',
+      );
     }
     const nestFamilyMember = await this.userService.getFamilyByFlaskId(
       flaskUserId,
