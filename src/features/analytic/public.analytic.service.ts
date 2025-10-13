@@ -13,6 +13,7 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   ChildExistence,
+  NeedTypeEnum,
   PaymentStatusEnum,
 } from 'src/types/interfaces/interface';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
@@ -22,41 +23,21 @@ import {
   PaginateQuery,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
-import { SeasonComparisonResponseDto } from './dto/season-comparison-response.dto';
+import {
+  SeasonComparisonItemDto,
+  SeasonComparisonResponseDto,
+} from './dto/season-comparison-response.dto';
 import { productCategories, serviceCategories } from 'src/utils/catagories';
 import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 import { CheckPointEntity } from 'src/entities/checkpoint.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
+import { jalaliYearRangeIso, mergeByJalaliMonth } from '../../utils/jalali';
+import {
+  containsAny,
+  escapeRegExp,
+  normalizeForMatch,
+} from '../../utils/helpers';
 
-// Helper: month labels
-const MONTH_LABELS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-const MONTH_LABELS_IR = [
-  'فروردین',
-  'اردیبهشت',
-  'خرداد',
-  'تیر',
-  'مرداد',
-  'شهریور',
-  'مهر',
-  'آبان',
-  'آذر',
-  'دی',
-  'بهمن',
-  'اسفند',
-];
 @Injectable()
 export class AnalyticPublicService {
   private readonly logger = new Logger(AnalyticPublicService.name);
@@ -92,16 +73,16 @@ export class AnalyticPublicService {
         );
       }
     }
-
     try {
       const totalUsersPromise = this.flaskUserRepository
         .createQueryBuilder('user')
-        .where('user.is_phonenumber_verified = :is_phonenumber_verified', {
-          is_phonenumber_verified: true,
-        })
-        .orWhere('user.is_email_verified = :is_email_verified', {
-          is_email_verified: true,
-        })
+        .where(
+          new Brackets((qb) => {
+            qb.where('user.is_email_verified = TRUE').orWhere(
+              'user.is_phonenumber_verified = TRUE',
+            );
+          }),
+        )
         .andWhere('user.isDeleted = :isDeleted', { isDeleted: false })
         .andWhere('user.firstName != :firstName', { firstName: 'SAY' })
         .getCount();
@@ -111,16 +92,24 @@ export class AnalyticPublicService {
         .select('COUNT(need.id)', 'count')
         .where('need.isDeleted = :isDeleted', { isDeleted: false })
         .andWhere('need.confirmDate IS NOT NULL')
-        .andWhere('need.status <= :status', {
+        .andWhere('need.status < :status', {
           status: PaymentStatusEnum.COMPLETE_PAY,
         })
         .getCount();
 
       const totalPaymentsPromise = this.flaskPaymentRepository
         .createQueryBuilder('payment')
+        .leftJoinAndMapOne(
+          'payment.need',
+          Need,
+          'need',
+          'need.id = payment.id_need',
+        )
         .select('COALESCE(SUM(payment.need_amount), 0)', 'total')
         .where('payment.verified IS NOT NULL')
-        .andWhere('payment.need_amount > :amount', { amount: 0 }) // only positive amounts
+        // .andWhere('payment.desc != :desc', { desc: 'Refund payment' }) // This does not work since refund is negative we can check for amount > 0
+        .andWhere('payment.need_amount > :amount', { amount: 0 }) // Refund are not included/deducted from total
+        .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
         .getRawOne();
 
       const totalDoneNeedsPromise = this.flaskNeedRepository
@@ -180,32 +169,50 @@ export class AnalyticPublicService {
     }
   }
 
-  async getTransactions(options: PaginateQuery): Promise<Paginated<Payment>> {
+  async getTransactions(options: PaginateQuery): Promise<Paginated<Need>> {
     try {
-      const queryBuilder = this.flaskPaymentRepository
-        .createQueryBuilder('p')
-        .leftJoinAndMapOne('p.need', Need, 'need', 'need.id = p.id_need')
+      const queryBuilder = this.flaskNeedRepository
+        .createQueryBuilder('need')
+        .leftJoinAndMapMany('need.p', Payment, 'p', ' p.id_need = need.id')
         .where('p.verified IS NOT NULL')
         .andWhere('need.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
         .select([
+          'need.id',
+          'need.type',
+          'need.title',
+          'need.name_translations',
+          'need._cost',
+          'need.purchase_cost',
+          'need.link',
+          'need.status',
+          'need.child_id',
+          'need.deliveryCode',
+          'need.img',
+          'need.imageUrl',
+          'need.purchase_date',
+          'need.doneAt',
+          'need.ngo_delivery_date',
+          'need.child_delivery_date',
+          'need.expected_delivery_date',
+          'need.confirmDate',
+          'need.created',
+          'need.updated',
+          'need.deleted_at',
+          'need.bank_track_id',
           'p.id',
           'p.id_need',
+          'p.id_user',
           'p.created',
           'p.need_amount',
           'p.donation_amount',
           'p.credit_amount',
           'p.order_id',
           'p.verified',
-          'need.title',
-          'need._cost',
-          'need.link',
-          'need.child_id',
-          'need.img',
-          'need.imageUrl',
+          'p.gateway_track_id',
         ])
-        .orderBy('p.created', 'DESC')
+        .orderBy('need.updated', 'DESC')
         .cache(true);
-      return await nestPaginate<Payment>(options, queryBuilder, {
+      return await nestPaginate<Need>(options, queryBuilder, {
         sortableColumns: ['id'],
         defaultSortBy: [['created', 'DESC']],
         nullSort: 'last',
@@ -219,10 +226,224 @@ export class AnalyticPublicService {
     }
   }
 
+  // Payment season comparison
+  public async getPaymentSeasonComparison(
+    targetJalaliYear: number,
+    prevJalaliYear: number,
+  ): Promise<SeasonComparisonItemDto[]> {
+    const currRange = jalaliYearRangeIso(targetJalaliYear);
+    const prevRange = jalaliYearRangeIso(prevJalaliYear);
+
+    const payCurrRows = await this.flaskPaymentRepository
+      .createQueryBuilder('p')
+      .leftJoinAndMapOne('p.n', Need, 'n', 'n.id = p.id_need')
+      .select('EXTRACT(MONTH FROM p.created)::int', 'month')
+      .addSelect('EXTRACT(DAY FROM p.created)::int', 'day')
+      .addSelect('SUM(COALESCE(p.need_amount,0))', 'value')
+      .where('p.created >= :start AND p.created < :end', {
+        start: currRange.startIso,
+        end: currRange.endIso,
+      })
+      .andWhere('p.verified IS NOT NULL')
+      .andWhere('n.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
+      .andWhere('p.need_amount > :amount', { amount: 0 })
+      .groupBy('month, day')
+      .getRawMany();
+
+    const payPrevRows = await this.flaskPaymentRepository
+      .createQueryBuilder('p')
+      .leftJoinAndMapOne('p.n', Need, 'n', 'n.id = p.id_need')
+      .select('EXTRACT(MONTH FROM p.created)::int', 'month')
+      .addSelect('EXTRACT(DAY FROM p.created)::int', 'day') // include day for accurate mapping
+      .addSelect('SUM(COALESCE(p.need_amount,0))', 'value')
+      .where('p.created >= :start AND p.created < :end', {
+        start: prevRange.startIso,
+        end: prevRange.endIso,
+      })
+      .andWhere('p.verified IS NOT NULL')
+      .andWhere('n.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
+      .andWhere('p.need_amount > :amount', { amount: 0 })
+      .groupBy('month, day')
+      .getRawMany();
+
+    return mergeByJalaliMonth(
+      payCurrRows,
+      payPrevRows,
+      targetJalaliYear,
+      prevJalaliYear,
+    );
+  }
+
+  // User season comparison
+  public async getUserSeasonComparison(
+    targetJalaliYear: number,
+    prevJalaliYear: number,
+  ): Promise<SeasonComparisonItemDto[]> {
+    const currRange = jalaliYearRangeIso(targetJalaliYear);
+    const prevRange = jalaliYearRangeIso(prevJalaliYear);
+
+    const userCurrRows = await this.flaskUserRepository
+      .createQueryBuilder('u')
+      .select('EXTRACT(MONTH FROM u.created)::int', 'month')
+      .addSelect('EXTRACT(DAY FROM u.created)::int', 'day')
+      .addSelect('COUNT(u.id)', 'value')
+      .where(
+        new Brackets((qb) => {
+          qb.where('u.is_email_verified = TRUE').orWhere(
+            'u.is_phonenumber_verified = TRUE',
+          );
+        }),
+      )
+      .andWhere('u.created >= :start AND u.created < :end', {
+        start: currRange.startIso,
+        end: currRange.endIso,
+      })
+      .andWhere('u.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('u.firstName != :firstName', { firstName: 'SAY' })
+      .groupBy('month, day')
+      .getRawMany();
+
+    const userPrevRows = await this.flaskUserRepository
+      .createQueryBuilder('u')
+      .select('EXTRACT(MONTH FROM u.created)::int', 'month')
+      .addSelect('EXTRACT(DAY FROM u.created)::int', 'day')
+      .addSelect('COUNT(u.id)', 'value')
+      .where(
+        new Brackets((qb) => {
+          qb.where('u.is_email_verified = TRUE').orWhere(
+            'u.is_phonenumber_verified = TRUE',
+          );
+        }),
+      )
+      .andWhere('u.created >= :start AND u.created < :end', {
+        start: prevRange.startIso,
+        end: prevRange.endIso,
+      })
+      .andWhere('u.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('u.firstName != :firstName', { firstName: 'SAY' })
+      .groupBy('month, day')
+      .getRawMany();
+
+    return mergeByJalaliMonth(
+      userCurrRows,
+      userPrevRows,
+      targetJalaliYear,
+      prevJalaliYear,
+    );
+  }
+
+  // Need season comparison
+  public async getNeedSeasonComparison(
+    targetJalaliYear: number,
+    prevJalaliYear: number,
+  ): Promise<SeasonComparisonItemDto[]> {
+    const currRange = jalaliYearRangeIso(targetJalaliYear);
+    const prevRange = jalaliYearRangeIso(prevJalaliYear);
+
+    // current Jalali year (include day for accurate mapping)
+    const needCurrRows = await this.flaskNeedRepository
+      .createQueryBuilder('n')
+      .where('n.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('n.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
+      .andWhere('n.doneAt >= :start AND n.doneAt < :end', {
+        start: currRange.startIso,
+        end: currRange.endIso,
+      })
+      .select('EXTRACT(MONTH FROM n.doneAt)::int', 'month')
+      .addSelect('EXTRACT(DAY FROM n.doneAt)::int', 'day')
+      .addSelect('COUNT(n.id)', 'value') // alias value for mergeByJalaliMonth
+      .groupBy('month, day')
+      .getRawMany();
+
+    // previous Jalali year (include day for accuracy)
+    const needPrevRows = await this.flaskNeedRepository
+      .createQueryBuilder('n')
+      .where('n.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('n.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
+      .andWhere('n.doneAt >= :start AND n.doneAt < :end', {
+        start: prevRange.startIso,
+        end: prevRange.endIso,
+      })
+      .select('EXTRACT(MONTH FROM n.doneAt)::int', 'month')
+      .addSelect('EXTRACT(DAY FROM n.doneAt)::int', 'day')
+      .addSelect('COUNT(n.id)', 'value')
+      .groupBy('month, day')
+      .getRawMany();
+
+    // merge and return
+    return mergeByJalaliMonth(
+      needCurrRows,
+      needPrevRows,
+      targetJalaliYear,
+      prevJalaliYear,
+    );
+  }
+
+  // Child season comparison
+  public async getChildSeasonComparison(
+    targetJalaliYear: number,
+    prevJalaliYear: number,
+  ): Promise<SeasonComparisonItemDto[]> {
+    const currRange = jalaliYearRangeIso(targetJalaliYear);
+    const prevRange = jalaliYearRangeIso(prevJalaliYear);
+
+    // current Jalali year (include day for accurate mapping)
+    const childCurrRows = await this.flaskChildRepository
+      .createQueryBuilder('c')
+      .where('c.isConfirmed = :isConfirmed', { isConfirmed: true })
+      // .andWhere('c.existence_status = :existence_status', {
+      //   existence_status: ChildExistence.AlivePresent,
+      // })
+      .andWhere('c.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('c.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .andWhere('c.confirmDate >= :start AND c.confirmDate < :end', {
+        start: currRange.startIso,
+        end: currRange.endIso,
+      })
+      .select('EXTRACT(MONTH FROM c.confirmDate)::int', 'month')
+      .addSelect('EXTRACT(DAY FROM c.confirmDate)::int', 'day')
+      .addSelect('COUNT(c.id)', 'value') // alias value for mergeByJalaliMonth
+      .groupBy('month, day')
+      .getRawMany();
+
+    // previous Jalali year (include day for accuracy)
+    const childPrevRows = await this.flaskChildRepository
+      .createQueryBuilder('c')
+      .where('c.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('c.existence_status = :existence_status', {
+        existence_status: ChildExistence.AlivePresent,
+      })
+      .andWhere('c.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('c.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .andWhere('c.confirmDate >= :start AND c.confirmDate < :end', {
+        start: prevRange.startIso,
+        end: prevRange.endIso,
+      })
+      .select('EXTRACT(MONTH FROM c.confirmDate)::int', 'month')
+      .addSelect('EXTRACT(DAY FROM c.confirmDate)::int', 'day')
+      .addSelect('COUNT(c.id)', 'value') // alias value for mergeByJalaliMonth
+      .groupBy('month, day')
+      .getRawMany();
+
+    // merge and return
+    return mergeByJalaliMonth(
+      childCurrRows,
+      childPrevRows,
+      targetJalaliYear,
+      prevJalaliYear,
+    );
+  }
+
   async getSeasonComparison(
     season?: string,
-    includeRates = false,
-    previousSeason?: string,
     useCache = true,
   ): Promise<SeasonComparisonResponseDto> {
     const cacheKey = 'reports:seasonComparison';
@@ -242,184 +463,36 @@ export class AnalyticPublicService {
     }
     try {
       // 1) determine target year (season)
-      let targetYear: number | null = null;
+      let targetJalaliYear: number | null = null;
       if (season && String(season).trim()) {
         const asNum = Number(season);
         if (Number.isFinite(asNum) && Number.isInteger(asNum))
-          targetYear = asNum;
-      }
-
-      if (!targetYear) {
-        const latest = await this.flaskNeedRepository
-          .createQueryBuilder('n')
-          .select('EXTRACT(YEAR FROM n.doneAt)::int', 'year')
-          .where('n.isConfirmed = :isConfirmed', { isConfirmed: true })
-          .andWhere('n.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
-          .orderBy('year', 'DESC')
-          .limit(1)
-          .getRawOne();
-        targetYear = latest?.year ?? new Date().getFullYear();
+          targetJalaliYear = asNum;
       }
 
       // 2) determine previous year
-      let prevYear: number | null = null;
-      if (previousSeason && String(previousSeason).trim()) {
-        const asNum = Number(previousSeason);
-        if (Number.isFinite(asNum) && Number.isInteger(asNum)) prevYear = asNum;
-      }
-      if (!prevYear) prevYear = targetYear - 1;
+      let prevJalaliYear: number | null = null;
+      if (!prevJalaliYear) prevJalaliYear = targetJalaliYear - 1;
 
       // 3) Query counts grouped by month for target year
-      // SELECT EXTRACT(MONTH FROM created)::int AS month, COUNT(*) as count
-      // FROM users WHERE EXTRACT(YEAR FROM created)::int = :year GROUP BY month
-      const userCurrRows = await this.flaskUserRepository
-        .createQueryBuilder('u')
-        .select('EXTRACT(MONTH FROM u.created)::int', 'month')
-        .addSelect('COUNT(u.id)', 'count')
-        .where('EXTRACT(YEAR FROM u.created)::int = :year', {
-          year: targetYear,
-        })
-        .groupBy('month')
-        .getRawMany();
 
-      const userPrevRows = await this.flaskUserRepository
-        .createQueryBuilder('u')
-        .select('EXTRACT(MONTH FROM u.created)::int', 'month')
-        .addSelect('COUNT(u.id)', 'count')
-        .where('EXTRACT(YEAR FROM u.created)::int = :year', {
-          year: prevYear,
-        })
-        .groupBy('month')
-        .getRawMany();
+      const userItems: SeasonComparisonItemDto[] =
+        await this.getUserSeasonComparison(targetJalaliYear, prevJalaliYear);
 
-      // Convert rows to month->count maps
-      const userCurrMap: Record<number, number> = {};
-      for (const r of userCurrRows) {
-        const m = Number(r.month);
-        userCurrMap[m] = Number(r.count ?? 0);
-      }
-      const userPrevMap: Record<number, number> = {};
-      for (const r of userPrevRows) {
-        const m = Number(r.month);
-        userPrevMap[m] = Number(r.count ?? 0);
-      }
+      const payItems: SeasonComparisonItemDto[] =
+        await this.getPaymentSeasonComparison(targetJalaliYear, prevJalaliYear);
 
-      // Build items for all 12 months (1..12). If you prefer only months present, we can filter.
-      const userItems = Array.from({ length: 12 }, (_, i) => {
-        const monthIndex = i + 1; // 1-based
-        const period = MONTH_LABELS_IR[i];
-        const current = userCurrMap[monthIndex] ?? 0;
-        const previous = userPrevMap[monthIndex] ?? 0;
-        const isNew = previous === 0 && current > 0;
-        const rate =
-          previous === 0 ? null : ((current - previous) / previous) * 100;
-        return includeRates
-          ? { period, current, previous, isNew, rate }
-          : { period, current, previous };
-      });
+      const needItems: SeasonComparisonItemDto[] =
+        await this.getNeedSeasonComparison(targetJalaliYear, prevJalaliYear);
 
-      const payCurrRows = await this.flaskPaymentRepository
-        .createQueryBuilder('p')
-        .select('EXTRACT(MONTH FROM p.created)::int', 'month')
-        .addSelect('COUNT(p.id)', 'count')
-        .where('EXTRACT(YEAR FROM p.created)::int = :year', {
-          year: targetYear,
-        })
-        .andWhere('p.verified IS NOT NULL')
-        .groupBy('month')
-        .getRawMany();
-
-      const payPrevRows = await this.flaskPaymentRepository
-        .createQueryBuilder('p')
-        .select('EXTRACT(MONTH FROM p.created)::int', 'month')
-        .addSelect('COUNT(p.id)', 'count')
-        .where('EXTRACT(YEAR FROM p.created)::int = :year', {
-          year: prevYear,
-        })
-        .andWhere('p.verified IS NOT NULL')
-        .groupBy('month')
-        .getRawMany();
-
-      // Convert rows to month->count maps
-      const payCurrMap: Record<number, number> = {};
-      for (const r of payCurrRows) {
-        const m = Number(r.month);
-        payCurrMap[m] = Number(r.count ?? 0);
-      }
-      const payPrevMap: Record<number, number> = {};
-      for (const r of payPrevRows) {
-        const m = Number(r.month);
-        payPrevMap[m] = Number(r.count ?? 0);
-      }
-
-      // Build items for all 12 months (1..12). If you prefer only months present, we can filter.
-      const payItems = Array.from({ length: 12 }, (_, i) => {
-        const monthIndex = i + 1; // 1-based
-        const period = MONTH_LABELS_IR[i];
-        const current = payCurrMap[monthIndex] ?? 0;
-        const previous = payPrevMap[monthIndex] ?? 0;
-        const isNew = previous === 0 && current > 0;
-        const rate =
-          previous === 0 ? null : ((current - previous) / previous) * 100;
-        return includeRates
-          ? { period, current, previous, isNew, rate }
-          : { period, current, previous };
-      });
-
-      const needCurrRows = await this.flaskNeedRepository
-        .createQueryBuilder('n')
-        .where('n.isConfirmed = :isConfirmed', { isConfirmed: true })
-        .andWhere('n.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
-        .select('EXTRACT(MONTH FROM n.doneAt)::int', 'month')
-        .addSelect('COUNT(n.id)', 'count')
-        .where('EXTRACT(YEAR FROM n.doneAt)::int = :year', {
-          year: targetYear,
-        })
-        .groupBy('month')
-        .getRawMany();
-
-      const needPrevRows = await this.flaskNeedRepository
-        .createQueryBuilder('n')
-        .where('n.isConfirmed = :isConfirmed', { isConfirmed: true })
-        .andWhere('n.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
-        .select('EXTRACT(MONTH FROM n.doneAt)::int', 'month')
-        .addSelect('COUNT(n.id)', 'count')
-        .where('EXTRACT(YEAR FROM n.doneAt)::int = :year', {
-          year: prevYear,
-        })
-        .groupBy('month')
-        .getRawMany();
-
-      // Convert rows to month->count maps
-      const needCurrMap: Record<number, number> = {};
-      for (const r of needCurrRows) {
-        const m = Number(r.month);
-        needCurrMap[m] = Number(r.count ?? 0);
-      }
-      const needPrevMap: Record<number, number> = {};
-      for (const r of needPrevRows) {
-        const m = Number(r.month);
-        needPrevMap[m] = Number(r.count ?? 0);
-      }
-
-      // Build items for all 12 months (1..12). If you prefer only months present, we can filter.
-      const needItems = Array.from({ length: 12 }, (_, i) => {
-        const monthIndex = i + 1; // 1-based
-        const period = MONTH_LABELS_IR[i];
-        const current = needCurrMap[monthIndex] ?? 0;
-        const previous = needPrevMap[monthIndex] ?? 0;
-        const isNew = previous === 0 && current > 0;
-        const rate =
-          previous === 0 ? null : ((current - previous) / previous) * 100;
-        return includeRates
-          ? { period, current, previous, isNew, rate }
-          : { period, current, previous };
-      });
+      const childItems: SeasonComparisonItemDto[] =
+        await this.getChildSeasonComparison(targetJalaliYear, prevJalaliYear);
 
       const result: SeasonComparisonResponseDto = {
-        doneNeeds: { data: needItems, season: String(targetYear) },
-        totalUsers: { data: userItems, season: String(targetYear) },
-        pays: { data: payItems, season: String(targetYear) },
+        doneNeeds: { data: needItems, season: String(targetJalaliYear) },
+        totalUsers: { data: userItems, season: String(targetJalaliYear) },
+        pays: { data: payItems, season: String(targetJalaliYear) },
+        children: { data: childItems, season: String(targetJalaliYear) },
       };
 
       if (useCache && ttlSeconds > 0) {
@@ -452,6 +525,10 @@ export class AnalyticPublicService {
           data: [],
           season: String(season ?? new Date().getFullYear()),
         },
+        children: {
+          data: [],
+          season: String(season ?? new Date().getFullYear()),
+        },
       };
     }
   }
@@ -466,8 +543,6 @@ export class AnalyticPublicService {
     }
     return false;
   }
-
-  // inside your analyticPublicService (TypeScript)
   async getNeedsFrequency(
     options?: {
       limit?: number;
@@ -483,7 +558,7 @@ export class AnalyticPublicService {
 
     if (useCache && ttlSeconds > 0) {
       try {
-        const cached = await this.cacheManager.get<SummaryDto>(cacheKey);
+        const cached = await this.cacheManager.get<any>(cacheKey);
         if (cached) return cached;
       } catch (e) {
         this.logger.warn(
@@ -522,12 +597,13 @@ export class AnalyticPublicService {
         totalCount: number;
         doneCount: number;
         membersSet: Set<string>;
+        isAssigned: boolean;
+        assignedCategoryKey: string | null;
       }
     >();
 
     const extractServiceName = (nt: any): string => {
       if (!nt) return '';
-      // try parse if stringified
       if (typeof nt === 'string') {
         try {
           nt = JSON.parse(nt);
@@ -548,23 +624,15 @@ export class AnalyticPublicService {
       return String(nt ?? '').trim();
     };
 
-    const containsAny = (text: string, keywords: string[]) => {
-      if (!text || !keywords || !keywords.length) return false;
-      const lower = String(text).toLowerCase();
-      for (const kw of keywords) {
-        if (!kw) continue;
-        if (lower.includes(String(kw).toLowerCase())) return true;
-      }
-      return false;
-    };
+    const UNASSIGNED_PRODUCT = '__UNASSIGNED_PRODUCT__';
+    const UNASSIGNED_SERVICE = '__UNASSIGNED_SERVICE__';
 
     for (const r of raw) {
       const needType = Number(r.type ?? 0);
       let searchText = '';
       let representativeName = '';
 
-      if (needType === 0) {
-        // service: build from name_translations
+      if (needType === NeedTypeEnum.SERVICE) {
         let nt = r.name_translations;
         if (typeof nt === 'string') {
           try {
@@ -574,7 +642,6 @@ export class AnalyticPublicService {
           }
         }
         if (nt && typeof nt === 'object') {
-          // join all string values
           const vals = Object.values(nt).map((v) =>
             v == null ? '' : String(v),
           );
@@ -584,18 +651,15 @@ export class AnalyticPublicService {
         }
         representativeName = extractServiceName(r.name_translations);
       } else {
-        // product: title
         searchText = String(r.title ?? '');
         representativeName = String(r.title ?? '').trim();
       }
 
       if (!searchText || !String(searchText).trim()) continue;
 
-      // choose assigned category
       let assigned: string | null = null;
 
-      // productCategories and serviceCategories should be imported/available in this service file
-      if (needType === 1) {
+      if (needType === NeedTypeEnum.PRODUCT) {
         for (const [cat, kws] of Object.entries(productCategories)) {
           if (containsAny(searchText, kws)) {
             assigned = cat;
@@ -611,19 +675,39 @@ export class AnalyticPublicService {
         }
       }
 
-      if (!assigned) continue;
+      let groupKey: string;
+      let displayName: string;
+      let isAssigned = true;
+      let assignedCategoryKey: string | null = assigned;
 
-      if (!grouped.has(assigned)) {
-        grouped.set(assigned, {
-          id: assigned,
-          name: assigned,
+      if (!assigned) {
+        isAssigned = false;
+        if (needType === NeedTypeEnum.PRODUCT) {
+          groupKey = UNASSIGNED_PRODUCT;
+          displayName = 'Unassigned (product)';
+        } else {
+          groupKey = UNASSIGNED_SERVICE;
+          displayName = 'Unassigned (service)';
+        }
+        assignedCategoryKey = null;
+      } else {
+        groupKey = String(assigned);
+        displayName = String(assigned);
+      }
+
+      if (!grouped.has(groupKey)) {
+        grouped.set(groupKey, {
+          id: groupKey,
+          name: displayName,
           totalCount: 0,
           doneCount: 0,
           membersSet: new Set<string>(),
+          isAssigned,
+          assignedCategoryKey,
         });
       }
 
-      const g = grouped.get(assigned)!;
+      const g = grouped.get(groupKey)!;
       g.totalCount += 1;
       if (r.doneAt) g.doneCount += 1;
 
@@ -640,7 +724,8 @@ export class AnalyticPublicService {
         return {
           id: g.id,
           name: g.name,
-          assignedCategory: g.name,
+          assignedCategory: g.isAssigned ? g.name : null,
+          isAssigned: g.isAssigned,
           totalCount: g.totalCount,
           doneCount: g.doneCount,
           members: membersArr,
@@ -653,7 +738,8 @@ export class AnalyticPublicService {
 
     if (useCache && ttlSeconds > 0) {
       try {
-        await this.cacheManager.set(cacheKey, out, 10);
+        // <--- Fix: pass ttl as number (third param) per your CacheManager typing
+        await this.cacheManager.set(cacheKey, out, ttlSeconds);
       } catch (e) {
         this.logger.warn(
           'Cache write failed for reports need frequency: ' +
@@ -661,91 +747,10 @@ export class AnalyticPublicService {
         );
       }
     }
+
     return out;
   }
 
-  async getLastNeedsWithAtLeastTwoPayers(
-    limit = 100,
-    minPayers = 2,
-  ): Promise<Need[]> {
-    // Build subquery: id_need that have >= minPayers distinct id_user
-    const payerSubQb = this.flaskPaymentRepository
-      .createQueryBuilder('p')
-      .where('p.id_need IS NOT NULL')
-      .andWhere('p.verified IS NOT NULL')
-      // .andWhere('p.need_amount > :amount', { amount: 0 }) // only positive amounts
-      // only count positive contributions (adjust fields if your schema differs)
-      .andWhere('p.id_user != :payflaskUseId', { payflaskUseId: 208 })
-      .andWhere(
-        new Brackets((qb) => {
-          qb.where('p.need_amount > 0')
-            .orWhere('p.donation_amount > 0')
-            .orWhere('p.credit_amount > 0');
-        }),
-      )
-      .select('p.id_need', 'id_need')
-      .groupBy('p.id_need')
-      .having('COUNT(DISTINCT p.id_user) >= :minPayers', {
-        minPayers,
-      });
-
-    // main query: fetch needs whose id exists in the subquery
-    const qb = this.flaskNeedRepository.createQueryBuilder('need');
-    qb.leftJoinAndMapMany(
-      'need.participants',
-      NeedFamily,
-      'needFamily',
-      'needFamily.id_need = need.id',
-    )
-      .leftJoinAndMapOne(
-        'need.child',
-        Child,
-        'child',
-        'child.id = need.child_id',
-      )
-      .leftJoinAndMapMany(
-        'need.payments',
-        Payment,
-        'payment',
-        'payment.id_need = need.id',
-      )
-      .where('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      .andWhere('need.status >= :statusNotPaid', {
-        statusNotPaid: PaymentStatusEnum.COMPLETE_PAY,
-      })
-      .andWhere('payment.id_need IS NOT NULL')
-      .andWhere('payment.verified IS NOT NULL')
-      // .andWhere('payment.need_amount > :amount', { amount: 0 }) // only positive amounts
-      .andWhere('payment.id_user != :pflaskUseId', { pflaskUseId: 208 })
-      .andWhere('needFamily.id_user != :flaskUseId', { flaskUseId: 208 })
-      .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', { testNgoIds: [3, 14] })
-      .andWhere(`need.id IN (${payerSubQb.getQuery()})`)
-      // pass the subquery params (minPayers)
-      .setParameters(payerSubQb.getParameters())
-      .select([
-        'need.id',
-        'need.img',
-        'need.imageUrl',
-        'need.created',
-        'need.child_delivery_date',
-        'need._cost',
-        'need.status',
-        'need.isConfirmed',
-        'need.confirmDate',
-        'need.isDeleted',
-        'need.child_id',
-        'needFamily',
-        'payment',
-      ])
-      .orderBy('need.created', 'DESC')
-      .limit(limit)
-      .cache(true);
-
-    return qb.getMany();
-  }
   /**
    * Return the most recent 20 checkpoints ordered by checkpoint time (descending).
    * No filters, no pagination metadata — just an array of CheckPointEntity.
@@ -754,22 +759,18 @@ export class AnalyticPublicService {
     try {
       const qb = this.checkPointRepository
         .createQueryBuilder('cp')
-        .leftJoinAndSelect('cp.user', 'user')
-        // .select([
-        //   'cp.id',
-        //   'cp.title',
-        //   'cp.description',
-        //   'cp.type',
-        //   'cp.checkPointDate', // adjust column name if different
-        //   'cp.createdAt',
-        //   'cp.confirmedAt',
-        //   'cp.isConfirmed',
-        //   'user.id',
-        //   'user.name',
-        //   'user.username',
-        //   'user.email',
-        // ])
-        // order by checkpoint time primary, fallback to createdAt for tie-breaker
+        .select([
+          'cp.id',
+          'cp.title',
+          'cp.description',
+          'cp.type',
+          'cp.url',
+          'cp.checkPointDate', // adjust column name if different
+          'cp.createdAt',
+          'cp.confirmedAt',
+          'cp.isConfirmed',
+        ])
+        .where('cp.isConfirmed = :isConfirmed', { isConfirmed: true })
         .orderBy('cp.checkPointDate', 'DESC')
         .addOrderBy('cp.createdAt', 'DESC')
         .take(20); // LIMIT 20

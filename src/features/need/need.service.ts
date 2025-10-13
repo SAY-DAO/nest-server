@@ -876,6 +876,7 @@ export class NeedService {
         'need.category',
         'need.isConfirmed',
         'need.created',
+        'need.details',
         'need.updated',
         'need.confirmDate',
         'need.doneAt',
@@ -1081,7 +1082,7 @@ export class NeedService {
     const queryBuilder = this.flaskNeedRepository
       .createQueryBuilder('need')
       .addSelect('similarity(need.title, :title)', 'similarity_score')
-      .where('similarity(need.title, :title) > 0.20', { title })
+      .where('similarity(need.title, :title) > 0.14', { title })
       .andWhere('need.type = :type', { type: NeedTypeEnum.PRODUCT })
       // .addSelect(`levenshtein(lower(need.title), lower(:term))`, 'distance')
       // .where(`levenshtein(lower(need.title), lower(:term)) <= :maxDistance`, {

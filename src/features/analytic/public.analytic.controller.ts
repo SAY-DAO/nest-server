@@ -72,14 +72,8 @@ export class AnalyticPublicController {
   }
 
   @Get('multi-payers')
-  async getNeedsWithMultiplePayers(
-    @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit: number,
-  ): Promise<Need[]> {
-    const safeLimit = Math.min(Math.max(limit, 1), 1000);
-    return this.analyticPublicService.getLastNeedsWithAtLeastTwoPayers(
-      safeLimit,
-      2,
-    );
+  async getNeedsWithMultiplePayers() {
+    return config().dataCache.roleScatteredData();
   }
 
   @Get('checkpoints')

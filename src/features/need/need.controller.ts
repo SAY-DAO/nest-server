@@ -72,7 +72,7 @@ export class NeedController {
     private syncService: SyncService,
     private providerService: ProviderService,
     private paymentService: PaymentService,
-  ) { }
+  ) {}
 
   @Get(`all`)
   @ApiOperation({ description: 'Get all needs from db 1' })
@@ -337,8 +337,9 @@ export class NeedController {
       timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 60;
     console.log(`Mass prepare expired: ${expired}`);
     console.log(
-      `Last prepare: ${toBeConfirmed.createdAt &&
-      timeDifference(toBeConfirmed.createdAt, new Date()).mm
+      `Last prepare: ${
+        toBeConfirmed.createdAt &&
+        timeDifference(toBeConfirmed.createdAt, new Date()).mm
       } minutes ago`,
     );
 
@@ -374,7 +375,8 @@ export class NeedController {
           fetchedNeed.details !== need.details ||
           fetchedNeed.title !== need.title ||
           fetchedNeed.information !== need.informations ||
-          fetchedNeed.descriptionTranslations.en !== need.description_translations.en ||
+          fetchedNeed.descriptionTranslations.en !==
+            need.description_translations.en ||
           fetchedNeed.nameTranslations.en !== need.name_translations.en
         ) {
           const { need: nestNeed } = await this.syncService.syncNeed(
@@ -492,22 +494,30 @@ export class NeedController {
         let similarTitleNeeds: [Need[], number];
         if (need.type === NeedTypeEnum.PRODUCT) {
           similarTitleNeeds = await this.needService.getSimilarNeedsProduct(
-            need.title,
+           need.title.slice(0, 20),
           );
           // double check
-          similarTitleNeeds[0] = similarTitleNeeds[0].filter((n) =>
-            sentenceSimilarityPercent(n.title.slice(0, 15), need.title.slice(0, 15)) > 20,
+          similarTitleNeeds[0] = similarTitleNeeds[0].filter(
+            (n) =>
+              sentenceSimilarityPercent(
+                n.title.slice(0, 15),
+                need.title.slice(0, 15),
+              ) > 20,
           );
-          similarTitleNeeds[1] = similarTitleNeeds[0].length
+          similarTitleNeeds[1] = similarTitleNeeds[0].length;
         } else {
           similarTitleNeeds = await this.needService.getSimilarNeedsService(
             need.name_translations.fa,
           );
           // double check
-          similarTitleNeeds[0] = similarTitleNeeds[0].filter((n) =>
-            sentenceSimilarityPercent(n.name_translations.fa, need.name_translations.fa) > 20,
+          similarTitleNeeds[0] = similarTitleNeeds[0].filter(
+            (n) =>
+              sentenceSimilarityPercent(
+                n.name_translations.fa,
+                need.name_translations.fa,
+              ) > 20,
           );
-          similarTitleNeeds[1] = similarTitleNeeds[0].length
+          similarTitleNeeds[1] = similarTitleNeeds[0].length;
         }
 
         const sameCatSimilarity: Need[] = [];

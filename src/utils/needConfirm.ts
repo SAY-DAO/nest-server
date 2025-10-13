@@ -110,7 +110,10 @@ export async function validateNeed(
   const listResult = [];
   for (let i = 0; i < list.length; i++) {
     const titleResult = Number(
-      title && Number(getSimilarityPercentage(title.slice(0, 20), list[i].slice(0, 20))),
+      title &&
+        Number(
+          getSimilarityPercentage(title.slice(0, 20), list[i].slice(0, 20)),
+        ),
     );
     listResult.push(titleResult);
   }
@@ -285,14 +288,15 @@ export async function validateNeed(
     price < 500
   ) {
     const createTicketDetails: CreateTicketParams = {
-      title: `Check ${price < 500
-        ? 'Price'
-        : type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)
+      title: `Check ${
+        price < 500
+          ? 'Price'
+          : type === NeedTypeEnum.PRODUCT && (!title || title.length < 5)
           ? 'Title'
           : !name_en || name_en.length < 3
-            ? 'Name'
-            : !description_en || (description_en.length < 5 && 'Description')
-        }`,
+          ? 'Name'
+          : !description_en || (description_en.length < 5 && 'Description')
+      }`,
       flaskNeedId: nestNeed.flaskId,
       need: nestNeed,
       flaskUserId: SUPER_ADMIN_ID_PANEL,
@@ -305,14 +309,16 @@ export async function validateNeed(
       isValidNeed: false,
       participants: [nestNeed.socialWorker, SuperAdmin],
       ticketDetails: createTicketDetails,
-      message: `Automated Message: Please check ${price < 500
-        ? 'Price'
-        : type === NeedTypeEnum.PRODUCT && (!title || title.length < MIN_TITLE_LENGTH)
+      message: `Automated Message: Please check ${
+        price < 500
+          ? 'Price'
+          : type === NeedTypeEnum.PRODUCT &&
+            (!title || title.length < MIN_TITLE_LENGTH)
           ? 'Title'
           : !name_en || name_en.length < 3
-            ? 'Name'
-            : !description_en || (description_en.length < 5 && 'Description')
-        }`,
+          ? 'Name'
+          : !description_en || (description_en.length < 5 && 'Description')
+      }`,
     };
     return result;
   }
@@ -423,10 +429,24 @@ export function rateDuplicate(need: Need, duplicate: Need) {
         msg = 'title is not That similar';
       }
     } else if (type === NeedTypeEnum.SERVICE) {
+      titleResult =
+        duplicate.details &&
+        Number(
+          getSimilarityPercentage(
+            need.details.length > 15
+              ? need.details.substring(0, 15)
+              : need.details,
+            duplicate.details.length > 15
+              ? duplicate.details.substring(0, 15)
+              : duplicate.details,
+          ),
+        );
+
       if (
         !duplicate.name_translations ||
         !duplicate.name_translations.fa ||
-        duplicate.name_translations.fa.length < 1
+        duplicate.name_translations.fa.length < 1 ||
+        (duplicate.details && titleResult > SIMILAR_TXT_PERCENTAGE)
       ) {
         TT = true;
       } else {

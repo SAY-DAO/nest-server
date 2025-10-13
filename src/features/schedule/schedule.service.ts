@@ -14,7 +14,7 @@ export class ScheduleService {
     private campaignService: CampaignService,
     private familyService: FamilyService,
     private analyticService: AnalyticService,
-  ) { }
+  ) {}
   private readonly logger = new Logger(ScheduleService.name);
 
   // first store the list of needs paid by roles - then call these methods in cache this.roleScatteredData() this.theQuartile();
@@ -95,7 +95,6 @@ export class ScheduleService {
     this.rolesCount();
   }
 
-
   @Cron(CronExpression.EVERY_WEEK, {
     name: 'ActiveFamilies',
     timeZone: 'Asia/Tehran',
@@ -122,17 +121,7 @@ export class ScheduleService {
   })
   async handleWeeklyCron() {
     this.logger.debug(' Complete payments of families Called every Week');
-    const familyData = config().dataCache.fetchFamilyAll();
-
-    const expired =
-      !familyData ||
-      !familyData.created ||
-      timeDifference(familyData.created, new Date()).mm >= 10080; // 60 minutes/hour × 24 hours/day × 7 days/week = 10,080 minutes/week
-    if (expired) {
-      this.completePays();
-    } else {
-      this.logger.debug('Reading from cache');
-    }
+    this.completePays();
   }
 
   // ERROR [Scheduler] ServerError: Can't send mail - all recipients were rejected: 550 <nakama@say.company> No such user here

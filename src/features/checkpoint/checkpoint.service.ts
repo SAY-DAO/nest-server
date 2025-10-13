@@ -51,9 +51,11 @@ export class CheckPointService {
         title: dto.title,
         description: dto.description,
         type: dto.type,
+        url: dto.url,
         user,
         isConfirmed: false,
         confirmedAt: null,
+        checkPointDate: dto.checkPointDate,
       });
       return await this.checkPointRepository.save(cp);
     } catch (err) {
@@ -142,19 +144,13 @@ export class CheckPointService {
   /**
    * Confirm a checkpoint (admin action). Sets isConfirmed = true and confirmedAt timestamp.
    */
-  async confirmCheckpoint(
-    id: string,
-    confirmerId?: number,
-  ): Promise<CheckPointEntity> {
+  async confirmCheckpoint(id: string): Promise<CheckPointEntity> {
     const cp = await this.checkPointRepository.findOne({ where: { id } });
     if (!cp)
       throw new NotFoundException(`CheckPointEntity with id ${id} not found`);
-
-    if (cp.isConfirmed) return cp; // already confirmed (idempotent)
-
+    if (cp.isConfirmed) return cp; // already confirmed 
     cp.isConfirmed = true;
     cp.confirmedAt = new Date();
-    // optionally: store confirmerId in another column if you need who approved
     return this.checkPointRepository.save(cp);
   }
 

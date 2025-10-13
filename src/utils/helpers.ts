@@ -21,7 +21,12 @@ import {
 } from '../types/interfaces/interface';
 import { NeedFamily } from '../entities/flaskEntities/needFamily';
 import { Payment } from '../entities/flaskEntities/payment.entity';
-import { levenshteinDistance, nameSimilarityPercent, sentenceSimilarityPercent } from './similaritity';
+import {
+  levenshteinDistance,
+  nameSimilarityPercent,
+  sentenceSimilarityPercent,
+} from './similaritity';
+import { productCategories, serviceCategories } from './catagories';
 
 // MATH.quantileSeq
 export const QUANTILE_min = 0;
@@ -209,28 +214,28 @@ export function persianMonthStringFarsi(value: Date) {
   return pm === 'Farvardin'
     ? 'فروردین'
     : pm === 'Ordibehesht'
-      ? 'اردیبهشت'
-      : pm === 'Khordad'
-        ? 'خرداد'
-        : pm === 'Tir'
-          ? 'تیر'
-          : pm === 'Mordad'
-            ? 'مرداد'
-            : pm === 'Shahrivar'
-              ? 'شهریور'
-              : pm === 'Mehr'
-                ? 'مهر'
-                : pm === 'Aban'
-                  ? 'آبان'
-                  : pm === 'Azar'
-                    ? 'آذر'
-                    : pm === 'Dey'
-                      ? 'دی'
-                      : pm === 'Bahman'
-                        ? 'بهمن'
-                        : pm === 'Esfand'
-                          ? 'اسفند'
-                          : null;
+    ? 'اردیبهشت'
+    : pm === 'Khordad'
+    ? 'خرداد'
+    : pm === 'Tir'
+    ? 'تیر'
+    : pm === 'Mordad'
+    ? 'مرداد'
+    : pm === 'Shahrivar'
+    ? 'شهریور'
+    : pm === 'Mehr'
+    ? 'مهر'
+    : pm === 'Aban'
+    ? 'آبان'
+    : pm === 'Azar'
+    ? 'آذر'
+    : pm === 'Dey'
+    ? 'دی'
+    : pm === 'Bahman'
+    ? 'بهمن'
+    : pm === 'Esfand'
+    ? 'اسفند'
+    : null;
 }
 
 export function persianDay(value: Date) {
@@ -328,84 +333,120 @@ export function getNeedsTimeLine(needs: Need[]) {
 
     // farvardin
     if (thePersianMonthCreated === 1) {
-      if (!needs[i].deleted_at) farvardin.created += 1; else { farvardin.deleted += 1; }
+      if (!needs[i].deleted_at) farvardin.created += 1;
+      else {
+        farvardin.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         farvardin.confirmed += 1;
       }
     }
     // ordibehesht
     else if (thePersianMonthCreated === 2) {
-      if (!needs[i].deleted_at) ordibehesht.created += 1; else { ordibehesht.deleted += 1; }
+      if (!needs[i].deleted_at) ordibehesht.created += 1;
+      else {
+        ordibehesht.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         ordibehesht.confirmed += 1;
       }
     }
     // khordad
     else if (thePersianMonthCreated === 3) {
-      if (!needs[i].deleted_at) khordad.created += 1; else { khordad.deleted += 1; }
+      if (!needs[i].deleted_at) khordad.created += 1;
+      else {
+        khordad.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         khordad.confirmed += 1;
       }
     }
     // tir
     else if (thePersianMonthCreated === 4) {
-      if (!needs[i].deleted_at) tir.created += 1; else { tir.deleted += 1; }
+      if (!needs[i].deleted_at) tir.created += 1;
+      else {
+        tir.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         tir.confirmed += 1;
       }
     }
     // mordad
     else if (thePersianMonthCreated === 5) {
-      if (!needs[i].deleted_at) mordad.created += 1; else { mordad.deleted += 1; }
+      if (!needs[i].deleted_at) mordad.created += 1;
+      else {
+        mordad.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         mordad.confirmed += 1;
       }
     }
     // shahrivar
     else if (thePersianMonthCreated === 6) {
-      if (!needs[i].deleted_at) shahrivar.created += 1; else { shahrivar.deleted += 1; }
+      if (!needs[i].deleted_at) shahrivar.created += 1;
+      else {
+        shahrivar.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         shahrivar.confirmed += 1;
       }
     }
     // mehr
     else if (thePersianMonthCreated === 7) {
-      if (!needs[i].deleted_at) mehr.created += 1; else { mehr.deleted += 1; }
+      if (!needs[i].deleted_at) mehr.created += 1;
+      else {
+        mehr.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         mehr.confirmed += 1;
       }
     }
     // aban
     else if (thePersianMonthCreated === 8) {
-      if (!needs[i].deleted_at) aban.created += 1; else { aban.deleted += 1; }
+      if (!needs[i].deleted_at) aban.created += 1;
+      else {
+        aban.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         aban.confirmed += 1;
       }
     }
     // azar
     else if (thePersianMonthCreated === 9) {
-      if (!needs[i].deleted_at) azar.created += 1; else { azar.deleted += 1 }
+      if (!needs[i].deleted_at) azar.created += 1;
+      else {
+        azar.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         azar.confirmed += 1;
       }
     }
     // dey
     else if (thePersianMonthCreated === 10) {
-      if (!needs[i].deleted_at) dey.created += 1; else { dey.deleted += 1; }
+      if (!needs[i].deleted_at) dey.created += 1;
+      else {
+        dey.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         dey.confirmed += 1;
       }
     }
     // bahman
     else if (thePersianMonthCreated === 11) {
-      if (!needs[i].deleted_at) bahman.created += 1; else { bahman.deleted += 1; }
+      if (!needs[i].deleted_at) bahman.created += 1;
+      else {
+        bahman.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         bahman.confirmed += 1;
       }
     }
     // esfand
     else if (thePersianMonthCreated === 12) {
-      if (!needs[i].deleted_at) esfand.created += 1; else { esfand.deleted += 1; }
+      if (!needs[i].deleted_at) esfand.created += 1;
+      else {
+        esfand.deleted += 1;
+      }
       if (needs[i].confirmDate) {
         esfand.confirmed += 1;
       }
@@ -542,7 +583,7 @@ export function ticketNotifications(
         !myView ||
         (latestView.flaskUserId !== myView.flaskUserId &&
           Date.parse(myView.viewed.toUTCString()) <
-          Date.parse(latestView.viewed.toUTCString()))
+            Date.parse(latestView.viewed.toUTCString()))
       );
     });
 
@@ -553,7 +594,7 @@ export function isUnpayable(need: Need) {
   return (
     need.unavailable_from &&
     timeDifference(new Date(), need.unavailable_from).hh <
-    PRODUCT_UNPAYABLE_PERIOD
+      PRODUCT_UNPAYABLE_PERIOD
   );
 }
 
@@ -931,12 +972,12 @@ export function getMonthsAgo(date: Date, priorMonths: number) {
 }
 
 export function getSimilarityPercentage(sentence1: string, sentence2: string) {
-  const similarity = sentenceSimilarityPercent(sentence1, sentence2)
+  const similarity = sentenceSimilarityPercent(sentence1, sentence2);
   return round(similarity);
 }
 
 export function urlSimilarityPercentage(url1: string, url2: string) {
-  const similarity = nameSimilarityPercent(url1, url2)
+  const similarity = nameSimilarityPercent(url1, url2);
 
   return similarity.toFixed(2);
 }
@@ -980,3 +1021,71 @@ export function areNamesSimilar(
   console.log(`Similarity: ${Math.round(ratio * 10000) / 100}%`);
   return Math.round(ratio * 10000) / 100 > thresholdPercentage; // Returns true if similarity is greater than 50%
 }
+
+/** Normalize Persian/Arabic/Unicode text for matching (ي → ی, ك → ک) */
+/** ---------- Normalizer (Persian/Arabic-friendly) ---------- */
+export function normalizeForMatch(s: string | null | undefined): string {
+  if (!s) return '';
+  let t = String(s).normalize('NFKC');
+
+  // NBSP -> space
+  t = t.replace(/\u00A0/g, ' ');
+
+  // Replace ZWNJ with space so "کوله‌پشتی" -> "کوله پشتی"
+  t = t.replace(/\u200C/g, ' ');
+
+  // Arabic forms -> Persian
+  t = t.replace(/\u064A/g, '\u06CC').replace(/\u0643/g, '\u06A9');
+
+  // remove Arabic diacritics (harakat)
+  t = t.replace(/[\u064B-\u0652\u0670]/g, '');
+
+  // replace non-letter/number with space (keeps Unicode letters/numbers)
+  t = t.replace(/[^\p{L}\p{N}]+/gu, ' ');
+
+  // collapse spaces, trim and lowercase
+  t = t.replace(/\s+/g, ' ').trim().toLowerCase();
+
+  return t;
+}
+
+export function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export const containsAny = (text: string, keywords: string[]) => {
+  if (!text) return false;
+  if (!keywords || !keywords.length) return false;
+
+  const normText = normalizeForMatch(text); // normalized string
+  const compactText = normText.replace(/\s+/g, ''); // no spaces
+
+  for (const rawKw of keywords) {
+    if (!rawKw) continue;
+    const normKw = normalizeForMatch(String(rawKw));
+    const compactKw = normKw.replace(/\s+/g, '');
+
+    // 1) compact substring (catches کوله‌پشتی vs کوله پشتی vs کولهپشتی)
+    if (compactKw && compactText.includes(compactKw)) return true;
+
+    // 2) normalized substring (multi-word match)
+    if (normKw && normText.includes(normKw)) return true;
+
+    // 3) token sequence match (explicit multi-token check)
+    if (normKw) {
+      const kwTokens = normKw.split(' ').filter(Boolean);
+      if (kwTokens.length > 1) {
+        const tokens = normText.split(' ').filter(Boolean);
+        for (let i = 0; i + kwTokens.length <= tokens.length; i++) {
+          if (
+            tokens.slice(i, i + kwTokens.length).join(' ') ===
+            kwTokens.join(' ')
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+};
