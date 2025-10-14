@@ -210,11 +210,11 @@ export class AnalyticPublicService {
           'p.verified',
           'p.gateway_track_id',
         ])
-        .orderBy('need.updated', 'DESC')
+        .orderBy('need.child_delivery_date', 'DESC')
         .cache(true);
       return await nestPaginate<Need>(options, queryBuilder, {
         sortableColumns: ['id'],
-        defaultSortBy: [['created', 'DESC']],
+        defaultSortBy: [['updated', 'DESC']],
         nullSort: 'last',
       });
     } catch (err) {
