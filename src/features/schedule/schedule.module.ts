@@ -23,6 +23,10 @@ import { NgoArrivalEntity, NgoEntity } from '../../entities/ngo.entity';
 import { ContributorEntity } from '../../entities/contributor.entity';
 import { EthereumAccountEntity } from '../../entities/ethereum.account.entity';
 import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
+import { AnalyticPublicService } from '../analytic/public.analytic.service';
+import { CheckPointEntity } from 'src/entities/checkpoint.entity';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CheckPointService } from '../checkpoint/checkpoint.service';
 
 @Module({
   imports: [
@@ -50,17 +54,25 @@ import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
       ContributorEntity,
       AllUserEntity,
       EthereumAccountEntity,
-      NgoPreRegisterEntity
+      NgoPreRegisterEntity,
+      CheckPointEntity,
     ]),
+    CacheModule.register({
+      ttl: Number(process.env.REPORTS_CACHE_TTL ?? 10), // seconds
+      max: 100,
+    }),
   ],
+
   controllers: [],
   providers: [
     NeedService,
     FamilyService,
     AnalyticService,
+    AnalyticPublicService,
     NgoService,
     UserService,
     ScheduleService,
+    CheckPointService
   ],
 })
 export class ScheduleTaskModule {}

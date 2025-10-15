@@ -44,12 +44,8 @@ export class AnalyticPublicController {
   }
 
   @Get('season-comparison')
-  getSeasonComparison(
-    @Query('season') season?: string,
-    @Query('includeRates') includeRates?: string,
-  ) {
-    const include = includeRates === 'true' || includeRates === '1';
-    return this.analyticPublicService.getSeasonComparison(season, include);
+  getSeasonComparison(@Query('season') season?: string) {
+    return this.analyticPublicService.getSeasonComparison(season);
   }
 
   @Get('needs-frequency-clustered')

@@ -34,17 +34,20 @@ export class FamilyService {
   ) {}
 
   async searchUsers(query: string): Promise<User[]> {
-    return this.flaskUserRepository
-      .createQueryBuilder('user')
-      .where(
-        'user.userName ILIKE :query OR user.emailAddress ILIKE :query OR user.phone_number ILIKE :query OR user.firstName ILIKE :query',
-        {
-          query: `%${query}%`,
-        },
-      )
-      .getMany();
+    const q = `%${query}%`;
+    return (
+      this.flaskUserRepository
+        .createQueryBuilder('user')
+        .where('user.userName ILIKE :userName', { userName: q })
+        .orWhere('user.emailAddress ILIKE :emailAddress', { emailAddress: q })
+        .orWhere('user.phone_number ILIKE :phone_number', { phone_number: q })
+        .orWhere('user.firstName ILIKE :firstName', { firstName: q })
+        .orWhere('user.first_name ILIKE :first_name', { first_name: q })
+        .orWhere('CAST(user.id AS text) ILIKE :id', { id: q }) // cast id to text so ILIKE works
+        .andWhere('user.isDeleted != :isDeleted', { isDeleted: false })
+        .getMany()
+    );
   }
-
   async getFamilyMembers(familyId: number): Promise<any> {
     return await this.flaskFamilyRepository
       .createQueryBuilder('family')

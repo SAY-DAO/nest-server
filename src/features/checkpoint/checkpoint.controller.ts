@@ -59,9 +59,8 @@ export class CheckPointController {
     }
     const user = await this.userService.getFamilyByFlaskId(dappFlaskUserId);
     if (!user) throw new NotFoundException(`User not found`);
-    return await this.cpService.createForUser(user, dto);
+    return await this.cpService.createForBuilder(user, dto);
   }
-
 
   @Get('')
   @ApiOperation({ description: 'Get paginated checkpoints' })

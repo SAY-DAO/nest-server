@@ -16,22 +16,15 @@ export const CheckPointTypeLabel: Record<CheckPointType, string> = {
   [CheckPointType.TESTING]: 'Testing',
 
   [CheckPointType.DESIGN]: 'Design',
-  [CheckPointType.UX]: 'UX',
-  [CheckPointType.BRANDING]: 'Brand',
   [CheckPointType.ASSET_PRODUCTION]: 'Assets',
 
   [CheckPointType.CONTENT]: 'Content',
-  [CheckPointType.COPYWRITING]: 'Copy',
-  [CheckPointType.SEO]: 'SEO',
   [CheckPointType.SOCIAL]: 'Social',
-  [CheckPointType.EMAIL]: 'Email',
-  [CheckPointType.PAID_ADS]: 'Ads',
   [CheckPointType.MARKETING_CAMPAIGN]: 'Campaign',
   [CheckPointType.GROWTH_EXPERIMENT]: 'Experiment',
 
   [CheckPointType.CUSTOMER_SUPPORT]: 'Support',
   [CheckPointType.ONBOARDING]: 'Onboarding',
-  [CheckPointType.SALES_OUTREACH]: 'Sales',
   [CheckPointType.PARTNERSHIPS]: 'Partners',
   [CheckPointType.INCIDENT_RESPONSE]: 'Incident',
 

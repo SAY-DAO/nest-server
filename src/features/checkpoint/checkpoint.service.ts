@@ -29,10 +29,10 @@ export class CheckPointService {
   ) {}
 
   /**
-   * Create a checkpoint for a user, enforcing "max 5 unconfirmed" rule.
+   * Create a checkpoint for a builder, enforcing "max 5 unconfirmed" rule.
    * Uses a transaction + pessimistic lock to avoid race conditions.
    */
-  async createForUser(
+  async createForBuilder(
     user: AllUserEntity,
     dto: CreateCheckPointDto,
   ): Promise<CheckPointEntity> {
@@ -148,7 +148,7 @@ export class CheckPointService {
     const cp = await this.checkPointRepository.findOne({ where: { id } });
     if (!cp)
       throw new NotFoundException(`CheckPointEntity with id ${id} not found`);
-    if (cp.isConfirmed) return cp; // already confirmed 
+    if (cp.isConfirmed) return cp; // already confirmed
     cp.isConfirmed = true;
     cp.confirmedAt = new Date();
     return this.checkPointRepository.save(cp);

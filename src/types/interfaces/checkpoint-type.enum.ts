@@ -14,22 +14,15 @@ export const CheckPointType = {
   TESTING: 'testing',
 
   DESIGN: 'design',
-  UX: 'ux',
-  BRANDING: 'brand',
   ASSET_PRODUCTION: 'assets',
 
   CONTENT: 'content',
-  COPYWRITING: 'copy',
-  SEO: 'seo',
   SOCIAL: 'social',
-  EMAIL: 'email',
-  PAID_ADS: 'ads',
   MARKETING_CAMPAIGN: 'campaign',
   GROWTH_EXPERIMENT: 'experiment',
 
   CUSTOMER_SUPPORT: 'support',
   ONBOARDING: 'onboarding',
-  SALES_OUTREACH: 'sales',
   PARTNERSHIPS: 'partners',
   INCIDENT_RESPONSE: 'incident',
 

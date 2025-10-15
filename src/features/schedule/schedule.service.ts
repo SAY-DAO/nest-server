@@ -5,15 +5,25 @@ import config from '../../config';
 import { FamilyService } from '../family/family.service';
 import { AnalyticService } from '../analytic/analytic.service';
 import { CampaignService } from '../campaign/campaign.service';
-import { persianDay, timeDifference } from '../../utils/helpers';
+import { persianDay } from '../../utils/helpers';
 import { execute } from '@getvim/execute';
+import { toJalaali } from 'jalaali-js';
+import { DateTime } from 'luxon';
+import { CheckPointService } from '../checkpoint/checkpoint.service';
+import { AnalyticPublicService } from '../analytic/public.analytic.service';
+import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
+import { CreateCheckPointDto } from '../checkpoint/dto/create-checkpoint.dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ScheduleService {
   constructor(
     private campaignService: CampaignService,
     private familyService: FamilyService,
+    private userService: UserService,
     private analyticService: AnalyticService,
+    private readonly analyticPublicService: AnalyticPublicService,
+    private checkPointService: CheckPointService,
   ) {}
   private readonly logger = new Logger(ScheduleService.name);
 
@@ -224,6 +234,53 @@ export class ScheduleService {
       // calling postgresql backup function
       // nestPGBackup();
       flaskPGBackup();
+    }
+  }
+
+  // run daily at 00:05 Tehran time and only act if it's the 1st day of the Jalali month
+  // @Timeout(5000)
+  @Cron('0 5 0 * * *', {
+    name: 'CompletePaymentsAtStartOfJalaliMonth',
+    timeZone: 'Asia/Tehran',
+  })
+  async handleStartOfJalaliMonthCron() {
+    try {
+      // get precise time in Tehran
+      const tehran = DateTime.now().setZone('Asia/Tehran');
+
+      // convert to Jalali
+      const { jy, jm, jd } = toJalaali(tehran.year, tehran.month, tehran.day);
+
+      this.logger.warn(`Cron for check-points -> Jalali ${jy}/${jm}/${jd}`);
+
+      // run only on the first day of Jalali month
+      if (jd === 22) {
+        this.logger.warn(
+          `Beginning of Jalali month detected (${jy}/${jm}/01). Running completePays().`,
+        );
+
+        // make sure to await
+        const sayUser = await this.userService.getUserByFlaskId(208);
+
+        // construct DTO
+        const dto: CreateCheckPointDto = {
+          title: `Complete payments - ${jy}/${jm}/01`,
+          description: `Auto-created checkpoint for start of Jalali month ${jy}/${jm}/01`,
+          url: 'https://example.org/...',
+          type: CheckPointType.SEASONAL_REPORT,
+          // use full ISO timestamp (includes offset); IsDateString accepts ISO8601
+          checkPointDate: tehran.startOf('day').toISO(),
+        };
+        const created = await this.checkPointService.createForBuilder(
+          sayUser,
+          dto,
+        );
+        this.logger.log(`Created checkpoint id=${created.id}`);
+      } else {
+        this.logger.warn('Not the first day of a Jalali month — skipping.');
+      }
+    } catch (err) {
+      this.logger.error('Error in handleStartOfJalaliMonthCron', err as any);
     }
   }
 }

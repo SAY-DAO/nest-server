@@ -97,7 +97,7 @@ export class FamilyController {
     const flaskUser = await this.userService.getFlaskUser(flaskUserId);
     const nestUser = await this.userService.getFamilyByFlaskId(flaskUserId);
 
-    return { ...flaskUser, isBuilder: nestUser.isBuilder };
+    return { ...flaskUser, isBuilder: nestUser && nestUser.isBuilder };
   }
 
   @Patch('builder/:flaskUserId')
@@ -121,12 +121,13 @@ export class FamilyController {
         'flaskUserId is required and must be a number',
       );
     }
-    const nestFamilyMember = await this.userService.getFamilyByFlaskId(
+    let nestFamilyMember = await this.userService.getFamilyByFlaskId(
       flaskUserId,
     );
     if (!nestFamilyMember) {
-      throw new ForbiddenException("Can't find the user");
+      nestFamilyMember = await this.userService.createFamily(flaskUserId);
     }
+
     return await this.familyService.updateBuilderStatus(nestFamilyMember);
   }
 
@@ -143,7 +144,7 @@ export class FamilyController {
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
-    if (query.length > 3) {
+    if (query.length >= 3) {
       const users = await this.familyService.searchUsers(query);
       return { users };
     }

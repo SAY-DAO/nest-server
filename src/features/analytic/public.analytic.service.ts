@@ -443,7 +443,7 @@ export class AnalyticPublicService {
   }
 
   async getSeasonComparison(
-    season?: string,
+    targetYear?: string,
     useCache = true,
   ): Promise<SeasonComparisonResponseDto> {
     const cacheKey = 'reports:seasonComparison';
@@ -464,8 +464,8 @@ export class AnalyticPublicService {
     try {
       // 1) determine target year (season)
       let targetJalaliYear: number | null = null;
-      if (season && String(season).trim()) {
-        const asNum = Number(season);
+      if (targetYear && String(targetYear).trim()) {
+        const asNum = Number(targetYear);
         if (Number.isFinite(asNum) && Number.isInteger(asNum))
           targetJalaliYear = asNum;
       }
@@ -515,19 +515,19 @@ export class AnalyticPublicService {
       return {
         doneNeeds: {
           data: [],
-          season: String(season ?? new Date().getFullYear()),
+          season: String(targetYear ?? new Date().getFullYear()),
         },
         totalUsers: {
           data: [],
-          season: String(season ?? new Date().getFullYear()),
+          season: String(targetYear ?? new Date().getFullYear()),
         },
         pays: {
           data: [],
-          season: String(season ?? new Date().getFullYear()),
+          season: String(targetYear ?? new Date().getFullYear()),
         },
         children: {
           data: [],
-          season: String(season ?? new Date().getFullYear()),
+          season: String(targetYear ?? new Date().getFullYear()),
         },
       };
     }
