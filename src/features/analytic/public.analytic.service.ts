@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   Inject,
   Injectable,
@@ -15,6 +16,7 @@ import {
   ChildExistence,
   NeedTypeEnum,
   PaymentStatusEnum,
+  VirtualFamilyRole,
 } from 'src/types/interfaces/interface';
 import { Payment } from 'src/entities/flaskEntities/payment.entity';
 import { Child } from 'src/entities/flaskEntities/child.entity';
@@ -28,15 +30,14 @@ import {
   SeasonComparisonResponseDto,
 } from './dto/season-comparison-response.dto';
 import { productCategories, serviceCategories } from 'src/utils/catagories';
-import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
-import { CheckPointEntity } from 'src/entities/checkpoint.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
 import { jalaliYearRangeIso, mergeByJalaliMonth } from '../../utils/jalali';
-import {
-  containsAny,
-  escapeRegExp,
-  normalizeForMatch,
-} from '../../utils/helpers';
+import { containsAny } from '../../utils/helpers';
+import config from '../../config';
+import { Family } from 'src/entities/flaskEntities/family.entity';
+import { UserFamily } from 'src/entities/flaskEntities/userFamily.entity';
+import { NGO } from 'src/entities/flaskEntities/ngo.entity';
+import { NeedFamily } from 'src/entities/flaskEntities/needFamily';
 
 @Injectable()
 export class AnalyticPublicService {
@@ -45,23 +46,52 @@ export class AnalyticPublicService {
   constructor(
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
+    @InjectRepository(NGO, 'flaskPostgres')
+    private flaskNgoRepository: Repository<NGO>,
     @InjectRepository(User, 'flaskPostgres')
     private flaskUserRepository: Repository<User>,
     @InjectRepository(Payment, 'flaskPostgres')
     private flaskPaymentRepository: Repository<Payment>,
     @InjectRepository(Child, 'flaskPostgres')
     private flaskChildRepository: Repository<Child>,
-    @InjectRepository(CheckPointEntity)
-    private checkPointRepository: Repository<CheckPointEntity>,
+    @InjectRepository(Family, 'flaskPostgres')
+    private flaskFamilyRepository: Repository<Family>,
+    @InjectRepository(UserFamily, 'flaskPostgres')
+    private flaskUserFamilyRepository: Repository<UserFamily>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
 
     @InjectRepository(AllUserEntity)
     private allUserRepository: Repository<AllUserEntity>,
   ) {}
 
+  async getDeliveredNeedsAnalytic(type: NeedTypeEnum, page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+    return await this.flaskNeedRepository
+      .createQueryBuilder('need')
+      .select([
+        'need.id',
+        'need.name_translations',
+        'need.type',
+        'need.created',
+        'need.confirmDate',
+        'need.doneAt',
+        'need.purchase_date',
+        'need.ngo_delivery_date',
+        'need.child_delivery_date',
+      ])
+      .where('need.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('need.type = :type', { type })
+      .andWhere('need.child_delivery_date IS NOT NULL')
+      .orderBy('need.child_delivery_date', 'DESC')
+      .take(limit)
+      .skip(skip)
+      .getManyAndCount();
+  }
+
   async getSummary(useCache = true): Promise<SummaryDto> {
     const cacheKey = 'reports:summary';
-    const ttlSeconds = Number(process.env.REPORTS_CACHE_TTL ?? 10);
+    const ttlSeconds = Number(process.env.REPORTS_CACHE_TTL ?? 10000);
 
     if (useCache && ttlSeconds > 0) {
       try {
@@ -74,6 +104,28 @@ export class AnalyticPublicService {
       }
     }
     try {
+      const children = await this.getChildrenAnalytic();
+      const ngos = await this.flaskNgoRepository
+        .createQueryBuilder('ngo')
+        .where('ngo.id NOT IN (:...testNgoIds)', {
+          testNgoIds: [3, 14],
+        })
+        .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+        .andWhere('ngo.isActive = :isActive', { isActive: true })
+        .cache(true)
+        .getMany();
+
+      const rolesCount = config().dataCache.fetchFamilyCount();
+
+      const totalFamilyMembersCount = this.flaskUserFamilyRepository
+        .createQueryBuilder('userFamily')
+        .leftJoinAndSelect(Family, 'family', 'family.id = userFamily.id_family')
+        .where('family.isDeleted = :isFamilyDeleted', {
+          isFamilyDeleted: false,
+        })
+        .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
+        .getCount();
+
       const totalUsersPromise = this.flaskUserRepository
         .createQueryBuilder('user')
         .where(
@@ -85,16 +137,6 @@ export class AnalyticPublicService {
         )
         .andWhere('user.isDeleted = :isDeleted', { isDeleted: false })
         .andWhere('user.firstName != :firstName', { firstName: 'SAY' })
-        .getCount();
-
-      const totalAvailableNeedsPromise = this.flaskNeedRepository
-        .createQueryBuilder('need')
-        .select('COUNT(need.id)', 'count')
-        .where('need.isDeleted = :isDeleted', { isDeleted: false })
-        .andWhere('need.confirmDate IS NOT NULL')
-        .andWhere('need.status < :status', {
-          status: PaymentStatusEnum.COMPLETE_PAY,
-        })
         .getCount();
 
       const totalPaymentsPromise = this.flaskPaymentRepository
@@ -112,44 +154,42 @@ export class AnalyticPublicService {
         .andWhere('need.isDeleted = :isDeleted', { isDeleted: false })
         .getRawOne();
 
-      const totalDoneNeedsPromise = this.flaskNeedRepository
+      const totalAvailableNeedsPromise = this.flaskNeedRepository
         .createQueryBuilder('need')
         .select('COUNT(need.id)', 'count')
         .where('need.isDeleted = :isDeleted', { isDeleted: false })
         .andWhere('need.confirmDate IS NOT NULL')
+        .andWhere('need.status < :status', {
+          status: PaymentStatusEnum.COMPLETE_PAY,
+        })
+        .getCount();
+
+      const totalDoneNeedsPromise = this.flaskNeedRepository
+        .createQueryBuilder('need')
+        .select('COUNT(need.id)', 'count')
+        .where('need.isDeleted = :isDeleted', { isDeleted: false })
         .andWhere('need.status >= :status', {
           status: PaymentStatusEnum.COMPLETE_PAY,
         })
         .getCount();
 
-      const totalChildrenPromise = this.flaskChildRepository
-        .createQueryBuilder('child')
-        .where('child.existence_status = :existence_status', {
-          existence_status: ChildExistence.AlivePresent,
-        })
-        .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
-        .andWhere('child.isMigrated = :childIsMigrated', {
-          childIsMigrated: false,
-        })
-        .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-          testNgoIds: [3, 14],
-        })
-        .getCount();
-
-      const [uRes, anRes, pRes, dnRes, cRes] = await Promise.all([
+      const [uRes, anRes, pRes, dnRes, fmRes] = await Promise.all([
         totalUsersPromise,
         totalAvailableNeedsPromise,
         totalPaymentsPromise,
         totalDoneNeedsPromise,
-        totalChildrenPromise,
+        totalFamilyMembersCount,
       ]);
 
       const result: SummaryDto = {
+        children,
+        ngos,
+        rolesCount,
         totalUsers: Number(uRes ?? 0),
-        totalNeeds: Number(anRes ?? 0),
+        totalNotDoneNeeds: Number(anRes ?? 0),
         totalPayments: Number(pRes.total ?? 0),
         totalDoneNeeds: Number(dnRes ?? 0),
-        totalChildren: Number(cRes ?? 0),
+        totalFamilyMembers: Number(fmRes ?? 0),
       };
 
       if (useCache && ttlSeconds > 0) {
@@ -227,7 +267,7 @@ export class AnalyticPublicService {
   }
 
   // Payment season comparison
-  public async getPaymentSeasonComparison(
+  public async getPaymentComparison(
     targetJalaliYear: number,
     prevJalaliYear: number,
   ): Promise<SeasonComparisonItemDto[]> {
@@ -275,7 +315,7 @@ export class AnalyticPublicService {
   }
 
   // User season comparison
-  public async getUserSeasonComparison(
+  public async getUserComparison(
     targetJalaliYear: number,
     prevJalaliYear: number,
   ): Promise<SeasonComparisonItemDto[]> {
@@ -333,7 +373,7 @@ export class AnalyticPublicService {
   }
 
   // Need season comparison
-  public async getNeedSeasonComparison(
+  public async getNeedComparison(
     targetJalaliYear: number,
     prevJalaliYear: number,
   ): Promise<SeasonComparisonItemDto[]> {
@@ -379,8 +419,7 @@ export class AnalyticPublicService {
     );
   }
 
-  // Child season comparison
-  public async getChildSeasonComparison(
+  public async getChildComparison(
     targetJalaliYear: number,
     prevJalaliYear: number,
   ): Promise<SeasonComparisonItemDto[]> {
@@ -447,7 +486,7 @@ export class AnalyticPublicService {
     useCache = true,
   ): Promise<SeasonComparisonResponseDto> {
     const cacheKey = 'reports:seasonComparison';
-    const ttlSeconds = Number(process.env.REPORTS_CACHE_TTL ?? 10);
+    const ttlSeconds = Number(process.env.REPORTS_CACHE_TTL ?? 10000);
 
     if (useCache && ttlSeconds > 0) {
       try {
@@ -476,17 +515,21 @@ export class AnalyticPublicService {
 
       // 3) Query counts grouped by month for target year
 
-      const userItems: SeasonComparisonItemDto[] =
-        await this.getUserSeasonComparison(targetJalaliYear, prevJalaliYear);
+      const userItems: SeasonComparisonItemDto[] = await this.getUserComparison(
+        targetJalaliYear,
+        prevJalaliYear,
+      );
 
       const payItems: SeasonComparisonItemDto[] =
-        await this.getPaymentSeasonComparison(targetJalaliYear, prevJalaliYear);
+        await this.getPaymentComparison(targetJalaliYear, prevJalaliYear);
 
-      const needItems: SeasonComparisonItemDto[] =
-        await this.getNeedSeasonComparison(targetJalaliYear, prevJalaliYear);
+      const needItems: SeasonComparisonItemDto[] = await this.getNeedComparison(
+        targetJalaliYear,
+        prevJalaliYear,
+      );
 
       const childItems: SeasonComparisonItemDto[] =
-        await this.getChildSeasonComparison(targetJalaliYear, prevJalaliYear);
+        await this.getChildComparison(targetJalaliYear, prevJalaliYear);
 
       const result: SeasonComparisonResponseDto = {
         doneNeeds: { data: needItems, season: String(targetJalaliYear) },
@@ -533,253 +576,167 @@ export class AnalyticPublicService {
     }
   }
 
-  // Helper: case-insensitive contains check
-  private containsAny(text: string, keywords: string[]): boolean {
-    if (!text) return false;
-    const lower = text.toLowerCase();
-    for (const kw of keywords) {
-      if (!kw) continue;
-      if (lower.indexOf(kw.toLowerCase()) !== -1) return true;
-    }
-    return false;
-  }
-  async getNeedsFrequency(
-    options?: {
-      limit?: number;
-      since?: string;
-      until?: string;
-      filterByDoneAt?: boolean;
-      similarityThreshold?: number;
-    },
-    useCache = true,
-  ) {
-    const cacheKey = 'reports:need-frequency';
-    const ttlSeconds = Number(process.env.REPORTS_CACHE_TTL ?? 10);
-
-    if (useCache && ttlSeconds > 0) {
-      try {
-        const cached = await this.cacheManager.get<any>(cacheKey);
-        if (cached) return cached;
-      } catch (e) {
-        this.logger.warn(
-          'Cache read failed for reports need-frequency: ' + (e as any).message,
-        );
-      }
-    }
-
-    const { limit = 20, since, until, filterByDoneAt = false } = options || {};
-
-    const dateField = filterByDoneAt ? 'need."doneAt"' : 'need."created"';
-
-    const qb = this.flaskNeedRepository
-      .createQueryBuilder('need')
-      .where('need.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('need.isDeleted = :isNeedDeleted', { isNeedDeleted: false })
+  async getChildrenAnalytic() {
+    const allChildren = await this.flaskChildRepository
+      .createQueryBuilder('child')
       .select([
-        'need.id AS id',
-        'need.title AS title',
-        'need.name_translations AS name_translations',
-        'need.type AS type',
-        'need."doneAt" AS "doneAt"',
-        'need."created" AS created',
-      ]);
-
-    if (since) qb.andWhere(`${dateField} >= :since`, { since });
-    if (until) qb.andWhere(`${dateField} <= :until`, { until });
-
-    const raw = await qb.getRawMany();
-
-    const grouped = new Map<
-      string,
-      {
-        id: string;
-        name: string;
-        totalCount: number;
-        doneCount: number;
-        membersSet: Set<string>;
-        isAssigned: boolean;
-        assignedCategoryKey: string | null;
-      }
-    >();
-
-    const extractServiceName = (nt: any): string => {
-      if (!nt) return '';
-      if (typeof nt === 'string') {
-        try {
-          nt = JSON.parse(nt);
-        } catch {
-          // keep as string
-        }
-      }
-      if (typeof nt === 'object' && nt !== null) {
-        const prefer = ['en', 'fa', 'per', 'ps', 'default'];
-        for (const k of prefer) {
-          if (nt[k] && String(nt[k]).trim()) return String(nt[k]).trim();
-        }
-        for (const v of Object.values(nt)) {
-          if (v && String(v).trim()) return String(v).trim();
-        }
-        return '';
-      }
-      return String(nt ?? '').trim();
-    };
-
-    const UNASSIGNED_PRODUCT = '__UNASSIGNED_PRODUCT__';
-    const UNASSIGNED_SERVICE = '__UNASSIGNED_SERVICE__';
-
-    for (const r of raw) {
-      const needType = Number(r.type ?? 0);
-      let searchText = '';
-      let representativeName = '';
-
-      if (needType === NeedTypeEnum.SERVICE) {
-        let nt = r.name_translations;
-        if (typeof nt === 'string') {
-          try {
-            nt = JSON.parse(nt);
-          } catch {
-            nt = nt;
-          }
-        }
-        if (nt && typeof nt === 'object') {
-          const vals = Object.values(nt).map((v) =>
-            v == null ? '' : String(v),
-          );
-          searchText = vals.join(' ');
-        } else {
-          searchText = String(nt ?? '');
-        }
-        representativeName = extractServiceName(r.name_translations);
-      } else {
-        searchText = String(r.title ?? '');
-        representativeName = String(r.title ?? '').trim();
-      }
-
-      if (!searchText || !String(searchText).trim()) continue;
-
-      let assigned: string | null = null;
-
-      if (needType === NeedTypeEnum.PRODUCT) {
-        for (const [cat, kws] of Object.entries(productCategories)) {
-          if (containsAny(searchText, kws)) {
-            assigned = cat;
-            break;
-          }
-        }
-      } else {
-        for (const [cat, kws] of Object.entries(serviceCategories)) {
-          if (containsAny(searchText, kws)) {
-            assigned = cat;
-            break;
-          }
-        }
-      }
-
-      let groupKey: string;
-      let displayName: string;
-      let isAssigned = true;
-      let assignedCategoryKey: string | null = assigned;
-
-      if (!assigned) {
-        isAssigned = false;
-        if (needType === NeedTypeEnum.PRODUCT) {
-          groupKey = UNASSIGNED_PRODUCT;
-          displayName = 'Unassigned (product)';
-        } else {
-          groupKey = UNASSIGNED_SERVICE;
-          displayName = 'Unassigned (service)';
-        }
-        assignedCategoryKey = null;
-      } else {
-        groupKey = String(assigned);
-        displayName = String(assigned);
-      }
-
-      if (!grouped.has(groupKey)) {
-        grouped.set(groupKey, {
-          id: groupKey,
-          name: displayName,
-          totalCount: 0,
-          doneCount: 0,
-          membersSet: new Set<string>(),
-          isAssigned,
-          assignedCategoryKey,
-        });
-      }
-
-      const g = grouped.get(groupKey)!;
-      g.totalCount += 1;
-      if (r.doneAt) g.doneCount += 1;
-
-      const rep =
-        (representativeName && String(representativeName).trim()) ||
-        String(r.title ?? '').trim() ||
-        `need-${r.id}`;
-      if (rep) g.membersSet.add(String(rep));
-    }
-
-    const out = Array.from(grouped.values())
-      .map((g) => {
-        const membersArr = Array.from(g.membersSet).slice(0, 200);
-        return {
-          id: g.id,
-          name: g.name,
-          assignedCategory: g.isAssigned ? g.name : null,
-          isAssigned: g.isAssigned,
-          totalCount: g.totalCount,
-          doneCount: g.doneCount,
-          members: membersArr,
-          membersCount: g.membersSet.size,
-          membersHasMore: g.membersSet.size > membersArr.length,
-        };
+        'child.id',
+        'child.id_ngo',
+        'child.sayname_translations',
+        'child.isConfirmed',
+      ])
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
       })
-      .sort((a, b) => b.totalCount - a.totalCount)
-      .slice(0, Number(limit));
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .getManyAndCount();
 
-    if (useCache && ttlSeconds > 0) {
-      try {
-        // <--- Fix: pass ttl as number (third param) per your CacheManager typing
-        await this.cacheManager.set(cacheKey, out, ttlSeconds);
-      } catch (e) {
-        this.logger.warn(
-          'Cache write failed for reports need frequency: ' +
-            (e as any).message,
-        );
-      }
-    }
+    const dead = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: ChildExistence.DEAD,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
 
-    return out;
+    const alivePresent = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: ChildExistence.AlivePresent,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
+
+    const aliveGone = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: ChildExistence.AliveGone,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
+
+    const tempGone = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .where('child.existence_status = :existence_status', {
+        existence_status: ChildExistence.TempGone,
+      })
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
+
+    const confirmed = await this.flaskChildRepository
+      .createQueryBuilder('child')
+      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
+      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      .andWhere('child.isMigrated = :childIsMigrated', {
+        childIsMigrated: false,
+      })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
+      .select(['child.id', 'ngo'])
+      .getCount();
+
+    return {
+      noNeeds: config().dataCache.fetchChildrenNoNeeds(),
+      allChildren: allChildren[1],
+      dead,
+      alivePresent,
+      aliveGone,
+      tempGone,
+      confirmed,
+    };
   }
 
-  /**
-   * Return the most recent 20 checkpoints ordered by checkpoint time (descending).
-   * No filters, no pagination metadata — just an array of CheckPointEntity.
-   */
-  async findLatest20(): Promise<CheckPointEntity[]> {
-    try {
-      const qb = this.checkPointRepository
-        .createQueryBuilder('cp')
-        .select([
-          'cp.id',
-          'cp.title',
-          'cp.description',
-          'cp.type',
-          'cp.url',
-          'cp.checkPointDate', // adjust column name if different
-          'cp.createdAt',
-          'cp.confirmedAt',
-          'cp.isConfirmed',
-        ])
-        .where('cp.isConfirmed = :isConfirmed', { isConfirmed: true })
-        .orderBy('cp.checkPointDate', 'DESC')
-        .addOrderBy('cp.createdAt', 'DESC')
-        .take(20); // LIMIT 20
+  async getTheNetwork(): Promise<any> {
+    return (
+      this.flaskChildRepository
+        .createQueryBuilder('child')
+        .leftJoinAndMapOne(
+          'child.family',
+          Family,
+          'family',
+          'family.id_child = child.id',
+        )
+        .leftJoinAndMapMany(
+          'family.currentMembers',
+          UserFamily,
+          'userFamily',
+          'userFamily.id_family = family.id',
+        )
+        .innerJoinAndMapOne(
+          'userFamily.user',
+          User,
+          'user',
+          'user.id = userFamily.id_user',
+        )
 
-      const items = await qb.getMany();
-      return items;
-    } catch (err) {
-      // optional: log(err)
-      throw new InternalServerErrorException('Failed to fetch checkpoints');
-    }
+        .where('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+        .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
+        .andWhere('userFamily.isDeleted = :isDeleted', { isDeleted: false })
+        .andWhere('child.isMigrated = :childIsMigrated', {
+          childIsMigrated: false,
+        })
+        // .andWhere('child.existence_status = :existence_status', {
+        //   existence_status: ChildExistence.AlivePresent,
+        // })
+        .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+          testNgoIds: [3, 14],
+        })
+        .select([
+          'child.id',
+          'child.awakeAvatarUrl',
+          'family.id',
+          'userFamily.id',
+          'userFamily.flaskFamilyRole',
+          'user.id',
+          'user.avatarUrl',
+        ])
+        .cache(true)
+        .getMany()
+    );
   }
 }

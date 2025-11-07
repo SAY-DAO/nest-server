@@ -29,6 +29,9 @@ export default class DataCache {
     khalehsData: Need[];
     daeisData: Need[];
     ammesData: Need[];
+    sayData: Need[];
+    nakamaData: Need[];
+    othersData: Need[];
     created: Date;
   } = null;
   familyRolesCount = null;
@@ -122,6 +125,9 @@ export default class DataCache {
     khalehsData,
     daeisData,
     ammesData,
+    sayData,
+    nakamaData,
+    othersData,
   }: {
     fathersData: Need[];
     mothersData: Need[];
@@ -129,6 +135,9 @@ export default class DataCache {
     khalehsData: Need[];
     daeisData: Need[];
     ammesData: Need[];
+    sayData: Need[];
+    nakamaData: Need[];
+    othersData: Need[];
   }) => {
     this.familyData = {
       fathersData,
@@ -137,6 +146,9 @@ export default class DataCache {
       khalehsData,
       daeisData,
       ammesData,
+      sayData,
+      nakamaData,
+      othersData,
       created: new Date(),
     };
     // after storing needs paid by roles, e.g. list of needs paid by fathers
@@ -152,6 +164,9 @@ export default class DataCache {
     khalehsCount,
     daeisCount,
     ammesCount,
+    sayCount,
+    othersCount,
+    nakamaCount,
   }) => {
     this.familyRolesCount = {
       fathersCount,
@@ -160,6 +175,9 @@ export default class DataCache {
       khalehsCount,
       daeisCount,
       ammesCount,
+      sayCount,
+      othersCount,
+      nakamaCount,
       created: new Date(),
     };
   };
@@ -202,37 +220,50 @@ export default class DataCache {
 
   // panel analytic scatter chart + update medianList for quartile
   roleScatteredData() {
+    const father = getScattered(
+      this.familyData && this.familyData.fathersData,
+      VirtualFamilyRole.FATHER,
+      this.medianList,
+    );
+    const mother = getScattered(
+      this.familyData && this.familyData.mothersData,
+      VirtualFamilyRole.MOTHER,
+      this.medianList,
+    );
+    const amoo = getScattered(
+      this.familyData && this.familyData.amoosData,
+      VirtualFamilyRole.AMOO,
+      this.medianList,
+    );
+    const khaleh = getScattered(
+      this.familyData && this.familyData.khalehsData,
+      VirtualFamilyRole.KHALEH,
+      this.medianList,
+    );
+    const daei = getScattered(
+      this.familyData && this.familyData.daeisData,
+      VirtualFamilyRole.DAEI,
+      this.medianList,
+    );
+    const amme = getScattered(
+      this.familyData && this.familyData.ammesData,
+      VirtualFamilyRole.AMME,
+      this.medianList,
+    );
+
     return {
-      father: getScattered(
-        this.familyData && this.familyData.fathersData,
-        VirtualFamilyRole.FATHER,
-        this.medianList,
-      ),
-      mother: getScattered(
-        this.familyData && this.familyData.mothersData,
-        VirtualFamilyRole.MOTHER,
-        this.medianList,
-      ),
-      amoo: getScattered(
-        this.familyData && this.familyData.amoosData,
-        VirtualFamilyRole.AMOO,
-        this.medianList,
-      ),
-      khaleh: getScattered(
-        this.familyData && this.familyData.khalehsData,
-        VirtualFamilyRole.KHALEH,
-        this.medianList,
-      ),
-      daei: getScattered(
-        this.familyData && this.familyData.daeisData,
-        VirtualFamilyRole.DAEI,
-        this.medianList,
-      ),
-      amme: getScattered(
-        this.familyData && this.familyData.ammesData,
-        VirtualFamilyRole.AMME,
-        this.medianList,
-      ),
+      father: father.finalList,
+      fatherUniqueCount: father.uniqueCount,
+      mother: mother.finalList,
+      motherUniqueCount: mother.uniqueCount,
+      amoo: amoo.finalList,
+      amooUniqueCount: amoo.uniqueCount,
+      khaleh: khaleh.finalList,
+      khalehUniqueCount: khaleh.uniqueCount,
+      daei: daei.finalList,
+      daeiUniqueCount: daei.uniqueCount,
+      amme: amme.finalList,
+      ammeUniqueCount: amme.uniqueCount,
     };
   }
 

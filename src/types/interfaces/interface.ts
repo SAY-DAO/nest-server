@@ -1,13 +1,14 @@
 export const SAY_DAPP_ID = 208;
 export const SUPER_ADMIN_ID_PANEL = 25;
-export const SUPER_ADMIN_ID_DAPP = 115;
 export enum eEthereumNetworkChainId {
   mainnet = 1,
   goerli = 5,
   sepolia = 11155111,
 }
 export enum VirtualFamilyRole {
+  NAKAMA = -3, // deprecated NFT
   SAY = -2,
+  OTHERS = -1,
   FATHER = 0,
   MOTHER = 1,
   AMOO = 2,

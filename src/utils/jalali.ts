@@ -1,7 +1,7 @@
 import * as jalaali from 'jalaali-js';
 import { SeasonComparisonItemDto } from '../features/analytic/dto/season-comparison-response.dto';
+import { toGregorian } from 'jalaali-js';
 
-/** Raw DB row type */
 export type RawRow = { month: any; day?: any; value: any };
 
 /* Persian month names */
@@ -94,7 +94,7 @@ export function deduceGregorianYearForRow(
  * - currJalaliYear & prevJalaliYear: Jalali years (e.g. 1403)
  *
  * Options:
- * - returnStrings: if true, current/previous are returned as strings (keeps parity with prior examples)
+ * - returnStrings: if true, current/previous are returned as strings 
  * - excludeFutureMonths: if true (default), and if currJalaliYear equals the Jalali year of `asOf`,
  *   months after the as-of month are removed from the returned array.
  * - asOf: reference Date used to determine the current Jalali month (default: new Date()).
@@ -181,7 +181,6 @@ export function mergeByJalaliMonth(
         current: returnStrings ? String(v.current) : v.current,
         previous: returnStrings ? String(v.prev) : v.prev,
         monthIndex: jm,
-        month: period,
       } as SeasonComparisonItemDto;
     });
 
@@ -191,9 +190,121 @@ export function mergeByJalaliMonth(
     out = out.filter((item) => {
       // keep months <= maxReachedMonth
       if (typeof item.monthIndex !== 'number') return true;
-      return item.monthIndex <= maxReachedMonth;
+      return item.monthIndex < maxReachedMonth;
     });
   }
-
   return out;
+}
+
+const persianDigitMap: Record<string, string> = {
+  '0': '۰',
+  '1': '۱',
+  '2': '۲',
+  '3': '۳',
+  '4': '۴',
+  '5': '۵',
+  '6': '۶',
+  '7': '۷',
+  '8': '۸',
+  '9': '۹',
+};
+
+function toPersianDigitsInString(s: string): string {
+  return s.replace(/\d/g, (d) => persianDigitMap[d] ?? d);
+}
+
+function toPersianNumberFormatted(
+  num: number | string,
+  locale = 'fa-IR',
+  options?: Intl.NumberFormatOptions,
+): string {
+  const n = typeof num === 'string' ? parseFloat(num) : num;
+  if (isNaN(n)) {
+    // If it's not a number (e.g. empty or invalid string), fallback to your simple replace
+    return toPersianDigitsInString(num.toString());
+  }
+  // Format the number using Intl.NumberFormat
+  const formatted = n.toLocaleString(locale, options);
+  // Then convert digits in that formatted string to Persian digits
+  return toPersianDigitsInString(formatted);
+}
+
+function toPersianNumber(num: number | string): string {
+  return num.toString().replace(/\d/g, (d) => persianDigitMap[d] ?? d);
+}
+
+export function makePersianDescription(
+  currMonthPay: number,
+  prevMonthPay: number,
+  currMonthNeed: number,
+  prevMonthNeed: number,
+  jm: number,
+  jy: number,
+): string {
+  const monthName = persianMonthNames[jm - 1];
+  const jyPersian = toPersianNumber(jy);
+  const jyPersianPrev = toPersianNumber(jy - 1);
+
+  const currPayPersian = toPersianNumberFormatted(currMonthPay);
+  const prevPayPersian = toPersianNumberFormatted(prevMonthPay);
+  const currNeedsPersian = toPersianNumberFormatted(currMonthNeed);
+  const prevNeedsPersian = toPersianNumberFormatted(prevMonthNeed);
+
+  let payRateText = '';
+  if (prevMonthPay > 0) {
+    const diffPay = currMonthPay - prevMonthPay;
+    const ratePay = (diffPay / prevMonthPay) * 100;
+    const ratePayRounded = Math.round(ratePay * 10) / 10;
+    if (diffPay > 0) {
+      payRateText = `افزایش ≈${toPersianNumberFormatted(ratePayRounded)}٪`;
+    } else if (diffPay < 0) {
+      payRateText = `کاهش ≈${toPersianNumberFormatted(
+        Math.abs(ratePayRounded),
+      )}٪`;
+    } else {
+      payRateText = 'بدون تغییر';
+    }
+  }
+
+  let needRateText = '';
+  if (prevMonthNeed > 0) {
+    const diffNeed = currMonthNeed - prevMonthNeed;
+    const rateNeed = (diffNeed / prevMonthNeed) * 100;
+    const rateNeedRounded = Math.round(rateNeed * 10) / 10;
+    if (diffNeed > 0) {
+      needRateText = `افزایش ≈${toPersianNumberFormatted(rateNeedRounded)}٪`;
+    } else if (diffNeed < 0) {
+      needRateText = `کاهش ≈${toPersianNumberFormatted(
+        Math.abs(rateNeedRounded),
+      )}٪`;
+    } else {
+      needRateText = 'بدون تغییر';
+    }
+  }
+
+  // Construct the description
+  let desc = `در ماه ${monthName} ${jyPersian}، مجموع پرداخت‌ها ${currPayPersian} تومان و تعداد نیازهای ارسال شده به کودکان ${currNeedsPersian} عدد بود. `;
+  desc += `در ماه ${monthName} ${jyPersianPrev}، مجموع پرداخت‌ها ${prevPayPersian} تومان و تعداد نیازها ${prevNeedsPersian} عدد بود`;
+  const joinRateParts = [];
+  if (payRateText) {
+    joinRateParts.push(`${payRateText} در پرداخت‌ها`);
+  }
+  if (needRateText) {
+    joinRateParts.push(
+      `${needRateText} در تعداد نیازها در مقایسه با دوره مشابه سال قبلی`,
+    );
+  }
+  if (joinRateParts.length > 0) {
+    desc += ` — ${joinRateParts.join(' و ')}`;
+  }
+  desc += '.';
+
+  return desc;
+}
+
+// Jalali to Georgian
+export function jalaaliToDate(jy: number, jm: number, jd: number): Date {
+  const { gy, gm, gd } = toGregorian(jy, jm, jd);
+  // Note: JavaScript Date months are 0‑based, so subtract 1 from gm
+  return new Date(gy, gm - 1, gd);
 }

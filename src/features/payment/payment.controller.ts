@@ -147,7 +147,7 @@ export class PaymentController {
     }
   }
   @Get(`all`)
-  @ApiOperation({ description: 'Get all needs payments' })
+  @ApiOperation({ description: 'Get user payments' })
   async getPayments(@Req() req: Request) {
     const panelFlaskUserId = req.headers['panelFlaskUserId'];
     const panelFlaskTypeId = req.headers['panelFlaskTypeId'];

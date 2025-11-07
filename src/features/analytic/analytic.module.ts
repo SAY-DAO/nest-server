@@ -36,6 +36,7 @@ import { AnalyticPublicController } from './public.analytic.controller';
 import { AnalyticPublicService } from './public.analytic.service';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CheckPointEntity } from 'src/entities/checkpoint.entity';
+import { CheckPointService } from '../checkpoint/checkpoint.service';
 
 @Module({
   imports: [
@@ -69,20 +70,21 @@ import { CheckPointEntity } from 'src/entities/checkpoint.entity';
       CheckPointEntity,
     ]),
     CacheModule.register({
-      ttl: Number(process.env.REPORTS_CACHE_TTL ?? 10), // seconds
+      ttl: Number(process.env.REPORTS_CACHE_TTL ?? 10000), // seconds
       max: 100,
     }),
   ],
 
   controllers: [AnalyticController, AnalyticPublicController],
   providers: [
-    AnalyticService,
+    CheckPointService,
     AnalyticPublicService,
     UserService,
     NeedService,
     ChildrenService,
     FamilyService,
     NgoService,
+    AnalyticService,
   ],
 })
 export class AnalyticModule implements NestModule {
@@ -90,13 +92,18 @@ export class AnalyticModule implements NestModule {
     consumer
       .apply(AnalyticMiddleware)
       .exclude(
+        {
+          path: 'analytic/public/needs/delivered/:type',
+          method: RequestMethod.GET,
+        },
         { path: 'analytic/public/summary', method: RequestMethod.GET },
+        { path: 'analytic/public/children/network', method: RequestMethod.GET },
         { path: 'analytic/public/transactions', method: RequestMethod.GET },
         {
           path: 'analytic/public/season-comparison',
           method: RequestMethod.GET,
         },
-        { path: 'analytic/public/multi-payers', method: RequestMethod.GET },
+        { path: 'analytic/public/family/scattered', method: RequestMethod.GET },
         { path: 'analytic/public/logs', method: RequestMethod.GET },
         {
           path: 'analytic/public/needs-frequency-clustered',

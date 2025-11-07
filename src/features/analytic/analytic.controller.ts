@@ -90,36 +90,6 @@ export class AnalyticController {
     return result;
   }
 
-  @Get(`needs/delivered/:needType`)
-  @ApiOperation({ description: 'Get all delivered needs from flask' })
-  async getNeedsAnalytic(
-    @Req() req: Request,
-    @Param('needType') needType: NeedTypeEnum,
-  ) {
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
-    ) {
-      throw new ForbiddenException('You Are not the Super admin');
-    }
-    return await this.analyticService.getDeliveredNeedsAnalytic(needType);
-  }
-
-  @Get(`children`)
-  @ApiOperation({ description: 'Get all needs from flask' })
-  async getChildrenAnalytic(@Req() req: Request) {
-    const panelFlaskUserId = req.headers['panelFlaskUserId'];
-    const panelFlaskTypeId = req.headers['panelFlaskTypeId'];
-    if (
-      !isAuthenticated(panelFlaskUserId, panelFlaskTypeId) ||
-      panelFlaskTypeId !== FlaskUserTypesEnum.SUPER_ADMIN
-    ) {
-      throw new ForbiddenException('You Are not the Super admin');
-    }
-    return await this.analyticService.getChildrenAnalytic();
-  }
 
   @Get(`ngos`)
   @ApiOperation({ description: 'Get all needs from flask' })

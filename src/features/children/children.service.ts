@@ -154,8 +154,16 @@ export class ChildrenService {
     );
   }
 
-  getChildren(): Promise<ChildrenEntity[]> {
+  async getChildren(): Promise<ChildrenEntity[]> {
     return this.childrenRepository.find();
+  }
+
+  async getAllFlaskChildren(): Promise<Child[]> {
+    return this.flaskChildRepository.find({
+      where: {
+        isDeleted: false,
+      },
+    });
   }
 
   async getFlaskChildren(
@@ -267,50 +275,6 @@ export class ChildrenService {
       .getMany();
   }
 
-  async getTheNetwork(): Promise<any> {
-    return this.flaskChildRepository
-      .createQueryBuilder('child')
-      .leftJoinAndMapOne(
-        'child.family',
-        Family,
-        'family',
-        'family.id_child = child.id',
-      )
-      .leftJoinAndMapMany(
-        'family.currentMembers',
-        UserFamily,
-        'userFamily',
-        'userFamily.id_family = family.id',
-      )
-      .innerJoinAndMapOne(
-        'userFamily.user',
-        User,
-        'user',
-        'user.id = userFamily.id_user',
-      )
-
-      .where('child.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('child.isMigrated = :childIsMigrated', {
-        childIsMigrated: false,
-      })
-      .andWhere('child.existence_status = :existence_status', {
-        existence_status: ChildExistence.AlivePresent,
-      })
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      .select([
-        'child.id',
-        'child.awakeAvatarUrl',
-        'family.id',
-        'userFamily.id',
-        'user.id',
-        'user.avatarUrl',
-      ])
-      .cache(true)
-      .getMany();
-  }
   // ----------------------------------------------------------------------------------------------------------------------------------
   // ----------------------------------------------------------- PRE - REGISTER -------------------------------------------------------
   // ----------------------------------------------------------------------------------------------------------------------------------

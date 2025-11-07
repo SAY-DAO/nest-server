@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ChildExistence,
   PaymentStatusEnum,
   SAYPlatformRoles,
   VirtualFamilyRole,
 } from '../../types/interfaces/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Need } from '../../entities/flaskEntities/need.entity';
-import { And, IsNull, Not, Repository, UpdateResult } from 'typeorm';
+import { And, Brackets, IsNull, Not, Repository, UpdateResult } from 'typeorm';
 import { Payment } from '../../entities/flaskEntities/payment.entity';
 import { Child } from '../../entities/flaskEntities/child.entity';
 import { User } from '../../entities/flaskEntities/user.entity';
@@ -35,19 +36,34 @@ export class FamilyService {
 
   async searchUsers(query: string): Promise<User[]> {
     const q = `%${query}%`;
-    return (
-      this.flaskUserRepository
-        .createQueryBuilder('user')
-        .where('user.userName ILIKE :userName', { userName: q })
-        .orWhere('user.emailAddress ILIKE :emailAddress', { emailAddress: q })
-        .orWhere('user.phone_number ILIKE :phone_number', { phone_number: q })
-        .orWhere('user.firstName ILIKE :firstName', { firstName: q })
-        .orWhere('user.first_name ILIKE :first_name', { first_name: q })
-        .orWhere('CAST(user.id AS text) ILIKE :id', { id: q }) // cast id to text so ILIKE works
-        .andWhere('user.isDeleted != :isDeleted', { isDeleted: false })
-        .getMany()
-    );
+
+    // quick heuristics
+    const isNumeric = /^\d+$/.test(query);
+    const isUuid =
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+        query,
+      );
+
+    const qb = this.flaskUserRepository.createQueryBuilder('user');
+
+    qb.where(
+      new Brackets((br) => {
+        br.where('user.userName ILIKE :q', { q })
+          .orWhere('user.emailAddress ILIKE :q', { q })
+          .orWhere('user.phone_number ILIKE :q', { q })
+          .orWhere('user.firstName ILIKE :q', { q });
+        // prefer exact id match when query looks like an id (faster & correct)
+        if (isUuid || isNumeric) {
+          br.orWhere('user.id = :exactId', { exactId: query });
+        } else {
+          // fallback to text match (Postgres): cast id to text and ILIKE
+          br.orWhere('CAST(user.id AS text) ILIKE :q', { q });
+        }
+      }),
+    ).andWhere('user.isDeleted = :isDeleted', { isDeleted: false });
+    return qb.getMany();
   }
+
   async getFamilyMembers(familyId: number): Promise<any> {
     return await this.flaskFamilyRepository
       .createQueryBuilder('family')
@@ -63,29 +79,133 @@ export class FamilyService {
       .getManyAndCount();
   }
 
-  async getFamilyRolesCount(vfamilyRole: VirtualFamilyRole): Promise<any> {
-    return this.flaskUserRepository
+  async getFamilyRolesCount(vfamilyRole: number): Promise<number> {
+    const testNgoIds = [3, 14];
+
+    // resolve real table names to avoid TypeORM alias substitution issues
+    const mgr = this.flaskUserRepository.manager;
+    const nfTable = mgr.getRepository(NeedFamily).metadata.tableName;
+    const needTable = mgr.getRepository(Need).metadata.tableName;
+    const childTable = mgr.getRepository(Child).metadata.tableName;
+    const paymentTable = mgr.getRepository(Payment).metadata.tableName;
+
+    const qb = this.flaskUserRepository
       .createQueryBuilder('user')
-      .leftJoinAndMapMany(
-        'user.user_families',
-        UserFamily,
-        'userFamily',
-        'userFamily.id_user = user.id',
+      // require a matching needFamily row with the requested role
+      .innerJoin(
+        nfTable,
+        'nf',
+        `"nf"."id_user" = "user"."id" AND "nf"."user_role" = :flaskFamilyRole`,
+        { flaskFamilyRole: vfamilyRole },
       )
-      .leftJoinAndMapOne(
-        'userFamily.family',
-        Family,
-        'family',
-        'family.id = userFamily.id_family',
+      // require the related need and check need filters in ON clause
+      .innerJoin(
+        needTable,
+        'n',
+        `"n"."id" = "nf"."id_need" AND ( "n"."isDeleted" IS NULL OR "n"."isDeleted" = FALSE ) AND ( "n"."isConfirmed" = TRUE ) AND "n"."status" >= :statusPaid`,
+        { statusPaid: PaymentStatusEnum.COMPLETE_PAY },
       )
-      .andWhere('userFamily.isDeleted = :userFamilyDeleted', {
-        userFamilyDeleted: false,
-      })
-      .andWhere('userFamily.flaskFamilyRole = :flaskFamilyRole', {
-        flaskFamilyRole: vfamilyRole, // we have -1 and -2 in data as well (e.g user id:208 is SAY)
-      })
-      .cache(true)
-      .getCount();
+      // require the child and apply child filters
+      .innerJoin(
+        childTable,
+        'c',
+        `"c"."id" = "n"."child_id" AND ( "c"."isDeleted" IS NULL OR "c"."isDeleted" = FALSE ) AND ( "c"."id_ngo" IS NULL OR "c"."id_ngo" NOT IN (:...testNgoIds) )`,
+        { testNgoIds },
+      )
+      // require at least one payment by the user for that need (verified)
+      .innerJoin(
+        paymentTable,
+        'p',
+        `"p"."id_user" = "user"."id" AND "p"."id_need" = "n"."id" AND "p"."verified" IS NOT NULL`,
+      )
+      .where(
+        new Brackets((b) => {
+          b.where('user.is_email_verified = TRUE').orWhere(
+            'user.is_phonenumber_verified = TRUE',
+          );
+        }),
+      )
+      .andWhere('(user.isDeleted IS NULL OR user.isDeleted = FALSE)')
+      .andWhere('user.firstName != :say', { say: 'SAY' })
+      .select('COUNT(DISTINCT user.id)', 'count');
+
+    const raw = await qb.getRawOne();
+    return parseInt(raw.count, 10) || 0;
+  }
+
+  async getDoneNeedsByFamilyRole(
+    vfamilyRole: VirtualFamilyRole,
+    userId: number,
+  ): Promise<[Need[], number]> {
+    return (
+      this.flaskNeedRepository
+        .createQueryBuilder('need')
+        .leftJoinAndMapMany(
+          'need.participants',
+          NeedFamily,
+          'needFamily',
+          'needFamily.id_need = need.id',
+        )
+        .leftJoinAndMapOne(
+          'need.child',
+          Child,
+          'child',
+          'child.id = need.child_id',
+        )
+        .leftJoinAndMapMany(
+          'need.payments',
+          Payment,
+          'payment',
+          'payment.id_need = need.id',
+        )
+        .where('need.status >= :statusPaid', {
+          statusPaid: PaymentStatusEnum.COMPLETE_PAY,
+        })
+        .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
+        .andWhere('child.isDeleted = :childDeleted', { childDeleted: false })
+        .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+          testNgoIds: [3, 14],
+        })
+        .andWhere('need.isConfirmed = :isNeedConfirmed', {
+          isNeedConfirmed: true,
+        })
+        .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
+        .andWhere(userId > 0 && `payment.id_user = :pUserId`, {
+          pUserId: userId,
+        })
+        .andWhere(userId > 0 && `needFamily.id_user = :nUserId`, {
+          nUserId: userId,
+        })
+        // -----> From here: diff from what we get on panel done count
+        // .andWhere('needFamily.isDeleted = :needFamilyDeleted', {
+        //   needFamilyDeleted: false,
+        // })
+        //<------- to here
+        .andWhere('needFamily.flaskFamilyRole = :flaskFamilyRole', {
+          flaskFamilyRole: vfamilyRole, // we have -3 and -2 in data as well (e.g user id:208 is SAY)
+        })
+        .andWhere('payment.id IS NOT NULL')
+        .andWhere('payment.verified IS NOT NULL')
+        .andWhere('payment.id_need IS NOT NULL')
+        .select([
+          'need.id',
+          'need.created',
+          'need.child_delivery_date',
+          'need._cost',
+          'need.status',
+          'need.isConfirmed',
+          'need.confirmDate',
+          'need.isDeleted',
+          'need.status',
+          'need.child_id',
+          'child.isConfirmed',
+          'child.id_ngo',
+          'needFamily',
+          'payment',
+        ])
+        .cache(true)
+        .getManyAndCount()
+    );
   }
 
   async isChildCaredOnce(userId: number, childId: number): Promise<boolean> {
@@ -118,74 +238,6 @@ export class FamilyService {
       .andWhere('payment.verified IS NOT NULL')
       .andWhere('payment.order_id IS NOT NULL')
       .getExists();
-  }
-
-  async getFamilyRoleCompletePay(
-    vfamilyRole: VirtualFamilyRole,
-    userId: number,
-  ): Promise<[Need[], number]> {
-    return (
-      this.flaskNeedRepository
-        .createQueryBuilder('need')
-        .leftJoinAndMapMany(
-          'need.participants',
-          NeedFamily,
-          'needFamily',
-          'needFamily.id_need = need.id',
-        )
-        .leftJoinAndMapOne(
-          'need.child',
-          Child,
-          'child',
-          'child.id = need.child_id',
-        )
-        .leftJoinAndMapMany(
-          'need.payments',
-          Payment,
-          'payment',
-          'payment.id_need = need.id',
-        )
-        .andWhere('need.status >= :statusNotPaid', {
-          statusNotPaid: PaymentStatusEnum.COMPLETE_PAY,
-        })
-        .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
-        .andWhere(userId > 0 && `payment.id_user = :pUserId`, {
-          pUserId: userId,
-        })
-        .andWhere(userId > 0 && `needFamily.id_user = :nUserId`, {
-          nUserId: userId,
-        })
-        // -----> From here: diff from what we get on panel delivered column
-        .andWhere('needFamily.isDeleted = :needFamilyDeleted', {
-          needFamilyDeleted: false,
-        })
-        .andWhere('needFamily.flaskFamilyRole = :flaskFamilyRole', {
-          flaskFamilyRole: vfamilyRole, // we have -1 and -2 in data as well (e.g user id:208 is SAY)
-        })
-        //<------- to here
-        .andWhere('payment.id IS NOT NULL')
-        .andWhere('payment.verified IS NOT NULL')
-        .andWhere('payment.id_need IS NOT NULL')
-        .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-          testNgoIds: [3, 14],
-        })
-        .select([
-          'need.id',
-          'need.created',
-          'need.child_delivery_date',
-          'need._cost',
-          'need.status',
-          'need.isConfirmed',
-          'need.confirmDate',
-          'need.isDeleted',
-          'need.status',
-          'need.child_id',
-          'needFamily',
-          'payment',
-        ])
-        .cache(true)
-        .getManyAndCount()
-    );
   }
 
   // async getFamilyPaidNeeds(familyMemberId: number): Promise<PaymentEntity[]> {

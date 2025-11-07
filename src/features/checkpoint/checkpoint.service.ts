@@ -15,6 +15,7 @@ import {
   PaginateQuery,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
+import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 
 @Injectable()
 export class CheckPointService {
@@ -90,6 +91,15 @@ export class CheckPointService {
     return cp;
   }
 
+  async findByCheckPintDate(
+    date: Date,
+    cpType: CheckPointType,
+  ): Promise<CheckPointEntity> {
+    return await this.checkPointRepository.findOne({
+      where: { checkPointDate: date, type: cpType },
+    });
+  }
+
   async findAll(query: PaginateQuery): Promise<Paginated<CheckPointEntity>> {
     try {
       const qb = this.checkPointRepository
@@ -137,6 +147,38 @@ export class CheckPointService {
         ],
       });
     } catch (err) {
+      throw new InternalServerErrorException('Failed to fetch checkpoints');
+    }
+  }
+
+  /**
+   * Return the most recent 20 checkpoints ordered by checkpoint time (descending).
+   * No filters, no pagination metadata — just an array of CheckPointEntity.
+   */
+  async findLatest20(): Promise<CheckPointEntity[]> {
+    try {
+      const qb = this.checkPointRepository
+        .createQueryBuilder('cp')
+        .select([
+          'cp.id',
+          'cp.title',
+          'cp.description',
+          'cp.type',
+          'cp.url',
+          'cp.checkPointDate', // adjust column name if different
+          'cp.createdAt',
+          'cp.confirmedAt',
+          'cp.isConfirmed',
+        ])
+        .where('cp.isConfirmed = :isConfirmed', { isConfirmed: true })
+        .orderBy('cp.checkPointDate', 'DESC')
+        .addOrderBy('cp.createdAt', 'DESC')
+        .take(300); // LIMIT 20
+
+      const items = await qb.getMany();
+      return items;
+    } catch (err) {
+      // optional: log(err)
       throw new InternalServerErrorException('Failed to fetch checkpoints');
     }
   }

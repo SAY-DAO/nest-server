@@ -11,15 +11,11 @@ export const CheckPointTypeLabel: Record<CheckPointType, string> = {
   [CheckPointType.PERFORMANCE]: 'Perf',
 
   [CheckPointType.ROADMAP]: 'Roadmap',
-  [CheckPointType.PRODUCT_SPEC]: 'Spec',
   [CheckPointType.USER_RESEARCH]: 'Research',
   [CheckPointType.TESTING]: 'Testing',
 
   [CheckPointType.DESIGN]: 'Design',
-  [CheckPointType.ASSET_PRODUCTION]: 'Assets',
-
   [CheckPointType.CONTENT]: 'Content',
-  [CheckPointType.SOCIAL]: 'Social',
   [CheckPointType.MARKETING_CAMPAIGN]: 'Campaign',
   [CheckPointType.GROWTH_EXPERIMENT]: 'Experiment',
 
@@ -40,6 +36,8 @@ export const CheckPointTypeLabel: Record<CheckPointType, string> = {
   [CheckPointType.MEETING]: 'Meeting',
   [CheckPointType.TRAINING]: 'Training',
 
-  [CheckPointType.CHILD_JOINED]: 'Joined',
-  [CheckPointType.SEASONAL_REPORT]: 'Report',
+  [CheckPointType.CHILD_LEFT]: 'Left',
+  [CheckPointType.CHILD_JOINED]: 'Registered',
+  [CheckPointType.NGO_JOINED]: 'Joined',
+  [CheckPointType.MONTHLY_REPORT]: 'Report',
 };

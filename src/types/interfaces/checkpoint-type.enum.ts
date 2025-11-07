@@ -9,23 +9,19 @@ export const CheckPointType = {
   PERFORMANCE: 'performance',
 
   ROADMAP: 'roadmap',
-  PRODUCT_SPEC: 'spec',
   USER_RESEARCH: 'research',
   TESTING: 'testing',
 
   DESIGN: 'design',
-  ASSET_PRODUCTION: 'assets',
-
   CONTENT: 'content',
-  SOCIAL: 'social',
   MARKETING_CAMPAIGN: 'campaign',
   GROWTH_EXPERIMENT: 'experiment',
 
   CUSTOMER_SUPPORT: 'support',
   ONBOARDING: 'onboarding',
   PARTNERSHIPS: 'partners',
-  INCIDENT_RESPONSE: 'incident',
 
+  INCIDENT_RESPONSE: 'incident',
   MONITORING: 'monitor',
   BACKUP: 'backup',
   SECURITY: 'security',
@@ -38,8 +34,10 @@ export const CheckPointType = {
   MEETING: 'meeting',
   TRAINING: 'training',
 
-  CHILD_JOINED: 'joined',
-  SEASONAL_REPORT: 'report',
+  CHILD_JOINED: 'registered',
+  CHILD_LEFT: 'left',
+  NGO_JOINED: 'joined',
+  MONTHLY_REPORT: 'report',
 } as const;
 
 export type CheckPointType =

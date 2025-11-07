@@ -1198,15 +1198,6 @@ export class ChildrenController {
     return await this.campaignService.childrenWithNoNeed();
   }
 
-  @Get('/network')
-  getAvailableContributions(@Req() req: Request) {
-    const dappFlaskUserId = req.headers['dappFlaskUserId'];
-    if (!isAuthenticated(dappFlaskUserId, FlaskUserTypesEnum.FAMILY)) {
-      throw new ForbiddenException('You Are not authorized');
-    }
-    return this.childrenService.getTheNetwork();
-  }
-
   @Get('avatars/images/:fileName')
   async serveAwakeAvatar(
     @Param('fileName') fileName: string,

@@ -7,6 +7,7 @@ import { BaseEntity } from './BaseEntity';
 
 @Entity()
 export class Need extends BaseEntity {
+  [x: string]: any;
   @Column({ nullable: true })
   title: string;
 

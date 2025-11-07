@@ -843,7 +843,7 @@ export function findQuartileGrant(
 }
 
 export function getScattered(
-  data: any[],
+  data: any[], //need[]
   vRole: VirtualFamilyRole,
   medianList: any[],
 ) {
@@ -852,13 +852,14 @@ export function getScattered(
     userId: number;
     created: Date;
   }[] = [];
+
   if (data) {
     // 1- go over all needs and seperate users who have paid
     data.forEach((n) => {
       n.participants.forEach((partic: NeedFamily) => {
         // get the payment of the participant
         const payment = n.payments.find(
-          (p: Payment) => p.id_user === partic.id_user && p.need_amount > 0,
+          (p: Payment) => p.id_user === partic.id_user,
         );
         if (payment && payment.id_user) {
           usersPays.push({
@@ -868,16 +869,23 @@ export function getScattered(
         }
       });
     });
+  } else {
+    console.log('Data is not loaded for scattred yet!');
   }
+
   // 2- count total pays per users
   const listOfIds = [];
   usersPays.forEach((u) => {
     const onlyThisUserPays = usersPays.filter((p) => p.userId === u.userId);
     if (!listOfIds.find((item) => item.userId === u.userId)) {
       listOfIds.push({ userId: u.userId });
-      series.push({ userId: u.userId, total: onlyThisUserPays.length });
+      series.push({ userId: u.userId, total: onlyThisUserPays.length }); // total -> totalNumberOfPay
     }
   });
+
+  const uniqueUserIds = new Set(usersPays.map((item) => item.userId));
+  // Get the count of unique userIds
+  const uniqueCount = uniqueUserIds.size;
 
   // series = [{userId: 126, total: 101},{userId: 666, total: 3}, {userId: 567, total: 3}, ...]
   const sorted = series.sort((a, b) => a.total - b.total);
@@ -902,8 +910,8 @@ export function getScattered(
   }
   // for quartile / Scattered graph
   medianList.push({ [vRole]: paidList });
-
-  return finalList;
+  
+  return { finalList, uniqueCount };
 }
 
 export function truncateString(str: string, num: number) {
@@ -1089,3 +1097,10 @@ export const containsAny = (text: string, keywords: string[]) => {
   }
   return false;
 };
+
+export function getNextMonthIndex1(monthIndex: number): number {
+  if (monthIndex < 1 || monthIndex > 12) {
+    throw new Error(`Invalid monthIndex: ${monthIndex}`);
+  }
+  return (monthIndex % 12) + 1;
+}

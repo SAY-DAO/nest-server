@@ -18,17 +18,12 @@ export const CheckPointCategory: Record<string, CheckPointType[]> = {
   ],
   Product: [
     CheckPointType.ROADMAP,
-    CheckPointType.PRODUCT_SPEC,
     CheckPointType.USER_RESEARCH,
     CheckPointType.TESTING,
   ],
-  Design: [
-    CheckPointType.DESIGN,
-    CheckPointType.ASSET_PRODUCTION,
-  ],
+  Design: [CheckPointType.DESIGN],
   Marketing: [
     CheckPointType.CONTENT,
-    CheckPointType.SOCIAL,
     CheckPointType.MARKETING_CAMPAIGN,
     CheckPointType.GROWTH_EXPERIMENT,
   ],
@@ -45,5 +40,10 @@ export const CheckPointCategory: Record<string, CheckPointType[]> = {
     CheckPointType.MEETING,
     CheckPointType.TRAINING,
   ],
-  Internal: [CheckPointType.CHILD_JOINED, CheckPointType.SEASONAL_REPORT],
+  Internal: [
+    CheckPointType.CHILD_LEFT,
+    CheckPointType.CHILD_JOINED,
+    CheckPointType.NGO_JOINED,
+    CheckPointType.MONTHLY_REPORT,
+  ],
 };

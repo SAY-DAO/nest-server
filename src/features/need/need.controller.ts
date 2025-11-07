@@ -23,12 +23,7 @@ import {
   SUPER_ADMIN_ID_PANEL,
 } from '../../types/interfaces/interface';
 import config from '../../config';
-import {
-  areNamesSimilar,
-  daysDifference,
-  isOver18,
-  timeDifference,
-} from '../../utils/helpers';
+import { daysDifference, isOver18, timeDifference } from '../../utils/helpers';
 import axios from 'axios';
 import { NgoService } from '../ngo/ngo.service';
 import { format } from 'date-fns';
@@ -494,7 +489,7 @@ export class NeedController {
         let similarTitleNeeds: [Need[], number];
         if (need.type === NeedTypeEnum.PRODUCT) {
           similarTitleNeeds = await this.needService.getSimilarNeedsProduct(
-           need.title.slice(0, 20),
+            need.title.slice(0, 20),
           );
           // double check
           similarTitleNeeds[0] = similarTitleNeeds[0].filter(

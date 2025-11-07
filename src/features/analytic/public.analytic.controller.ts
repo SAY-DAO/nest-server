@@ -8,19 +8,40 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { daysDifference } from '../../utils/helpers';
-import { AnalyticService } from './analytic.service';
 import config from '../../config';
 import { AnalyticPublicService } from './public.analytic.service';
-import { Need } from 'src/entities/flaskEntities/need.entity';
+import { CheckPointService } from '../checkpoint/checkpoint.service';
+import {
+  NeedTypeEnum,
+  VirtualFamilyRole,
+} from 'src/types/interfaces/interface';
 
 @ApiTags('Analytic/public')
 @Controller('analytic/public')
 export class AnalyticPublicController {
   constructor(
-    private readonly analyticService: AnalyticService,
+    private readonly checkPointService: CheckPointService,
     private readonly analyticPublicService: AnalyticPublicService,
   ) {}
+
+  @Get('needs/delivered/:needType')
+  @ApiOperation({ description: 'Get all delivered needs from flask' })
+  async getNeedsAnalytic(
+    @Param('needType') needType: NeedTypeEnum,
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    const p = Math.max(Number.parseInt(page, 10) || 1, 1);
+    const l = Math.max(Number.parseInt(limit, 10) || 10, 1);
+    const [items, total] =
+      await this.analyticPublicService.getDeliveredNeedsAnalytic(
+        needType,
+        p,
+        l,
+      );
+
+    return { delivered: items, count: total, page: p, limit: l };
+  }
 
   @Get('summary')
   @ApiOperation({ description: 'get summary of totals' })
@@ -29,7 +50,7 @@ export class AnalyticPublicController {
   }
 
   @Get('transactions')
-  @ApiOperation({ description: 'get summary of totals' })
+  @ApiOperation({ description: 'get needs payments' })
   async getTransactionsAnalytic(@Req() req: Request) {
     const X_LIMIT = parseInt(req.headers['x-limit']);
     const X_TAKE = parseInt(req.headers['x-take']);
@@ -48,27 +69,8 @@ export class AnalyticPublicController {
     return this.analyticPublicService.getSeasonComparison(season);
   }
 
-  @Get('needs-frequency-clustered')
-  async getNeedsFrequencyClustered(
-    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
-    @Query('since') since?: string,
-    @Query('until') until?: string,
-    @Query('filterByDoneAt', new DefaultValuePipe(false))
-    filterByDoneAt?: boolean,
-    @Query('similarityThreshold', new DefaultValuePipe(0.2))
-    similarityThreshold?: number,
-  ) {
-    return this.analyticPublicService.getNeedsFrequency({
-      limit,
-      since,
-      until,
-      filterByDoneAt,
-      similarityThreshold: Number(similarityThreshold),
-    });
-  }
-
-  @Get('multi-payers')
-  async getNeedsWithMultiplePayers() {
+  @Get('family/scattered')
+  async getFamilyRoleScattered() {
     return config().dataCache.roleScatteredData();
   }
 
@@ -78,9 +80,14 @@ export class AnalyticPublicController {
   })
   async getAll() {
     try {
-      return this.analyticPublicService.findLatest20();
+      return this.checkPointService.findLatest20();
     } catch (e) {
       console.log(e);
     }
+  }
+
+  @Get('children/network')
+  getAvailableContributions() {
+    return this.analyticPublicService.getTheNetwork();
   }
 }

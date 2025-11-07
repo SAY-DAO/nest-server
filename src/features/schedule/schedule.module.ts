@@ -27,6 +27,9 @@ import { AnalyticPublicService } from '../analytic/public.analytic.service';
 import { CheckPointEntity } from 'src/entities/checkpoint.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CheckPointService } from '../checkpoint/checkpoint.service';
+import { ChildrenService } from '../children/children.service';
+import { ChildrenPreRegisterEntity } from 'src/entities/childrenPreRegister.entity';
+import { ChildrenEntity } from 'src/entities/children.entity';
 
 @Module({
   imports: [
@@ -56,9 +59,11 @@ import { CheckPointService } from '../checkpoint/checkpoint.service';
       EthereumAccountEntity,
       NgoPreRegisterEntity,
       CheckPointEntity,
+      ChildrenPreRegisterEntity,
+      ChildrenEntity,
     ]),
     CacheModule.register({
-      ttl: Number(process.env.REPORTS_CACHE_TTL ?? 10), // seconds
+      ttl: Number(process.env.REPORTS_CACHE_TTL ?? 10000), // seconds
       max: 100,
     }),
   ],
@@ -72,7 +77,8 @@ import { CheckPointService } from '../checkpoint/checkpoint.service';
     NgoService,
     UserService,
     ScheduleService,
-    CheckPointService
+    ChildrenService,
+    CheckPointService,
   ],
 })
 export class ScheduleTaskModule {}

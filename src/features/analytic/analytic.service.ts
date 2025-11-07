@@ -44,31 +44,7 @@ export class AnalyticService {
     private flaskChildRepository: Repository<Child>,
     @InjectRepository(Need, 'flaskPostgres')
     private flaskNeedRepository: Repository<Need>,
-  ) { }
-
-  async getDeliveredNeedsAnalytic(type: NeedTypeEnum) {
-    return await this.flaskNeedRepository
-      .createQueryBuilder('need')
-      .select([
-        'need.id',
-        'need.name_translations',
-        'need.type',
-        'need.created',
-        'need.confirmDate',
-        'need.doneAt',
-        'need.purchase_date',
-        'need.ngo_delivery_date',
-        'need.child_delivery_date',
-      ])
-      .where('need.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('need.type = :type', { type })
-      // .where("need.purchase_date > :startDate", { startDate: new Date(2021, 2, 3) })
-      // .andWhere("need.child_delivery_date < :endDate", { endDate: new Date(2023, 1, 3) })
-      .andWhere('need.child_delivery_date IS NOT NULL')
-      // .orderBy("need.created", "ASC")
-      // .limit(10)
-      .getManyAndCount();
-  }
+  ) {}
 
   async getUsersAnalytic() {
     const families = await this.flaskFamilyRepository
@@ -100,121 +76,6 @@ export class AnalyticService {
         'child.sayname_translations',
       ])
       .getMany();
-  }
-
-  async getChildrenAnalytic() {
-    const allChildren = await this.flaskChildRepository
-      .createQueryBuilder('child')
-      .select([
-        'child.id',
-        'child.id_ngo',
-        'child.sayname_translations',
-        'child.isConfirmed',
-      ])
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      .andWhere('child.isMigrated = :childIsMigrated', {
-        childIsMigrated: false,
-      })
-      .getManyAndCount();
-
-    const dead = await this.flaskChildRepository
-      .createQueryBuilder('child')
-      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.existence_status = :existence_status', {
-        existence_status: ChildExistence.DEAD,
-      })
-      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
-      .andWhere('child.isMigrated = :childIsMigrated', {
-        childIsMigrated: false,
-      })
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      .select(['child.id', 'ngo'])
-      .getCount();
-
-    const alivePresent = await this.flaskChildRepository
-      .createQueryBuilder('child')
-      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.existence_status = :existence_status', {
-        existence_status: ChildExistence.AlivePresent,
-      })
-      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
-      .andWhere('child.isMigrated = :childIsMigrated', {
-        childIsMigrated: false,
-      })
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      .select(['child.id', 'ngo'])
-      .getCount();
-
-    const aliveGone = await this.flaskChildRepository
-      .createQueryBuilder('child')
-      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.existence_status = :existence_status', {
-        existence_status: ChildExistence.AliveGone,
-      })
-      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
-      .andWhere('child.isMigrated = :childIsMigrated', {
-        childIsMigrated: false,
-      })
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      .select(['child.id', 'ngo'])
-      .getCount();
-
-    const tempGone = await this.flaskChildRepository
-      .createQueryBuilder('child')
-      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .where('child.existence_status = :existence_status', {
-        existence_status: ChildExistence.TempGone,
-      })
-      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
-      .andWhere('child.isMigrated = :childIsMigrated', {
-        childIsMigrated: false,
-      })
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      .select(['child.id', 'ngo'])
-      .getCount();
-
-    const confirmed = await this.flaskChildRepository
-      .createQueryBuilder('child')
-      .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
-      .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
-      .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
-      .andWhere('child.isMigrated = :childIsMigrated', {
-        childIsMigrated: false,
-      })
-      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
-        testNgoIds: [3, 14],
-      })
-      .select(['child.id', 'ngo'])
-      .getCount();
-
-    return {
-      noNeeds: config().dataCache.fetchChildrenNoNeeds(),
-      allChildren: allChildren[1],
-      dead,
-      alivePresent,
-      aliveGone,
-      tempGone,
-      confirmed,
-    };
   }
 
   async getChildNeedsAnalytic(childId: number) {
@@ -271,7 +132,9 @@ export class AnalyticService {
       .createQueryBuilder('need')
       .select(['need.id', 'need.child_id', 'need.status', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.status = :status', { status: PaymentStatusEnum.COMPLETE_PAY })
+      .andWhere('need.status = :status', {
+        status: PaymentStatusEnum.COMPLETE_PAY,
+      })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -279,7 +142,9 @@ export class AnalyticService {
       .createQueryBuilder('need')
       .select(['need.id', 'need.child_id', 'need.status', 'isDeleted'])
       .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.status = :status', { status: PaymentStatusEnum.PARTIAL_PAY })
+      .andWhere('need.status = :status', {
+        status: PaymentStatusEnum.PARTIAL_PAY,
+      })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -293,8 +158,10 @@ export class AnalyticService {
         'isDeleted',
       ])
       .where('need.child_id = :childId', { childId: childId })
-      .andWhere('need.type = :type', {  type: NeedTypeEnum.PRODUCT  })
-      .andWhere('need.status = :status', { status: ProductStatusEnum.PURCHASED_PRODUCT })
+      .andWhere('need.type = :type', { type: NeedTypeEnum.PRODUCT })
+      .andWhere('need.status = :status', {
+        status: ProductStatusEnum.PURCHASED_PRODUCT,
+      })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -309,7 +176,9 @@ export class AnalyticService {
       ])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.type = :type', { type: NeedTypeEnum.SERVICE })
-      .andWhere('need.status = :status', { status: ServiceStatusEnum.MONEY_TO_NGO })
+      .andWhere('need.status = :status', {
+        status: ServiceStatusEnum.MONEY_TO_NGO,
+      })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -324,7 +193,9 @@ export class AnalyticService {
       ])
       .where('need.child_id = :childId', { childId: childId })
       .andWhere('need.type = :type', { type: NeedTypeEnum.PRODUCT })
-      .andWhere('need.status = :status', { status: ProductStatusEnum.DELIVERED_TO_NGO })
+      .andWhere('need.status = :status', {
+        status: ProductStatusEnum.DELIVERED_TO_NGO,
+      })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       .getCount();
 
@@ -546,11 +417,15 @@ export class AnalyticService {
 
     const totalFamiliesCount = await this.flaskFamilyRepository
       .createQueryBuilder('family')
-      .leftJoinAndSelect(
-        UserFamily,
-        'userFamily',
-        'userFamily.id_family = family.id',
-      )
+      .leftJoinAndSelect(Child, 'child', 'child.id = family.id_child')
+      .where('child.isConfirmed = :childConfirmed', { childConfirmed: true })
+      .andWhere('child.isDeleted = :isDeleted', { isDeleted: false })
+      // .andWhere('child.isMigrated = :childIsMigrated', {
+      //   childIsMigrated: false,
+      // })
+      .andWhere('child.id_ngo NOT IN (:...testNgoIds)', {
+        testNgoIds: [3, 14],
+      })
       .andWhere('family.isDeleted = :isDeleted', { isDeleted: false })
       .getCount();
 
@@ -584,7 +459,7 @@ export class AnalyticService {
     swIds: number[],
     role: SAYPlatformRoles,
     flaskUserId: number,
-    ngoIds: number[]
+    ngoIds: number[],
   ) {
     const today = new Date();
     const monthsAgo = today.setMonth(today.getMonth() - 6);
@@ -625,7 +500,7 @@ export class AnalyticService {
         // 'need.purchase_date',
         // 'need.expected_delivery_date',
         // 'need.unavailable_from',
-        'need.deleted_at'
+        'need.deleted_at',
       ])
       .orderBy('need.created', 'DESC')
       .getManyAndCount();
@@ -637,4 +512,5 @@ export class AnalyticService {
 
     return { summary, inMonth, count: needs[1], swIds };
   }
+
 }

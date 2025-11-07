@@ -180,7 +180,7 @@ export class FamilyController {
     ) {
       throw new ForbiddenException('You Are not the Super admin');
     }
-    return await this.familyService.getFamilyRoleCompletePay(
+    return await this.familyService.getDoneNeedsByFamilyRole(
       VirtualFamilyRole.SAY,
       Number(SAY_DAPP_ID),
     );
@@ -553,27 +553,27 @@ export class FamilyController {
       throw new ForbiddenException('You Are not authorized');
     }
 
-    const userAsFather = await this.familyService.getFamilyRoleCompletePay(
+    const userAsFather = await this.familyService.getDoneNeedsByFamilyRole(
       VirtualFamilyRole.FATHER,
       Number(dappFlaskUserId),
     );
-    const userAsMother = await this.familyService.getFamilyRoleCompletePay(
+    const userAsMother = await this.familyService.getDoneNeedsByFamilyRole(
       VirtualFamilyRole.MOTHER,
       Number(dappFlaskUserId),
     );
-    const userAsAmoo = await this.familyService.getFamilyRoleCompletePay(
+    const userAsAmoo = await this.familyService.getDoneNeedsByFamilyRole(
       VirtualFamilyRole.AMOO,
       Number(dappFlaskUserId),
     );
-    const userAsKhaleh = await this.familyService.getFamilyRoleCompletePay(
+    const userAsKhaleh = await this.familyService.getDoneNeedsByFamilyRole(
       VirtualFamilyRole.KHALEH,
       Number(dappFlaskUserId),
     );
-    const userAsDaei = await this.familyService.getFamilyRoleCompletePay(
+    const userAsDaei = await this.familyService.getDoneNeedsByFamilyRole(
       VirtualFamilyRole.DAEI,
       Number(dappFlaskUserId),
     );
-    const userAsAmme = await this.familyService.getFamilyRoleCompletePay(
+    const userAsAmme = await this.familyService.getDoneNeedsByFamilyRole(
       VirtualFamilyRole.AMME,
       Number(dappFlaskUserId),
     );

@@ -5,7 +5,7 @@ import {
   MaxLength,
   IsEnum,
   IsUrl,
-  IsDateString,
+  IsDate,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
@@ -40,7 +40,7 @@ export class CreateCheckPointDto {
   @IsEnum(CheckPointType)
   type: CheckPointType;
 
-  @IsDateString()
+  @IsDate()
   @IsNotEmpty()
-  checkPointDate: string;
+  checkPointDate: Date;
 }

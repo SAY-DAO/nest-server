@@ -1,12 +1,8 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  CreateDateColumn,
   RelationId,
-  JoinColumn,
-  Index,
 } from 'typeorm';
 import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 import { AllUserEntity } from '../entities/user.entity';
