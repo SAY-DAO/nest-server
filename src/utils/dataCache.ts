@@ -254,16 +254,22 @@ export default class DataCache {
     return {
       father: father.finalList,
       fatherUniqueCount: father.uniqueCount,
+      fatherTotalUniqueRoles: father.totalUniqueRoles,
       mother: mother.finalList,
       motherUniqueCount: mother.uniqueCount,
+      motherTotalUniqueRoles: mother.totalUniqueRoles,
       amoo: amoo.finalList,
       amooUniqueCount: amoo.uniqueCount,
+      amooTotalUniqueRoles: amoo.totalUniqueRoles,
       khaleh: khaleh.finalList,
       khalehUniqueCount: khaleh.uniqueCount,
+      khalehTotalUniqueRoles: khaleh.totalUniqueRoles,
       daei: daei.finalList,
       daeiUniqueCount: daei.uniqueCount,
+      daeiTotalUniqueRoles: daei.totalUniqueRoles,
       amme: amme.finalList,
       ammeUniqueCount: amme.uniqueCount,
+      ammeTotalUniqueRoles: amme.totalUniqueRoles,
     };
   }
 

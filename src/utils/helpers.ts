@@ -851,6 +851,7 @@ export function getScattered(
   const usersPays: {
     userId: number;
     created: Date;
+    childId: number;
   }[] = [];
 
   if (data) {
@@ -865,6 +866,7 @@ export function getScattered(
           usersPays.push({
             userId: payment.id_user,
             created: payment.created,
+            childId: n.child_id,
           });
         }
       });
@@ -886,6 +888,17 @@ export function getScattered(
   const uniqueUserIds = new Set(usersPays.map((item) => item.userId));
   // Get the count of unique userIds
   const uniqueCount = uniqueUserIds.size;
+
+  // We create a Set of string keys that represent the pair (userId, childId)
+  // (e.g. `${userId}::${childId}`). Since Set only stores unique values,
+  // duplicate payments from the same user for the same child will collapse to one entry.
+  const uniqueRoles = new Set(
+    usersPays.map(({ userId, childId }) => `${userId}::${childId}`),
+  );
+
+  // ex. This counts user 1 for child 10 once, and user 1 for child 11 separately.
+  // so we wouldnow how many roles are active --> 3 fathers but all could be same user
+  const totalUniqueRoles = uniqueRoles.size;
 
   // series = [{userId: 126, total: 101},{userId: 666, total: 3}, {userId: 567, total: 3}, ...]
   const sorted = series.sort((a, b) => a.total - b.total);
@@ -910,8 +923,8 @@ export function getScattered(
   }
   // for quartile / Scattered graph
   medianList.push({ [vRole]: paidList });
-  
-  return { finalList, uniqueCount };
+
+  return { finalList, uniqueCount, totalUniqueRoles };
 }
 
 export function truncateString(str: string, num: number) {
