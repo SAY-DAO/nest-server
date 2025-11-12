@@ -1,13 +1,13 @@
 export class SummaryDto {
   children: any;
   ngos: any;
-  rolesCount: {
-    fathersCount: number;
-    mothersCount: number;
-    amoosCount: number;
-    khalehsCount: number;
-    daeisCount: number;
-    ammesCount: number;
+  activeUsersCount: {
+    activeFathersCount: number;
+    activeMothersCount: number;
+    activeAmoosCount: number;
+    activeKhalehsCount: number;
+    activeDaeisCount: number;
+    activeAmmesCount: number;
     created: Date;
   };
   totalUsers: number;

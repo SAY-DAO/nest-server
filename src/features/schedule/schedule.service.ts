@@ -113,41 +113,41 @@ export class ScheduleService {
 
   async rolesCount() {
     // total count (e.g how many fathers in our ecosystem)
-    const fathers = await this.familyService.getFamilyRolesCount(
+    const fathers = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.FATHER,
     );
-    const mothers = await this.familyService.getFamilyRolesCount(
+    const mothers = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.MOTHER,
     );    
-    const amoos = await this.familyService.getFamilyRolesCount(
+    const amoos = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.AMOO,
     );
-    const khalehs = await this.familyService.getFamilyRolesCount(
+    const khalehs = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.KHALEH,
     );
-    const daeis = await this.familyService.getFamilyRolesCount(
+    const daeis = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.DAEI,
     );
-    const ammes = await this.familyService.getFamilyRolesCount(
+    const ammes = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.AMME,
     );
-    const say = await this.familyService.getFamilyRolesCount(
+    const say = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.SAY,
     );
-    const others = await this.familyService.getFamilyRolesCount(
+    const others = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.OTHERS,
     );
-    const nakama = await this.familyService.getFamilyRolesCount(
+    const nakama = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.NAKAMA,
     );
 
     config().dataCache.storeRolesCount({
-      fathersCount: fathers,
-      mothersCount: mothers,
-      amoosCount: amoos,
-      khalehsCount: khalehs,
-      daeisCount: daeis,
-      ammesCount: ammes,
+      activeFathersCount: fathers,
+      activeMothersCount: mothers,
+      activeAmoosCount: amoos,
+      activeKhalehsCount: khalehs,
+      activeDaeisCount: daeis,
+      activeAmmesCount: ammes,
       sayCount: say,
       othersCount: others,
       nakamaCount: nakama,

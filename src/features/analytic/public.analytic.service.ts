@@ -115,7 +115,7 @@ export class AnalyticPublicService {
         .cache(true)
         .getMany();
 
-      const rolesCount = config().dataCache.fetchFamilyCount();
+      const activeUsersCount = config().dataCache.fetchFamilyCount();
 
       const totalFamilyMembersCount = this.flaskUserFamilyRepository
         .createQueryBuilder('userFamily')
@@ -184,7 +184,7 @@ export class AnalyticPublicService {
       const result: SummaryDto = {
         children,
         ngos,
-        rolesCount,
+        activeUsersCount,
         totalUsers: Number(uRes ?? 0),
         totalNotDoneNeeds: Number(anRes ?? 0),
         totalPayments: Number(pRes.total ?? 0),

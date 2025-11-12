@@ -78,7 +78,8 @@ export class FamilyService {
       .getManyAndCount();
   }
 
-  async getFamilyRolesCount(vfamilyRole: number): Promise<number> {
+  // have at least paid for a delivered need
+  async countActiveFamilyByRole(vfamilyRole: number): Promise<number> {
     const testNgoIds = [3, 14];
 
     // resolve real table names to avoid TypeORM alias substitution issues
@@ -125,7 +126,6 @@ export class FamilyService {
         }),
       )
       .andWhere('(user.isDeleted IS NULL OR user.isDeleted = FALSE)')
-      .andWhere('user.firstName != :say', { say: 'SAY' })
       .select('COUNT(DISTINCT user.id)', 'count');
 
     const raw = await qb.getRawOne();
