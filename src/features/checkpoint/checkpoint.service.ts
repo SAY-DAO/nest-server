@@ -49,8 +49,8 @@ export class CheckPointService {
         );
       }
       const cp = this.checkPointRepository.create({
-        title: dto.title,
-        description: dto.description,
+        title: { fa: dto.title.fa, en: dto.title.en },
+        description: { fa: dto.description.fa, en: dto.description.en },
         type: dto.type,
         url: dto.url,
         user,

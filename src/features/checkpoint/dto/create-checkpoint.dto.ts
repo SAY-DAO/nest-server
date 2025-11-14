@@ -11,11 +11,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 
 export class CreateCheckPointDto {
-  @ApiProperty({ example: 'Finished editing homepage', maxLength: 200 })
+  @ApiProperty({
+    example: { en: 'Finished editing homepage', fa: 'پایان ویرایش صفحه اصلی' },
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
-  title: string;
+  title: { fa: string; en: string };
 
   @ApiProperty({ example: 'https://saydao.org/...', maxLength: 500 })
   @IsUrl()
@@ -24,12 +26,11 @@ export class CreateCheckPointDto {
   url?: string;
 
   @ApiProperty({
-    example: 'The feature is finished',
+    example: { en: 'The feature is finished', fa: 'این قابلیت به پایان رسید' },
     required: false,
   })
   @IsOptional()
-  @IsString()
-  description: string;
+  description: { fa: string; en: string };
 
   @ApiProperty({
     enum: CheckPointType,

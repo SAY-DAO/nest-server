@@ -1,9 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  RelationId,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, RelationId } from 'typeorm';
 import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 import { AllUserEntity } from '../entities/user.entity';
 import { BaseEntity } from './BaseEntity';
@@ -11,16 +6,16 @@ import { IsOptional, IsUrl } from 'class-validator';
 
 @Entity({ name: 'checkpoint' })
 export class CheckPointEntity extends BaseEntity {
-  @Column({ length: 200 })
-  title: string;
+  @Column({ type: 'json', nullable: false })
+  title: { en: string; fa: string };
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   @IsOptional()
   @IsUrl()
   url?: string;
 
-  @Column({ type: 'text', nullable: true })
-  description?: string;
+  @Column({ type: 'json', nullable: true })
+  description?: { en?: string; fa?: string };
 
   @Column({
     type: 'enum',
