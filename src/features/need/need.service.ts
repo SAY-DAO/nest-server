@@ -637,17 +637,18 @@ export class NeedService {
         'need.receipts_',
         NeedReceipt,
         'need_receipt',
-        'need_receipt.need_id = need.id',
+        'need_receipt.need_id = need.id AND need_receipt.deleted IS NULL',
       )
 
       .leftJoinAndMapMany(
         'need_receipt.receipt',
         Receipt,
         'receipt',
-        'receipt.id = need_receipt.receipt_id',
+        'receipt.id = need_receipt.receipt_id AND receipt.deleted IS NULL',
       )
       // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds })
       .where('need.isDeleted = :needDeleted', { needDeleted: false })
+      .andWhere('receipt.deleted IS NULL')
       .andWhere(
         new Brackets((qb) => {
           qb.where('need.type = :typeProduct', {
@@ -753,14 +754,14 @@ export class NeedService {
         'need.receipts_',
         NeedReceipt,
         'need_receipt',
-        'need_receipt.need_id = need.id',
+        'need_receipt.need_id = need.id AND need_receipt.deleted IS NULL',
       )
 
       .leftJoinAndMapMany(
         'need_receipt.receipt',
         Receipt,
         'receipt',
-        'receipt.id = need_receipt.receipt_id',
+        'receipt.id = need_receipt.receipt_id AND receipt.deleted IS NULL',
       )
       .where('need.id NOT IN (:...needWithSignatures)', {
         needWithSignatures: needWithSignatures[0]
@@ -771,7 +772,6 @@ export class NeedService {
         swIds: socialWorker ? [socialWorker] : [...swIds],
       })
       // .andWhere('child.id_ngo IN (:...ngoIds)', { ngoIds: ngoIds }) // e.g: sw: 1 used to be in Ngo:13, therefore some needs are created in an ngo where their sw is now active somewhere else.
-      // .andWhere('need_receipt.deleted = :receiptDeleted', { receiptDeleted: null })
       .andWhere('need.isDeleted = :needDeleted', { needDeleted: false })
       // .andWhere('need._cost = :price', { price: 0 }) // only for test purposes
       .andWhere(
@@ -790,7 +790,6 @@ export class NeedService {
             });
         }),
       )
-
       .select([
         'child',
         'ngo.id',
