@@ -9,13 +9,11 @@ import { Repository } from 'typeorm';
 import { CreateCheckPointDto } from './dto/create-checkpoint.dto';
 import { CheckPointEntity } from '../../entities/checkpoint.entity';
 import { AllUserEntity } from 'src/entities/user.entity';
-import { GetCheckpointsDto } from './dto/get-checkpoints.dto';
 import {
   Paginated,
   PaginateQuery,
   paginate as nestPaginate,
 } from 'nestjs-paginate';
-import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 
 @Injectable()
 export class CheckPointService {
@@ -51,7 +49,6 @@ export class CheckPointService {
       const cp = this.checkPointRepository.create({
         title: { fa: dto.title.fa, en: dto.title.en },
         description: { fa: dto.description.fa, en: dto.description.en },
-        type: dto.type,
         url: dto.url,
         user,
         isConfirmed: false,
@@ -66,7 +63,6 @@ export class CheckPointService {
 
   async findByUser(
     userId: string,
-    type?: string,
     onlyConfirmed?: boolean,
     limit = 50,
     offset = 0,
@@ -75,7 +71,6 @@ export class CheckPointService {
       .createQueryBuilder('cp')
       .where('cp.id = :userId', { userId });
 
-    if (type) qb.andWhere('cp.type = :type', { type });
     if (onlyConfirmed === true) qb.andWhere('cp.isConfirmed = true');
     if (onlyConfirmed === false) qb.andWhere('cp.isConfirmed = false');
 
@@ -91,15 +86,6 @@ export class CheckPointService {
     return cp;
   }
 
-  async findByCheckPintDate(
-    date: Date,
-    cpType: CheckPointType,
-  ): Promise<CheckPointEntity> {
-    return await this.checkPointRepository.findOne({
-      where: { checkPointDate: date, type: cpType },
-    });
-  }
-
   async findAll(query: PaginateQuery): Promise<Paginated<CheckPointEntity>> {
     try {
       const qb = this.checkPointRepository
@@ -113,11 +99,6 @@ export class CheckPointService {
           '(cp.title ILIKE :search OR cp.description ILIKE :search)',
           { search: searchTerm },
         );
-      }
-
-      // 🔹 Filtering
-      if (query.filter?.type) {
-        qb.andWhere('cp.type = :type', { type: query.filter.type });
       }
 
       if (typeof query.filter?.isConfirmed === 'boolean') {
@@ -136,7 +117,6 @@ export class CheckPointService {
           'cp.id',
           'cp.title',
           'cp.description',
-          'cp.type',
           'cp.createdAt',
           'cp.confirmedAt',
           'cp.isConfirmed',
@@ -163,7 +143,6 @@ export class CheckPointService {
           'cp.id',
           'cp.title',
           'cp.description',
-          'cp.type',
           'cp.url',
           'cp.checkPointDate', // adjust column name if different
           'cp.createdAt',

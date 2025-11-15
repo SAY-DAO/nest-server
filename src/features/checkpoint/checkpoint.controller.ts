@@ -8,7 +8,6 @@ import {
   Delete,
   Patch,
   Query,
-  UseGuards,
   ForbiddenException,
   Req,
   NotFoundException,
@@ -17,12 +16,9 @@ import { ApiHeader, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CheckPointService } from './checkpoint.service';
 import { CreateCheckPointDto } from './dto/create-checkpoint.dto';
 import { CheckPointEntity } from '../../entities/checkpoint.entity';
-import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 import { isAuthenticated } from 'src/utils/auth';
 import { FlaskUserTypesEnum } from 'src/types/interfaces/interface';
 import { UserService } from '../user/user.service';
-import { ServerError } from 'src/filters/server-exception.filter';
-import { GetCheckpointsDto } from './dto/get-checkpoints.dto';
 import { PaginateQuery } from 'nestjs-paginate';
 
 @ApiTags('Checkpoint')

@@ -1,5 +1,4 @@
 import { Entity, Column, ManyToOne, RelationId } from 'typeorm';
-import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 import { AllUserEntity } from '../entities/user.entity';
 import { BaseEntity } from './BaseEntity';
 import { IsOptional, IsUrl } from 'class-validator';
@@ -16,14 +15,6 @@ export class CheckPointEntity extends BaseEntity {
 
   @Column({ type: 'json', nullable: true })
   description?: { en?: string; fa?: string };
-
-  @Column({
-    type: 'enum',
-    enum: CheckPointType,
-    nullable: false,
-    default: CheckPointType.FEATURE,
-  })
-  type: CheckPointType;
 
   @ManyToOne(() => AllUserEntity, (user) => user.checkpoints, {
     onDelete: 'CASCADE',

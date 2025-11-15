@@ -7,7 +7,6 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 
 export class GetCheckpointsDto {
   @Type(() => Number)
@@ -30,10 +29,6 @@ export class GetCheckpointsDto {
   @IsOptional()
   @IsString()
   sort?: string = 'createdAt:desc';
-
-  @IsOptional()
-  @IsIn(Object.values(CheckPointType))
-  type?: CheckPointType;
 
   @IsOptional()
   @IsBoolean()

@@ -8,7 +8,6 @@ import {
   IsDate,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { CheckPointType } from 'src/types/interfaces/checkpoint-type.enum';
 
 export class CreateCheckPointDto {
   @ApiProperty({
@@ -31,15 +30,6 @@ export class CreateCheckPointDto {
   })
   @IsOptional()
   description: { fa: string; en: string };
-
-  @ApiProperty({
-    enum: CheckPointType,
-    example: CheckPointType.DESIGN,
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(CheckPointType)
-  type: CheckPointType;
 
   @IsDate()
   @IsNotEmpty()

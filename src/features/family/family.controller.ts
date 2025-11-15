@@ -64,20 +64,24 @@ export class FamilyController {
   @ApiOperation({ description: 'Get a family member' })
   async getMe(@Req() req: Request) {
     const accessToken = req.headers['authorization'];
+    try {
+      const userFlaskApi = new UserAPIApi();
+      const familyMember = await userFlaskApi.apiV2UserUserIduserIdGet(
+        accessToken,
+        'me',
+      );
 
-    const userFlaskApi = new UserAPIApi();
-    const familyMember = await userFlaskApi.apiV2UserUserIduserIdGet(
-      accessToken,
-      'me',
-    );
-    if (!familyMember) {
-      throw new ForbiddenException('You Are not the authenticated1');
+      if (!familyMember) {
+        throw new ForbiddenException('You Are not the authenticated');
+      }
+      let nestUser = await this.userService.getFamilyByFlaskId(familyMember.id);
+      if (!nestUser) {
+        nestUser = await this.userService.createFamily(familyMember.id);
+      }
+      return { ...familyMember, isBuilder: nestUser.isBuilder };
+    } catch (e) {
+      console.log(e);
     }
-    let nestUser = await this.userService.getFamilyByFlaskId(familyMember.id);
-    if (!nestUser) {
-      nestUser = await this.userService.createFamily(familyMember.id);
-    }
-    return { ...familyMember, isBuilder: nestUser.isBuilder };
   }
 
   @Get(`/members/:flaskUserId`)
