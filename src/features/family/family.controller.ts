@@ -80,7 +80,7 @@ export class FamilyController {
       }
       return { ...familyMember, isBuilder: nestUser.isBuilder };
     } catch (e) {
-      console.log(e);
+      throw new ServerError(e);
     }
   }
 
