@@ -105,9 +105,9 @@ export class CampaignController {
       throw new ForbiddenException('You Are not authorized');
     }
     // ############## BE CAREFUL #################
-    if (process.env.NODE_ENV === 'production') {
+    // if (process.env.NODE_ENV === 'production') {
       await this.campaignService.sendNewsLetter(body);
-    }
+    // }
   }
 
   @Get('test/t')
