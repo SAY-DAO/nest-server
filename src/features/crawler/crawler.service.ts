@@ -23,7 +23,7 @@ export class CrawlerService {
     try {
       const proxyRes = await axios.get(proxyUrl, {
         validateStatus: () => true,
-        timeout: 8000,
+        timeout: 20000,
         responseType: 'text',
       });
 
@@ -54,7 +54,7 @@ export class CrawlerService {
     try {
       const res = await axios.get(url, {
         validateStatus: () => true,
-        timeout: 8000,
+        timeout: 20000,
         responseType: 'text',
       });
 
