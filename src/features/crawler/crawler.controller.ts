@@ -5,7 +5,7 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('Crawler')
 @Controller('crawler')
 export class CrawlerController {
-  constructor(private readonly service: CrawlerService) { }
+  constructor(private readonly service: CrawlerService) {}
 
   /**
    * Example: GET /digikala?url=https://www.example.com/dkp-12345/&force=true
@@ -17,7 +17,9 @@ export class CrawlerController {
     }
     const res = await this.service.getData(url);
     if (!res) {
-      throw new NotFoundException('Could not fetch product (DKP missing or APIs failed).');
+      throw new NotFoundException(
+        'Could not fetch product (DKP missing or APIs failed).',
+      );
     }
     return res;
   }
