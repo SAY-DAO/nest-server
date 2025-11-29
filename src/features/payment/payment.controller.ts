@@ -22,6 +22,7 @@ import {
   CreateFlaskCartPaymentDto,
   CreateFlaskPaymentDto,
 } from '../../types/dtos/CreatePayment.dto';
+import { ServerError } from 'src/filters/server-exception.filter';
 
 @ApiTags('Payments')
 @ApiSecurity('flask-access-token')
@@ -55,7 +56,7 @@ export class PaymentController {
         Authorization: token,
       },
     };
-      try {
+    try {
       // create flask payment
       const { data } = await axios.post(
         'https://api.sayapp.company/api/v2/payment',
@@ -88,7 +89,7 @@ export class PaymentController {
       );
       return data;
     } catch (e) {
-      console.log(e);
+        throw new ServerError(e.message, e.status);
     }
   }
 

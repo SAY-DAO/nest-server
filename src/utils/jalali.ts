@@ -190,7 +190,7 @@ export function mergeByJalaliMonth(
     out = out.filter((item) => {
       // keep months <= maxReachedMonth
       if (typeof item.monthIndex !== 'number') return true;
-      return item.monthIndex < maxReachedMonth;
+      return item.monthIndex <= maxReachedMonth;
     });
   }
   return out;

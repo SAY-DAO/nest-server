@@ -601,7 +601,7 @@ export class AnalyticPublicService {
       })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      // .andWhere('ngo.isActive = :isActive', { isActive: true })
       .andWhere('child.isMigrated = :childIsMigrated', {
         childIsMigrated: false,
       })
@@ -619,7 +619,7 @@ export class AnalyticPublicService {
       })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      // .andWhere('ngo.isActive = :isActive', { isActive: true })
       .andWhere('child.isMigrated = :childIsMigrated', {
         childIsMigrated: false,
       })
@@ -637,7 +637,7 @@ export class AnalyticPublicService {
       })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      // .andWhere('ngo.isActive = :isActive', { isActive: true })
       .andWhere('child.isMigrated = :childIsMigrated', {
         childIsMigrated: false,
       })
@@ -655,7 +655,7 @@ export class AnalyticPublicService {
       })
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      // .andWhere('ngo.isActive = :isActive', { isActive: true })
       .andWhere('child.isMigrated = :childIsMigrated', {
         childIsMigrated: false,
       })
@@ -670,7 +670,7 @@ export class AnalyticPublicService {
       .leftJoinAndMapOne('child.ngo', NGO, 'ngo', 'ngo.id = child.id_ngo')
       .andWhere('child.isConfirmed = :isConfirmed', { isConfirmed: true })
       .andWhere('ngo.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('ngo.isActive = :isActive', { isActive: true })
+      // .andWhere('ngo.isActive = :isActive', { isActive: true })
       .andWhere('child.isMigrated = :childIsMigrated', {
         childIsMigrated: false,
       })
