@@ -188,9 +188,9 @@ export function mergeByJalaliMonth(
   if (excludeFutureMonths && currJalaliYear === asOfJ.jy) {
     const maxReachedMonth = asOfJ.jm;
     out = out.filter((item) => {
-      // keep months <= maxReachedMonth
+      // keep months < maxReachedMonth
       if (typeof item.monthIndex !== 'number') return true;
-      return item.monthIndex <= maxReachedMonth;
+      return item.monthIndex < maxReachedMonth;
     });
   }
   return out;
