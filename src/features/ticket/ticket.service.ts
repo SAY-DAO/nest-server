@@ -254,7 +254,7 @@ export class TicketService {
       await this.ticketContentRepository.delete({ id: content.id });
     }
     for await (const view of ticket.views) {
-      await this.ticketContentRepository.delete({ id: view.id });
+      await this.ticketViewRepository.delete({ id: view.id });
     }
     return this.ticketRepository.delete({ id });
   }
