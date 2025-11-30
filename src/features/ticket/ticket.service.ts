@@ -244,7 +244,18 @@ export class TicketService {
     });
   }
 
-  DeleteTicket(id: string) {
+  async DeleteTicket(id: string) {
+    const ticket = await this.ticketRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+    for await (const content of ticket.ticketHistories) {
+      await this.ticketContentRepository.delete({ id: content.id });
+    }
+    for await (const view of ticket.views) {
+      await this.ticketContentRepository.delete({ id: view.id });
+    }
     return this.ticketRepository.delete({ id });
   }
 
