@@ -776,7 +776,10 @@ export class NeedController {
             }
           }
         } catch (e) {
-          throw new ServerError(e.statusMessage, e.statusCode);
+          throw new ServerError(
+            e.statusMessage || e.response.data.message,
+            e.statusCode || e.status,
+          );
         }
       }
     }
