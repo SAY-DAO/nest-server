@@ -329,7 +329,7 @@ export class NeedController {
       !toBeConfirmed ||
       !toBeConfirmed.list[0] ||
       !toBeConfirmed.createdAt ||
-      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 60;
+      timeDifference(toBeConfirmed.createdAt, new Date()).mm >= 10;
     console.log(`Mass prepare expired: ${expired}`);
     console.log(
       `Last prepare: ${

@@ -38,7 +38,10 @@ export default class DataCache {
   childActiveFamilies = null;
   medianList = [];
   midjourneyList = [];
-  ToBeConfirmed = {
+  ToBeConfirmed: {
+    list: any[];
+    createdAt: Date;
+  } = {
     list: [],
     createdAt: null,
   };
