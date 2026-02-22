@@ -17,7 +17,6 @@ env:
   PRODUCTION_STACK_NAME: say-nest1
   PRODUCTION_STACK_NAME_2: say-nest2
   DOCKER_STACK_PATH: docker-compose.production.yml
-  DOCKER_STACK_PATH_2: docker-compose.production-2.yml
 
 on:
   push:
@@ -263,7 +262,7 @@ jobs:
       - name: Prepare Stack File
         run: >
           ENVIRONMENT=${{ env.PRODUCTION }} DOMAIN=${{ env.PRODUCTION_DOMAIN_2 }} CONTAINER_IMAGE=${IMAGE_ID} STACK_NAME=${{ env.PRODUCTION_STACK_NAME_2 }}
-          docker compose -f ${{ env.DOCKER_STACK_PATH_2 }} config | sed 's/^name:.*/version: "3.9"/' >  ${{ env.STACK_FILE }}
+          docker compose -f ${{ env.DOCKER_STACK_PATH }} config | sed 's/^name:.*/version: "3.9"/' >  ${{ env.STACK_FILE }}
 
       # Move to server 2
       - name: Move Stack File - Server 2
