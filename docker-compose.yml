@@ -3,7 +3,7 @@
 services:
   # Traefik Reverse Proxy
   traefik:
-    image: traefik:v2.10
+    image: traefik:latest
     command:
       - "--api.insecure=true"  # Enable the Traefik dashboard (optional, for debugging)
       - "--entrypoints.http.address=:80"  # Listen on HTTP port
