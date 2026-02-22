@@ -214,7 +214,8 @@ jobs:
           ENVIRONMENT=${{ env.PRODUCTION }} DOMAIN=${{ env.PRODUCTION_DOMAIN }} CONTAINER_IMAGE=${IMAGE_ID} STACK_NAME=${{ env.PRODUCTION_STACK_NAME }}
           docker compose -f ${{ env.DOCKER_STACK_PATH }} config | sed 's/^name:.*/version: "3.9"/' >  ${{ env.STACK_FILE }}
 
-      - name: Move Stack File to Server
+      # Move to server 1
+      - name: Move Stack File - Server 1
         uses: appleboy/scp-action@v0.1.1
         with:
           host: ${{ secrets.PROD_SERVER_ADDR }}
@@ -224,11 +225,33 @@ jobs:
           source: ${{ env.STACK_FILE }}
           target: '/tmp'
 
-      - name: Deploy Stack
+      # Deploy server 1
+      - name: Deploy Stack - Server 1
         uses: appleboy/ssh-action@v0.1.4
         with:
           host: ${{ secrets.PROD_SERVER_ADDR }}
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PROD_SERVER_PORT }}
+          script: docker stack deploy --prune --resolve-image=changed --with-registry-auth -c /tmp/${{ env.STACK_FILE }} ${{ env.PRODUCTION_STACK_NAME }}
+
+      # Move to server 2
+      - name: Move Stack File - Server 2
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.PROD_SERVER_ADDR_2 }}
+          username: ${{ secrets.PROD_SERVER_USER_2 }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY_2 }}
+          port: ${{ secrets.PROD_SERVER_PORT }}
+          source: ${{ env.STACK_FILE }}
+          target: '/tmp'
+
+      # Deploy server 2
+      - name: Deploy Stack - Server 2
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.PROD_SERVER_ADDR_2 }}
+          username: ${{ secrets.PROD_SERVER_USER_2 }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY_2 }}
           port: ${{ secrets.PROD_SERVER_PORT }}
           script: docker stack deploy --prune --resolve-image=changed --with-registry-auth -c /tmp/${{ env.STACK_FILE }} ${{ env.PRODUCTION_STACK_NAME }}
