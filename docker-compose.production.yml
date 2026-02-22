@@ -1,6 +1,31 @@
 version: '3.9'
 
 services:
+ # Traefik Reverse Proxy
+  traefik:
+    image: traefik:latest
+    command:
+      - "--api.insecure=true"  # Enable the Traefik dashboard (optional, for debugging)
+      - "--entrypoints.http.address=:80"  # Listen on HTTP port
+      - "--entrypoints.https.address=:443"  # Listen on HTTPS port
+      - "--providers.docker"  # Enable Docker provider for Traefik to discover services
+      - "--certificatesresolvers.le.acme.httpchallenge=true"  # Let's Encrypt HTTP challenge
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=http"
+      - "--certificatesresolvers.le.acme.email=youremail@example.com"  # Replace with your email
+      - "--certificatesresolvers.le.acme.storage=/acme.json"  # Store certificates
+    ports:
+      - "80:80"    # Expose HTTP port
+      - "443:443"  # Expose HTTPS port
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"  # Allow Traefik to access Docker API
+      - "./acme.json:/acme.json"  # Store the certificates (make sure this file exists)
+    networks:
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.labels.${ENVIRONMENT} == true
+          
   api:
     image: ${CONTAINER_IMAGE:-backend}
     volumes:
