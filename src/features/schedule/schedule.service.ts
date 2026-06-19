@@ -118,7 +118,7 @@ export class ScheduleService {
     );
     const mothers = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.MOTHER,
-    );    
+    );
     const amoos = await this.familyService.countActiveFamilyByRole(
       VirtualFamilyRole.AMOO,
     );
@@ -154,14 +154,13 @@ export class ScheduleService {
     });
   }
 
-  @Timeout(5000)
-  async handleCronOnce() {
-    this.logger.debug(
-      'Called only once after 15 seconds of the server initiation',
-    );
-    await this.campaignService.childrenWithNoNeed();
-    await this.rolesCount();
-    await this.completePays();
+  onApplicationBootstrap() {
+    setTimeout(async () => {
+      this.logger.debug('Runs once after startup');
+      await this.campaignService.childrenWithNoNeed();
+      await this.rolesCount();
+      await this.completePays();
+    }, 5000);
   }
 
   @Cron(CronExpression.EVERY_WEEK, {
