@@ -212,9 +212,18 @@ jobs:
           echo "STACK_FILE=docker-stack-${{ env.PRODUCTION_STACK_NAME }}-${{ github.sha }}.yml" >> $GITHUB_ENV
 
       - name: Prepare Stack File
-        run: >
-          ENVIRONMENT=${{ env.PRODUCTION }} DOMAIN=${{ env.PRODUCTION_DOMAIN }} CONTAINER_IMAGE=${IMAGE_ID} STACK_NAME=${{ env.PRODUCTION_STACK_NAME }}
-          docker compose -f ${{ env.DOCKER_STACK_PATH }} config | sed 's/^name:.*/version: "3.9"/' >  ${{ env.STACK_FILE }}
+        run: |
+          ENVIRONMENT="${{ env.PRODUCTION }}" \
+          DOMAIN="${{ env.PRODUCTION_DOMAIN }}" \
+          CONTAINER_IMAGE="${IMAGE_ID}" \
+          STACK_NAME="${{ env.PRODUCTION_STACK_NAME }}" \
+          docker compose -f "${{ env.DOCKER_STACK_PATH }}" config \
+            | sed 's/^name:.*/version: "3.9"/' \
+            > "${{ env.STACK_FILE }}"
+
+          echo "LOCAL FILE:"
+          wc -c "${{ env.STACK_FILE }}"
+          head -5 "${{ env.STACK_FILE }}"
 
       # Move to server 1
       - name: Move Stack File - Server 1
