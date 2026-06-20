@@ -205,7 +205,7 @@ jobs:
 
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set Envars
         run: |
@@ -213,21 +213,19 @@ jobs:
 
       - name: Prepare Stack File
         run: |
+          set -euo pipefail
+
           ENVIRONMENT="${{ env.PRODUCTION }}" \
           DOMAIN="${{ env.PRODUCTION_DOMAIN }}" \
           CONTAINER_IMAGE="${IMAGE_ID}" \
           STACK_NAME="${{ env.PRODUCTION_STACK_NAME }}" \
-          docker compose -f "${{ env.DOCKER_STACK_PATH }}" config \
-            | sed 's/^name:.*/version: "3.9"/' \
-            > "${{ env.STACK_FILE }}"
-
-          echo "LOCAL FILE:"
+          docker compose -f "${{ env.DOCKER_STACK_PATH }}" config > "$STACK_FILE"
           wc -c "${{ env.STACK_FILE }}"
           head -5 "${{ env.STACK_FILE }}"
 
       # Move to server 1
       - name: Move Stack File - Server 1
-        uses: appleboy/scp-action@v0.1.1
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.PROD_SERVER_ADDR }}
           username: ${{ secrets.PROD_SERVER_USER }}
@@ -244,4 +242,8 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: ${{ secrets.PROD_SERVER_PORT }}
-          script: docker stack deploy --prune --resolve-image=changed --with-registry-auth -c /tmp/${{ env.STACK_FILE }} ${{ env.PRODUCTION_STACK_NAME }}
+          script:  |
+            set -euo pipefail
+            ls -lh "/tmp/${STACK_FILE}"
+            head -5 "/tmp/${STACK_FILE}"
+            docker stack deploy --prune --resolve-image=changed --with-registry-auth -c /tmp/${STACK_FILE} ${{ env.PRODUCTION_STACK_NAME }}
