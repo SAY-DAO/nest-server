@@ -1,16 +1,16 @@
-version: '3.9'
+version: "3.9"
 services:
     api:
         build:
-          dockerfile: Dockerfile
-          context: .
-  
+            dockerfile: Dockerfile
+            context: .
+
         volumes:
-          - .:/usr/src/app
+            - .:/usr/src/app
         container_name: api_say_nest
-        depends_on: 
+        depends_on:
             - say_nest_db
-        environment: 
+        environment:
             NODE_ENV: production
             PORT: 8002
         ports:
@@ -18,15 +18,15 @@ services:
             - 5000:8002
             # debugging port
             - 9229:9229
-        command: npm run start:dev 
+        command: npm run start:dev
 
     say_nest_db:
         image: postgres:10.4
         container_name: postgresql_say_nest
         environment:
-            POSTGRES_PASSWORD: 'postgres'
-            POSTGRES_USER: 'postgres'
-            POSTGRES_DB: 'say_nest'
+            POSTGRES_PASSWORD: "postgres"
+            POSTGRES_USER: "postgres"
+            POSTGRES_DB: "say_nest"
             PORT: 5432
         restart: always
         volumes:
@@ -34,7 +34,6 @@ services:
         ports:
             - "35000:5432"
         command: postgres -c listen_addresses='*'
-
 
 volumes:
     postgres:

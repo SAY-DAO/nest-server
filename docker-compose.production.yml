@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   traefik:
@@ -39,8 +39,7 @@ services:
           - node.role == manager
       restart_policy:
         condition: any
-  
-          
+
   api:
     image: ${CONTAINER_IMAGE:-backend}
     volumes:
