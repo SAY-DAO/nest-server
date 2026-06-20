@@ -235,14 +235,15 @@ jobs:
 
       - name: Fix Swarm Port Types
         run: |
-          set -euo pipefail
+            set -euo pipefail
 
-          yq -i '
-            (.services[]? | select(has("ports")) | .ports[]? | select(has("published")) | .published) |= tonumber
-          ' "$STACK_FILE"
+            yq -i '
+              del(.name) |
+              (.services[]? | select(has("ports")) | .ports[]? | select(has("published")) | .published) |= tonumber
+            ' "$STACK_FILE"
 
-          echo "Traefik ports after fix:"
-          yq '.services.traefik.ports' "$STACK_FILE"
+            echo "Sanitized stack file:"
+            head -20 "$STACK_FILE"
 
       - name: Move Stack File - Server 1
         uses: appleboy/scp-action@v0.1.7
