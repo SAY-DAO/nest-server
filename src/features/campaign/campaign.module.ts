@@ -1,5 +1,5 @@
 import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { CampaignService } from './campaign.service';
 import { join } from 'path';
@@ -53,6 +53,7 @@ import { TicketViewEntity } from '../../entities/ticketView.entity';
 import { TicketEntity } from '../../entities/ticket.entity';
 import { TicketContentEntity } from '../../entities/ticketContent.entity';
 import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
+// import { VisitorEntity } from 'src/entities/visitor.entity';
 
 @Global() // 👈 global module
 @Module({
@@ -106,6 +107,7 @@ import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
       ChildrenEntity,
       ContributorEntity,
       AllUserEntity,
+      // VisitorEntity,
       EthereumAccountEntity,
       ChildrenPreRegisterEntity,
       SignatureEntity,
@@ -124,7 +126,7 @@ import { NgoPreRegisterEntity } from 'src/entities/ngoPreRegister.entity';
       TicketViewEntity,
       TicketEntity,
       TicketContentEntity,
-      NgoPreRegisterEntity
+      NgoPreRegisterEntity,
     ]),
   ],
   providers: [
