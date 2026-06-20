@@ -255,6 +255,18 @@ jobs:
           source: ${{ env.STACK_FILE }}
           target: '/tmp'
 
+      - name: Ensure Traefik Network Exists
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.PROD_SERVER_ADDR }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PROD_SERVER_PORT }}
+          script: |
+            set -euo pipefail
+            docker network inspect traefik-public >/dev/null 2>&1 || \
+              docker network create --driver overlay --attachable traefik-public
+
       - name: Deploy Stack - Server 1
         uses: appleboy/ssh-action@v0.1.4
         with:
