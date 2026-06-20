@@ -106,7 +106,9 @@ volumes:
     name: "${STACK_NAME}_postgres_volume"
   uploads_volume:
     name: "${STACK_NAME}_uploads_volume"
-
+  traefik-certs:
+    name: "${STACK_NAME}_traefik-certs"
+    
 networks:
   traefik-public:
     external: true
