@@ -18,6 +18,7 @@ env:
   PRODUCTION_STACK_NAME_2: say-nest2
   DOCKER_STACK_PATH: docker-compose.production.yml
 
+  
 on:
   push:
     branches:
@@ -220,8 +221,9 @@ jobs:
           CONTAINER_IMAGE="${IMAGE_ID}" \
           STACK_NAME="${{ env.PRODUCTION_STACK_NAME }}" \
           docker compose -f "${{ env.DOCKER_STACK_PATH }}" config > "$STACK_FILE"
-          wc -c "${{ env.STACK_FILE }}"
-          head -5 "${{ env.STACK_FILE }}"
+
+          wc -c "$STACK_FILE"
+          head -5 "$STACK_FILE"
 
       # Move to server 1
       - name: Move Stack File - Server 1
@@ -242,8 +244,11 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: ${{ secrets.PROD_SERVER_PORT }}
-          script:  |
+          script: |
             set -euo pipefail
+            STACK_FILE="docker-stack-${{ env.PRODUCTION_STACK_NAME }}-${{ github.sha }}.yml"
             ls -lh "/tmp/${STACK_FILE}"
             head -5 "/tmp/${STACK_FILE}"
-            docker stack deploy --prune --resolve-image=changed --with-registry-auth -c /tmp/${STACK_FILE} ${{ env.PRODUCTION_STACK_NAME }}
+            docker stack deploy --prune --resolve-image=changed --with-registry-auth \
+              -c "/tmp/${STACK_FILE}" \
+              "${{ env.PRODUCTION_STACK_NAME }}"
