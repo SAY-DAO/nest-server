@@ -191,64 +191,86 @@ jobs:
           port: ${{ secrets.STAGING_SERVER_PORT }}
           script: docker stack deploy --prune --resolve-image=changed --with-registry-auth -c /tmp/${{ env.STACK_FILE }} ${{ env.STAGING_STACK_NAME }}
 
-  deploy_production_1:
-    name: Deploy to Production Server
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/heads/release')
-    needs:
-      - build_and_push
-    env:
-      IMAGE_ID: ${{ needs.build_and_push.outputs.image_id }}
+      deploy_production_1:
+      name: Deploy to Production Server
+      runs-on: ubuntu-latest
+      if: startsWith(github.ref, 'refs/heads/release')
+      needs:
+        - build_and_push
+      env:
+        IMAGE_ID: ${{ needs.build_and_push.outputs.image_id }}
 
-    environment:
-      name: Production
-      url: https://${{ env.PRODUCTION_DOMAIN }}
+      environment:
+        name: Production
+        url: https://${{ env.PRODUCTION_DOMAIN }}
 
-    steps:
-      - name: Git Checkout
-        uses: actions/checkout@v4
+      steps:
+        - name: Git Checkout
+          uses: actions/checkout@v4
 
-      - name: Set Envars
-        run: |
-          echo "STACK_FILE=docker-stack-${{ env.PRODUCTION_STACK_NAME }}-${{ github.sha }}.yml" >> $GITHUB_ENV
+        - name: Set Envars
+          run: |
+            echo "STACK_FILE=docker-stack-${{ env.PRODUCTION_STACK_NAME }}-${{ github.sha }}.yml" >> $GITHUB_ENV
 
-      - name: Prepare Stack File
-        run: |
-          set -euo pipefail
-
-          ENVIRONMENT="${{ env.PRODUCTION }}" \
-          DOMAIN="${{ env.PRODUCTION_DOMAIN }}" \
-          CONTAINER_IMAGE="${IMAGE_ID}" \
-          STACK_NAME="${{ env.PRODUCTION_STACK_NAME }}" \
-          docker compose -f "${{ env.DOCKER_STACK_PATH }}" config > "$STACK_FILE"
-
-          wc -c "$STACK_FILE"
-          head -5 "$STACK_FILE"
-
-      # Move to server 1
-      - name: Move Stack File - Server 1
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.PROD_SERVER_ADDR }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.PROD_SERVER_PORT }}
-          source: ${{ env.STACK_FILE }}
-          target: '/tmp'
-
-      # Deploy server 1
-      - name: Deploy Stack - Server 1
-        uses: appleboy/ssh-action@v0.1.4
-        with:
-          host: ${{ secrets.PROD_SERVER_ADDR }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.PROD_SERVER_PORT }}
-          script: |
+        - name: Prepare Stack File
+          run: |
             set -euo pipefail
-            STACK_FILE="docker-stack-${{ env.PRODUCTION_STACK_NAME }}-${{ github.sha }}.yml"
-            ls -lh "/tmp/${STACK_FILE}"
-            head -5 "/tmp/${STACK_FILE}"
-            docker stack deploy --prune --resolve-image=changed --with-registry-auth \
-              -c "/tmp/${STACK_FILE}" \
-              "${{ env.PRODUCTION_STACK_NAME }}"
+
+            ENVIRONMENT="${{ env.PRODUCTION }}" \
+            DOMAIN="${{ env.PRODUCTION_DOMAIN }}" \
+            CONTAINER_IMAGE="${IMAGE_ID}" \
+            STACK_NAME="${{ env.PRODUCTION_STACK_NAME }}" \
+            docker compose -f "${{ env.DOCKER_STACK_PATH }}" config > "$STACK_FILE"
+
+            echo "Generated stack file:"
+            wc -c "$STACK_FILE"
+            head -20 "$STACK_FILE"
+
+        - name: Install yq
+          run: |
+            sudo wget -qO /usr/local/bin/yq \
+              https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+            yq --version
+
+        - name: Fix Swarm Port Types
+          run: |
+            set -euo pipefail
+
+            yq -i '
+              (.services[]? | select(has("ports")) | .ports[]? | select(has("published")) | .published) |= tonumber
+            ' "$STACK_FILE"
+
+            echo "Traefik ports after fix:"
+            yq '.services.traefik.ports' "$STACK_FILE"
+
+        - name: Move Stack File - Server 1
+          uses: appleboy/scp-action@v0.1.7
+          with:
+            host: ${{ secrets.PROD_SERVER_ADDR }}
+            username: ${{ secrets.PROD_SERVER_USER }}
+            key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+            port: ${{ secrets.PROD_SERVER_PORT }}
+            source: ${{ env.STACK_FILE }}
+            target: '/tmp'
+
+        - name: Deploy Stack - Server 1
+          uses: appleboy/ssh-action@v0.1.4
+          with:
+            host: ${{ secrets.PROD_SERVER_ADDR }}
+            username: ${{ secrets.PROD_SERVER_USER }}
+            key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+            port: ${{ secrets.PROD_SERVER_PORT }}
+            script: |
+              set -euo pipefail
+
+              STACK_FILE="docker-stack-${{ env.PRODUCTION_STACK_NAME }}-${{ github.sha }}.yml"
+
+              ls -lh "/tmp/${STACK_FILE}"
+
+              docker stack deploy \
+                --prune \
+                --resolve-image=changed \
+                --with-registry-auth \
+                -c "/tmp/${STACK_FILE}" \
+                "${{ env.PRODUCTION_STACK_NAME }}"
